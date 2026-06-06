@@ -1,0 +1,45 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title> | AI Privacy Gateway 文档</title><link rel="icon" type="image/svg+xml" href="/favicon.svg"><style>:root{--ink: #0a0a0f;--paper: #111118;--surface: #1a1a26;--border: rgba(255,255,255,.06);--text: #e8e8ed;--text-dim: #8b8b9e;--text-quiet: #5a5a6e;--green: #3cfc8c;--green-bg: rgba(60,252,140,.08);--amber: #f0a030;--purple: #a78bfa;--radius: 4px;--radius-lg: 8px;--max-width: 1120px}*,*:before,*:after{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,PingFang SC,Hiragino Sans GB,Microsoft YaHei,sans-serif;background:var(--ink);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}a{color:var(--green);text-decoration:none;transition:color .15s}a:hover{color:#fff;text-decoration:none}.btn-ghost{display:inline-block;padding:8px 14px;font-size:.9rem;font-weight:500;color:var(--text-dim);border:none;background:transparent;cursor:pointer;transition:color .15s}.btn-ghost:hover{color:#fff}nav{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;max-width:var(--max-width);margin:0 auto;border-bottom:1px solid var(--border)}nav .logo{font-weight:700;font-size:1.05rem;color:#fff;display:flex;align-items:center;gap:10px;letter-spacing:-.02em}nav .logo .mark{width:26px;height:26px;background:var(--green);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.68rem;color:#000}nav .links{display:flex;gap:2px;align-items:center}.docs-layout{display:flex;max-width:var(--max-width);margin:0 auto;gap:48px;padding:0 28px 80px}.docs-sidebar{width:200px;flex-shrink:0}.docs-sidebar nav{display:block;position:sticky;top:24px;padding:0;border:none}.docs-sidebar h4{color:var(--text-quiet);font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;margin-bottom:14px;font-weight:600}.docs-sidebar a{display:block;padding:7px 0;color:var(--text-dim);font-size:.92rem}.docs-sidebar a:hover{color:#fff}.docs-content{flex:1;min-width:0}.docs-content h1{font-size:2rem;font-weight:700;letter-spacing:-.03em;margin-bottom:28px}.docs-content h2{font-size:1.4rem;font-weight:700;letter-spacing:-.02em;margin:36px 0 14px;color:#fff}.docs-content h3{color:var(--text);font-weight:600;margin:28px 0 10px;font-size:1.05rem}.docs-content p{color:var(--text-dim);margin-bottom:16px}.docs-content ul,.docs-content ol{color:var(--text-dim);margin-bottom:16px;padding-left:22px}.docs-content li{margin-bottom:6px}.docs-content pre{background:#0006;border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 24px;overflow-x:auto;margin-bottom:18px}.docs-content code{font-family:Fira Code,Cascadia Code,JetBrains Mono,monospace;font-size:.88rem}.docs-content :not(pre)>code{background:var(--surface);padding:2px 7px;border-radius:3px;font-size:.85rem}.docs-content blockquote{border-left:2px solid var(--green);padding-left:14px;color:var(--text-dim);margin-bottom:16px}.docs-content table{width:100%;border-collapse:collapse;margin-bottom:18px}.docs-content th,.docs-content td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--border)}.docs-content th{color:var(--text);font-weight:600;font-size:.85rem}.docs-content td{color:var(--text-dim);font-size:.9rem}footer{text-align:center;padding:40px 28px;color:var(--text-dim);font-size:.85rem;border-top:1px solid var(--border)}footer a{color:var(--text-dim)}@media(max-width:768px){.docs-layout{flex-direction:column}.docs-sidebar{width:100%}}
+</style></head> <body> <nav> <a href="/" class="logo"> <span class="mark">PG</span> Privacy Gateway
+</a> <div class="links"> <a href="/docs" class="btn-ghost">文档</a> <a href="/download" class="btn-ghost">下载</a> <a href="/#pricing" class="btn-ghost">价格</a> <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn-ghost" target="_blank">GitHub</a> </div> </nav> <main> <h1 id="快速开始">快速开始</h1>
+<p>5 分钟部署 AI Privacy Gateway。</p>
+<h2 id="docker-部署推荐">Docker 部署（推荐）</h2>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">docker</span><span style="color:#9ECBFF"> run</span><span style="color:#79B8FF"> -d</span><span style="color:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#79B8FF">  --name</span><span style="color:#9ECBFF"> ai-privacy-gw</span><span style="color:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#79B8FF">  -p</span><span style="color:#9ECBFF"> 9999:9999</span><span style="color:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#79B8FF">  -v</span><span style="color:#9ECBFF"> ./vault_data:/app/vault_data</span><span style="color:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#79B8FF">  -e</span><span style="color:#9ECBFF"> VERSION=lite</span><span style="color:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#9ECBFF">  aiprivacygateway/lite</span></span></code></pre>
+<p>验证：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">curl</span><span style="color:#9ECBFF"> http://localhost:9999/health</span></span>
+<span class="line"><span style="color:#6A737D"># {"status":"healthy"}</span></span></code></pre>
+<h2 id="windows-部署">Windows 部署</h2>
+<ol>
+<li>下载 <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/releases/latest">PrivacyGateway.exe</a></li>
+<li>双击运行</li>
+<li>访问 <code>http://localhost:9999/health</code></li>
+</ol>
+<h2 id="配置-ai-客户端">配置 AI 客户端</h2>
+<p>将你的 AI 客户端 API 地址改为 <code>http://localhost:9999</code>：</p>
+<h3 id="cursor">Cursor</h3>
+<p>设置 → API Key → Base URL 改为 <code>http://localhost:9999</code></p>
+<h3 id="代码调用">代码调用</h3>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F97583">from</span><span style="color:#E1E4E8"> openai </span><span style="color:#F97583">import</span><span style="color:#E1E4E8"> OpenAI</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">client </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> OpenAI(</span></span>
+<span class="line"><span style="color:#FFAB70">    base_url</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">"http://localhost:9999/v1"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#FFAB70">    api_key</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">"your-api-key"</span></span>
+<span class="line"><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">response </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> client.chat.completions.create(</span></span>
+<span class="line"><span style="color:#FFAB70">    model</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">"deepseek-chat"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#FFAB70">    messages</span><span style="color:#F97583">=</span><span style="color:#E1E4E8">[{</span><span style="color:#9ECBFF">"role"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"user"</span><span style="color:#E1E4E8">, </span><span style="color:#9ECBFF">"content"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"我的手机是13812345678"</span><span style="color:#E1E4E8">}]</span></span>
+<span class="line"><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#6A737D"># 网关自动将 13812345678 替换为 [VAULT_PHONE_xxx]</span></span>
+<span class="line"><span style="color:#6A737D"># AI 收到的内容:"我的手机是[VAULT_PHONE_xxx]"</span></span>
+<span class="line"><span style="color:#6A737D"># AI 返回后网关自动还原</span></span></code></pre>
+<h2 id="下一步">下一步</h2>
+<ul>
+<li><a href="/docs/keywords">自定义敏感词</a></li>
+<li><a href="/docs/deploy">部署配置</a></li>
+<li><a href="/docs/config">环境变量参考</a></li>
+</ul> </main> <footer> <p>AI Privacy Gateway &copy; 2026</p> </footer> </body></html>

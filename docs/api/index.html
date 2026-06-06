@@ -1,0 +1,93 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title> | AI Privacy Gateway 文档</title><link rel="icon" type="image/svg+xml" href="/favicon.svg"><style>:root{--ink: #0a0a0f;--paper: #111118;--surface: #1a1a26;--border: rgba(255,255,255,.06);--text: #e8e8ed;--text-dim: #8b8b9e;--text-quiet: #5a5a6e;--green: #3cfc8c;--green-bg: rgba(60,252,140,.08);--amber: #f0a030;--purple: #a78bfa;--radius: 4px;--radius-lg: 8px;--max-width: 1120px}*,*:before,*:after{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,PingFang SC,Hiragino Sans GB,Microsoft YaHei,sans-serif;background:var(--ink);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}a{color:var(--green);text-decoration:none;transition:color .15s}a:hover{color:#fff;text-decoration:none}.btn-ghost{display:inline-block;padding:8px 14px;font-size:.9rem;font-weight:500;color:var(--text-dim);border:none;background:transparent;cursor:pointer;transition:color .15s}.btn-ghost:hover{color:#fff}nav{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;max-width:var(--max-width);margin:0 auto;border-bottom:1px solid var(--border)}nav .logo{font-weight:700;font-size:1.05rem;color:#fff;display:flex;align-items:center;gap:10px;letter-spacing:-.02em}nav .logo .mark{width:26px;height:26px;background:var(--green);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.68rem;color:#000}nav .links{display:flex;gap:2px;align-items:center}.docs-layout{display:flex;max-width:var(--max-width);margin:0 auto;gap:48px;padding:0 28px 80px}.docs-sidebar{width:200px;flex-shrink:0}.docs-sidebar nav{display:block;position:sticky;top:24px;padding:0;border:none}.docs-sidebar h4{color:var(--text-quiet);font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;margin-bottom:14px;font-weight:600}.docs-sidebar a{display:block;padding:7px 0;color:var(--text-dim);font-size:.92rem}.docs-sidebar a:hover{color:#fff}.docs-content{flex:1;min-width:0}.docs-content h1{font-size:2rem;font-weight:700;letter-spacing:-.03em;margin-bottom:28px}.docs-content h2{font-size:1.4rem;font-weight:700;letter-spacing:-.02em;margin:36px 0 14px;color:#fff}.docs-content h3{color:var(--text);font-weight:600;margin:28px 0 10px;font-size:1.05rem}.docs-content p{color:var(--text-dim);margin-bottom:16px}.docs-content ul,.docs-content ol{color:var(--text-dim);margin-bottom:16px;padding-left:22px}.docs-content li{margin-bottom:6px}.docs-content pre{background:#0006;border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 24px;overflow-x:auto;margin-bottom:18px}.docs-content code{font-family:Fira Code,Cascadia Code,JetBrains Mono,monospace;font-size:.88rem}.docs-content :not(pre)>code{background:var(--surface);padding:2px 7px;border-radius:3px;font-size:.85rem}.docs-content blockquote{border-left:2px solid var(--green);padding-left:14px;color:var(--text-dim);margin-bottom:16px}.docs-content table{width:100%;border-collapse:collapse;margin-bottom:18px}.docs-content th,.docs-content td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--border)}.docs-content th{color:var(--text);font-weight:600;font-size:.85rem}.docs-content td{color:var(--text-dim);font-size:.9rem}footer{text-align:center;padding:40px 28px;color:var(--text-dim);font-size:.85rem;border-top:1px solid var(--border)}footer a{color:var(--text-dim)}@media(max-width:768px){.docs-layout{flex-direction:column}.docs-sidebar{width:100%}}
+</style></head> <body> <nav> <a href="/" class="logo"> <span class="mark">PG</span> Privacy Gateway
+</a> <div class="links"> <a href="/docs" class="btn-ghost">文档</a> <a href="/download" class="btn-ghost">下载</a> <a href="/#pricing" class="btn-ghost">价格</a> <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn-ghost" target="_blank">GitHub</a> </div> </nav> <main> <h1 id="api-参考">API 参考</h1>
+<p>管理接口、统计查询、License 验证。</p>
+<h2 id="健康检查">健康检查</h2>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">GET</span><span style="color:#9ECBFF"> /health</span></span></code></pre>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#E1E4E8">{</span><span style="color:#79B8FF">"status"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"healthy"</span><span style="color:#E1E4E8">}</span></span></code></pre>
+<h2 id="统计">统计</h2>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">GET</span><span style="color:#9ECBFF"> /admin/stats</span></span></code></pre>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#79B8FF">  "today"</span><span style="color:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#79B8FF">    "requests"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">1523</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">    "masked"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">487</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">    "fields_masked"</span><span style="color:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#79B8FF">      "phone"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">312</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">      "email"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">98</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">      "id_card"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">45</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">      "bank_card"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">32</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#E1E4E8">  },</span></span>
+<span class="line"><span style="color:#79B8FF">  "total"</span><span style="color:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#79B8FF">    "requests"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">28491</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">    "masked"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">9120</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<h2 id="版本信息">版本信息</h2>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">GET</span><span style="color:#9ECBFF"> /admin/version</span></span></code></pre>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#79B8FF">  "version"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"1.0.0"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">  "edition"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"lite"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">  "rust_integrity"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">false</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<h2 id="完整性检查-pro">完整性检查 (Pro+)</h2>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">GET</span><span style="color:#9ECBFF"> /admin/integrity</span></span></code></pre>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#79B8FF">  "ok"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">true</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">  "checksum"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"sha256:abc123..."</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">  "records"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">487</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<h2 id="license-管理">License 管理</h2>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">POST</span><span style="color:#9ECBFF"> /admin/license</span></span>
+<span class="line"><span style="color:#B392F0">Content-Type:</span><span style="color:#9ECBFF"> application/json</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">{</span><span style="color:#B392F0">"key"</span><span style="color:#79B8FF">:</span><span style="color:#9ECBFF"> "APG-XXXX-XXXX-XXXX"}</span></span></code></pre>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#79B8FF">  "activated"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">true</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">  "edition"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"pro"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">  "expires_at"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"2027-06-06"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">  "seats"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">20</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<h2 id="敏感词管理">敏感词管理</h2>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6A737D"># 列出所有敏感词</span></span>
+<span class="line"><span style="color:#B392F0">GET</span><span style="color:#9ECBFF"> /admin/keywords</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 添加敏感词</span></span>
+<span class="line"><span style="color:#B392F0">POST</span><span style="color:#9ECBFF"> /admin/keywords</span></span>
+<span class="line"><span style="color:#B392F0">Content-Type:</span><span style="color:#9ECBFF"> application/json</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">{</span><span style="color:#B392F0">"word"</span><span style="color:#79B8FF">:</span><span style="color:#9ECBFF"> "机密项目X",</span><span style="color:#9ECBFF"> "replacement":</span><span style="color:#9ECBFF"> "PROJECT_X"}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 删除敏感词</span></span>
+<span class="line"><span style="color:#B392F0">DELETE</span><span style="color:#9ECBFF"> /admin/keywords/{id}</span></span></code></pre>
+<h2 id="错误码">错误码</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>状态码</th><th>说明</th></tr></thead><tbody><tr><td>200</td><td>成功</td></tr><tr><td>400</td><td>请求参数错误</td></tr><tr><td>401</td><td>License 无效或过期</td></tr><tr><td>429</td><td>请求频率超限</td></tr><tr><td>500</td><td>内部错误</td></tr></tbody></table> </main> <footer> <p>AI Privacy Gateway &copy; 2026</p> </footer> </body></html>

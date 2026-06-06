@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title> | AI Privacy Gateway 文档</title><link rel="icon" type="image/svg+xml" href="/favicon.svg"><style>:root{--ink: #0a0a0f;--paper: #111118;--surface: #1a1a26;--border: rgba(255,255,255,.06);--text: #e8e8ed;--text-dim: #8b8b9e;--text-quiet: #5a5a6e;--green: #3cfc8c;--green-bg: rgba(60,252,140,.08);--amber: #f0a030;--purple: #a78bfa;--radius: 4px;--radius-lg: 8px;--max-width: 1120px}*,*:before,*:after{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,PingFang SC,Hiragino Sans GB,Microsoft YaHei,sans-serif;background:var(--ink);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}a{color:var(--green);text-decoration:none;transition:color .15s}a:hover{color:#fff;text-decoration:none}.btn-ghost{display:inline-block;padding:8px 14px;font-size:.9rem;font-weight:500;color:var(--text-dim);border:none;background:transparent;cursor:pointer;transition:color .15s}.btn-ghost:hover{color:#fff}nav{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;max-width:var(--max-width);margin:0 auto;border-bottom:1px solid var(--border)}nav .logo{font-weight:700;font-size:1.05rem;color:#fff;display:flex;align-items:center;gap:10px;letter-spacing:-.02em}nav .logo .mark{width:26px;height:26px;background:var(--green);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.68rem;color:#000}nav .links{display:flex;gap:2px;align-items:center}.docs-layout{display:flex;max-width:var(--max-width);margin:0 auto;gap:48px;padding:0 28px 80px}.docs-sidebar{width:200px;flex-shrink:0}.docs-sidebar nav{display:block;position:sticky;top:24px;padding:0;border:none}.docs-sidebar h4{color:var(--text-quiet);font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;margin-bottom:14px;font-weight:600}.docs-sidebar a{display:block;padding:7px 0;color:var(--text-dim);font-size:.92rem}.docs-sidebar a:hover{color:#fff}.docs-content{flex:1;min-width:0}.docs-content h1{font-size:2rem;font-weight:700;letter-spacing:-.03em;margin-bottom:28px}.docs-content h2{font-size:1.4rem;font-weight:700;letter-spacing:-.02em;margin:36px 0 14px;color:#fff}.docs-content h3{color:var(--text);font-weight:600;margin:28px 0 10px;font-size:1.05rem}.docs-content p{color:var(--text-dim);margin-bottom:16px}.docs-content ul,.docs-content ol{color:var(--text-dim);margin-bottom:16px;padding-left:22px}.docs-content li{margin-bottom:6px}.docs-content pre{background:#0006;border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 24px;overflow-x:auto;margin-bottom:18px}.docs-content code{font-family:Fira Code,Cascadia Code,JetBrains Mono,monospace;font-size:.88rem}.docs-content :not(pre)>code{background:var(--surface);padding:2px 7px;border-radius:3px;font-size:.85rem}.docs-content blockquote{border-left:2px solid var(--green);padding-left:14px;color:var(--text-dim);margin-bottom:16px}.docs-content table{width:100%;border-collapse:collapse;margin-bottom:18px}.docs-content th,.docs-content td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--border)}.docs-content th{color:var(--text);font-weight:600;font-size:.85rem}.docs-content td{color:var(--text-dim);font-size:.9rem}footer{text-align:center;padding:40px 28px;color:var(--text-dim);font-size:.85rem;border-top:1px solid var(--border)}footer a{color:var(--text-dim)}@media(max-width:768px){.docs-layout{flex-direction:column}.docs-sidebar{width:100%}}
+</style></head> <body> <nav> <a href="/" class="logo"> <span class="mark">PG</span> Privacy Gateway
+</a> <div class="links"> <a href="/docs" class="btn-ghost">文档</a> <a href="/download" class="btn-ghost">下载</a> <a href="/#pricing" class="btn-ghost">价格</a> <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn-ghost" target="_blank">GitHub</a> </div> </nav> <main> <h1 id="部署指南">部署指南</h1>
+<p>生产环境部署方案。</p>
+<h2 id="docker-compose推荐">Docker Compose（推荐）</h2>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#85E89D">version</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"3.8"</span></span>
+<span class="line"><span style="color:#85E89D">services</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">  gateway</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#85E89D">    image</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">aiprivacygateway/lite</span></span>
+<span class="line"><span style="color:#85E89D">    ports</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">      - </span><span style="color:#9ECBFF">"9999:9999"</span></span>
+<span class="line"><span style="color:#85E89D">    volumes</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">      - </span><span style="color:#9ECBFF">./vault_data:/app/vault_data</span></span>
+<span class="line"><span style="color:#85E89D">    environment</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">      - </span><span style="color:#9ECBFF">VERSION=lite</span></span>
+<span class="line"><span style="color:#E1E4E8">      - </span><span style="color:#9ECBFF">UPSTREAM_URL=https://api.deepseek.com</span></span>
+<span class="line"><span style="color:#85E89D">    restart</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">unless-stopped</span></span></code></pre>
+<p>启动：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">docker-compose</span><span style="color:#9ECBFF"> up</span><span style="color:#79B8FF"> -d</span></span></code></pre>
+<h2 id="裸机部署systemd">裸机部署（systemd）</h2>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="ini"><code><span class="line"><span style="color:#B392F0">[Unit]</span></span>
+<span class="line"><span style="color:#F97583">Description</span><span style="color:#E1E4E8">=AI Privacy Gateway</span></span>
+<span class="line"><span style="color:#F97583">After</span><span style="color:#E1E4E8">=network.target</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">[Service]</span></span>
+<span class="line"><span style="color:#F97583">Type</span><span style="color:#E1E4E8">=simple</span></span>
+<span class="line"><span style="color:#F97583">User</span><span style="color:#E1E4E8">=nobody</span></span>
+<span class="line"><span style="color:#F97583">WorkingDirectory</span><span style="color:#E1E4E8">=/opt/ai-privacy-gateway</span></span>
+<span class="line"><span style="color:#F97583">ExecStart</span><span style="color:#E1E4E8">=/usr/bin/python3 main.py</span></span>
+<span class="line"><span style="color:#F97583">Restart</span><span style="color:#E1E4E8">=always</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">[Install]</span></span>
+<span class="line"><span style="color:#F97583">WantedBy</span><span style="color:#E1E4E8">=multi-user.target</span></span></code></pre>
+<h2 id="nginx-反向代理">Nginx 反向代理</h2>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="nginx"><code><span class="line"><span style="color:#F97583">server</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#F97583">    listen </span><span style="color:#79B8FF">443</span><span style="color:#E1E4E8"> ssl;</span></span>
+<span class="line"><span style="color:#F97583">    server_name </span><span style="color:#E1E4E8">gateway.internal;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">    location</span><span style="color:#B392F0"> / </span><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#F97583">        proxy_pass </span><span style="color:#E1E4E8">http://127.0.0.1:9999;</span></span>
+<span class="line"><span style="color:#F97583">        proxy_http_version </span><span style="color:#79B8FF">1.1</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#F97583">        proxy_set_header </span><span style="color:#E1E4E8">Upgrade $http_upgrade;</span></span>
+<span class="line"><span style="color:#F97583">        proxy_set_header </span><span style="color:#E1E4E8">Connection </span><span style="color:#9ECBFF">"upgrade"</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#F97583">        proxy_set_header </span><span style="color:#E1E4E8">Host $host;</span></span>
+<span class="line"><span style="color:#F97583">        proxy_read_timeout </span><span style="color:#79B8FF">300s</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<h2 id="下一步">下一步</h2>
+<ul>
+<li><a href="/docs/config">配置环境变量</a></li>
+<li><a href="/docs/keywords">自定义敏感词</a></li>
+<li><a href="/docs/architecture">架构说明</a></li>
+</ul> </main> <footer> <p>AI Privacy Gateway &copy; 2026</p> </footer> </body></html>
