@@ -192,4 +192,4 @@ MIT License - Free for personal use.
 
 ---
 
-**Pro 版升级** → [官网](https://your-website.com) | **Enterprise 定制** → 联系我们
+[🌐 官方网站](https://gunxueqiu6.github.io/ai-privacy-gateway/) | [📖 文档](https://gunxueqiu6.github.io/ai-privacy-gateway/docs/) | [📥 下载](https://gunxueqiu6.github.io/ai-privacy-gateway/download/) | **Enterprise 定制** → [联系我们](mailto:support@aiprivacygateway.com)
