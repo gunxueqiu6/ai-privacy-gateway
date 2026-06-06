@@ -1,0 +1,121 @@
+name: Release AI Privacy Gateway
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-lite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Build Docker image (Lite)
+        run: |
+          docker build -t ai-privacy-gateway:lite .
+          docker save ai-privacy-gateway:lite > lite_image.tar
+
+      - name: Upload Lite Docker image
+        uses: actions/upload-artifact@v4
+        with:
+          name: lite-docker-image
+          path: lite_image.tar
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build Windows executable
+        run: |
+          pyinstaller --onefile --name PrivacyGateway --add-data "static;static" main.py
+
+      - name: Upload Windows executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-exe
+          path: dist/PrivacyGateway.exe
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build macOS executable
+        run: |
+          pyinstaller --onefile --name PrivacyGateway --add-data "static:static" main.py
+
+      - name: Upload macOS executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-exe
+          path: dist/PrivacyGateway
+
+  release:
+    needs: [build-lite, build-windows, build-macos]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            lite-docker-image/lite_image.tar
+            windows-exe/PrivacyGateway.exe
+            macos-exe/PrivacyGateway
+          body: |
+            ## AI Privacy Gateway Lite 版
+
+            ### 下载
+            - **Windows**: PrivacyGateway.exe（双击运行）
+            - **macOS**: PrivacyGateway（命令行运行）
+            - **Docker**: lite_image.tar（docker load 导入）
+
+            ### 使用方法
+            1. 运行程序
+            2. 将 AI 客户端 API 地址改为 `http://localhost:9999`
+            3. 打开管理后台 `http://localhost:9999/admin`
+
+            ### 功能
+            - 自动脱敏手机号、身份证、邮箱、银行卡
+            - 支持流式输出
+            - 自定义敏感词
+            - 本地 SQLite 存储
+
+            ---
+            **升级 Pro 版**: ¥99/月，支持团队协作、云端规则更新
+            [官网购买](https://your-website.com/pricing)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

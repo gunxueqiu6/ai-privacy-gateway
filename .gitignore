@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# 数据目录
+vault_data/
+*.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# 日志
+*.log
+
+# 环境配置
+.env
+.env.local
+
+# macOS
+.DS_Store
+
+# Rust
+rust_src/**/target/
+*.pyd
+*.dll
+*.so
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Docker
+*.tar

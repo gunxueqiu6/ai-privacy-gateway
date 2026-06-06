@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  privacy-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai-privacy-vault
+    ports:
+      - "9999:9999"
+    volumes:
+      - ./vault_data:/app/vault_data
+    environment:
+      - VERSION=lite
+      - LICENSE_KEY=free_version
+      - TARGET_LLM=https://api.openai.com
+      - LISTEN_PORT=9999
+      - DB_TYPE=sqlite
+      - MASK_ENGINE_TYPE=regex
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9999/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

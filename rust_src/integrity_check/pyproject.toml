@@ -1,0 +1,13 @@
+[tool.maturin]
+name = "integrity_check"
+version = "2.0.0"
+edition = "2021"
+
+sdist-include = ["Cargo.toml", "src/**/*.rs"]
+
+[tool.maturin.python]
+requires = ["pyo3>=0.22"]
+
+[build-system]
+requires = ["maturin>=1.5"]
+build-backend = "maturin"

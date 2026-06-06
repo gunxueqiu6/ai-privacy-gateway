@@ -1,0 +1,104 @@
+# Default values for ai-privacy-gateway.
+# This is a YAML-formatted file.
+
+replicaCount: 3
+
+image:
+  repository: your-registry/ai-privacy-gateway
+  tag: enterprise
+  pullPolicy: Always
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  fsGroup: 1000
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 9999
+  targetPort: 9999
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
+  hosts:
+    - host: api.yourcompany.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: api-tls
+      hosts:
+        - api.yourcompany.com
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+  requests:
+    cpu: 500m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Redis configuration
+redis:
+  enabled: true
+  host: redis-service
+  port: 6379
+  password: ""
+
+# Gateway configuration
+config:
+  version: enterprise
+  licenseKey: ""
+  licenseServerUrl: ""
+  targetLLM: https://api.openai.com
+  listenPort: 9999
+  dbType: redis
+  maskEngineType: ac_automaton
+
+# Alert configuration
+alerts:
+  dingtalkWebhook: ""
+  feishuWebhook: ""
+  wecomWebhook: ""
+
+# Persistence for SQLite (if not using Redis)
+persistence:
+  enabled: false
+  size: 1Gi
+  storageClass: ""
+
+# Health check
+healthCheck:
+  enabled: true
+  interval: 30s
+  timeout: 10s
+  retries: 3

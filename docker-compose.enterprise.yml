@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # AI Privacy Gateway - Enterprise
+  privacy-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.enterprise
+    container_name: ai-privacy-vault-enterprise
+    ports:
+      - "9999:9999"
+    environment:
+      - VERSION=enterprise
+      - LICENSE_KEY=${LICENSE_KEY}
+      - LICENSE_SERVER_URL=${LICENSE_SERVER_URL}
+      - TARGET_LLM=https://api.openai.com
+      - LISTEN_PORT=9999
+      - DB_TYPE=redis
+      - MASK_ENGINE_TYPE=ac_automaton
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+    restart: always
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9999/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis 集群
+  redis:
+    image: redis:7-alpine
+    container_name: ai-privacy-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: always
+
+  # Nginx 负载均衡（可选）
+  nginx:
+    image: nginx:alpine
+    container_name: ai-privacy-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - privacy-gateway
+    restart: always
+
+volumes:
+  redis_data:

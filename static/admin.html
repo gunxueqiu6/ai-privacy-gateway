@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Privacy Gateway - 管理后台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            padding: 40px 0;
+        }
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        header .version {
+            color: #4ade80;
+            font-size: 1.2em;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-card .icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        .stat-card .value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #4ade80;
+        }
+        .stat-card .label {
+            color: #94a3b8;
+            margin-top: 5px;
+        }
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            margin-bottom: 20px;
+            color: #4ade80;
+        }
+        .keywords-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .keyword-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .keyword-item .delete {
+            color: #f87171;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .add-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .add-form input {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+        .add-form button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: #4ade80;
+            color: #1a1a2e;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .add-form button:hover {
+            background: #22c55e;
+        }
+        .btn-danger {
+            background: #f87171 !important;
+            color: #fff !important;
+        }
+        .btn-danger:hover {
+            background: #ef4444 !important;
+        }
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        .info-item .label {
+            color: #94a3b8;
+        }
+        .info-item .value {
+            color: #fff;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI Privacy Gateway</h1>
+            <div class="version" id="version">Lite 个人版</div>
+        </header>
+
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>服务运行中</span>
+            </div>
+            <div id="current-time"></div>
+        </div>
+
+        <div class="section">
+            <h2>今日拦截统计</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="icon">📱</div>
+                    <div class="value" id="phone-count">0</div>
+                    <div class="label">手机号</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">📧</div>
+                    <div class="value" id="email-count">0</div>
+                    <div class="label">邮箱</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">🪪</div>
+                    <div class="value" id="idcard-count">0</div>
+                    <div class="label">身份证</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">💳</div>
+                    <div class="value" id="bankcard-count">0</div>
+                    <div class="label">银行卡</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">🔒</div>
+                    <div class="value" id="custom-count">0</div>
+                    <div class="label">自定义词</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">📊</div>
+                    <div class="value" id="total-count">0</div>
+                    <div class="label">总计</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>自定义敏感词</h2>
+            <div class="keywords-list" id="keywords-list"></div>
+            <div class="add-form">
+                <input type="text" id="new-keyword" placeholder="输入新的敏感词...">
+                <button onclick="addKeyword()">添加</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>系统信息</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="label">API 地址</span>
+                    <span class="value">http://localhost:9999</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">目标服务</span>
+                    <span class="value" id="target-llm">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">数据库</span>
+                    <span class="value">SQLite</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">License</span>
+                    <span class="value" id="license">free_version</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>操作</h2>
+            <button class="btn-danger" onclick="clearMappings()">清除所有映射记录</button>
+        </div>
+
+        <footer>
+            <p>AI Privacy Gateway v2.0 | MIT License</p>
+        </footer>
+    </div>
+
+    <script>
+        // 更新时间
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = now.toLocaleString('zh-CN');
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // 获取统计
+        async function fetchStats() {
+            try {
+                const resp = await fetch('/admin/stats');
+                const data = await resp.json();
+                document.getElementById('phone-count').textContent = data.phone_count || 0;
+                document.getElementById('email-count').textContent = data.email_count || 0;
+                document.getElementById('idcard-count').textContent = data.idcard_count || 0;
+                document.getElementById('bankcard-count').textContent = data.bankcard_count || 0;
+                document.getElementById('custom-count').textContent = data.custom_count || 0;
+                document.getElementById('total-count').textContent = data.total_count || 0;
+            } catch (e) {
+                console.error('获取统计失败:', e);
+            }
+        }
+
+        // 获取关键词
+        async function fetchKeywords() {
+            try {
+                const resp = await fetch('/admin/keywords');
+                const data = await resp.json();
+                const list = document.getElementById('keywords-list');
+                list.innerHTML = '';
+                data.keywords.forEach(kw => {
+                    const item = document.createElement('div');
+                    item.className = 'keyword-item';
+                    item.innerHTML = `<span>${kw}</span><span class="delete" onclick="deleteKeyword('${kw}')">×</span>`;
+                    list.appendChild(item);
+                });
+            } catch (e) {
+                console.error('获取关键词失败:', e);
+            }
+        }
+
+        // 添加关键词
+        async function addKeyword() {
+            const input = document.getElementById('new-keyword');
+            const keyword = input.value.trim();
+            if (!keyword) return;
+
+            try {
+                const resp = await fetch('/admin/keywords/add', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({keyword})
+                });
+                if (resp.ok) {
+                    input.value = '';
+                    fetchKeywords();
+                }
+            } catch (e) {
+                console.error('添加关键词失败:', e);
+            }
+        }
+
+        // 删除关键词
+        async function deleteKeyword(keyword) {
+            try {
+                const resp = await fetch('/admin/keywords/delete', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({keyword})
+                });
+                if (resp.ok) {
+                    fetchKeywords();
+                }
+            } catch (e) {
+                console.error('删除关键词失败:', e);
+            }
+        }
+
+        // 清除映射
+        async function clearMappings() {
+            if (!confirm('确定要清除所有映射记录吗？')) return;
+            try {
+                const resp = await fetch('/admin/clear', {method: 'POST'});
+                if (resp.ok) {
+                    fetchStats();
+                    alert('已清除所有映射记录');
+                }
+            } catch (e) {
+                console.error('清除映射失败:', e);
+            }
+        }
+
+        // 获取版本信息
+        async function fetchVersion() {
+            try {
+                const resp = await fetch('/admin/version');
+                const data = await resp.json();
+                document.getElementById('version').textContent = data.version_display;
+                document.getElementById('license').textContent = data.version;
+            } catch (e) {
+                console.error('获取版本失败:', e);
+            }
+        }
+
+        // 初始化
+        fetchStats();
+        fetchKeywords();
+        fetchVersion();
+
+        // 定时刷新
+        setInterval(fetchStats, 5000);
+    </script>
+</body>
+</html>

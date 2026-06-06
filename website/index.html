@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Privacy Gateway - 你的团队 AI 数据正在裸奔，30 秒装上防火墙</title>
+    <meta name="description" content="AI隐私网关，拦截AI请求自动脱敏，保护团队数据安全。支持DeepSeek、Claude、ChatGPT等所有AI服务。">
+    <meta name="keywords" content="AI隐私,数据脱敏,DeepSeek代理,Cursor隐私,大模型安全">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #fff;
+        }
+        .hero {
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+        }
+        .hero h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+        .hero h1 .highlight {
+            color: #f87171;
+        }
+        .hero p {
+            font-size: 1.5em;
+            color: #94a3b8;
+            margin-bottom: 40px;
+        }
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 60px;
+        }
+        .btn {
+            padding: 15px 40px;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.3s;
+        }
+        .btn:hover { transform: translateY(-3px); }
+        .btn-primary {
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+            color: #0f172a;
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 2px solid #4ade80;
+        }
+        .features {
+            padding: 80px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .features h2 {
+            text-align: center;
+            font-size: 2em;
+            margin-bottom: 40px;
+            color: #4ade80;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        .feature-card {
+            background: rgba(255,255,255,0.05);
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+        }
+        .feature-card .icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+        .feature-card h3 {
+            margin-bottom: 15px;
+        }
+        .feature-card p {
+            color: #94a3b8;
+        }
+        .pricing {
+            padding: 80px 20px;
+            background: rgba(255,255,255,0.02);
+        }
+        .pricing h2 {
+            text-align: center;
+            font-size: 2em;
+            margin-bottom: 40px;
+        }
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .pricing-card {
+            background: rgba(255,255,255,0.1);
+            padding: 40px;
+            border-radius: 16px;
+            text-align: center;
+            position: relative;
+        }
+        .pricing-card.pro {
+            background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(217,119,6,0.2));
+            border: 2px solid #f59e0b;
+        }
+        .pricing-card.enterprise {
+            background: linear-gradient(135deg, rgba(168,85,247,0.2), rgba(139,92,246,0.2));
+            border: 2px solid #a855f7;
+        }
+        .pricing-card .badge {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #f59e0b;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-size: 0.8em;
+        }
+        .pricing-card h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        .pricing-card .price {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .pricing-card .price span {
+            font-size: 0.5em;
+            color: #94a3b8;
+        }
+        .pricing-card ul {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+        .pricing-card ul li {
+            padding: 10px 0;
+            color: #94a3b8;
+        }
+        .pricing-card ul li::before {
+            content: "✓ ";
+            color: #4ade80;
+        }
+        .pricing-card ul li.disabled::before {
+            content: "✗ ";
+            color: #f87171;
+        }
+        .pricing-card ul li.disabled {
+            color: #64748b;
+        }
+        .faq {
+            padding: 80px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .faq h2 {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .faq-item {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        .faq-item h4 {
+            margin-bottom: 10px;
+            color: #4ade80;
+        }
+        .faq-item p {
+            color: #94a3b8;
+        }
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+        footer a {
+            color: #4ade80;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <h1>你的团队 AI 数据<span class="highlight">正在裸奔</span></h1>
+        <p>30 秒装上防火墙，自动脱敏敏感信息</p>
+        <div class="cta-buttons">
+            <a href="#pricing" class="btn btn-primary">立即购买 Pro 版</a>
+            <a href="https://github.com/your-repo/ai-privacy-gateway" class="btn btn-secondary">免费试用 Lite 版</a>
+        </div>
+        <p style="font-size: 1em; color: #64748b;">支持 DeepSeek / Claude / ChatGPT / Cursor 等所有 AI 服务</p>
+    </section>
+
+    <section class="features">
+        <h2>核心功能</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="icon">🔒</div>
+                <h3>自动脱敏</h3>
+                <p>手机号、身份证、邮箱、银行卡等敏感信息自动识别并替换</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">⚡</div>
+                <h3>流式支持</h3>
+                <p>完美支持 AI 流式输出，用户完全无感知</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🏠</div>
+                <h3>本地存储</h3>
+                <p>所有数据仅存储在本地，绝不上传云端</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🔌</div>
+                <h3>一键接入</h3>
+                <p>只需改一个 API 地址，无需修改任何代码</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">📊</div>
+                <h3>团队看板</h3>
+                <p>实时查看团队拦截统计，会话查询追溯</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">☁️</div>
+                <h3>云端规则</h3>
+                <p>敏感词规则自动更新，无需手动维护</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="pricing">
+        <h2>版本对比</h2>
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <h3>Lite 个人版</h3>
+                <div class="price">免费<span></span></div>
+                <ul>
+                    <li>正则脱敏（手机/邮箱/身份证/银行卡）</li>
+                    <li>流式代理 + 缓冲</li>
+                    <li>自定义敏感词（手动添加）</li>
+                    <li>基础管理后台</li>
+                    <li class="disabled">多人并发</li>
+                    <li class="disabled">团队看板</li>
+                    <li class="disabled">云端规则更新</li>
+                </ul>
+                <a href="https://github.com/your-repo/ai-privacy-gateway" class="btn btn-secondary">GitHub 下载</a>
+            </div>
+
+            <div class="pricing-card pro">
+                <div class="badge">推荐</div>
+                <h3>Pro 团队版</h3>
+                <div class="price">¥99<span>/月</span></div>
+                <ul>
+                    <li>全部 Lite 功能</li>
+                    <li>多人并发（20人）</li>
+                    <li>SQLite WAL 模式</li>
+                    <li>团队看板 + 会话查询</li>
+                    <li>云端规则自动更新</li>
+                    <li>日/周/月统计报告</li>
+                    <li>邮件技术支持</li>
+                </ul>
+                <a href="#buy-pro" class="btn btn-primary">立即购买</a>
+            </div>
+
+            <div class="pricing-card enterprise">
+                <h3>Enterprise 企业版</h3>
+                <div class="price">定制<span>年费</span></div>
+                <ul>
+                    <li>全部 Pro 功能</li>
+                    <li>100+ 人高并发</li>
+                    <li>Redis 集群存储</li>
+                    <li>AC 自动机（万级词库）</li>
+                    <li>审计日志 + 告警</li>
+                    <li>权限控制 (RBAC)</li>
+                    <li>驻场支持 + SLA</li>
+                </ul>
+                <a href="#contact" class="btn btn-secondary">联系我们</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="faq">
+        <h2>常见问题</h2>
+        <div class="faq-item">
+            <h4>如何接入？</h4>
+            <p>只需将 AI 客户端的 API 地址从 https://api.openai.com 改为 http://localhost:9999，其他完全不变。</p>
+        </div>
+        <div class="faq-item">
+            <h4>数据安全吗？</h4>
+            <p>所有敏感数据仅存储在本地 SQLite，映射关系不上传任何云端，支持一键物理销毁。</p>
+        </div>
+        <div class="faq-item">
+            <h4>支持哪些 AI 服务？</h4>
+            <p>支持所有兼容 OpenAI API 格式的服务：DeepSeek、Claude、ChatGPT、Cursor、飞书机器人等。</p>
+        </div>
+        <div class="faq-item">
+            <h4>如何部署？</h4>
+            <p>Docker 一键部署：docker-compose up -d。或下载 Windows/macOS 单文件直接运行。</p>
+        </div>
+        <div class="faq-item">
+            <h4>Pro 版如何激活？</h4>
+            <p>购买后收到 License Key，在管理后台填写即可激活。License 绑定硬件指纹，防止滥用。</p>
+        </div>
+    </section>
+
+    <footer>
+        <p>AI Privacy Gateway © 2026 | <a href="https://github.com/your-repo">GitHub</a> | <a href="mailto:support@your-email.com">技术支持</a></p>
+    </footer>
+</body>
+</html>
