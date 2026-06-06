@@ -5,11 +5,22 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   build-lite:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -17,13 +28,15 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
+        run: pip install -r requirements.txt
 
-      - name: Build Docker image (Lite)
+      - name: Build and push Docker image
         run: |
-          docker build -t ai-privacy-gateway:lite .
-          docker save ai-privacy-gateway:lite > lite_image.tar
+          docker build -t ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:lite .
+          docker tag ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:lite ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:latest
+          docker push ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:lite
+          docker push ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:latest
+          docker save ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:lite > lite_image.tar
 
       - name: Upload Lite Docker image
         uses: actions/upload-artifact@v4
@@ -47,8 +60,7 @@ jobs:
           pip install pyinstaller
 
       - name: Build Windows executable
-        run: |
-          pyinstaller --onefile --name PrivacyGateway --add-data "static;static" main.py
+        run: pyinstaller --onefile --name PrivacyGateway --add-data "static;static" main.py
 
       - name: Upload Windows executable
         uses: actions/upload-artifact@v4
@@ -72,8 +84,7 @@ jobs:
           pip install pyinstaller
 
       - name: Build macOS executable
-        run: |
-          pyinstaller --onefile --name PrivacyGateway --add-data "static:static" main.py
+        run: pyinstaller --onefile --name PrivacyGateway --add-data "static:static" main.py
 
       - name: Upload macOS executable
         uses: actions/upload-artifact@v4
@@ -89,19 +100,24 @@ jobs:
         uses: actions/download-artifact@v4
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             lite-docker-image/lite_image.tar
             windows-exe/PrivacyGateway.exe
             macos-exe/PrivacyGateway
           body: |
-            ## AI Privacy Gateway Lite 版
+            ## AI Privacy Gateway Lite
+
+            ### Docker（推荐）
+            ```bash
+            docker run -d -p 9999:9999 ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:lite
+            ```
 
             ### 下载
             - **Windows**: PrivacyGateway.exe（双击运行）
             - **macOS**: PrivacyGateway（命令行运行）
-            - **Docker**: lite_image.tar（docker load 导入）
+            - **Docker**: lite_image.tar（离线导入：`docker load < lite_image.tar`）
 
             ### 使用方法
             1. 运行程序
@@ -110,12 +126,8 @@ jobs:
 
             ### 功能
             - 自动脱敏手机号、身份证、邮箱、银行卡
-            - 支持流式输出
+            - 支持流式输出 (SSE)
             - 自定义敏感词
             - 本地 SQLite 存储
-
-            ---
-            **升级 Pro 版**: ¥99/月，支持团队协作、云端规则更新
-            [官网购买](https://your-website.com/pricing)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
