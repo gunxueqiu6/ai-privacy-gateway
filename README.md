@@ -6,6 +6,27 @@
 
 ---
 
+## 效果演示
+
+将 AI 客户端 API 地址指向 `localhost:9999`，所有敏感信息自动脱敏：
+
+```text
+# 发送前（你的 Prompt）
+"用户张三，手机号 13812345678，身份证 110101199001011234，
+邮箱 zhang@example.com，请帮我查询订单"
+
+# 网关脱敏后（发给 AI 的内容）
+"用户张三，手机号 <PHONE_7a3f>，身份证 <ID_9b2e>，
+邮箱 <EMAIL_4c81>，请帮我查询订单"
+
+# AI 响应返回后（用户看到的）
+"张三先生，您的手机号 13812345678 关联的订单已查到..."
+```
+
+**一行代码不改，用户完全无感知。**
+
+---
+
 ## 中文
 
 ### 什么是 AI Privacy Gateway？
@@ -50,9 +71,9 @@ pip install -r requirements.txt
 python main.py
 ```
 
-#### 方式三：Windows 单文件（即将发布）
+#### 方式三：Windows 单文件
 
-下载 `PrivacyGateway.exe`，双击运行。
+下载 [Release](https://github.com/gunxueqiu6/ai-privacy-gateway/releases) 中的 `PrivacyGateway.exe`，双击运行。
 
 ### 使用方法
 
@@ -87,19 +108,6 @@ http://localhost:9999
 | Nginx Upstream | 已有 Nginx 反向代理 | [nginx_upstream.conf](deployment_examples/nginx_upstream.conf) |
 | Docker Sidecar | Docker Compose 环境 | [docker_sidecar.yml](deployment_examples/docker_sidecar.yml) |
 | 正向 HTTP 代理 | 无法修改代码的老旧系统 | [forward_proxy.md](deployment_examples/forward_proxy.md) |
-
-### 版本对比
-
-| 功能 | Lite（免费） | Pro（¥99/月） | Enterprise |
-|------|-------------|--------------|------------|
-| 正则脱敏 | ✅ | ✅ | ✅ |
-| 流式代理 | ✅ | ✅ | ✅ |
-| 自定义敏感词 | ✅ | ✅ | ✅ |
-| 多人并发 | ❌ | ✅ 20人 | ✅ 100+ |
-| 团队看板 | ❌ | ✅ | ✅ |
-| AC 自动机 | ❌ | ❌ | ✅ |
-| Redis 存储 | ❌ | ❌ | ✅ |
-| 审计日志 | ❌ | ❌ | ✅ |
 
 ### 技术栈
 
@@ -192,4 +200,4 @@ MIT License - Free for personal use.
 
 ---
 
-[🌐 官方网站](https://gunxueqiu6.github.io/ai-privacy-gateway/) | [📖 文档](https://gunxueqiu6.github.io/ai-privacy-gateway/docs/) | [📥 下载](https://gunxueqiu6.github.io/ai-privacy-gateway/download/) | **Enterprise 定制** → [联系我们](mailto:support@aiprivacygateway.com)
+[🌐 官方网站](https://privacygw.pages.dev/) | [📖 文档](https://privacygw.pages.dev/docs/) | [📥 下载](https://privacygw.pages.dev/download/)
