@@ -10,22 +10,35 @@ import Footer from '../components/Footer.astro';
   canonicalURL="https://privacygw.pages.dev/pricing">
   <Nav />
 
-  <div class="page-header">
-    <h1>选择你的版本</h1>
-    <p>从个人到企业，为不同规模团队设计</p>
-  </div>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container hero-content">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        <span>透明定价，无隐藏费用</span>
+      </div>
+      <h1 class="hero-title">
+        选择适合你的
+        <span class="gradient-text">版本</span>
+      </h1>
+      <p class="hero-description">
+        从个人开发者到大型企业，每个版本都为不同规模精心设计。<br/>
+        Lite 版永久免费开源，Pro 版 7 天无理由退款。
+      </p>
+    </div>
+  </section>
 
-  <section>
-    <div class="pricing-container">
-      <!-- Lite Version -->
-      <div class="pricing-card">
-        <div class="pricing-header">
-          <div class="tier-label">免费版</div>
-          <h2>Lite</h2>
-        </div>
+  <!-- Pricing Cards -->
+  <section class="pricing-section">
+    <div class="container pricing-grid">
+      <!-- Lite -->
+      <div class="pricing-card glass">
+        <div class="tier-label">免费版</div>
+        <h2>Lite</h2>
         <div class="pricing-price">
           <span class="price">免费</span>
         </div>
+        <p class="pricing-desc">个人开发者永久免费</p>
         <ul class="pricing-features">
           <li class="feature-item">
             <span class="check">✓</span>
@@ -37,7 +50,7 @@ import Footer from '../components/Footer.astro';
           </li>
           <li class="feature-item">
             <span class="check">✓</span>
-            <span>自定义敏感词（手动添加）</span>
+            <span>自定义敏感词</span>
           </li>
           <li class="feature-item">
             <span class="check">✓</span>
@@ -56,23 +69,19 @@ import Footer from '../components/Footer.astro';
             <span>云端规则自动更新</span>
           </li>
         </ul>
-        <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-outline">
-          GitHub 下载
-        </a>
+        <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-outline btn-block">GitHub 下载</a>
       </div>
 
-      <!-- Pro Version -->
+      <!-- Pro -->
       <div class="pricing-card popular">
         <div class="popular-badge">最受欢迎</div>
-        <div class="pricing-header">
-          <div class="tier-label">团队版</div>
-          <h2>Pro</h2>
-        </div>
+        <div class="tier-label">团队版</div>
+        <h2>Pro</h2>
         <div class="pricing-price">
           <span class="price">¥99</span>
           <span class="period">/月</span>
         </div>
-        <p class="pricing-description">适合 20 人以下团队使用</p>
+        <p class="pricing-desc">适合 20 人以下团队</p>
         <ul class="pricing-features">
           <li class="feature-item">
             <span class="check">✓</span>
@@ -103,22 +112,18 @@ import Footer from '../components/Footer.astro';
             <span>邮件技术支持</span>
           </li>
         </ul>
-        <button class="btn btn-primary" onclick="openCheckout('pro')">
-          立即购买
-        </button>
+        <button class="btn btn-primary btn-block" onclick="openCheckout('pro')">立即购买</button>
       </div>
 
-      <!-- Enterprise Version -->
-      <div class="pricing-card">
-        <div class="pricing-header">
-          <div class="tier-label">企业版</div>
-          <h2>Enterprise</h2>
-        </div>
+      <!-- Enterprise -->
+      <div class="pricing-card glass">
+        <div class="tier-label">企业版</div>
+        <h2>Enterprise</h2>
         <div class="pricing-price">
           <span class="price">定制</span>
           <span class="period">年费</span>
         </div>
-        <p class="pricing-description">适合大型企业部署</p>
+        <p class="pricing-desc">适合大型企业部署</p>
         <ul class="pricing-features">
           <li class="feature-item">
             <span class="check">✓</span>
@@ -126,7 +131,7 @@ import Footer from '../components/Footer.astro';
           </li>
           <li class="feature-item">
             <span class="check">✓</span>
-            <span>100+ 人高并发支持</span>
+            <span>100+ 人高并发</span>
           </li>
           <li class="feature-item">
             <span class="check">✓</span>
@@ -149,50 +154,47 @@ import Footer from '../components/Footer.astro';
             <span>驻场支持 + SLA 保障</span>
           </li>
         </ul>
-        <a href="mailto:contact@privacygw.com?subject=Enterprise%20咨询" class="btn btn-outline">
-          联系我们
-        </a>
+        <a href="mailto:contact@privacygw.com?subject=Enterprise%20咨询" class="btn btn-outline btn-block">联系我们</a>
       </div>
     </div>
   </section>
 
-  <section>
-    <div class="faq-container">
-      <h3>常见问题</h3>
-
-      <div class="faq-item">
-        <h4>购买后如何获取 License Key？</h4>
-        <p>购买完成后，License Key 会发送到您的邮箱。在管理后台输入 Key 即可激活 Pro 版功能。</p>
-      </div>
-
-      <div class="faq-item">
-        <h4>支持退款吗？</h4>
-        <p>支持 7 天无理由退款。如果您对产品不满意，请发送邮件至 support@privacygw.com。</p>
-      </div>
-
-      <div class="faq-item">
-        <h4>License 可以在多台机器使用吗？</h4>
-        <p>Pro 版 License 绑定硬件指纹，支持最多 3 台设备轮换。如需更多设备，请联系我们升级。</p>
-      </div>
-
-      <div class="faq-item">
-        <h4>如何升级到 Enterprise 版？</h4>
-        <p>请发送邮件至 contact@privacygw.com，我们会根据您的需求提供定制方案。</p>
+  <!-- FAQ -->
+  <section class="faq-section">
+    <div class="container">
+      <h2 class="section-title">常见问题</h2>
+      <div class="faq-grid">
+        <div class="faq-card glass">
+          <h4>购买后如何获取 License Key？</h4>
+          <p>购买完成后，License Key 会发送到您的邮箱。在管理后台输入 Key 即可激活 Pro 版功能。</p>
+        </div>
+        <div class="faq-card glass">
+          <h4>支持退款吗？</h4>
+          <p>支持 7 天无理由退款。如果您对产品不满意，请发送邮件至 support@privacygw.com。</p>
+        </div>
+        <div class="faq-card glass">
+          <h4>License 可以在多台机器使用吗？</h4>
+          <p>Pro 版 License 绑定硬件指纹，支持最多 3 台设备轮换。如需更多设备，请联系我们升级。</p>
+        </div>
+        <div class="faq-card glass">
+          <h4>如何升级到 Enterprise 版？</h4>
+          <p>请发送邮件至 contact@privacygw.com，我们会根据您的需求提供定制方案。</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- 购买弹窗 -->
+  <!-- Checkout Modal -->
   <div class="checkout-overlay" id="checkoutOverlay" style="display:none">
-    <div class="checkout-modal glass">
-      <button class="checkout-close" onclick="closeCheckout()">×</button>
+    <div class="checkout-modal">
+      <button class="checkout-close" onclick="closeCheckout()">&times;</button>
       <h3 id="checkoutTitle">购买 Pro 版</h3>
       <p class="checkout-price" id="checkoutPrice">¥99/月</p>
 
-      <!-- 步骤 1: 输入邮箱 -->
       <div id="checkoutStep1">
         <label class="checkout-label">邮箱地址（用于接收 License Key）</label>
         <input type="email" id="customerEmail" class="checkout-input" placeholder="your@email.com" required>
+
         <div class="checkout-methods">
           <button class="payment-method-btn active" onclick="selectPayment('wechat')" id="wechatTab">
             <span class="method-icon">💚</span> 微信支付
@@ -205,7 +207,6 @@ import Footer from '../components/Footer.astro';
           </button>
         </div>
 
-        <!-- 微信支付区域 -->
         <div id="wechatSection" class="payment-section">
           <div class="wechat-pay-info">
             <div class="qr-code-container">
@@ -216,19 +217,17 @@ import Footer from '../components/Footer.astro';
                 </div>
               </div>
               <div class="qr-refresh">
-                <button class="btn btn-outline btn-sm" onclick="refreshWechatQr()">🔄 刷新二维码</button>
+                <button class="btn btn-outline btn-sm" onclick="refreshWechatQr()">刷新二维码</button>
               </div>
             </div>
             <p class="payment-note">微信扫码支付 ¥99</p>
             <div class="payment-status" id="wechatStatus">
-              <span class="status-icon">⏳</span>
               <span>等待支付...</span>
             </div>
             <p class="payment-tip">支付完成后，License Key 将自动发送到您的邮箱</p>
           </div>
         </div>
 
-        <!-- 支付宝支付区域 -->
         <div id="alipaySection" class="payment-section" style="display:none">
           <div class="alipay-pay-info">
             <div class="qr-code-container">
@@ -239,27 +238,24 @@ import Footer from '../components/Footer.astro';
                 </div>
               </div>
               <div class="qr-refresh">
-                <button class="btn btn-outline btn-sm" onclick="refreshAlipayQr()">🔄 刷新二维码</button>
+                <button class="btn btn-outline btn-sm" onclick="refreshAlipayQr()">刷新二维码</button>
               </div>
             </div>
             <p class="payment-note">支付宝扫码支付 ¥99</p>
             <div class="payment-status" id="alipayStatus">
-              <span class="status-icon">⏳</span>
               <span>等待支付...</span>
             </div>
             <p class="payment-tip">支付完成后，License Key 将自动发送到您的邮箱</p>
           </div>
         </div>
 
-        <!-- PayPal 支付区域 -->
         <div id="paypalSection" class="payment-section" style="display:none">
           <div id="paypal-button-container" style="margin-top:1rem"></div>
         </div>
       </div>
 
-      <!-- 步骤 2: 购买成功 -->
       <div id="checkoutStep2" style="display:none">
-        <div class="success-icon">✅</div>
+        <div class="success-icon">&#10003;</div>
         <h4>购买成功！</h4>
         <p class="success-text">License Key 已发送到您的邮箱</p>
         <div class="license-display" id="licenseDisplay"></div>
@@ -312,9 +308,9 @@ import Footer from '../components/Footer.astro';
       document.getElementById('paypalSection').style.display = method === 'paypal' ? 'block' : 'none';
       document.getElementById('wechatSection').style.display = method === 'wechat' ? 'block' : 'none';
       document.getElementById('alipaySection').style.display = method === 'alipay' ? 'block' : 'none';
-      
+
       stopPaymentPolling();
-      
+
       if (method === 'paypal') {
         setTimeout(renderPayPalButton, 200);
       } else if (method === 'wechat') {
@@ -340,10 +336,7 @@ import Footer from '../components/Footer.astro';
         },
         onApprove: function(data, actions) {
           const email = document.getElementById('customerEmail').value.trim();
-          if (!email) {
-            alert('请先输入邮箱地址');
-            return;
-          }
+          if (!email) { alert('请先输入邮箱地址'); return; }
           fetch(`${LICENSE_SERVER}/api/payment/complete`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -383,36 +376,19 @@ import Footer from '../components/Footer.astro';
         document.getElementById('wechatQrCode').innerHTML = '<div class="qr-error">请先输入邮箱地址</div>';
         return;
       }
-      
-      document.getElementById('wechatQrCode').innerHTML = `
-        <div class="qr-loading">
-          <div class="spinner"></div>
-          <p>正在生成支付二维码...</p>
-        </div>
-      `;
-      document.getElementById('wechatStatus').innerHTML = '<span class="status-icon">⏳</span><span>等待支付...</span>';
+      document.getElementById('wechatQrCode').innerHTML = '<div class="qr-loading"><div class="spinner"></div><p>正在生成支付二维码...</p></div>';
+      document.getElementById('wechatStatus').innerHTML = '<span>等待支付...</span>';
 
       fetch(`${LICENSE_SERVER}/api/payment/wechat/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customer_email: email,
-          tier: selectedTier,
-          expires_in_days: 365,
-          max_concurrent: 20,
-          amount: 99.0
-        })
+        body: JSON.stringify({ customer_email: email, tier: selectedTier, expires_in_days: 365, max_concurrent: 20, amount: 99.0 })
       })
       .then(r => r.json())
       .then(result => {
         if (result.status === 'created') {
           currentOrderId = result.order_id;
-          document.getElementById('wechatQrCode').innerHTML = `
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(result.qr_code_url)}" 
-                 alt="微信支付二维码" 
-                 width="220" 
-                 height="220" />
-          `;
+          document.getElementById('wechatQrCode').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(result.qr_code_url)}" alt="微信支付二维码" width="220" height="220" />`;
           startPaymentPolling('wechat');
         } else {
           document.getElementById('wechatQrCode').innerHTML = '<div class="qr-error">生成二维码失败，请重试</div>';
@@ -424,9 +400,7 @@ import Footer from '../components/Footer.astro';
       });
     }
 
-    function refreshWechatQr() {
-      createWechatPayment();
-    }
+    function refreshWechatQr() { createWechatPayment(); }
 
     function createAlipayPayment() {
       const email = document.getElementById('customerEmail').value.trim();
@@ -434,36 +408,19 @@ import Footer from '../components/Footer.astro';
         document.getElementById('alipayQrCode').innerHTML = '<div class="qr-error">请先输入邮箱地址</div>';
         return;
       }
-      
-      document.getElementById('alipayQrCode').innerHTML = `
-        <div class="qr-loading">
-          <div class="spinner"></div>
-          <p>正在生成支付二维码...</p>
-        </div>
-      `;
-      document.getElementById('alipayStatus').innerHTML = '<span class="status-icon">⏳</span><span>等待支付...</span>';
+      document.getElementById('alipayQrCode').innerHTML = '<div class="qr-loading"><div class="spinner"></div><p>正在生成支付二维码...</p></div>';
+      document.getElementById('alipayStatus').innerHTML = '<span>等待支付...</span>';
 
       fetch(`${LICENSE_SERVER}/api/payment/alipay/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customer_email: email,
-          tier: selectedTier,
-          expires_in_days: 365,
-          max_concurrent: 20,
-          amount: 99.0
-        })
+        body: JSON.stringify({ customer_email: email, tier: selectedTier, expires_in_days: 365, max_concurrent: 20, amount: 99.0 })
       })
       .then(r => r.json())
       .then(result => {
         if (result.status === 'created') {
           currentOrderId = result.order_id;
-          document.getElementById('alipayQrCode').innerHTML = `
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(result.qr_code_url)}" 
-                 alt="支付宝支付二维码" 
-                 width="220" 
-                 height="220" />
-          `;
+          document.getElementById('alipayQrCode').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(result.qr_code_url)}" alt="支付宝支付二维码" width="220" height="220" />`;
           startPaymentPolling('alipay');
         } else {
           document.getElementById('alipayQrCode').innerHTML = '<div class="qr-error">生成二维码失败，请重试</div>';
@@ -475,56 +432,43 @@ import Footer from '../components/Footer.astro';
       });
     }
 
-    function refreshAlipayQr() {
-      createAlipayPayment();
-    }
+    function refreshAlipayQr() { createAlipayPayment(); }
 
     function startPaymentPolling(method) {
       stopPaymentPolling();
       const statusElement = document.getElementById(method === 'wechat' ? 'wechatStatus' : 'alipayStatus');
       const email = document.getElementById('customerEmail').value.trim();
-      
+
       paymentPollInterval = setInterval(() => {
         fetch(`${LICENSE_SERVER}/api/payment/${method}/query`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            order_id: currentOrderId,
-            customer_email: email
-          })
+          body: JSON.stringify({ order_id: currentOrderId, customer_email: email })
         })
         .then(r => r.json())
         .then(result => {
           if (result.status === 'completed') {
             stopPaymentPolling();
-            statusElement.innerHTML = '<span class="status-icon">✅</span><span>支付成功！</span>';
+            statusElement.innerHTML = '<span>✅ 支付成功！</span>';
             document.getElementById('checkoutStep1').style.display = 'none';
             document.getElementById('checkoutStep2').style.display = 'block';
             document.getElementById('licenseDisplay').textContent = result.license_key;
           } else if (result.status === 'not_found') {
             stopPaymentPolling();
-            statusElement.innerHTML = '<span class="status-icon">❌</span><span>订单不存在</span>';
+            statusElement.innerHTML = '<span>❌ 订单不存在</span>';
           }
         })
-        .catch(err => {
-          console.error('Payment polling error:', err);
-        });
+        .catch(err => { console.error('Payment polling error:', err); });
       }, 3000);
     }
 
     function stopPaymentPolling() {
-      if (paymentPollInterval) {
-        clearInterval(paymentPollInterval);
-        paymentPollInterval = null;
-      }
+      if (paymentPollInterval) { clearInterval(paymentPollInterval); paymentPollInterval = null; }
     }
 
     document.getElementById('customerEmail').addEventListener('input', function() {
-      if (selectedPayment === 'wechat') {
-        createWechatPayment();
-      } else if (selectedPayment === 'alipay') {
-        createAlipayPayment();
-      }
+      if (selectedPayment === 'wechat') createWechatPayment();
+      else if (selectedPayment === 'alipay') createAlipayPayment();
     });
 
     document.getElementById('checkoutOverlay').addEventListener('click', function(e) {
@@ -534,62 +478,105 @@ import Footer from '../components/Footer.astro';
 </Layout>
 
 <style>
-  .page-header {
+  /* Hero */
+  .hero {
+    padding: 10rem 0 4rem;
+    position: relative;
+  }
+
+  .hero-content {
     text-align: center;
-    padding: 8rem 0 3rem;
   }
 
-  .page-header h1 {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg-surface);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
     color: var(--primary);
+    margin-bottom: 1.5rem;
   }
 
-  .page-header p {
-    font-size: 1.1rem;
+  .badge-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--primary);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .hero-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    margin-bottom: 1.5rem;
+    line-height: 1.15;
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-description {
+    font-size: 1.125rem;
     color: var(--text-secondary);
+    line-height: 1.8;
+    max-width: 560px;
+    margin: 0 auto;
   }
 
-  .pricing-container {
+  /* Pricing */
+  .pricing-section {
+    padding: 4rem 0 6rem;
+  }
+
+  .pricing-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 2rem;
     max-width: 1200px;
-    margin: 0 auto 4rem;
   }
 
   .pricing-card {
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
     padding: 2.5rem;
     position: relative;
-    transition: all 0.3s ease;
-  }
-
-  .pricing-card:hover {
-    transform: translateY(-4px);
-    border-color: var(--primary-dim);
-    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
   }
 
   .pricing-card.popular {
     border-color: var(--primary);
-    box-shadow: 0 0 40px var(--primary-glow);
-    transform: scale(1.02);
+    box-shadow: 0 0 60px var(--primary-glow);
+    transform: scale(1.03);
+    background: rgba(134, 239, 172, 0.03);
+    backdrop-filter: blur(24px);
+    z-index: 1;
   }
 
   .popular-badge {
     position: absolute;
-    top: -12px;
+    top: -14px;
     left: 50%;
     transform: translateX(-50%);
     background: linear-gradient(135deg, var(--primary-dim), var(--primary));
-    color: white;
-    padding: 4px 16px;
+    color: var(--bg-deep);
+    padding: 0.35rem 1.25rem;
     border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: 0.8rem;
+    font-weight: 700;
+    white-space: nowrap;
   }
 
   .tier-label {
@@ -601,28 +588,31 @@ import Footer from '../components/Footer.astro';
     margin-bottom: 0.5rem;
   }
 
-  .pricing-header h2 {
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
+  .pricing-card h2 {
+    font-size: 1.75rem;
+    margin-bottom: 1.25rem;
   }
 
   .pricing-price {
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
   }
 
   .pricing-price .price {
     font-size: 3rem;
     font-weight: 700;
-    color: var(--primary);
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   .pricing-price .period {
     font-size: 1rem;
     color: var(--text-muted);
-    margin-left: 0.5rem;
+    margin-left: 0.25rem;
   }
 
-  .pricing-description {
+  .pricing-desc {
     color: var(--text-secondary);
     font-size: 0.9rem;
     margin-bottom: 1.5rem;
@@ -631,95 +621,110 @@ import Footer from '../components/Footer.astro';
   .pricing-features {
     list-style: none;
     padding: 0;
-    margin-bottom: 2rem;
+    margin: 0 0 2rem;
+    flex: 1;
   }
 
   .feature-item {
     display: flex;
     align-items: center;
-    padding: 0.75rem 0;
+    padding: 0.65rem 0;
     font-size: 0.9rem;
     color: var(--text-secondary);
+    gap: 0.75rem;
   }
 
   .feature-item.disabled {
-    opacity: 0.5;
+    opacity: 0.4;
     text-decoration: line-through;
   }
 
-  .check, .cross {
-    width: 18px;
-    height: 18px;
+  .check {
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 0.75rem;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 700;
-  }
-
-  .check {
-    background: rgba(34, 197, 94, 0.1);
-    color: #22c55e;
+    background: rgba(134, 239, 172, 0.12);
+    color: var(--primary);
+    flex-shrink: 0;
   }
 
   .cross {
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+    background: rgba(248, 113, 113, 0.1);
+    color: var(--danger);
+    flex-shrink: 0;
   }
 
-  .faq-container {
-    max-width: 800px;
+  .btn-outline {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    padding: 0.75rem 1.5rem;
+  }
+
+  .btn-outline:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  .btn-block {
+    width: 100%;
+  }
+
+  /* FAQ */
+  .faq-section {
+    padding: 6rem 0;
+  }
+
+  .section-title {
+    font-size: 2.5rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .faq-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    max-width: 900px;
     margin: 0 auto;
   }
 
-  .faq-container h3 {
-    text-align: center;
-    margin-bottom: 2rem;
-    color: var(--primary);
+  .faq-card {
+    padding: 1.5rem;
   }
 
-  .faq-item {
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 1.25rem 1.5rem;
-    margin-bottom: 1rem;
-  }
-
-  .faq-item h4 {
+  .faq-card h4 {
     color: var(--primary);
     margin-bottom: 0.5rem;
+    font-size: 1rem;
   }
 
-  .faq-item p {
+  .faq-card p {
     color: var(--text-secondary);
     font-size: 0.9rem;
+    line-height: 1.7;
   }
 
-  @media (max-width: 1024px) {
-    .pricing-container {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  @media (max-width: 768px) {
-    .pricing-container {
-      grid-template-columns: 1fr;
-    }
-
-    .pricing-card.popular {
-      transform: none;
-    }
-  }
-
-  /* 购买弹窗 */
+  /* Checkout Modal */
   .checkout-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(8px);
+    background: rgba(6, 6, 12, 0.8);
+    backdrop-filter: blur(12px);
     z-index: 200;
     display: flex;
     align-items: center;
@@ -730,39 +735,40 @@ import Footer from '../components/Footer.astro';
   .checkout-modal {
     background: var(--bg-surface);
     border: 1px solid var(--border);
-    border-radius: 16px;
+    border-radius: 20px;
     padding: 2.5rem;
     max-width: 480px;
     width: 100%;
     position: relative;
     max-height: 90vh;
     overflow-y: auto;
+    box-shadow: 0 0 80px rgba(134, 239, 172, 0.1);
   }
 
   .checkout-close {
     position: absolute;
     top: 1rem;
-    right: 1rem;
+    right: 1.25rem;
     background: none;
     border: none;
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     color: var(--text-muted);
     cursor: pointer;
     line-height: 1;
+    transition: color 0.2s;
   }
 
   .checkout-close:hover { color: var(--text-primary); }
 
   .checkout-modal h3 {
     font-size: 1.5rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
     color: var(--primary);
   }
 
   .checkout-price {
     font-size: 2rem;
     font-weight: 700;
-    color: var(--text-primary);
     margin-bottom: 1.5rem;
   }
 
@@ -777,8 +783,8 @@ import Footer from '../components/Footer.astro';
     width: 100%;
     padding: 0.75rem 1rem;
     border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--bg-base);
+    border-radius: 10px;
+    background: var(--bg-deep);
     color: var(--text-primary);
     font-size: 1rem;
     margin-bottom: 1rem;
@@ -798,10 +804,10 @@ import Footer from '../components/Footer.astro';
 
   .payment-method-btn {
     flex: 1;
-    padding: 0.75rem;
+    padding: 0.75rem 0.5rem;
     border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--bg-base);
+    border-radius: 10px;
+    background: var(--bg-deep);
     color: var(--text-secondary);
     cursor: pointer;
     font-size: 0.85rem;
@@ -811,80 +817,19 @@ import Footer from '../components/Footer.astro';
   .payment-method-btn.active {
     border-color: var(--primary);
     color: var(--primary);
-    background: var(--primary-bg, rgba(79, 209, 149, 0.1));
+    background: rgba(134, 239, 172, 0.08);
   }
-
-  .method-icon { margin-right: 0.25rem; }
 
   .payment-section { margin-top: 0.5rem; }
 
-  .wechat-qr-placeholder {
-    text-align: center;
-    padding: 1.5rem;
-  }
+  .qr-code-container { text-align: center; }
 
   .qr-code-frame {
     display: inline-block;
     padding: 12px;
     background: white;
     border-radius: 12px;
-    margin-bottom: 1rem;
-  }
-
-  .wechat-note {
-    font-size: 1rem;
-    color: var(--text-primary);
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-  }
-
-  .wechat-instruction {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    margin-bottom: 0.5rem;
-  }
-
-  .wechat-manual {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    font-style: italic;
-  }
-
-  .success-icon {
-    font-size: 3rem;
-    text-align: center;
-    margin-bottom: 1rem;
-  }
-
-  .success-text {
-    text-align: center;
-    color: var(--text-secondary);
-    margin-bottom: 1rem;
-  }
-
-  .license-display {
-    background: var(--bg-base);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 1rem;
-    text-align: center;
-    font-family: monospace;
-    font-size: 1.2rem;
-    color: var(--primary);
-    margin-bottom: 0.5rem;
-    word-break: break-all;
-  }
-
-  .success-note {
-    text-align: center;
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    margin-bottom: 1rem;
-  }
-
-  /* 支付二维码样式 */
-  .qr-code-container {
-    text-align: center;
+    margin-bottom: 0.75rem;
   }
 
   .qr-loading {
@@ -893,36 +838,29 @@ import Footer from '../components/Footer.astro';
     align-items: center;
     justify-content: center;
     padding: 2rem;
+    color: var(--text-muted);
   }
 
   .spinner {
     width: 40px;
     height: 40px;
-    border: 4px solid var(--border);
+    border: 3px solid var(--border);
     border-top-color: var(--primary);
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-bottom: 1rem;
   }
 
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
   .qr-error {
-    color: #ef4444;
+    color: var(--danger);
     text-align: center;
     padding: 2rem;
   }
 
-  .qr-refresh {
-    margin-top: 0.5rem;
-  }
-
-  .btn-sm {
-    padding: 0.5rem 1rem;
-    font-size: 0.8rem;
-  }
+  .qr-refresh { margin-top: 0.5rem; }
+  .btn-sm { padding: 0.5rem 1rem; font-size: 0.8rem; }
 
   .payment-note {
     font-size: 1rem;
@@ -938,26 +876,69 @@ import Footer from '../components/Footer.astro';
     justify-content: center;
     gap: 0.5rem;
     padding: 0.75rem;
-    background: rgba(79, 209, 149, 0.1);
-    border-radius: 8px;
+    background: rgba(134, 239, 172, 0.08);
+    border-radius: 10px;
     margin-bottom: 0.5rem;
     font-size: 0.9rem;
     color: var(--text-secondary);
-  }
-
-  .payment-status.error {
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
-  }
-
-  .status-icon {
-    font-size: 1rem;
   }
 
   .payment-tip {
     font-size: 0.8rem;
     color: var(--text-muted);
     text-align: center;
-    font-style: italic;
+  }
+
+  .success-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(134, 239, 172, 0.15);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 auto 1rem;
+  }
+
+  .success-text {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+  }
+
+  .license-display {
+    background: var(--bg-deep);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+    font-family: 'Fira Code', monospace;
+    font-size: 1.1rem;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+    word-break: break-all;
+  }
+
+  .success-note {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 1024px) {
+    .pricing-grid { grid-template-columns: repeat(2, 1fr); }
+    .pricing-card.popular { transform: none; }
+  }
+
+  @media (max-width: 768px) {
+    .hero-title { font-size: 2.25rem; }
+    .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
+    .pricing-card.popular { transform: none; }
+    .faq-grid { grid-template-columns: 1fr; }
+    .checkout-methods { flex-direction: column; }
   }
 </style>

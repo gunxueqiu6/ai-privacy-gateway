@@ -10,73 +10,103 @@ import Footer from '../components/Footer.astro';
   canonicalURL="https://privacygw.pages.dev/download">
   <Nav />
 
-  <section class="download-section">
-    <div class="container download-content">
-      <h1 class="download-title">下载 Privacy Gateway</h1>
-      <p class="download-description">选择适合你的版本开始保护 AI 数据隐私</p>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container hero-content">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        <span>v1.0.1 最新版本</span>
+      </div>
+      <h1 class="hero-title">
+        下载 <span class="gradient-text">Privacy Gateway</span>
+      </h1>
+      <p class="hero-description">
+        选择适合你平台的版本。Docker 一键部署，Windows/macOS 便携版双击即用。<br/>
+        全部开源免费，MIT 许可证。
+      </p>
+    </div>
+  </section>
 
+  <!-- Download Cards -->
+  <section class="download-section">
+    <div class="container">
       <div class="download-grid">
-        <!-- Docker -->
         <div class="download-card glass">
-          <div class="download-icon">🐳</div>
+          <div class="download-icon-wrap">
+            <span class="download-icon">&#9635;</span>
+          </div>
           <h3>Docker</h3>
-          <p class="download-desc">一键部署，适合服务器环境</p>
+          <p>一键部署，适合服务器环境</p>
           <div class="code-block">
             <pre><code>docker-compose up -d</code></pre>
           </div>
-          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway#docker" class="btn btn-outline">查看文档</a>
+          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway#docker" class="btn btn-outline btn-block">查看文档</a>
         </div>
 
-        <!-- Windows -->
         <div class="download-card glass">
-          <div class="download-icon">🪟</div>
+          <div class="download-icon-wrap">
+            <span class="download-icon">⊞</span>
+          </div>
           <h3>Windows</h3>
-          <p class="download-desc">便携版，双击运行</p>
-          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/releases/download/v1.0.1/PrivacyGateway.exe" class="btn btn-primary">
+          <p>便携版 .exe，双击运行</p>
+          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/releases/download/v1.0.1/PrivacyGateway.exe" class="btn btn-primary btn-block">
             下载 v1.0.1
           </a>
         </div>
 
-        <!-- macOS -->
         <div class="download-card glass">
-          <div class="download-icon">🍎</div>
+          <div class="download-icon-wrap">
+            <span class="download-icon">&#8984;</span>
+          </div>
           <h3>macOS</h3>
-          <p class="download-desc">便携版，直接运行</p>
-          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/releases/download/v1.0.1/PrivacyGateway-macos" class="btn btn-primary">
+          <p>便携版，直接运行</p>
+          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/releases/download/v1.0.1/PrivacyGateway-macos" class="btn btn-primary btn-block">
             下载 v1.0.1
           </a>
         </div>
 
-        <!-- Source Code -->
         <div class="download-card glass">
-          <div class="download-icon">📦</div>
+          <div class="download-icon-wrap">
+            <span class="download-icon">&lt;/&gt;</span>
+          </div>
           <h3>源代码</h3>
-          <p class="download-desc">开源免费，欢迎贡献</p>
+          <p>开源免费，欢迎贡献</p>
           <div class="code-block">
             <pre><code>git clone https://github.com/gunxueqiu6/ai-privacy-gateway</code></pre>
           </div>
-          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-outline">GitHub</a>
+          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-outline btn-block">GitHub</a>
         </div>
       </div>
 
+      <!-- Quick Start -->
       <div class="quick-start glass">
-        <h3>快速开始</h3>
-        <div class="quick-start-grid">
-          <div class="quick-step">
+        <h3>30 秒快速开始</h3>
+        <div class="steps">
+          <div class="step">
             <span class="step-num">1</span>
             <div>
               <h4>下载并启动</h4>
               <p>运行可执行文件或 Docker 容器</p>
             </div>
           </div>
-          <div class="quick-step">
+          <div class="step-connector">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </div>
+          <div class="step">
             <span class="step-num">2</span>
             <div>
               <h4>修改 API 地址</h4>
-              <p>将 AI 客户端的 API 地址改为 <code>http://localhost:9999/v1</code></p>
+              <p>改为 <code>http://localhost:9999/v1</code></p>
             </div>
           </div>
-          <div class="quick-step">
+          <div class="step-connector">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </div>
+          <div class="step">
             <span class="step-num">3</span>
             <div>
               <h4>完成</h4>
@@ -86,17 +116,18 @@ import Footer from '../components/Footer.astro';
         </div>
       </div>
 
-      <div class="release-notes">
+      <!-- Release Notes -->
+      <div class="release-notes glass">
         <h3>v1.0.1 更新日志</h3>
         <ul>
-          <li>✅ 修复：Docker 镜像构建问题（多阶段构建 Python 依赖）</li>
-          <li>✅ 新增：Helm ServiceAccount 模板</li>
-          <li>✅ 新增：网站网站地图 (sitemap.xml)</li>
-          <li>✅ 新增：手机号、身份证、邮箱、银行卡自动脱敏</li>
-          <li>✅ 新增：流式响应完美支持（SSE）</li>
-          <li>✅ 新增：本地 SQLite 存储映射关系</li>
-          <li>✅ 新增：自定义敏感词管理</li>
-          <li>✅ 新增：可视化管理后台</li>
+          <li>修复 Docker 镜像构建问题</li>
+          <li>新增 Helm ServiceAccount 模板</li>
+          <li>新增网站地图 sitemap.xml</li>
+          <li>手机号、身份证、邮箱、银行卡自动脱敏</li>
+          <li>流式响应完美支持 (SSE)</li>
+          <li>本地 SQLite 存储映射关系</li>
+          <li>自定义敏感词管理</li>
+          <li>可视化管理后台</li>
         </ul>
       </div>
     </div>
@@ -106,157 +137,95 @@ import Footer from '../components/Footer.astro';
 </Layout>
 
 <style>
-  .download-section {
-    padding: 8rem 0 6rem;
+  .hero {
+    padding: 10rem 0 4rem;
+    position: relative;
   }
+  .hero-content { text-align: center; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: var(--bg-surface); padding: 0.5rem 1rem; border-radius: 20px;
+    font-size: 0.875rem; font-weight: 500; color: var(--primary); margin-bottom: 1.5rem;
+  }
+  .badge-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .hero-title { font-size: 3.5rem; font-weight: 700; letter-spacing: -0.04em; margin-bottom: 1.5rem; line-height: 1.15; }
+  .gradient-text {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .hero-description { font-size: 1.125rem; color: var(--text-secondary); line-height: 1.8; max-width: 560px; margin: 0 auto; }
 
-  .download-content {
-    max-width: 900px;
-  }
-
-  .download-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    text-align: center;
-    margin-bottom: 1rem;
-  }
-
-  .download-description {
-    text-align: center;
-    color: var(--text-secondary);
-    margin-bottom: 3rem;
-  }
+  .download-section { padding: 4rem 0 6rem; max-width: 960px; margin: 0 auto; }
 
   .download-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;
     margin-bottom: 3rem;
   }
 
-  .download-card {
-    padding: 2rem;
+  .download-card { padding: 2rem; text-align: center; }
+  .download-icon-wrap {
+    width: 56px; height: 56px; border-radius: 14px;
+    background: rgba(134, 239, 172, 0.08);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem;
   }
-
-  .download-icon {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-  }
-
-  .download-card h3 {
-    margin-bottom: 0.5rem;
-  }
-
-  .download-desc {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    margin-bottom: 1rem;
-  }
+  .download-icon { font-size: 1.5rem; color: var(--primary); font-weight: 700; }
+  .download-card h3 { margin-bottom: 0.5rem; }
+  .download-card p { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem; }
 
   .code-block {
-    background: rgba(0,0,0,0.3);
-    border-radius: 8px;
-    padding: 0.75rem;
-    margin-bottom: 1rem;
-    overflow-x: auto;
+    background: var(--bg-deep); border: 1px solid var(--border);
+    border-radius: 8px; padding: 0.75rem; margin-bottom: 1rem; overflow-x: auto; text-align: left;
   }
+  .code-block pre { margin: 0; font-size: 0.85rem; }
+  .code-block code { color: var(--primary); font-family: 'Fira Code', monospace; }
 
-  .code-block pre {
-    margin: 0;
-    font-size: 0.875rem;
-    color: var(--primary);
+  .btn-outline {
+    background: transparent; color: var(--text-primary);
+    border: 1px solid var(--border); padding: 0.75rem 1.5rem;
   }
+  .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+  .btn-block { width: 100%; }
 
-  .quick-start {
-    padding: 2rem;
-    margin-bottom: 3rem;
+  .quick-start { padding: 2.5rem; margin-bottom: 3rem; text-align: center; }
+  .quick-start h3 { margin-bottom: 2rem; }
+  .steps {
+    display: flex; align-items: center; justify-content: center;
+    gap: 1.5rem; flex-wrap: wrap;
   }
-
-  .quick-start h3 {
-    margin-bottom: 1.5rem;
-    text-align: center;
-  }
-
-  .quick-start-grid {
-    display: flex;
-    gap: 2rem;
-    flex-wrap: wrap;
-  }
-
-  .quick-step {
-    flex: 1;
-    min-width: 200px;
-    display: flex;
-    gap: 1rem;
-  }
-
+  .step { flex: 1; min-width: 200px; display: flex; gap: 1rem; text-align: left; }
   .step-num {
-    width: 2.5rem;
-    height: 2.5rem;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dim));
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    color: var(--bg-deep);
-    flex-shrink: 0;
+    width: 2.75rem; height: 2.75rem;
+    background: linear-gradient(135deg, var(--primary-dim), var(--primary));
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: var(--bg-deep); flex-shrink: 0; font-size: 1.1rem;
   }
-
-  .quick-step h4 {
-    margin-bottom: 0.25rem;
+  .step h4 { margin-bottom: 0.25rem; }
+  .step p { color: var(--text-secondary); font-size: 0.9rem; }
+  .step code {
+    background: var(--bg-deep); padding: 0.2rem 0.5rem; border-radius: 4px;
+    font-size: 0.8rem; color: var(--primary); font-family: 'Fira Code', monospace;
   }
-
-  .quick-step p {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
+  .step-connector {
+    color: var(--primary); width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   }
+  .step-connector svg { width: 20px; height: 20px; }
 
-  .quick-step code {
-    background: var(--bg-surface);
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    color: var(--primary);
-  }
-
-  .release-notes {
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 2rem;
-  }
-
-  .release-notes h3 {
-    margin-bottom: 1rem;
-    color: var(--primary);
-  }
-
+  .release-notes { padding: 2rem; }
+  .release-notes h3 { margin-bottom: 1rem; color: var(--primary); }
   .release-notes ul {
-    list-style: none;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
+    list-style: none; padding: 0;
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;
   }
-
-  .release-notes li {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    padding: 0.25rem 0;
-  }
+  .release-notes li { color: var(--text-secondary); font-size: 0.9rem; padding: 0.4rem 0; }
 
   @media (max-width: 768px) {
-    .download-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .quick-start-grid {
-      flex-direction: column;
-    }
-
-    .release-notes ul {
-      grid-template-columns: 1fr;
-    }
+    .hero-title { font-size: 2.25rem; }
+    .download-grid { grid-template-columns: 1fr; }
+    .steps { flex-direction: column; }
+    .step-connector { transform: rotate(90deg); }
+    .release-notes ul { grid-template-columns: 1fr; }
   }
 </style>
