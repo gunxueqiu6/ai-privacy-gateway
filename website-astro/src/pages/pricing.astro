@@ -1,29 +1,14 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
 ---
 
 <Layout
   title="定价 — AI Privacy Gateway | Lite 免费 · Pro ¥99/月 · Enterprise 定制"
   description="AI Privacy Gateway 提供三个版本：Lite 个人免费版（开源）、Pro 团队版 ¥99/月（20 人）、Enterprise 企业版（定制年费）。选择适合你的版本。"
   canonicalURL="https://privacygw.pages.dev/pricing">
-  <div class="gradient-orb gradient-orb-1"></div>
-  <div class="gradient-orb gradient-orb-2"></div>
-
-  <!-- 导航栏 -->
-  <nav class="nav glass">
-    <div class="container nav-container">
-      <div class="nav-brand">
-        <span class="brand-icon">🔒</span>
-        <span class="brand-text">Privacy Gateway</span>
-      </div>
-      <div class="nav-links">
-        <a href="/#features" class="nav-link">功能</a>
-        <a href="/#how-it-works" class="nav-link">原理</a>
-        <a href="/pricing" class="nav-link">定价</a>
-        <a href="/download" class="btn btn-secondary">下载</a>
-      </div>
-    </div>
-  </nav>
+  <Nav />
 
   <div class="page-header">
     <h1>选择你的版本</h1>
@@ -174,22 +159,22 @@ import Layout from '../layouts/Layout.astro';
   <section>
     <div class="faq-container">
       <h3>常见问题</h3>
-      
+
       <div class="faq-item">
         <h4>购买后如何获取 License Key？</h4>
         <p>购买完成后，License Key 会发送到您的邮箱。在管理后台输入 Key 即可激活 Pro 版功能。</p>
       </div>
-      
+
       <div class="faq-item">
         <h4>支持退款吗？</h4>
         <p>支持 7 天无理由退款。如果您对产品不满意，请发送邮件至 support@privacygw.com。</p>
       </div>
-      
+
       <div class="faq-item">
         <h4>License 可以在多台机器使用吗？</h4>
         <p>Pro 版 License 绑定硬件指纹，支持最多 3 台设备轮换。如需更多设备，请联系我们升级。</p>
       </div>
-      
+
       <div class="faq-item">
         <h4>如何升级到 Enterprise 版？</h4>
         <p>请发送邮件至 contact@privacygw.com，我们会根据您的需求提供定制方案。</p>
@@ -249,28 +234,11 @@ import Layout from '../layouts/Layout.astro';
     </div>
   </div>
 
-  <!-- 页脚 -->
-  <footer class="footer">
-    <div class="container footer-content">
-      <div class="footer-brand">
-        <span class="brand-icon">🔒</span>
-        <span class="brand-text">Privacy Gateway</span>
-      </div>
-      <div class="footer-links">
-        <a href="/download">下载</a>
-        <a href="/pricing">定价</a>
-        <a href="https://github.com/gunxueqiu6/ai-privacy-gateway">GitHub</a>
-        <a href="mailto:contact@privacygw.com">联系我们</a>
-      </div>
-      <p class="footer-copyright">
-        © 2026 AI Privacy Gateway. MIT License.
-      </p>
-    </div>
-  </footer>
+  <Footer />
 
   <script src="https://www.paypal.com/sdk/js?client-id=AXO6jh-66p-C8s_kaBXq9JVQN4MVpHj5uZztJv-8k6ut5Z-B9c97BYBTtPxC90Uij1DT7cl0ytsPiukq&currency=CNY&intent=capture" async></script>
-  <script>
-    const LICENSE_SERVER = 'https://149.104.12.203:8443';
+  <script is:inline>
+    const LICENSE_SERVER = 'https://149.104.12.203';
     let selectedTier = 'pro';
     let selectedPayment = 'paypal';
 
@@ -329,7 +297,6 @@ import Layout from '../layouts/Layout.astro';
             alert('请先输入邮箱地址');
             return;
           }
-          // 调用 License Server 完成支付 + 生成 License
           fetch(`${LICENSE_SERVER}/api/payment/complete`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -532,96 +499,6 @@ import Layout from '../layouts/Layout.astro';
   .faq-item p {
     color: var(--text-secondary);
     font-size: 0.9rem;
-  }
-
-  .nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
-    padding: 1rem 0;
-  }
-
-  .nav-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .nav-brand {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .brand-icon {
-    font-size: 1.5rem;
-  }
-
-  .brand-text {
-    font-weight: 600;
-    font-size: 1.1rem;
-    letter-spacing: -0.02em;
-  }
-
-  .nav-links {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-  }
-
-  .nav-link {
-    color: var(--text-secondary);
-    font-weight: 500;
-    transition: color 0.3s ease;
-  }
-
-  .nav-link:hover {
-    color: var(--primary);
-  }
-
-  .btn-outline {
-    background: transparent;
-    color: var(--text-primary);
-    border: 1px solid var(--border);
-    padding: 0.5rem 1rem;
-  }
-
-  .btn-outline:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-  }
-
-  .footer {
-    padding: 4rem 0;
-    border-top: 1px solid var(--border);
-  }
-
-  .footer-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
-  }
-
-  .footer-links {
-    display: flex;
-    gap: 2rem;
-  }
-
-  .footer-links a {
-    color: var(--text-muted);
-    transition: color 0.3s ease;
-  }
-
-  .footer-links a:hover {
-    color: var(--primary);
-  }
-
-  .footer-copyright {
-    color: var(--text-muted);
-    font-size: 0.875rem;
   }
 
   @media (max-width: 1024px) {

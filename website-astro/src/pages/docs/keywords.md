@@ -1,6 +1,8 @@
 ---
 layout: ../../layouts/DocsLayout.astro
 title: 自定义敏感词
+description: 自定义敏感词配置 — 添加团队专属敏感词、正则模式、批量导入、管理后台操作指南。
+canonicalURL: https://privacygw.pages.dev/docs/keywords
 ---
 
 # 自定义敏感词

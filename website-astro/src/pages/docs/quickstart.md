@@ -1,6 +1,8 @@
 ---
 layout: ../../layouts/DocsLayout.astro
 title: 快速开始
+description: 5 分钟部署 AI Privacy Gateway — Docker、Windows、macOS 一键启动，保护发往 AI 的敏感数据。
+canonicalURL: https://privacygw.pages.dev/docs/quickstart
 ---
 
 # 快速开始
