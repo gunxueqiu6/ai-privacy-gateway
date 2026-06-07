@@ -234,3 +234,52 @@ def get_audit_logger() -> AuditLogger:
     if audit_logger is None:
         audit_logger = AuditLogger()
     return audit_logger
+
+
+# 新增的统计查询方法
+def get_today_mask_count() -> int:
+    """获取今日脱敏操作总数量"""
+    try:
+        from datetime import datetime, date
+        logger = get_audit_logger()
+        logs = logger.get_logs(limit=10000)
+        today = date.today().isoformat()
+        count = 0
+        for log in logs:
+            if log.get("timestamp", "").startswith(today) and log.get("action") == "mask":
+                count += log.get("count", 0)
+        return count
+    except Exception:
+        return 0
+
+
+def get_today_entity_count() -> int:
+    """获取今日实体处理总数量"""
+    try:
+        from datetime import datetime, date
+        logger = get_audit_logger()
+        logs = logger.get_logs(limit=10000)
+        today = date.today().isoformat()
+        count = 0
+        for log in logs:
+            if log.get("timestamp", "").startswith(today):
+                count += log.get("count", 0)
+        return count
+    except Exception:
+        return 0
+
+
+def get_today_error_count() -> int:
+    """获取今日错误数量"""
+    try:
+        from datetime import datetime, date
+        logger = get_audit_logger()
+        logs = logger.get_logs(limit=10000)
+        today = date.today().isoformat()
+        count = 0
+        for log in logs:
+            if log.get("timestamp", "").startswith(today) and log.get("status") == "error":
+                count += 1
+        return count
+    except Exception:
+        return 0
