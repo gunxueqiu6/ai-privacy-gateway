@@ -1,10 +1,25 @@
 ---
-const { frontmatter, title: directTitle } = Astro.props;
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  canonicalURL?: string;
+  frontmatter?: Record<string, any>;
+}
+
+const {
+  title,
+  description = 'AI Privacy Gateway 技术文档 — 快速开始、部署指南、配置参考、API 文档、架构说明',
+  canonicalURL = 'https://privacygw.pages.dev/docs',
+  frontmatter = {},
+} = Astro.props;
+
 const fm = frontmatter || {};
-const title = fm.title || directTitle || '文档中心';
-const description = fm.description || Astro.props.description || 'AI Privacy Gateway 技术文档 — 快速开始、部署指南、配置参考、API 文档、架构说明';
-const canonicalURL = fm.canonicalURL || Astro.props.canonicalURL || 'https://privacygw.pages.dev/docs';
-const pageTitle = `${title} | AI Privacy Gateway 文档`;
+const pageTitle = `${fm.title || title} | AI Privacy Gateway 文档`;
+const pageDescription = fm.description || description;
+const pageUrl = fm.canonicalURL || canonicalURL;
 ---
 
 <!doctype html>
@@ -13,180 +28,243 @@ const pageTitle = `${title} | AI Privacy Gateway 文档`;
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{pageTitle}</title>
-  <meta name="description" content={description}>
+  <meta name="description" content={pageDescription}>
   <meta name="keywords" content="AI隐私,数据脱敏,隐私网关,LLM安全,技术文档,部署指南,API参考,架构说明">
   <meta name="robots" content="index, follow">
-  <link rel="canonical" href={canonicalURL}>
+  <link rel="canonical" href={pageUrl}>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-  <!-- Open Graph -->
   <meta property="og:title" content={pageTitle}>
-  <meta property="og:description" content={description}>
+  <meta property="og:description" content={pageDescription}>
   <meta property="og:type" content="article">
-  <meta property="og:url" content={canonicalURL}>
+  <meta property="og:url" content={pageUrl}>
   <meta property="og:image" content="https://privacygw.pages.dev/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="zh_CN">
   <meta property="og:site_name" content="AI Privacy Gateway">
 
-  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content={pageTitle}>
-  <meta name="twitter:description" content={description}>
+  <meta name="twitter:description" content={pageDescription}>
   <meta name="twitter:image" content="https://privacygw.pages.dev/og-image.png">
 
-  <!-- JSON-LD Structured Data -->
   <script type="application/ld+json" set:html={JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'TechArticle',
     headline: pageTitle,
-    description: description,
-    author: {
-      '@type': 'Organization',
-      name: 'AI Privacy Gateway'
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: 'AI Privacy Gateway',
-      url: 'https://privacygw.pages.dev'
-    }
+    description: pageDescription,
+    author: { '@type': 'Organization', name: 'AI Privacy Gateway' },
+    publisher: { '@type': 'Organization', name: 'AI Privacy Gateway', url: 'https://privacygw.pages.dev' }
   })} />
   <style is:global>
-    :root {
-      --ink: #0a0a0f;
-      --paper: #111118;
-      --surface: #1a1a26;
-      --border: rgba(255,255,255,0.06);
-      --text: #e8e8ed;
-      --text-dim: #8b8b9e;
-      --text-quiet: #5a5a6e;
-      --green: #3cfc8c;
-      --green-bg: rgba(60,252,140,0.08);
-      --amber: #f0a030;
-      --purple: #a78bfa;
-      --radius: 4px;
-      --radius-lg: 8px;
-      --max-width: 1120px;
-    }
-
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-      background: var(--ink);
-      color: var(--text);
-      line-height: 1.7;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    a { color: var(--green); text-decoration: none; transition: color 0.15s; }
-    a:hover { color: #fff; text-decoration: none; }
-
-    .btn-ghost {
-      display: inline-block; padding: 8px 14px; font-size: 0.9rem;
-      font-weight: 500; color: var(--text-dim); border: none;
-      background: transparent; cursor: pointer; transition: color 0.15s;
-    }
-    .btn-ghost:hover { color: #fff; }
-
-    nav {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 28px; max-width: var(--max-width); margin: 0 auto;
-      border-bottom: 1px solid var(--border);
-    }
-    nav .logo {
-      font-weight: 700; font-size: 1.05rem; color: #fff;
-      display: flex; align-items: center; gap: 10px;
-      letter-spacing: -0.02em;
-    }
-    nav .logo .mark {
-      width: 26px; height: 26px; background: var(--green);
-      border-radius: var(--radius); display: flex; align-items: center;
-      justify-content: center; font-weight: 900; font-size: 0.68rem;
-      color: #000;
-    }
-    nav .links { display: flex; gap: 2px; align-items: center; }
-
-    .docs-layout {
-      display: flex; max-width: var(--max-width); margin: 0 auto;
-      gap: 48px; padding: 0 28px 80px;
-    }
-    .docs-sidebar { width: 200px; flex-shrink: 0; }
-    .docs-sidebar nav {
-      display: block; position: sticky; top: 24px; padding: 0;
-      border: none;
-    }
-    .docs-sidebar h4 {
-      color: var(--text-quiet); font-size: 0.72rem;
-      text-transform: uppercase; letter-spacing: 0.12em;
-      margin-bottom: 14px; font-weight: 600;
-    }
-    .docs-sidebar a {
-      display: block; padding: 7px 0; color: var(--text-dim);
-      font-size: 0.92rem;
-    }
-    .docs-sidebar a:hover { color: #fff; }
-
-    .docs-content { flex: 1; min-width: 0; }
-    .docs-content h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 28px; }
-    .docs-content h2 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; margin: 36px 0 14px; color: #fff; }
-    .docs-content h3 { color: var(--text); font-weight: 600; margin: 28px 0 10px; font-size: 1.05rem; }
-    .docs-content p { color: var(--text-dim); margin-bottom: 16px; }
-    .docs-content ul, .docs-content ol { color: var(--text-dim); margin-bottom: 16px; padding-left: 22px; }
-    .docs-content li { margin-bottom: 6px; }
-    .docs-content pre {
-      background: rgba(0,0,0,0.4); border: 1px solid var(--border);
-      border-radius: var(--radius-lg); padding: 20px 24px;
-      overflow-x: auto; margin-bottom: 18px;
-    }
-    .docs-content code {
-      font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
-      font-size: 0.88rem;
-    }
-    .docs-content :not(pre) > code {
-      background: var(--surface); padding: 2px 7px; border-radius: 3px; font-size: 0.85rem;
-    }
-    .docs-content blockquote {
-      border-left: 2px solid var(--green); padding-left: 14px;
-      color: var(--text-dim); margin-bottom: 16px;
-    }
-    .docs-content table { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
-    .docs-content th, .docs-content td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); }
-    .docs-content th { color: var(--text); font-weight: 600; font-size: 0.85rem; }
-    .docs-content td { color: var(--text-dim); font-size: 0.9rem; }
-
-    footer {
-      text-align: center; padding: 40px 28px; color: var(--text-dim);
-      font-size: 0.85rem; border-top: 1px solid var(--border);
-    }
-    footer a { color: var(--text-dim); }
-
-    @media (max-width: 768px) {
-      .docs-layout { flex-direction: column; }
-      .docs-sidebar { width: 100%; }
-    }
+    @import '../styles/global.css';
   </style>
 </head>
 <body>
-  <nav>
-    <a href="/" class="logo">
-      <span class="mark">PG</span> Privacy Gateway
-    </a>
-    <div class="links">
-      <a href="/docs" class="btn-ghost">文档</a>
-      <a href="/download" class="btn-ghost">下载</a>
-      <a href="/#pricing" class="btn-ghost">价格</a>
-      <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn-ghost" target="_blank">GitHub</a>
-    </div>
-  </nav>
+  <div class="gradient-orb gradient-orb-1"></div>
+  <div class="gradient-orb gradient-orb-2"></div>
+  <Nav />
 
-  <main>
-    <slot />
+  <main class="docs-layout">
+    <aside class="docs-sidebar glass">
+      <nav>
+        <h4>文档导航</h4>
+        <a href="/docs/quickstart">快速开始</a>
+        <a href="/docs/deploy">部署指南</a>
+        <a href="/docs/config">配置参考</a>
+        <a href="/docs/keywords">自定义敏感词</a>
+        <a href="/docs/architecture">架构说明</a>
+        <a href="/docs/api">API 参考</a>
+      </nav>
+    </aside>
+
+    <article class="docs-content">
+      <slot />
+    </article>
   </main>
 
-  <footer>
-    <p>AI Privacy Gateway &copy; 2026</p>
-  </footer>
+  <Footer />
 </body>
 </html>
+
+<style>
+  .docs-layout {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    gap: 3rem;
+    padding: 8rem 2rem 4rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .docs-sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    padding: 1.5rem;
+    position: sticky;
+    top: 6rem;
+    align-self: flex-start;
+    max-height: calc(100vh - 8rem);
+    overflow-y: auto;
+  }
+
+  .docs-sidebar h4 {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+
+  .docs-sidebar a {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .docs-sidebar a:hover {
+    color: var(--primary);
+    background: rgba(134, 239, 172, 0.05);
+  }
+
+  .docs-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .docs-content :global(h1) {
+    font-size: 2.25rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .docs-content :global(h2) {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 2.5rem 0 1rem;
+    color: var(--text-primary);
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .docs-content :global(h3) {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin: 1.5rem 0 0.75rem;
+    font-size: 1.1rem;
+  }
+
+  .docs-content :global(p) {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    line-height: 1.8;
+  }
+
+  .docs-content :global(ul), .docs-content :global(ol) {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+  }
+
+  .docs-content :global(li) {
+    margin-bottom: 0.5rem;
+  }
+
+  .docs-content :global(pre) {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    margin-bottom: 1.25rem;
+  }
+
+  .docs-content :global(code) {
+    font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
+    font-size: 0.88rem;
+  }
+
+  .docs-content :global(:not(pre) > code) {
+    background: var(--bg-surface);
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: var(--primary);
+  }
+
+  .docs-content :global(blockquote) {
+    border-left: 2px solid var(--primary);
+    padding-left: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    font-style: italic;
+  }
+
+  .docs-content :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.25rem;
+  }
+
+  .docs-content :global(th), .docs-content :global(td) {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .docs-content :global(th) {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.85rem;
+    background: var(--bg-surface);
+  }
+
+  .docs-content :global(td) {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .docs-content :global(tr:hover td) {
+    background: rgba(134, 239, 172, 0.03);
+  }
+
+  @media (max-width: 768px) {
+    .docs-layout {
+      flex-direction: column;
+      padding: 6rem 1rem 3rem;
+    }
+
+    .docs-sidebar {
+      width: 100%;
+      position: static;
+      max-height: none;
+    }
+
+    .docs-sidebar nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .docs-sidebar h4 {
+      width: 100%;
+    }
+
+    .docs-sidebar a {
+      padding: 0.35rem 0.75rem;
+      font-size: 0.85rem;
+    }
+  }
+</style>
