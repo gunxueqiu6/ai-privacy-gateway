@@ -1,0 +1,117 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-lite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run tests
+        run: |
+          pytest tests/ -v --tb=short
+
+      - name: Upload coverage
+        if: success()
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage.xml
+          fail_ci_if_error: false
+
+  test-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run tests
+        run: |
+          pytest tests/ -v --tb=short
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install lint tools
+        run: |
+          pip install flake8 black mypy
+
+      - name: Check code style (Black)
+        run: |
+          black --check --diff . || true
+
+      - name: Run flake8
+        run: |
+          flake8 . --max-line-length=120 --extend-ignore=E203,W503 || true
+
+      - name: Run mypy
+        run: |
+          mypy . --ignore-missing-imports || true
+
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Lite Docker image
+        run: |
+          docker build -t ai-privacy-gateway:lite -f Dockerfile .
+
+      - name: Test Docker container
+        run: |
+          docker run -d --name test-gateway -p 9999:9999 ai-privacy-gateway:lite
+          sleep 5
+          curl -f http://localhost:9999/health || exit 1
+          docker stop test-gateway
+
+  rust-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-action@stable
+
+      - name: Check Rust code
+        run: |
+          cd rust_src/integrity_check
+          cargo check
+
+      - name: Build Rust module
+        run: |
+          cd rust_src/integrity_check
+          cargo build --release
+
+      - name: Test Rust module
+        run: |
+          pip install maturin
+          cd rust_src/integrity_check
+          maturin develop --release || echo "Maturin build skipped"

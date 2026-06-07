@@ -1,0 +1,71 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="文档">
+
+  <style>
+    .docs-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+      max-width: 900px; margin: 0 auto;
+    }
+    .docs-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 30px 28px;
+      display: block; color: var(--text); text-decoration: none;
+      transition: border-color 0.2s;
+    }
+    .docs-card:hover { border-color: rgba(255,255,255,0.15); text-decoration: none; color: #fff; }
+    .docs-card .idx {
+      font-size: 0.7rem; font-weight: 700; color: var(--text-quiet);
+      letter-spacing: 0.08em; margin-bottom: 14px;
+    }
+    .docs-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.01em; }
+    .docs-card p { color: var(--text-dim); font-size: 0.88rem; line-height: 1.5; }
+
+    @media (max-width: 768px) {
+      .docs-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+
+  <div class="page-header">
+    <h1>文档中心</h1>
+    <p>快速上手、部署配置、API 参考</p>
+  </div>
+
+  <section style="padding-top:10px">
+    <div class="docs-grid">
+      <a href="/docs/quickstart" class="docs-card">
+        <div class="idx">01</div>
+        <h3>快速开始</h3>
+        <p>5 分钟部署，Docker / Windows / macOS</p>
+      </a>
+      <a href="/docs/deploy" class="docs-card">
+        <div class="idx">02</div>
+        <h3>部署指南</h3>
+        <p>Docker Compose、裸机部署、systemd</p>
+      </a>
+      <a href="/docs/config" class="docs-card">
+        <div class="idx">03</div>
+        <h3>配置参考</h3>
+        <p>环境变量、脱敏规则、License 激活</p>
+      </a>
+      <a href="/docs/keywords" class="docs-card">
+        <div class="idx">04</div>
+        <h3>自定义敏感词</h3>
+        <p>添加团队专属敏感词、正则模式</p>
+      </a>
+      <a href="/docs/architecture" class="docs-card">
+        <div class="idx">05</div>
+        <h3>架构说明</h3>
+        <p>数据流、SSE 处理、Rust 完整性检查</p>
+      </a>
+      <a href="/docs/api" class="docs-card">
+        <div class="idx">06</div>
+        <h3>API 参考</h3>
+        <p>管理接口、统计查询、License 验证</p>
+      </a>
+    </div>
+  </section>
+
+</Layout>

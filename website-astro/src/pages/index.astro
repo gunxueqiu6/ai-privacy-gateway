@@ -2,423 +2,624 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="保护团队AI数据安全">
+<Layout title="AI Privacy Gateway - AI 数据隐私保护">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="gradient-orb gradient-orb-1"></div>
+    <div class="gradient-orb gradient-orb-2"></div>
 
-  <style>
-    /* ── Hero ── */
-    .hero {
-      padding: 140px 40px 100px; max-width: var(--max-width); margin: 0 auto;
-      display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
-      position: relative;
-    }
-    .hero-text {
-      position: relative; z-index: 1;
-    }
-    .hero-text .eyebrow {
-      font-size: 0.8rem; font-weight: 500; letter-spacing: 0.08em;
-      color: var(--green-muted); margin-bottom: 32px;
-    }
-    .hero-text h1 {
-      font-size: clamp(2.8rem, 5vw, 3.8rem); font-weight: 600;
-      line-height: 1.06; letter-spacing: -0.04em; margin-bottom: 28px;
-      color: #f0f0f5;
-    }
-    .hero-text h1 em {
-      font-style: normal; color: var(--green);
-    }
-    .hero-text .lead {
-      font-size: 1.15rem; color: var(--text-dim); line-height: 1.7;
-      margin-bottom: 40px; max-width: 440px;
-    }
-    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 56px; }
-    .hero-stat {
-      display: flex; gap: 48px;
-    }
-    .hero-stat div {
-      display: flex; flex-direction: column;
-    }
-    .hero-stat b { font-size: 1.6rem; color: #f0f0f5; font-weight: 600; letter-spacing: -0.02em; }
-    .hero-stat span { font-size: 0.8rem; color: var(--text-quiet); margin-top: 2px; }
+    <div class="container">
+      <div class="hero-content fade-in">
+        <h1>你的团队 AI 数据<br><span class="highlight">正在裸奔</span></h1>
+        <p class="hero-subtitle">30 秒装上防火墙，自动脱敏敏感信息</p>
 
-    .hero-visual { position: relative; }
-    .hero-glow {
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
-      width: 480px; height: 480px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(163,230,53,0.04) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    .hero-code {
-      background: var(--paper); border: 1px solid var(--border);
-      border-radius: var(--radius-lg); overflow: hidden;
-      position: relative; z-index: 1;
-    }
-    .hero-code .bar {
-      display: flex; gap: 6px; padding: 14px 18px;
-      background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border);
-    }
-    .hero-code .bar span { width: 9px; height: 9px; border-radius: 9px; }
-    .hero-code .bar span:nth-child(1) { background: #ef4444; }
-    .hero-code .bar span:nth-child(2) { background: #f59e0b; }
-    .hero-code .bar span:nth-child(3) { background: #22c55e; }
-    .hero-code pre {
-      background: transparent; border: none; padding: 22px 24px;
-      font-size: 0.82rem; line-height: 1.75; color: var(--text-dim);
-      overflow-x: auto; font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
-    }
-    .hero-code pre .c1 { color: var(--green); }
-    .hero-code pre .c2 { color: var(--text-quiet); }
-    .hero-code pre .c3 { color: var(--amber); }
+        <div class="cta-buttons">
+          <a href="#pricing" class="btn btn-primary">立即购买 Pro 版</a>
+          <a href="https://github.com/your-repo/ai-privacy-gateway" class="btn btn-secondary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+            </svg>
+            GitHub 免费下载
+          </a>
+        </div>
 
-    /* ── Problem — clean 3-col ── */
-    .section-problem { background: var(--paper); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-    .problem-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 56px;
-      max-width: var(--max-width); margin: 0 auto;
-    }
-    .problem-item .num {
-      font-size: 0.7rem; font-weight: 600; color: var(--text-quiet);
-      letter-spacing: 0.1em; margin-bottom: 18px;
-    }
-    .problem-item h3 { font-size: 1.15rem; font-weight: 600; margin-bottom: 10px; letter-spacing: -0.02em; color: #f0f0f5; }
-    .problem-item p { color: var(--text-dim); font-size: 0.92rem; line-height: 1.65; }
-
-    /* ── Features — refined bento ── */
-    .bento {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
-      max-width: var(--max-width); margin: 0 auto;
-      background: var(--border);
-    }
-    .bento-item {
-      background: var(--paper); padding: 48px 40px;
-      display: flex; flex-direction: column;
-    }
-    .bento-item.main { grid-column: span 2; grid-row: span 2; }
-    .bento-item .icon {
-      width: 36px; height: 36px; border-radius: var(--radius);
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 22px; font-size: 0.9rem;
-    }
-    .bento-item .icon.green { background: var(--green-bg); color: var(--green-muted); }
-    .bento-item .icon.purple { background: var(--purple-bg); color: var(--purple); }
-    .bento-item .icon.amber { background: var(--amber-bg); color: var(--amber); }
-    .bento-item h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; letter-spacing: -0.02em; color: #f0f0f5; }
-    .bento-item p { color: var(--text-dim); font-size: 0.9rem; line-height: 1.6; }
-
-    /* ── How it works ── */
-    .steps {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 64px;
-      max-width: var(--max-width); margin: 0 auto;
-    }
-    .step {
-      display: flex; flex-direction: column;
-    }
-    .step .step-icon {
-      width: 48px; height: 48px; border-radius: var(--radius);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.1rem; font-weight: 700; margin-bottom: 24px;
-      border: 1px solid var(--border);
-    }
-    .step:nth-child(1) .step-icon { background: var(--green-bg); border-color: rgba(163,230,53,0.15); color: var(--green); }
-    .step:nth-child(2) .step-icon { background: var(--purple-bg); border-color: rgba(167,139,250,0.15); color: var(--purple); }
-    .step:nth-child(3) .step-icon { background: var(--amber-bg); border-color: rgba(245,158,11,0.15); color: var(--amber); }
-    .step h3 { font-size: 1.2rem; font-weight: 600; margin-bottom: 10px; letter-spacing: -0.02em; color: #f0f0f5; }
-    .step p { color: var(--text-dim); font-size: 0.92rem; line-height: 1.65; }
-
-    /* ── Pricing ── */
-    .pricing-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
-      max-width: 880px; margin: 0 auto;
-    }
-    .pricing-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-lg); padding: 40px 36px;
-      display: flex; flex-direction: column;
-      transition: border-color 0.3s;
-    }
-    .pricing-card:hover { border-color: rgba(255,255,255,0.12); }
-    .pricing-card.featured {
-      border-color: rgba(163,230,53,0.2);
-      background: linear-gradient(180deg, rgba(163,230,53,0.03), transparent);
-    }
-    .pricing-card .plan-name {
-      font-size: 0.78rem; font-weight: 500; letter-spacing: 0.02em;
-      color: var(--text-quiet); margin-bottom: 16px;
-    }
-    .pricing-card .price {
-      font-size: 2.8rem; font-weight: 600; letter-spacing: -0.04em;
-      margin-bottom: 28px; color: #f0f0f5;
-    }
-    .pricing-card .price span { font-size: 0.3em; font-weight: 400; color: var(--text-dim); margin-left: 2px; }
-    .pricing-card ul { list-style: none; margin-bottom: 32px; flex: 1; }
-    .pricing-card li {
-      padding: 7px 0; color: var(--text-dim); font-size: 0.9rem;
-      border-bottom: 1px solid var(--border-soft);
-    }
-    .pricing-card li:last-child { border-bottom: none; }
-    .pricing-card li.yes::before { content: ""; display: none; }
-    .pricing-card li.no { color: var(--text-quiet); }
-    .pricing-card .btn { width: 100%; }
-    .badge-featured {
-      position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
-      background: var(--green-muted); color: #0a0a0a; font-size: 0.7rem; font-weight: 600;
-      padding: 4px 16px; border-radius: 100px; letter-spacing: 0.03em;
-    }
-
-    /* ── FAQ ── */
-    .faq-list { max-width: 640px; margin: 0 auto; }
-    .faq-item { padding: 26px 0; border-bottom: 1px solid var(--border-soft); }
-    .faq-item:first-child { border-top: 1px solid var(--border-soft); }
-    .faq-item h4 { font-weight: 600; margin-bottom: 6px; letter-spacing: -0.01em; font-size: 1.02rem; }
-    .faq-item p { color: var(--text-dim); font-size: 0.92rem; line-height: 1.65; }
-
-    /* ── CTA ── */
-    .section-cta { background: var(--paper); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-    .cta-content { text-align: center; max-width: 560px; margin: 0 auto; }
-    .cta-content h2 { font-size: 2.2rem; font-weight: 600; letter-spacing: -0.03em; margin-bottom: 14px; }
-    .cta-content p { color: var(--text-dim); margin-bottom: 36px; font-size: 1.05rem; }
-    .cta-content .actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-
-    @media (max-width: 768px) {
-      .hero { grid-template-columns: 1fr; gap: 48px; padding: 80px 24px 60px; }
-      .hero-stat { gap: 32px; }
-      .problem-grid { grid-template-columns: 1fr; gap: 40px; }
-      .bento { grid-template-columns: 1fr; }
-      .bento-item.main { grid-column: span 1; grid-row: span 1; }
-      .steps { grid-template-columns: 1fr; gap: 40px; }
-      .pricing-grid { grid-template-columns: 1fr; }
-    }
-  </style>
-
-  <!-- ── Hero ── -->
-  <div class="hero">
-    <div class="hero-text">
-      <div class="eyebrow">AI DATA PRIVACY INFRASTRUCTURE</div>
-      <h1>团队的 AI 数据保护，<em>一行代码不改</em></h1>
-      <p class="lead">本地反向代理自动脱敏手机号、身份证、邮箱、银行卡，再发送给 ChatGPT / DeepSeek / Claude。30 秒部署，数据不出网。</p>
-      <div class="hero-actions">
-        <a href="/download" class="btn btn-primary btn-lg">免费下载</a>
-        <a href="/docs/quickstart" class="btn btn-outline btn-lg">查看文档</a>
-      </div>
-      <div class="hero-stat">
-        <div><b>&lt; 50ms</b> <span>请求延迟</span></div>
-        <div><b>本地部署</b> <span>数据不出网</span></div>
-        <div><b>开源</b> <span>代码可审计</span></div>
-      </div>
-    </div>
-    <div class="hero-visual">
-      <div class="hero-glow"></div>
-      <div class="hero-code">
-        <div class="bar"><span></span><span></span><span></span></div>
-        <pre><span class="c2"># 一行 Docker，启动本地防火墙</span>
-<span class="c1">$</span> docker run -d -p 9999:9999 \
-  ghcr.io/gunxueqiu6/ai-privacy-gateway:lite
-
-<span class="c2"># 发送请求 — 敏感信息自动脱敏</span>
-<span class="c1">$</span> curl http://localhost:9999/v1/chat \
-  -d <span class="c3">'{'{'}"model":"deepseek-chat"{'}'}'</span>
-
-<span class="c2"># 手机号 → &lt;PHONE_7a3f&gt;
-# 身份证 → &lt;ID_9b2e&gt;
-# AI 响应时自动还原，用户无感知</span></pre>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── Problem ── -->
-  <section class="section-problem">
-    <div class="section-head">
-      <h2>你的团队每天都在泄露什么</h2>
-      <p>99% 的团队在用真实生产数据调试 AI，却不知道这些数据正被发往境外。</p>
-    </div>
-    <div class="problem-grid">
-      <div class="problem-item">
-        <div class="num">01</div>
-        <h3>IDE 里粘贴真实手机号</h3>
-        <p>开发者在 Cursor / Copilot 中用真实数据调试，代码补全将敏感信息发送到境外服务器。</p>
-      </div>
-      <div class="problem-item">
-        <div class="num">02</div>
-        <h3>客服机器人泄露客户隐私</h3>
-        <p>飞书 / 钉钉机器人通过 AI API 处理工单，客户手机号、邮箱原文传输，无任何脱敏措施。</p>
-      </div>
-      <div class="problem-item">
-        <div class="num">03</div>
-        <h3>训练数据被 AI 公司采集</h3>
-        <p>发给 ChatGPT / DeepSeek 的业务数据可能用于模型训练，竞品次日就能问出你的商业机密。</p>
+        <p class="supported-platforms">
+          支持 DeepSeek / Claude / ChatGPT / Cursor 等所有 AI 服务
+        </p>
       </div>
     </div>
   </section>
 
-  <!-- ── Features (bento) ── -->
-  <section>
-    <div class="section-head">
-      <h2>全面防护，零侵入</h2>
-      <p>不改代码，不换框架，只改一个 URL 地址。</p>
-    </div>
-    <div class="bento">
-      <div class="bento-item main">
-        <div class="icon green">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+  <!-- Problem Section -->
+  <section class="problems">
+    <div class="container">
+      <h2 class="section-title">真实场景，真实风险</h2>
+
+      <div class="problem-grid">
+        <div class="glass problem-card">
+          <div class="problem-icon">💼</div>
+          <h3>Cursor 里贴身份证</h3>
+          <p>开发者为了调试，把用户身份证号贴进 Cursor 对话，训练数据被抓取</p>
         </div>
-        <h3>自动检测 · 手机号 · 身份证 · 邮箱 · 银行卡</h3>
-        <p>内置正则引擎 + 自定义敏感词库，自动识别并替换所有敏感字段。支持中文姓名、公司名、项目代号等任意自定义关键词，可配置正则模式。</p>
-      </div>
-      <div class="bento-item">
-        <div class="icon purple">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+
+        <div class="glass problem-card">
+          <div class="problem-icon">📱</div>
+          <h3>飞书机器人泄露手机号</h3>
+          <p>客服机器人在对话中暴露客户手机号，被竞争对手获取</p>
         </div>
-        <h3>SSE 流式透传</h3>
-        <p>Streaming 响应实时脱敏还原，零延迟，用户完全无感知。</p>
-      </div>
-      <div class="bento-item">
-        <div class="icon amber">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+
+        <div class="glass problem-card">
+          <div class="problem-icon">🔓</div>
+          <h3>DeepSeek 训练数据被抓取</h3>
+          <p>API 请求被第三方缓存，敏感数据流入训练集</p>
         </div>
-        <h3>本地存储 · 数据不出网</h3>
-        <p>映射表仅存本地 SQLite，绝不上传云端。一键销毁：<code>rm -rf vault_data/</code></p>
-      </div>
-      <div class="bento-item">
-        <div class="icon green">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-        </div>
-        <h3>5 分钟上线</h3>
-        <p>API 地址从 api.openai.com 改为 localhost:9999，其他完全不变。</p>
-      </div>
-      <div class="bento-item">
-        <div class="icon purple">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        </div>
-        <h3>拦截统计 & 审计</h3>
-        <p>实时拦截数、字段分类、会话追溯，满足合规审计要求。</p>
-      </div>
-      <div class="bento-item">
-        <div class="icon amber">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-        </div>
-        <h3>云端规则更新</h3>
-        <p>Pro 版支持敏感词规则库自动更新，新威胁即时响应。</p>
       </div>
     </div>
   </section>
 
-  <!-- ── How it works ── -->
-  <section>
-    <div class="section-head">
-      <h2>工作原理</h2>
-      <p>请求到达 → 脱敏 → 转发 → AI 响应 → 还原。全程透明。</p>
-    </div>
-    <div class="steps">
-      <div class="step">
-        <div class="step-icon">1</div>
-        <h3>检测</h3>
-        <p>正则引擎 + 关键词匹配自动识别请求中所有敏感字段。支持自定义正则和团队专属词库。</p>
-      </div>
-      <div class="step">
-        <div class="step-icon">2</div>
-        <h3>脱敏</h3>
-        <p>原始数据替换为占位符，映射关系写入本地 SQLite。脱敏后的请求转发至上游 AI API。</p>
-      </div>
-      <div class="step">
-        <div class="step-icon">3</div>
-        <h3>还原</h3>
-        <p>AI 响应返回时，占位符自动还原为原始数据。对用户完全透明，无感知体验。</p>
+  <!-- Features Section -->
+  <section class="features">
+    <div class="container">
+      <h2 class="section-title">核心功能</h2>
+
+      <div class="features-bento">
+        <div class="glass feature-card feature-large">
+          <div class="feature-icon">🔒</div>
+          <h3>自动脱敏</h3>
+          <p>手机号、身份证、邮箱、银行卡等敏感信息自动识别并替换为 [VAULT_xxx] 占位符</p>
+          <div class="feature-demo">
+            <code>13812345678 → [VAULT_PHONE_a1b2c3]</code>
+          </div>
+        </div>
+
+        <div class="glass feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>流式支持</h3>
+          <p>完美支持 AI 流式输出 SSE，用户完全无感知</p>
+        </div>
+
+        <div class="glass feature-card">
+          <div class="feature-icon">🏠</div>
+          <h3>本地存储</h3>
+          <p>所有数据仅存储在本地 SQLite，映射关系不上传任何云端</p>
+        </div>
+
+        <div class="glass feature-card">
+          <div class="feature-icon">🔌</div>
+          <h3>一键接入</h3>
+          <p>只需改一个 API 地址，无需修改任何代码</p>
+        </div>
+
+        <div class="glass feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>团队看板</h3>
+          <p>实时查看团队拦截统计，会话查询追溯</p>
+        </div>
+
+        <div class="glass feature-card">
+          <div class="feature-icon">☁️</div>
+          <h3>云端规则</h3>
+          <p>敏感词规则自动更新，无需手动维护</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ── Pricing ── -->
-  <section id="pricing">
-    <div class="section-head">
-      <h2>版本</h2>
-      <p>从个人到企业，选择适合你的防护等级。</p>
-    </div>
-    <div class="pricing-grid" style="position:relative">
-      <div class="pricing-card">
-        <div class="plan-name">LITE 个人版</div>
-        <div class="price">免费</div>
-        <ul>
-          <li class="yes">正则脱敏（手机/邮箱/身份证/银行卡）</li>
-          <li class="yes">流式代理 + SSE 缓冲</li>
-          <li class="yes">自定义敏感词</li>
-          <li class="yes">基础管理后台</li>
-          <li class="no">多人并发</li>
-          <li class="no">团队看板</li>
-          <li class="no">云端规则更新</li>
-        </ul>
-        <a href="/download" class="btn btn-outline">免费下载</a>
-      </div>
+  <!-- How It Works -->
+  <section class="how-it-works">
+    <div class="container">
+      <h2 class="section-title">工作原理</h2>
 
-      <div class="pricing-card featured" style="position:relative">
-        <div class="badge-featured">推荐</div>
-        <div class="plan-name">PRO 团队版</div>
-        <div class="price">&yen;99<span>/月</span></div>
-        <ul>
-          <li class="yes">全部 Lite 功能</li>
-          <li class="yes">20 人并发 WAL 模式</li>
-          <li class="yes">团队看板 + 会话查询</li>
-          <li class="yes">云端规则自动更新</li>
-          <li class="yes">日/周/月统计报告</li>
-          <li class="yes">邮件技术支持</li>
-        </ul>
-        <a href="#" class="btn btn-primary">即将上线</a>
-      </div>
+      <div class="steps">
+        <div class="glass step-card">
+          <div class="step-number">1</div>
+          <h3>拦截请求</h3>
+          <p>你的 AI 客户端发送请求，包含敏感数据</p>
+        </div>
 
-      <div class="pricing-card">
-        <div class="plan-name">ENTERPRISE</div>
-        <div class="price">定制<span>年费</span></div>
-        <ul>
-          <li class="yes">全部 Pro 功能</li>
-          <li class="yes">100+ 人高并发</li>
-          <li class="yes">Redis 集群存储</li>
-          <li class="yes">AC 自动机（万级词库）</li>
-          <li class="yes">审计日志 + 告警</li>
-          <li class="yes">RBAC 权限控制</li>
-          <li class="yes">驻场支持 + SLA</li>
-        </ul>
-        <a href="mailto:sales@aiprivacygateway.com" class="btn btn-outline">联系我们</a>
+        <div class="step-connector">→</div>
+
+        <div class="glass step-card">
+          <div class="step-number">2</div>
+          <h3>自动脱敏</h3>
+          <p>网关识别并替换敏感数据为占位符</p>
+        </div>
+
+        <div class="step-connector">→</div>
+
+        <div class="glass step-card">
+          <div class="step-number">3</div>
+          <h3>转发 AI</h3>
+          <p>脱敏后的请求转发到目标 AI 服务</p>
+        </div>
+
+        <div class="step-connector">→</div>
+
+        <div class="glass step-card">
+          <div class="step-number">4</div>
+          <h3>还原返回</h3>
+          <p>响应中的占位符还原为原始值返回</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ── FAQ ── -->
-  <section>
-    <div class="section-head">
-      <h2>常见问题</h2>
-    </div>
-    <div class="faq-list">
-      <div class="faq-item">
-        <h4>如何接入？</h4>
-        <p>只需将 AI 客户端的 API 地址从 https://api.openai.com 改为 http://localhost:9999，其他完全不变。5 分钟搞定。</p>
-      </div>
-      <div class="faq-item">
-        <h4>数据安全吗？</h4>
-        <p>敏感映射表仅存储在你自己的服务器上（本地 SQLite），不上传任何云端。部署在自己内网，物理隔离。</p>
-      </div>
-      <div class="faq-item">
-        <h4>支持哪些 AI 服务？</h4>
-        <p>所有兼容 OpenAI API 格式的服务：ChatGPT、DeepSeek、Claude、Cursor、Copilot、通义千问、飞书 AI 等。</p>
-      </div>
-      <div class="faq-item">
-        <h4>如何部署？</h4>
-        <p>Docker 一行启动：<code>docker run -d -p 9999:9999 ghcr.io/gunxueqiu6/ai-privacy-gateway:lite</code>。也提供 Windows / macOS 单文件版本。</p>
-      </div>
-      <div class="faq-item">
-        <h4>Pro 版如何激活？</h4>
-        <p>购买后收到 License Key，在管理后台填写激活。License 绑定硬件指纹，防止滥用。</p>
+  <!-- Pricing Section -->
+  <section class="pricing" id="pricing">
+    <div class="container">
+      <h2 class="section-title">版本对比</h2>
+
+      <div class="pricing-grid">
+        <div class="glass pricing-card">
+          <h3>Lite 个人版</h3>
+          <div class="price">免费</div>
+          <ul class="feature-list">
+            <li>正则脱敏（手机/邮箱/身份证/银行卡）</li>
+            <li>流式代理 + 缓冲</li>
+            <li>自定义敏感词（手动添加）</li>
+            <li>基础管理后台</li>
+            <li class="disabled">多人并发</li>
+            <li class="disabled">团队看板</li>
+            <li class="disabled">云端规则更新</li>
+          </ul>
+          <a href="https://github.com/your-repo/ai-privacy-gateway" class="btn btn-secondary">GitHub 下载</a>
+        </div>
+
+        <div class="glass pricing-card pricing-recommended">
+          <div class="badge">推荐</div>
+          <h3>Pro 团队版</h3>
+          <div class="price">¥99<span>/月</span></div>
+          <ul class="feature-list">
+            <li>全部 Lite 功能</li>
+            <li>多人并发（20人）</li>
+            <li>SQLite WAL 模式</li>
+            <li>团队看板 + 会话查询</li>
+            <li>云端规则自动更新</li>
+            <li>日/周/月统计报告</li>
+            <li>邮件技术支持</li>
+          </ul>
+          <a href="#buy-pro" class="btn btn-primary">立即购买</a>
+        </div>
+
+        <div class="glass pricing-card">
+          <h3>Enterprise 企业版</h3>
+          <div class="price">定制<span>年费</span></div>
+          <ul class="feature-list">
+            <li>全部 Pro 功能</li>
+            <li>100+ 人高并发</li>
+            <li>Redis 集群存储</li>
+            <li>AC 自动机（万级词库）</li>
+            <li>审计日志 + 告警</li>
+            <li>权限控制 (RBAC)</li>
+            <li>驻场支持 + SLA</li>
+          </ul>
+          <a href="#contact" class="btn btn-secondary">联系我们</a>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ── CTA ── -->
-  <section class="section-cta">
-    <div class="cta-content">
-      <h2>给团队 AI 数据装上防火墙</h2>
-      <p>免费 Lite 版，永久可用。不需要信用卡。</p>
-      <div class="actions">
-        <a href="/download" class="btn btn-primary btn-lg">免费下载</a>
-        <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-outline btn-lg" target="_blank">GitHub</a>
+  <!-- FAQ Section -->
+  <section class="faq">
+    <div class="container">
+      <h2 class="section-title">常见问题</h2>
+
+      <div class="faq-list">
+        <div class="glass faq-item">
+          <h4>如何接入？</h4>
+          <p>只需将 AI 客户端的 API 地址从 https://api.openai.com 改为 http://localhost:9999，其他完全不变。</p>
+        </div>
+
+        <div class="glass faq-item">
+          <h4>数据安全吗？</h4>
+          <p>所有敏感数据仅存储在本地 SQLite，映射关系不上传任何云端，支持一键物理销毁。</p>
+        </div>
+
+        <div class="glass faq-item">
+          <h4>支持哪些 AI 服务？</h4>
+          <p>支持所有兼容 OpenAI API 格式的服务：DeepSeek、Claude、ChatGPT、Cursor、飞书机器人等。</p>
+        </div>
+
+        <div class="glass faq-item">
+          <h4>如何部署？</h4>
+          <p>Docker 一键部署：docker-compose up -d。或下载 Windows/macOS 单文件直接运行。</p>
+        </div>
+
+        <div class="glass faq-item">
+          <h4>Pro 版如何激活？</h4>
+          <p>购买后收到 License Key，在管理后台填写即可激活。License 绑定硬件指纹，防止滥用。</p>
+        </div>
       </div>
     </div>
   </section>
 
+  <!-- CTA Section -->
+  <section class="cta">
+    <div class="gradient-orb gradient-orb-1"></div>
+    <div class="container">
+      <h2>立即保护你的 AI 数据</h2>
+      <p>30 秒安装，马上生效</p>
+      <div class="cta-buttons">
+        <a href="https://github.com/your-repo/ai-privacy-gateway" class="btn btn-primary">免费开始</a>
+        <a href="#pricing" class="btn btn-secondary">查看定价</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <h3>AI Privacy Gateway</h3>
+          <p>保护 AI 请求中的敏感数据</p>
+        </div>
+        <div class="footer-links">
+          <a href="https://github.com/your-repo/ai-privacy-gateway">GitHub</a>
+          <a href="https://docs.your-website.com">文档</a>
+          <a href="#pricing">定价</a>
+          <a href="mailto:support@your-email.com">联系</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 AI Privacy Gateway. MIT License.</p>
+      </div>
+    </div>
+  </footer>
 </Layout>
+
+<style>
+  /* Hero */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4rem 1rem;
+    overflow: hidden;
+  }
+
+  .hero-content {
+    max-width: 800px;
+  }
+
+  .hero h1 {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    line-height: 1.1;
+  }
+
+  .highlight {
+    color: var(--danger);
+  }
+
+  .hero-subtitle {
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+  }
+
+  .cta-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+
+  .supported-platforms {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+
+  /* Section Title */
+  .section-title {
+    text-align: center;
+    margin-bottom: 4rem;
+    color: var(--primary);
+  }
+
+  /* Problems */
+  .problem-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .problem-card {
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .problem-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .problem-card h3 {
+    margin-bottom: 0.5rem;
+  }
+
+  .problem-card p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  /* Features Bento */
+  .features-bento {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+
+  .feature-card {
+    padding: 1.5rem;
+  }
+
+  .feature-large {
+    grid-column: span 2;
+  }
+
+  .feature-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .feature-card h3 {
+    margin-bottom: 0.5rem;
+  }
+
+  .feature-card p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .feature-demo {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: var(--bg-deep);
+    border-radius: 8px;
+  }
+
+  .feature-demo code {
+    font-size: 0.85rem;
+    color: var(--primary);
+  }
+
+  /* How It Works */
+  .steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .step-card {
+    padding: 1.5rem;
+    text-align: center;
+    min-width: 180px;
+  }
+
+  .step-number {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--primary-dim), var(--primary));
+    color: var(--bg-deep);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    margin: 0 auto 1rem;
+  }
+
+  .step-card h3 {
+    margin-bottom: 0.5rem;
+  }
+
+  .step-card p {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+  }
+
+  .step-connector {
+    color: var(--primary);
+    font-size: 1.5rem;
+  }
+
+  /* Pricing */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .pricing-card {
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+  }
+
+  .pricing-recommended {
+    border-color: var(--primary);
+    box-shadow: 0 0 40px var(--primary-glow);
+  }
+
+  .badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--primary-dim), var(--primary));
+    color: var(--bg-deep);
+    padding: 4px 16px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .price {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 1rem 0;
+  }
+
+  .price span {
+    font-size: 0.5em;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .feature-list {
+    list-style: none;
+    text-align: left;
+    margin: 1.5rem 0;
+  }
+
+  .feature-list li {
+    padding: 0.5rem 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .feature-list li::before {
+    content: "✓ ";
+    color: var(--primary);
+    margin-right: 0.5rem;
+  }
+
+  .feature-list li.disabled {
+    color: var(--text-muted);
+    text-decoration: line-through;
+  }
+
+  .feature-list li.disabled::before {
+    content: "✗ ";
+    color: var(--danger);
+  }
+
+  /* FAQ */
+  .faq-list {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .faq-item {
+    padding: 1.5rem;
+  }
+
+  .faq-item h4 {
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .faq-item p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  /* CTA */
+  .cta {
+    text-align: center;
+    padding: 6rem 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta h2 {
+    margin-bottom: 1rem;
+  }
+
+  .cta p {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+  }
+
+  /* Footer */
+  footer {
+    padding: 4rem 0 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .footer-brand h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .footer-brand p {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 2rem;
+  }
+
+  .footer-links a {
+    color: var(--text-secondary);
+  }
+
+  .footer-links a:hover {
+    color: var(--primary);
+  }
+
+  .footer-bottom {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .features-bento {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .feature-large {
+      grid-column: span 1;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .hero h1 {
+      font-size: 2.5rem;
+    }
+
+    .problem-grid,
+    .pricing-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .features-bento {
+      grid-template-columns: 1fr;
+    }
+
+    .steps {
+      flex-direction: column;
+    }
+
+    .step-connector {
+      transform: rotate(90deg);
+    }
+
+    .footer-content {
+      flex-direction: column;
+      gap: 1.5rem;
+      text-align: center;
+    }
+  }
+</style>
