@@ -8,7 +8,12 @@
       <a href="/download">下载</a>
       <a href="/pricing">定价</a>
       <a href="https://github.com/gunxueqiu6/ai-privacy-gateway">GitHub</a>
-      <a href="mailto:contact@privacygw.com">联系我们</a>
+    </div>
+    <div class="footer-contact">
+      <span class="contact-label">联系我们</span>
+      <a href="https://t.me/chirstmas_7" class="contact-link">Telegram: @chirstmas_7</a>
+      <span class="contact-sep">|</span>
+      <span class="contact-text">QQ: 1024294229</span>
     </div>
     <p class="footer-copyright">
       &copy; 2026 AI Privacy Gateway. MIT License.
@@ -52,5 +57,35 @@
   .footer-copyright {
     color: var(--text-muted);
     font-size: 0.875rem;
+  }
+
+  .footer-contact {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+
+  .contact-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .contact-link {
+    color: var(--primary);
+    transition: opacity 0.3s ease;
+  }
+
+  .contact-link:hover {
+    opacity: 0.8;
+  }
+
+  .contact-text {
+    color: var(--text-muted);
+  }
+
+  .contact-sep {
+    color: var(--border);
   }
 </style>
