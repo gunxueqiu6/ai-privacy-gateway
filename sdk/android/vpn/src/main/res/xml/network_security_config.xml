@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Allow cleartext traffic to gateway (for local development) -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">10.0.0.2</domain>
+    </domain-config>
+
+    <!-- HTTPS for AI services -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">openai.com</domain>
+        <domain includeSubdomains="true">anthropic.com</domain>
+        <domain includeSubdomains="true">deepseek.com</domain>
+        <domain includeSubdomains="true">moonshot.cn</domain>
+        <domain includeSubdomains="true">x.ai</domain>
+        <domain includeSubdomains="true">doubao.com</domain>
+        <domain includeSubdomains="true">yuanbao.com</domain>
+        <domain includeSubdomains="true">coze.cn</domain>
+        <domain includeSubdomains="true">coze.com</domain>
+    </domain-config>
+</network-security-config>

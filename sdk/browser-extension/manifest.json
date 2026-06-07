@@ -1,26 +1,54 @@
 {
   "manifest_version": 3,
   "name": "AI Privacy Gateway",
-  "version": "0.1.0",
-  "description": "一键保护 AI 对话中的敏感数据 — 自动脱敏后发送给 LLM，响应中自动还原",
-  "permissions": ["storage", "declarativeNetRequest"],
+  "version": "1.0.0",
+  "description": "保护您的 AI 对话数据隐私 - 自动脱敏敏感信息",
+  "permissions": [
+    "storage",
+    "contextMenus",
+    "activeTab",
+    "scripting",
+    "clipboardWrite"
+  ],
   "host_permissions": [
-    "https://api.openai.com/*",
-    "https://api.deepseek.com/*",
-    "https://api.anthropic.com/*",
-    "https://generativelanguage.googleapis.com/*",
-    "https://*.openai.azure.com/*"
+    "http://localhost:9999/*",
+    "https://*.deepseek.com/*",
+    "https://chat.openai.com/*",
+    "https://claude.ai/*",
+    "https://kimi.moonshot.cn/*",
+    "https://www.yuanbao.cn/*",
+    "https://www.doubao.com/*"
   ],
   "background": {
     "service_worker": "background.js"
   },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chat.openai.com/*",
+        "https://claude.ai/*",
+        "https://kimi.moonshot.cn/*",
+        "https://*.deepseek.com/*",
+        "https://www.yuanbao.cn/*",
+        "https://www.doubao.com/*"
+      ],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_end"
+    }
+  ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "AI Privacy Gateway"
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
   },
+  "options_page": "options.html",
   "icons": {
-    "16": "icons/icon.svg",
-    "48": "icons/icon.svg",
-    "128": "icons/icon.svg"
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   }
 }

@@ -97,6 +97,27 @@ ENTERPRISE_EMAIL_TEMPLATE = """\
       最大并发：<strong style="color: #e0e0e0;">{max_concurrent} 人</strong>
     </p>
 
+    <div style="background: #2a1a1a; border-radius: 8px; padding: 20px; margin-top: 20px;">
+      <h3 style="color: #f59e0b; font-size: 16px; margin-top: 0;">
+        🔐 企业运维集成 API Key
+      </h3>
+      <p style="color: #888; font-size: 13px;">
+        使用此 API Key 将你的部署监控数据接入企业现有运维系统：
+      </p>
+      <div style="background: #0f0f1a; border: 1px solid #f59e0b; border-radius: 8px;
+                  padding: 12px; text-align: center; margin: 15px 0;">
+        <code style="font-size: 15px; font-weight: bold; color: #f59e0b;
+                     font-family: 'Courier New', monospace;">
+          {enterprise_api_key}
+        </code>
+      </div>
+      <p style="color: #888; font-size: 12px; line-height: 1.8;">
+        - Prometheus 端点: <code style="color: #22c55e;">https://license.privacygw.com/metrics</code><br>
+        - 部署列表 API: <code style="color: #22c55e;">https://license.privacygw.com/api/enterprise/deployments</code><br>
+        - 请在请求头中添加: <code style="color: #22c55e;">X-API-Key: {enterprise_api_key}</code>
+      </p>
+    </div>
+
     <p style="color: #888; font-size: 14px; margin-top: 20px;">
       支持 Redis 集群、AC 自动机万级词库、RBAC、审计日志等全部企业功能。<br>
       我们将在 1 个工作日内联系你安排驻场支持。
@@ -167,13 +188,15 @@ def send_enterprise_license_email(
     to_email: str,
     license_key: str,
     expires_at: str,
-    max_concurrent: int = 100
+    max_concurrent: int = 100,
+    enterprise_api_key: Optional[str] = None
 ) -> bool:
     """发送 Enterprise 版购买确认邮件"""
     html = ENTERPRISE_EMAIL_TEMPLATE.format(
         license_key=license_key,
         expires_at=expires_at,
-        max_concurrent=max_concurrent
+        max_concurrent=max_concurrent,
+        enterprise_api_key=enterprise_api_key or "待生成"
     )
     return _send_email(
         to_email,
@@ -187,9 +210,12 @@ def send_license_email(
     license_key: str,
     tier: str,
     expires_at: str,
-    max_concurrent: int = 20
+    max_concurrent: int = 20,
+    enterprise_api_key: Optional[str] = None
 ) -> bool:
     """根据 tier 发送对应的购买确认邮件"""
     if tier == "enterprise":
-        return send_enterprise_license_email(to_email, license_key, expires_at, max_concurrent)
+        return send_enterprise_license_email(
+            to_email, license_key, expires_at, max_concurrent, enterprise_api_key
+        )
     return send_pro_license_email(to_email, license_key, expires_at, max_concurrent)

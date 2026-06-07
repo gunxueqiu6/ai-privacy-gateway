@@ -92,7 +92,7 @@ class ACAutomatonEngine:
         # 1. 先用正则处理动态模式（手机号等）
         for pattern_name, pattern in self.pattern_patterns.items():
             for match in pattern.findall(result):
-                placeholder = f"[VAULT_{pattern_name.upper()}_{self._encrypt(match)}]"
+                placeholder = f"[PII_{pattern_name.upper()}_{self._encrypt(match)}]"
                 result = result.replace(match, placeholder)
                 mappings[placeholder] = match
                 stats[pattern_name] += 1
@@ -109,7 +109,7 @@ class ACAutomatonEngine:
             matches.sort(key=lambda x: x[0], reverse=True)
 
             for start_idx, end_idx, keyword in matches:
-                placeholder = f"[VAULT_CUST_{self._encrypt(keyword)}]"
+                placeholder = f"[PII_CUST_{self._encrypt(keyword)}]"
                 result = result[:start_idx] + placeholder + result[end_idx + 1:]
                 mappings[placeholder] = keyword
                 stats["custom"] += 1

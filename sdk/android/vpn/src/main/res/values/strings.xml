@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AI Privacy Gateway</string>
+    <string name="tile_label">AI隐私保护</string>
+    <string name="vpn_active">🛡️ AI 隐私保护已开启</string>
+    <string name="vpn_inactive">⚠️ AI 隐私保护未开启</string>
+    <string name="stats_format">已拦截 %d 条敏感信息</string>
+    <string name="gateway_url_hint">网关地址</string>
+    <string name="api_key_hint">API Key</string>
+    <string name="save_config">保存配置</string>
+    <string name="auto_start">开机自动启动</string>
+</resources>

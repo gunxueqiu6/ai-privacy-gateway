@@ -1,9 +1,17 @@
 import sqlite3
 import os
 import logging
+import hashlib
 from datetime import datetime
 from typing import Dict, List, Optional
 from contextlib import contextmanager
+
+try:
+    import bcrypt
+    HAS_BCRYPT = True
+except ImportError:
+    HAS_BCRYPT = False
+    logger.warning("bcrypt not installed, falling back to SHA-256")
 
 logger = logging.getLogger(__name__)
 
@@ -229,5 +237,37 @@ class Database:
     def update_rbac_user_login(self, user_id: str, last_login: str):
         with self.get_conn() as conn:
             conn.execute("UPDATE rbac_users SET last_login = ? WHERE user_id = ?", (last_login, user_id))
+
+    def update_rbac_user_password(self, user_id: str, new_password_hash: str):
+        with self.get_conn() as conn:
+            cursor = conn.execute("UPDATE rbac_users SET password_hash = ? WHERE user_id = ?", (new_password_hash, user_id))
+            return cursor.rowcount > 0
+
+    def hash_password(self, password: str) -> str:
+        """使用 bcrypt 哈希密码"""
+        if HAS_BCRYPT:
+            return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        else:
+            # 降级到 SHA-256（仅用于开发环境）
+            return hashlib.sha256(password.encode('utf-8')).hexdigest()
+
+    def verify_password(self, password: str, stored_hash: str) -> bool:
+        """验证密码，支持旧的 SHA-256 和新的 bcrypt"""
+        if self.is_old_hash(stored_hash):
+            # 旧格式：纯 SHA-256
+            return hashlib.sha256(password.encode('utf-8')).hexdigest() == stored_hash
+        else:
+            # 新格式：bcrypt
+            if HAS_BCRYPT:
+                return bcrypt.checkpw(password.encode('utf-8'), stored_hash.encode('utf-8'))
+            return False
+
+    def is_old_hash(self, stored_hash: str) -> bool:
+        """检测是否是旧的 SHA-256 哈希（64 位十六进制）"""
+        return len(stored_hash) == 64 and all(c in '0123456789abcdefABCDEF' for c in stored_hash)
+
+    def needs_password_upgrade(self, stored_hash: str) -> bool:
+        """检查密码是否需要升级（从 SHA-256 升级到 bcrypt）"""
+        return self.is_old_hash(stored_hash) and HAS_BCRYPT
 
 db = Database()

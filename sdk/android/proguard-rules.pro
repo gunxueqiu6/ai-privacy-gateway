@@ -1,0 +1,3 @@
+-keep class com.privacygw.sdk.** { *; }
+-keep class com.google.gson.** { *; }
+-dontwarn com.google.gson.**

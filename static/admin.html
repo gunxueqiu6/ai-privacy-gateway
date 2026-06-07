@@ -5,294 +5,451 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Privacy Gateway - 管理后台</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #111118;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --accent: #4ade80;
+            --accent-dim: #22c55e;
+            --danger: #f87171;
+            --warning: #fbbf24;
+            --border: rgba(255, 255, 255, 0.1);
         }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        
+        /* Header */
         header {
-            text-align: center;
-            padding: 40px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
         }
-        header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+        header h1 { font-size: 1.5em; display: flex; align-items: center; gap: 10px; }
+        header h1::before { content: '🛡️'; }
+        .version-badge {
+            background: var(--accent);
+            color: var(--bg-primary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
         }
-        header .version {
-            color: #4ade80;
-            font-size: 1.2em;
+        .logout-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
         }
+        .logout-btn:hover { border-color: var(--danger); color: var(--danger); }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .tab-btn.active {
+            background: var(--accent);
+            color: var(--bg-primary);
+            border-color: var(--accent);
+        }
+        .tab-btn:hover:not(.active) { border-color: var(--accent); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        /* Stats Grid */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
         }
         .stat-card {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
             border-radius: 12px;
             padding: 20px;
             text-align: center;
-            transition: transform 0.3s;
         }
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-        .stat-card .icon {
-            font-size: 2em;
-            margin-bottom: 10px;
-        }
-        .stat-card .value {
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #4ade80;
-        }
-        .stat-card .label {
-            color: #94a3b8;
-            margin-top: 5px;
-        }
+        .stat-card .icon { font-size: 1.5em; margin-bottom: 8px; }
+        .stat-card .value { font-size: 2em; font-weight: 700; color: var(--accent); }
+        .stat-card .label { color: var(--text-secondary); font-size: 0.85em; margin-top: 4px; }
+        
+        /* Section */
         .section {
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 20px;
         }
-        .section h2 {
-            margin-bottom: 20px;
-            color: #4ade80;
-        }
-        .keywords-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
+        .section h2 { color: var(--accent); margin-bottom: 16px; font-size: 1.1em; }
+        
+        /* Keywords */
+        .keywords-list { display: flex; flex-wrap: wrap; gap: 8px; }
         .keyword-item {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 8px 16px;
+            background: var(--bg-secondary);
+            padding: 6px 12px;
             border-radius: 20px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        .keyword-item .delete {
-            color: #f87171;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .add-form {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
+        .keyword-item .delete { color: var(--danger); cursor: pointer; font-weight: bold; }
+        .add-form { display: flex; gap: 10px; margin-top: 16px; }
         .add-form input {
             flex: 1;
-            padding: 10px 15px;
-            border: none;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
             border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
         }
-        .add-form button {
+        .add-form input:focus { outline: none; border-color: var(--accent); }
+        .btn {
             padding: 10px 20px;
             border: none;
             border-radius: 8px;
-            background: #4ade80;
-            color: #1a1a2e;
-            font-weight: bold;
             cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
         }
-        .add-form button:hover {
-            background: #22c55e;
+        .btn-primary { background: var(--accent); color: var(--bg-primary); }
+        .btn-primary:hover { background: var(--accent-dim); }
+        .btn-danger { background: var(--danger); color: var(--text-primary); }
+        .btn-danger:hover { background: #ef4444; }
+        
+        /* Entity Types Table */
+        .entity-table {
+            width: 100%;
+            border-collapse: collapse;
         }
-        .btn-danger {
-            background: #f87171 !important;
-            color: #fff !important;
+        .entity-table th, .entity-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
         }
-        .btn-danger:hover {
-            background: #ef4444 !important;
+        .entity-table th { color: var(--text-secondary); font-weight: 600; }
+        .entity-toggle {
+            width: 44px;
+            height: 24px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
         }
-        .status-bar {
+        .entity-toggle.active { background: var(--accent); }
+        .entity-toggle::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            background: var(--text-primary);
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: left 0.3s;
+        }
+        .entity-toggle.active::after { left: 22px; }
+        
+        /* System Status */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .status-item {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            background: var(--bg-secondary);
             border-radius: 8px;
-            margin-bottom: 20px;
         }
-        .status-indicator {
+        .status-item .label { color: var(--text-secondary); }
+        .status-item .value { color: var(--text-primary); }
+        
+        /* Decay Indicator */
+        .decay-indicator {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 16px;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
         }
-        .status-dot {
+        .decay-level {
+            display: flex;
+            gap: 4px;
+        }
+        .decay-bar {
+            width: 40px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 4px;
+        }
+        .decay-bar.warning { background: var(--warning); }
+        .decay-bar.danger { background: var(--danger); }
+        .decay-bar.empty { background: var(--border); }
+        
+        /* Integrity Status */
+        .integrity-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+        }
+        .integrity-dot {
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background: #4ade80;
+            background: var(--accent);
             animation: pulse 2s infinite;
         }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-        }
-        .info-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-        }
-        .info-item .label {
-            color: #94a3b8;
-        }
-        .info-item .value {
-            color: #fff;
-        }
-        footer {
-            text-align: center;
-            padding: 20px;
-            color: #94a3b8;
+        .integrity-dot.error { background: var(--danger); animation: none; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .status-grid { grid-template-columns: 1fr; }
+            .tabs { flex-wrap: wrap; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>AI Privacy Gateway</h1>
-            <div class="version" id="version">Lite 个人版</div>
+            <h1>AI Privacy Gateway <span class="version-badge" id="version-badge">Lite</span></h1>
+            <button class="logout-btn" onclick="logout()">退出登录</button>
         </header>
 
-        <div class="status-bar">
-            <div class="status-indicator">
-                <div class="status-dot"></div>
-                <span>服务运行中</span>
-            </div>
-            <div id="current-time"></div>
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('dashboard')">📊 仪表盘</button>
+            <button class="tab-btn" onclick="switchTab('keywords')">🔑 敏感词管理</button>
+            <button class="tab-btn" onclick="switchTab('entities')">🏷️ 实体类型</button>
+            <button class="tab-btn" onclick="switchTab('system')">⚙️ 系统状态</button>
         </div>
 
-        <div class="section">
-            <h2>今日拦截统计</h2>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="icon">📱</div>
-                    <div class="value" id="phone-count">0</div>
-                    <div class="label">手机号</div>
-                </div>
-                <div class="stat-card">
-                    <div class="icon">📧</div>
-                    <div class="value" id="email-count">0</div>
-                    <div class="label">邮箱</div>
-                </div>
-                <div class="stat-card">
-                    <div class="icon">🪪</div>
-                    <div class="value" id="idcard-count">0</div>
-                    <div class="label">身份证</div>
-                </div>
-                <div class="stat-card">
-                    <div class="icon">💳</div>
-                    <div class="value" id="bankcard-count">0</div>
-                    <div class="label">银行卡</div>
-                </div>
-                <div class="stat-card">
-                    <div class="icon">🔒</div>
-                    <div class="value" id="custom-count">0</div>
-                    <div class="label">自定义词</div>
-                </div>
-                <div class="stat-card">
-                    <div class="icon">📊</div>
-                    <div class="value" id="total-count">0</div>
-                    <div class="label">总计</div>
+        <!-- Tab: Dashboard -->
+        <div class="tab-content active" id="tab-dashboard">
+            <div class="section">
+                <h2>今日拦截统计</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="icon">📱</div>
+                        <div class="value" id="phone-count">0</div>
+                        <div class="label">手机号</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon">📧</div>
+                        <div class="value" id="email-count">0</div>
+                        <div class="label">邮箱</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon">🪪</div>
+                        <div class="value" id="idcard-count">0</div>
+                        <div class="label">身份证</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon">💳</div>
+                        <div class="value" id="bankcard-count">0</div>
+                        <div class="label">银行卡</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon">👤</div>
+                        <div class="value" id="person-count">0</div>
+                        <div class="label">人名</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon">📍</div>
+                        <div class="value" id="location-count">0</div>
+                        <div class="label">地名</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon">🔒</div>
+                        <div class="value" id="custom-count">0</div>
+                        <div class="label">自定义词</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon">📊</div>
+                        <div class="value" id="total-count">0</div>
+                        <div class="label">总计</div>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <div class="section">
-            <h2>自定义敏感词</h2>
-            <div class="keywords-list" id="keywords-list"></div>
-            <div class="add-form">
-                <input type="text" id="new-keyword" placeholder="输入新的敏感词...">
-                <button onclick="addKeyword()">添加</button>
-            </div>
-        </div>
-
-        <div class="section">
-            <h2>系统信息</h2>
-            <div class="info-grid">
-                <div class="info-item">
-                    <span class="label">API 地址</span>
-                    <span class="value">http://localhost:9999</span>
-                </div>
-                <div class="info-item">
-                    <span class="label">目标服务</span>
-                    <span class="value" id="target-llm">-</span>
-                </div>
-                <div class="info-item">
-                    <span class="label">数据库</span>
-                    <span class="value">SQLite</span>
-                </div>
-                <div class="info-item">
-                    <span class="label">License</span>
-                    <span class="value" id="license">free_version</span>
+            
+            <div class="section">
+                <h2>活跃会话</h2>
+                <div class="status-grid">
+                    <div class="status-item">
+                        <span class="label">当前活跃会话</span>
+                        <span class="value" id="active-sessions">0</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="label">今日请求总数</span>
+                        <span class="value" id="request-count">0</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="section">
-            <h2>操作</h2>
-            <button class="btn-danger" onclick="clearMappings()">清除所有映射记录</button>
+        <!-- Tab: Keywords -->
+        <div class="tab-content" id="tab-keywords">
+            <div class="section">
+                <h2>自定义敏感词列表</h2>
+                <div class="keywords-list" id="keywords-list"></div>
+                <div class="add-form">
+                    <input type="text" id="new-keyword" placeholder="输入新的敏感词...">
+                    <button class="btn btn-primary" onclick="addKeyword()">添加</button>
+                </div>
+            </div>
         </div>
 
-        <footer>
-            <p>AI Privacy Gateway v2.0 | MIT License</p>
-        </footer>
+        <!-- Tab: Entities -->
+        <div class="tab-content" id="tab-entities">
+            <div class="section">
+                <h2>实体类型开关</h2>
+                <table class="entity-table">
+                    <thead>
+                        <tr>
+                            <th>实体类型</th>
+                            <th>名称</th>
+                            <th>描述</th>
+                            <th>状态</th>
+                        </tr>
+                    </thead>
+                    <tbody id="entity-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tab: System -->
+        <div class="tab-content" id="tab-system">
+            <div class="section">
+                <h2>版本信息</h2>
+                <div class="status-grid">
+                    <div class="status-item">
+                        <span class="label">版本号</span>
+                        <span class="value" id="version-info">-</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="label">版本类型</span>
+                        <span class="value" id="version-type">-</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="label">目标服务</span>
+                        <span class="value" id="target-llm">-</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="label">数据库</span>
+                        <span class="value">SQLite</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>完整性检查</h2>
+                <div class="integrity-status">
+                    <div class="integrity-dot" id="integrity-dot"></div>
+                    <span id="integrity-text">检查中...</span>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>衰减等级</h2>
+                <div class="decay-indicator">
+                    <div class="decay-level" id="decay-level"></div>
+                    <span id="decay-text">正常运行</span>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>操作</h2>
+                <button class="btn btn-danger" onclick="clearMappings()">清除所有映射记录</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // 更新时间
-        function updateTime() {
-            const now = new Date();
-            document.getElementById('current-time').textContent = now.toLocaleString('zh-CN');
+        const API_BASE = '';
+        let token = localStorage.getItem('admin_token');
+        
+        // Check auth
+        if (!token) {
+            window.location.href = '/static/login.html';
         }
-        setInterval(updateTime, 1000);
-        updateTime();
 
-        // 获取统计
+        // Tab switching
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabId).classList.add('active');
+        }
+
+        // Fetch with auth
+        async function authFetch(url, options = {}) {
+            const headers = options.headers || {};
+            headers['Authorization'] = `Bearer ${token}`;
+            options.headers = headers;
+            
+            const resp = await fetch(API_BASE + url, options);
+            if (resp.status === 401) {
+                localStorage.removeItem('admin_token');
+                window.location.href = '/static/login.html';
+            }
+            return resp;
+        }
+
+        // Fetch stats
         async function fetchStats() {
             try {
-                const resp = await fetch('/admin/stats');
+                const resp = await authFetch('/admin/stats');
                 const data = await resp.json();
                 document.getElementById('phone-count').textContent = data.phone_count || 0;
                 document.getElementById('email-count').textContent = data.email_count || 0;
                 document.getElementById('idcard-count').textContent = data.idcard_count || 0;
                 document.getElementById('bankcard-count').textContent = data.bankcard_count || 0;
+                document.getElementById('person-count').textContent = data.person_count || 0;
+                document.getElementById('location-count').textContent = data.location_count || 0;
                 document.getElementById('custom-count').textContent = data.custom_count || 0;
                 document.getElementById('total-count').textContent = data.total_count || 0;
-            } catch (e) {
-                console.error('获取统计失败:', e);
-            }
+                document.getElementById('request-count').textContent = data.request_count || 0;
+                document.getElementById('active-sessions').textContent = data.active_sessions || 0;
+            } catch (e) { console.error('获取统计失败:', e); }
         }
 
-        // 获取关键词
+        // Fetch keywords
         async function fetchKeywords() {
             try {
-                const resp = await fetch('/admin/keywords');
+                const resp = await authFetch('/admin/keywords');
                 const data = await resp.json();
                 const list = document.getElementById('keywords-list');
                 list.innerHTML = '';
@@ -302,19 +459,17 @@
                     item.innerHTML = `<span>${kw}</span><span class="delete" onclick="deleteKeyword('${kw}')">×</span>`;
                     list.appendChild(item);
                 });
-            } catch (e) {
-                console.error('获取关键词失败:', e);
-            }
+            } catch (e) { console.error('获取关键词失败:', e); }
         }
 
-        // 添加关键词
+        // Add keyword
         async function addKeyword() {
             const input = document.getElementById('new-keyword');
             const keyword = input.value.trim();
             if (!keyword) return;
-
+            
             try {
-                const resp = await fetch('/admin/keywords/add', {
+                const resp = await authFetch('/admin/keywords/add', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({keyword})
@@ -323,60 +478,134 @@
                     input.value = '';
                     fetchKeywords();
                 }
-            } catch (e) {
-                console.error('添加关键词失败:', e);
-            }
+            } catch (e) { console.error('添加关键词失败:', e); }
         }
 
-        // 删除关键词
+        // Delete keyword
         async function deleteKeyword(keyword) {
             try {
-                const resp = await fetch('/admin/keywords/delete', {
+                const resp = await authFetch('/admin/keywords/delete', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({keyword})
                 });
-                if (resp.ok) {
-                    fetchKeywords();
+                if (resp.ok) fetchKeywords();
+            } catch (e) { console.error('删除关键词失败:', e); }
+        }
+
+        // Fetch entities
+        async function fetchEntities() {
+            try {
+                const resp = await fetch('/api/entities');
+                const data = await resp.json();
+                const tbody = document.getElementById('entity-table-body');
+                tbody.innerHTML = '';
+                
+                data.entities.forEach(entity => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${entity.type}</td>
+                        <td>${entity.name}</td>
+                        <td>${entity.description}</td>
+                        <td>
+                            <div class="entity-toggle ${entity.enabled ? 'active' : ''}" 
+                                 onclick="toggleEntity('${entity.type}')"></div>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (e) { console.error('获取实体类型失败:', e); }
+        }
+
+        // Toggle entity (placeholder - would need backend support)
+        function toggleEntity(type) {
+            console.log('Toggle entity:', type);
+            // Would need backend API to persist this
+        }
+
+        // Fetch version
+        async function fetchVersion() {
+            try {
+                const resp = await authFetch('/admin/version');
+                const data = await resp.json();
+                document.getElementById('version-badge').textContent = data.version_display;
+                document.getElementById('version-info').textContent = data.version;
+                document.getElementById('version-type').textContent = data.version_type;
+            } catch (e) { console.error('获取版本失败:', e); }
+        }
+
+        // Fetch integrity
+        async function fetchIntegrity() {
+            try {
+                const resp = await authFetch('/admin/integrity');
+                const data = await resp.json();
+                const dot = document.getElementById('integrity-dot');
+                const text = document.getElementById('integrity-text');
+                
+                if (data.available && data.last_result?.status === 'ok') {
+                    dot.classList.remove('error');
+                    text.textContent = '完整性检查通过';
+                } else {
+                    dot.classList.add('error');
+                    text.textContent = data.message || '完整性检查不可用';
                 }
-            } catch (e) {
-                console.error('删除关键词失败:', e);
+            } catch (e) { 
+                document.getElementById('integrity-dot').classList.add('error');
+                document.getElementById('integrity-text').textContent = '检查失败';
             }
         }
 
-        // 清除映射
+        // Update decay indicator
+        function updateDecayIndicator(level) {
+            const container = document.getElementById('decay-level');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < 7; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'decay-bar';
+                if (i < level) {
+                    if (level >= 5) bar.classList.add('danger');
+                    else if (level >= 3) bar.classList.add('warning');
+                } else {
+                    bar.classList.add('empty');
+                }
+                container.appendChild(bar);
+            }
+            
+            const texts = ['正常运行', '轻微衰减', '中度衰减', '严重衰减', '紧急状态', '即将停服', '已停服'];
+            document.getElementById('decay-text').textContent = texts[level] || '正常运行';
+        }
+
+        // Clear mappings
         async function clearMappings() {
-            if (!confirm('确定要清除所有映射记录吗？')) return;
+            if (!confirm('确定要清除所有映射记录吗？此操作不可恢复。')) return;
+            
             try {
-                const resp = await fetch('/admin/clear', {method: 'POST'});
+                const resp = await authFetch('/admin/clear', {method: 'POST'});
                 if (resp.ok) {
                     fetchStats();
                     alert('已清除所有映射记录');
                 }
-            } catch (e) {
-                console.error('清除映射失败:', e);
-            }
+            } catch (e) { console.error('清除映射失败:', e); }
         }
 
-        // 获取版本信息
-        async function fetchVersion() {
-            try {
-                const resp = await fetch('/admin/version');
-                const data = await resp.json();
-                document.getElementById('version').textContent = data.version_display;
-                document.getElementById('license').textContent = data.version;
-            } catch (e) {
-                console.error('获取版本失败:', e);
-            }
+        // Logout
+        function logout() {
+            localStorage.removeItem('admin_token');
+            window.location.href = '/static/login.html';
         }
 
-        // 初始化
+        // Initialize
         fetchStats();
         fetchKeywords();
+        fetchEntities();
         fetchVersion();
+        fetchIntegrity();
+        updateDecayIndicator(0);
 
-        // 定时刷新
-        setInterval(fetchStats, 5000);
+        // Auto refresh
+        setInterval(fetchStats, 10000);
+        setInterval(fetchIntegrity, 60000);
     </script>
 </body>
 </html>
