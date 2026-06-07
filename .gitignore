@@ -51,3 +51,4 @@ rust_src/target/
 
 # PyInstaller配置
 *.spec
+!PrivacyGateway.spec

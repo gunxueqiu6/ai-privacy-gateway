@@ -32,8 +32,18 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:lite .
+          docker build --no-cache -t ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:lite .
           docker tag ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:lite ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:latest
+
+      - name: Verify Docker image
+        run: |
+          docker run -d --name ci-test -p 19999:9999 ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:lite
+          sleep 5
+          curl -f --retry 3 --retry-delay 2 http://localhost:19999/health || (docker logs ci-test && exit 1)
+          docker stop ci-test
+
+      - name: Push and export Docker image
+        run: |
           docker push ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:lite
           docker push ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:latest
           docker save ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:lite > lite_image.tar
