@@ -194,31 +194,66 @@ import Footer from '../components/Footer.astro';
         <label class="checkout-label">邮箱地址（用于接收 License Key）</label>
         <input type="email" id="customerEmail" class="checkout-input" placeholder="your@email.com" required>
         <div class="checkout-methods">
-          <button class="payment-method-btn active" onclick="selectPayment('paypal')" id="paypalTab">
-            <span class="method-icon">💳</span> PayPal / 信用卡
-          </button>
-          <button class="payment-method-btn" onclick="selectPayment('wechat')" id="wechatTab">
+          <button class="payment-method-btn active" onclick="selectPayment('wechat')" id="wechatTab">
             <span class="method-icon">💚</span> 微信支付
           </button>
-        </div>
-
-        <!-- PayPal 支付区域 -->
-        <div id="paypalSection" class="payment-section">
-          <div id="paypal-button-container" style="margin-top:1rem"></div>
+          <button class="payment-method-btn" onclick="selectPayment('alipay')" id="alipayTab">
+            <span class="method-icon">💙</span> 支付宝
+          </button>
+          <button class="payment-method-btn" onclick="selectPayment('paypal')" id="paypalTab">
+            <span class="method-icon">💳</span> PayPal
+          </button>
         </div>
 
         <!-- 微信支付区域 -->
-        <div id="wechatSection" class="payment-section" style="display:none">
+        <div id="wechatSection" class="payment-section">
           <div class="wechat-pay-info">
-            <div class="wechat-qr-placeholder">
-              <div class="qr-code-frame">
-                <img src="/wechat-pay-qr.jpg" alt="微信支付收款码" width="220" height="220" loading="lazy" />
+            <div class="qr-code-container">
+              <div class="qr-code-frame" id="wechatQrCode">
+                <div class="qr-loading">
+                  <div class="spinner"></div>
+                  <p>正在生成支付二维码...</p>
+                </div>
               </div>
-              <p class="wechat-note">微信扫码支付 ¥99</p>
-              <p class="wechat-instruction">支付完成后，请发送支付截图和接收邮箱至<br/><strong>lichengfei7@gmail.com</strong></p>
-              <p class="wechat-manual">我们将在 24 小时内发送 License Key 到您的邮箱</p>
+              <div class="qr-refresh">
+                <button class="btn btn-outline btn-sm" onclick="refreshWechatQr()">🔄 刷新二维码</button>
+              </div>
             </div>
+            <p class="payment-note">微信扫码支付 ¥99</p>
+            <div class="payment-status" id="wechatStatus">
+              <span class="status-icon">⏳</span>
+              <span>等待支付...</span>
+            </div>
+            <p class="payment-tip">支付完成后，License Key 将自动发送到您的邮箱</p>
           </div>
+        </div>
+
+        <!-- 支付宝支付区域 -->
+        <div id="alipaySection" class="payment-section" style="display:none">
+          <div class="alipay-pay-info">
+            <div class="qr-code-container">
+              <div class="qr-code-frame" id="alipayQrCode">
+                <div class="qr-loading">
+                  <div class="spinner"></div>
+                  <p>正在生成支付二维码...</p>
+                </div>
+              </div>
+              <div class="qr-refresh">
+                <button class="btn btn-outline btn-sm" onclick="refreshAlipayQr()">🔄 刷新二维码</button>
+              </div>
+            </div>
+            <p class="payment-note">支付宝扫码支付 ¥99</p>
+            <div class="payment-status" id="alipayStatus">
+              <span class="status-icon">⏳</span>
+              <span>等待支付...</span>
+            </div>
+            <p class="payment-tip">支付完成后，License Key 将自动发送到您的邮箱</p>
+          </div>
+        </div>
+
+        <!-- PayPal 支付区域 -->
+        <div id="paypalSection" class="payment-section" style="display:none">
+          <div id="paypal-button-container" style="margin-top:1rem"></div>
         </div>
       </div>
 
@@ -240,7 +275,9 @@ import Footer from '../components/Footer.astro';
   <script is:inline>
     const LICENSE_SERVER = 'https://149.104.12.203';
     let selectedTier = 'pro';
-    let selectedPayment = 'paypal';
+    let selectedPayment = 'wechat';
+    let currentOrderId = null;
+    let paymentPollInterval = null;
 
     function openCheckout(tier) {
       selectedTier = tier;
@@ -257,23 +294,33 @@ import Footer from '../components/Footer.astro';
       document.getElementById('checkoutStep1').style.display = 'block';
       document.getElementById('checkoutStep2').style.display = 'none';
       overlay.style.display = 'flex';
-      if (tier === 'pro' && selectedPayment === 'paypal') {
-        setTimeout(renderPayPalButton, 200);
+      if (tier === 'pro') {
+        selectPayment('wechat');
       }
     }
 
     function closeCheckout() {
       document.getElementById('checkoutOverlay').style.display = 'none';
+      stopPaymentPolling();
     }
 
     function selectPayment(method) {
       selectedPayment = method;
       document.getElementById('paypalTab').classList.toggle('active', method === 'paypal');
       document.getElementById('wechatTab').classList.toggle('active', method === 'wechat');
+      document.getElementById('alipayTab').classList.toggle('active', method === 'alipay');
       document.getElementById('paypalSection').style.display = method === 'paypal' ? 'block' : 'none';
       document.getElementById('wechatSection').style.display = method === 'wechat' ? 'block' : 'none';
+      document.getElementById('alipaySection').style.display = method === 'alipay' ? 'block' : 'none';
+      
+      stopPaymentPolling();
+      
       if (method === 'paypal') {
         setTimeout(renderPayPalButton, 200);
+      } else if (method === 'wechat') {
+        createWechatPayment();
+      } else if (method === 'alipay') {
+        createAlipayPayment();
       }
     }
 
@@ -329,6 +376,156 @@ import Footer from '../components/Footer.astro';
         }
       }).render('#paypal-button-container');
     }
+
+    function createWechatPayment() {
+      const email = document.getElementById('customerEmail').value.trim();
+      if (!email) {
+        document.getElementById('wechatQrCode').innerHTML = '<div class="qr-error">请先输入邮箱地址</div>';
+        return;
+      }
+      
+      document.getElementById('wechatQrCode').innerHTML = `
+        <div class="qr-loading">
+          <div class="spinner"></div>
+          <p>正在生成支付二维码...</p>
+        </div>
+      `;
+      document.getElementById('wechatStatus').innerHTML = '<span class="status-icon">⏳</span><span>等待支付...</span>';
+
+      fetch(`${LICENSE_SERVER}/api/payment/wechat/create`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer_email: email,
+          tier: selectedTier,
+          expires_in_days: 365,
+          max_concurrent: 20,
+          amount: 99.0
+        })
+      })
+      .then(r => r.json())
+      .then(result => {
+        if (result.status === 'created') {
+          currentOrderId = result.order_id;
+          document.getElementById('wechatQrCode').innerHTML = `
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(result.qr_code_url)}" 
+                 alt="微信支付二维码" 
+                 width="220" 
+                 height="220" />
+          `;
+          startPaymentPolling('wechat');
+        } else {
+          document.getElementById('wechatQrCode').innerHTML = '<div class="qr-error">生成二维码失败，请重试</div>';
+        }
+      })
+      .catch(err => {
+        console.error('WeChat payment create error:', err);
+        document.getElementById('wechatQrCode').innerHTML = '<div class="qr-error">网络错误，请重试</div>';
+      });
+    }
+
+    function refreshWechatQr() {
+      createWechatPayment();
+    }
+
+    function createAlipayPayment() {
+      const email = document.getElementById('customerEmail').value.trim();
+      if (!email) {
+        document.getElementById('alipayQrCode').innerHTML = '<div class="qr-error">请先输入邮箱地址</div>';
+        return;
+      }
+      
+      document.getElementById('alipayQrCode').innerHTML = `
+        <div class="qr-loading">
+          <div class="spinner"></div>
+          <p>正在生成支付二维码...</p>
+        </div>
+      `;
+      document.getElementById('alipayStatus').innerHTML = '<span class="status-icon">⏳</span><span>等待支付...</span>';
+
+      fetch(`${LICENSE_SERVER}/api/payment/alipay/create`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer_email: email,
+          tier: selectedTier,
+          expires_in_days: 365,
+          max_concurrent: 20,
+          amount: 99.0
+        })
+      })
+      .then(r => r.json())
+      .then(result => {
+        if (result.status === 'created') {
+          currentOrderId = result.order_id;
+          document.getElementById('alipayQrCode').innerHTML = `
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(result.qr_code_url)}" 
+                 alt="支付宝支付二维码" 
+                 width="220" 
+                 height="220" />
+          `;
+          startPaymentPolling('alipay');
+        } else {
+          document.getElementById('alipayQrCode').innerHTML = '<div class="qr-error">生成二维码失败，请重试</div>';
+        }
+      })
+      .catch(err => {
+        console.error('Alipay payment create error:', err);
+        document.getElementById('alipayQrCode').innerHTML = '<div class="qr-error">网络错误，请重试</div>';
+      });
+    }
+
+    function refreshAlipayQr() {
+      createAlipayPayment();
+    }
+
+    function startPaymentPolling(method) {
+      stopPaymentPolling();
+      const statusElement = document.getElementById(method === 'wechat' ? 'wechatStatus' : 'alipayStatus');
+      const email = document.getElementById('customerEmail').value.trim();
+      
+      paymentPollInterval = setInterval(() => {
+        fetch(`${LICENSE_SERVER}/api/payment/${method}/query`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            order_id: currentOrderId,
+            customer_email: email
+          })
+        })
+        .then(r => r.json())
+        .then(result => {
+          if (result.status === 'completed') {
+            stopPaymentPolling();
+            statusElement.innerHTML = '<span class="status-icon">✅</span><span>支付成功！</span>';
+            document.getElementById('checkoutStep1').style.display = 'none';
+            document.getElementById('checkoutStep2').style.display = 'block';
+            document.getElementById('licenseDisplay').textContent = result.license_key;
+          } else if (result.status === 'not_found') {
+            stopPaymentPolling();
+            statusElement.innerHTML = '<span class="status-icon">❌</span><span>订单不存在</span>';
+          }
+        })
+        .catch(err => {
+          console.error('Payment polling error:', err);
+        });
+      }, 3000);
+    }
+
+    function stopPaymentPolling() {
+      if (paymentPollInterval) {
+        clearInterval(paymentPollInterval);
+        paymentPollInterval = null;
+      }
+    }
+
+    document.getElementById('customerEmail').addEventListener('input', function() {
+      if (selectedPayment === 'wechat') {
+        createWechatPayment();
+      } else if (selectedPayment === 'alipay') {
+        createAlipayPayment();
+      }
+    });
 
     document.getElementById('checkoutOverlay').addEventListener('click', function(e) {
       if (e.target === this) closeCheckout();
@@ -683,5 +880,84 @@ import Footer from '../components/Footer.astro';
     font-size: 0.8rem;
     color: var(--text-muted);
     margin-bottom: 1rem;
+  }
+
+  /* 支付二维码样式 */
+  .qr-code-container {
+    text-align: center;
+  }
+
+  .qr-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .qr-error {
+    color: #ef4444;
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .qr-refresh {
+    margin-top: 0.5rem;
+  }
+
+  .btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  .payment-note {
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .payment-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: rgba(79, 209, 149, 0.1);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+
+  .payment-status.error {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+  }
+
+  .status-icon {
+    font-size: 1rem;
+  }
+
+  .payment-tip {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-align: center;
+    font-style: italic;
   }
 </style>

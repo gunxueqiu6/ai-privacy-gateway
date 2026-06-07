@@ -1,0 +1,90 @@
+{
+  "version": "1.0",
+  "description": "命名实体配置文件 - 按实体类型分组",
+  "entities": {
+    "PII_PER": {
+      "name": "人名",
+      "description": "中文人名，如张三、李四",
+      "enabled": true,
+      "custom_keywords": []
+    },
+    "PII_LOC": {
+      "name": "地名",
+      "description": "中国省份、城市、区县等",
+      "enabled": true,
+      "custom_keywords": []
+    },
+    "PII_ORG": {
+      "name": "机构名",
+      "description": "公司、组织、政府机构名称",
+      "enabled": true,
+      "custom_keywords": ["阿里巴巴", "腾讯", "字节跳动", "百度", "华为", "美团", "京东"]
+    },
+    "PII_PHONE": {
+      "name": "手机号",
+      "description": "中国大陆手机号",
+      "enabled": true,
+      "custom_keywords": []
+    },
+    "PII_EMAIL": {
+      "name": "邮箱",
+      "description": "电子邮箱地址",
+      "enabled": true,
+      "custom_keywords": []
+    },
+    "PII_IDCARD": {
+      "name": "身份证",
+      "description": "中国身份证号码",
+      "enabled": true,
+      "custom_keywords": []
+    },
+    "PII_BANK": {
+      "name": "银行卡",
+      "description": "银行卡号码",
+      "enabled": true,
+      "custom_keywords": []
+    },
+    "PII_PLATE": {
+      "name": "车牌号",
+      "description": "中国车牌号",
+      "enabled": true,
+      "custom_keywords": []
+    },
+    "PII_IP": {
+      "name": "IP地址",
+      "description": "IPv4 地址",
+      "enabled": true,
+      "custom_keywords": []
+    },
+    "PII_URL": {
+      "name": "URL",
+      "description": "网址链接",
+      "enabled": true,
+      "custom_keywords": []
+    },
+    "PII_DATE": {
+      "name": "日期",
+      "description": "日期格式",
+      "enabled": false,
+      "custom_keywords": []
+    },
+    "PII_AMOUNT": {
+      "name": "金额",
+      "description": "货币金额",
+      "enabled": false,
+      "custom_keywords": []
+    },
+    "PII_POSTCODE": {
+      "name": "邮编",
+      "description": "邮政编码",
+      "enabled": false,
+      "custom_keywords": []
+    },
+    "PII_CUST": {
+      "name": "自定义",
+      "description": "自定义敏感词",
+      "enabled": true,
+      "custom_keywords": ["密码", "密钥", "token", "api_key", "secret"]
+    }
+  }
+}

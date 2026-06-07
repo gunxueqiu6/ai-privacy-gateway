@@ -1,0 +1,560 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Layout
+  title="在线 Demo — AI Privacy Gateway | 实时脱敏演示"
+  description="AI Privacy Gateway 在线演示：输入文本，实时查看脱敏效果，支持手机号、邮箱、身份证、银行卡、人名、地名等 13 种实体类型检测。"
+  canonicalURL="https://privacygw.pages.dev/demo">
+  <Nav />
+
+  <div class="page-header">
+    <h1>实时脱敏演示</h1>
+    <p>输入任意文本，体验 AI 数据隐私隔离的强大能力</p>
+  </div>
+
+  <section>
+    <div class="demo-container">
+      <!-- 输入区域 -->
+      <div class="demo-panel">
+        <div class="panel-header">
+          <h3>原始文本</h3>
+          <span class="panel-label">输入</span>
+        </div>
+        <textarea 
+          id="inputText" 
+          class="demo-textarea"
+          placeholder="请输入需要脱敏的文本...&#10;&#10;例如：&#10;张三住在北京市海淀区，电话13812345678，邮箱test@example.com，身份证号110101199001011234"></textarea>
+        <div class="panel-actions">
+          <button class="btn btn-secondary" onclick="loadExample()">📝 加载示例</button>
+          <button class="btn btn-secondary" onclick="clearText()">🗑️ 清空</button>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="processText()">🚀 开始脱敏</button>
+      </div>
+
+      <!-- 输出区域 -->
+      <div class="demo-panel results-panel">
+        <div class="panel-header">
+          <h3>脱敏结果</h3>
+          <span class="panel-label">输出</span>
+        </div>
+        <div class="demo-output" id="outputText">
+          <div class="output-placeholder">
+            <div class="placeholder-icon">🔒</div>
+            <p>脱敏结果将在此显示</p>
+          </div>
+        </div>
+        <div class="output-stats" id="outputStats"></div>
+      </div>
+    </div>
+
+    <!-- 实体类型图例 -->
+    <div class="legend-container">
+      <h4>实体类型图例</h4>
+      <div class="legend-items">
+        <span class="legend-item" style="background: #fef3c7;"><span class="legend-color"></span>手机号</span>
+        <span class="legend-item" style="background: #dbeafe;"><span class="legend-color"></span>邮箱</span>
+        <span class="legend-item" style="background: #dcfce7;"><span class="legend-color"></span>身份证</span>
+        <span class="legend-item" style="background: #fce7f3;"><span class="legend-color"></span>银行卡</span>
+        <span class="legend-item" style="background: #e0e7ff;"><span class="legend-color"></span>人名</span>
+        <span class="legend-item" style="background: #fecaca;"><span class="legend-color"></span>地名</span>
+        <span class="legend-item" style="background: #e0e0e0;"><span class="legend-color"></span>其他</span>
+      </div>
+    </div>
+
+    <!-- 检测到的实体列表 -->
+    <div class="entities-container" id="entitiesContainer" style="display: none;">
+      <h4>检测到的敏感实体</h4>
+      <div class="entities-list" id="entitiesList"></div>
+    </div>
+  </section>
+
+  <Footer />
+
+  <script is:inline>
+    const API_ENDPOINT = 'http://localhost:9999/api/mask';
+    let isProcessing = false;
+
+    function loadExample() {
+      document.getElementById('inputText').value = `张三住在北京市海淀区中关村大街1号，联系电话13812345678，邮箱test@example.com。
+身份证号：110101199001011234，银行卡号：6222021234567890123。
+公司名称：北京科技有限公司，车牌号：京A12345，IP地址：192.168.1.100。
+今天是2024年1月15日，转账金额¥999.99，邮编100080。`;
+    }
+
+    function clearText() {
+      document.getElementById('inputText').value = '';
+      document.getElementById('outputText').innerHTML = `
+        <div class="output-placeholder">
+          <div class="placeholder-icon">🔒</div>
+          <p>脱敏结果将在此显示</p>
+        </div>
+      `;
+      document.getElementById('outputStats').innerHTML = '';
+      document.getElementById('entitiesContainer').style.display = 'none';
+    }
+
+    async function processText() {
+      const input = document.getElementById('inputText').value.trim();
+      
+      if (!input) {
+        alert('请输入需要脱敏的文本');
+        return;
+      }
+
+      if (isProcessing) return;
+      isProcessing = true;
+
+      const outputDiv = document.getElementById('outputText');
+      outputDiv.innerHTML = `
+        <div class="processing-indicator">
+          <div class="spinner"></div>
+          <p>正在检测敏感数据...</p>
+        </div>
+      `;
+      document.getElementById('outputStats').innerHTML = '';
+      document.getElementById('entitiesContainer').style.display = 'none';
+
+      try {
+        const response = await fetch(API_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: input })
+        });
+
+        const result = await response.json();
+        
+        displayResult(result);
+      } catch (error) {
+        outputDiv.innerHTML = `
+          <div class="error-message">
+            <span class="error-icon">❌</span>
+            <p>请求失败，请确保本地网关已启动 (http://localhost:9999)</p>
+          </div>
+        `;
+        console.error('API Error:', error);
+      } finally {
+        isProcessing = false;
+      }
+    }
+
+    function displayResult(result) {
+      const outputDiv = document.getElementById('outputText');
+      const statsDiv = document.getElementById('outputStats');
+      const entitiesContainer = document.getElementById('entitiesContainer');
+      const entitiesList = document.getElementById('entitiesList');
+
+      // 显示脱敏文本，高亮实体
+      let highlightedText = escapeHtml(result.masked_text);
+      
+      // 为每种实体类型添加样式
+      const entityStyles = {
+        'PII_PHONE': 'background: #fef3c7; border-radius: 3px; padding: 0 4px;',
+        'PII_EMAIL': 'background: #dbeafe; border-radius: 3px; padding: 0 4px;',
+        'PII_IDCARD': 'background: #dcfce7; border-radius: 3px; padding: 0 4px;',
+        'PII_BANK': 'background: #fce7f3; border-radius: 3px; padding: 0 4px;',
+        'PII_PER': 'background: #e0e7ff; border-radius: 3px; padding: 0 4px;',
+        'PII_LOC': 'background: #fecaca; border-radius: 3px; padding: 0 4px;',
+        'PII_ORG': 'background: #e0e0e0; border-radius: 3px; padding: 0 4px;',
+        'PII_PLATE': 'background: #fef9c3; border-radius: 3px; padding: 0 4px;',
+        'PII_IP': 'background: #d1fae5; border-radius: 3px; padding: 0 4px;',
+        'PII_URL': 'background: #ede9fe; border-radius: 3px; padding: 0 4px;',
+        'PII_DATE': 'background: #fed7aa; border-radius: 3px; padding: 0 4px;',
+        'PII_AMOUNT': 'background: #a7f3d0; border-radius: 3px; padding: 0 4px;',
+        'PII_POSTCODE': 'background: #cffafe; border-radius: 3px; padding: 0 4px;',
+        'PII_CUST': 'background: #fce7f3; border-radius: 3px; padding: 0 4px;',
+      };
+
+      result.entities.forEach(entity => {
+        const style = entityStyles[entity.type] || 'background: #e0e0e0; border-radius: 3px; padding: 0 4px;';
+        const placeholder = escapeHtml(entity.placeholder);
+        highlightedText = highlightedText.replace(
+          new RegExp(escapeRegex(placeholder), 'g'),
+          `<span style="${style}">${placeholder}</span>`
+        );
+      });
+
+      outputDiv.innerHTML = `<pre class="output-content">${highlightedText}</pre>`;
+
+      // 显示统计信息
+      const stats = result.stats || {};
+      const totalMasked = Object.values(stats).reduce((sum, val) => sum + (val || 0), 0);
+      
+      statsDiv.innerHTML = `
+        <div class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-value">${totalMasked}</span>
+            <span class="stat-label">检测到的实体数</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">${result.entities.length}</span>
+            <span class="stat-label">脱敏替换数</span>
+          </div>
+        </div>
+      `;
+
+      // 显示实体列表
+      if (result.entities && result.entities.length > 0) {
+        entitiesContainer.style.display = 'block';
+        entitiesList.innerHTML = `
+          <table class="entities-table">
+            <thead>
+              <tr>
+                <th>类型</th>
+                <th>原始值</th>
+                <th>占位符</th>
+                <th>位置</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${result.entities.map(entity => `
+                <tr>
+                  <td><span class="entity-type" style="${entityStyles[entity.type] || 'background: #e0e0e0;'}">${getEntityTypeName(entity.type)}</span></td>
+                  <td class="entity-value">${escapeHtml(entity.value)}</td>
+                  <td class="entity-placeholder">${escapeHtml(entity.placeholder)}</td>
+                  <td>${entity.position}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      }
+    }
+
+    function getEntityTypeName(type) {
+      const typeNames = {
+        'PII_PHONE': '手机号',
+        'PII_EMAIL': '邮箱',
+        'PII_IDCARD': '身份证',
+        'PII_BANK': '银行卡',
+        'PII_PER': '人名',
+        'PII_LOC': '地名',
+        'PII_ORG': '机构',
+        'PII_PLATE': '车牌号',
+        'PII_IP': 'IP地址',
+        'PII_URL': 'URL',
+        'PII_DATE': '日期',
+        'PII_AMOUNT': '金额',
+        'PII_POSTCODE': '邮编',
+        'PII_CUST': '自定义'
+      };
+      return typeNames[type] || type;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function escapeRegex(text) {
+      return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    // 自动加载示例
+    loadExample();
+  </script>
+
+  <style>
+    .page-header {
+      text-align: center;
+      padding: 6rem 0 3rem;
+    }
+
+    .page-header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: var(--primary);
+    }
+
+    .page-header p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+    }
+
+    .demo-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 0 auto 3rem;
+    }
+
+    .demo-panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .panel-header h3 {
+      margin: 0;
+      color: var(--primary);
+    }
+
+    .panel-label {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      background: rgba(79, 209, 149, 0.1);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .demo-textarea {
+      flex: 1;
+      width: 100%;
+      min-height: 200px;
+      padding: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-base);
+      color: var(--text-primary);
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.3s;
+      box-sizing: border-box;
+    }
+
+    .demo-textarea:focus {
+      border-color: var(--primary);
+    }
+
+    .panel-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .btn-full {
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    .demo-output {
+      flex: 1;
+      min-height: 200px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      background: var(--bg-base);
+      overflow: auto;
+    }
+
+    .output-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 200px;
+      color: var(--text-muted);
+    }
+
+    .placeholder-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .processing-indicator {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 200px;
+    }
+
+    .processing-indicator .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 1rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .output-content {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      margin: 0;
+      color: var(--text-primary);
+      font-family: monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .error-message {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 200px;
+      color: #ef4444;
+      text-align: center;
+    }
+
+    .error-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .output-stats {
+      margin-top: 1rem;
+    }
+
+    .stats-grid {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .stat-item {
+      flex: 1;
+      text-align: center;
+      padding: 1rem;
+      background: var(--bg-base);
+      border-radius: 8px;
+    }
+
+    .stat-value {
+      display: block;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .stat-label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 0.25rem;
+    }
+
+    .legend-container {
+      max-width: 1200px;
+      margin: 0 auto 3rem;
+      padding: 1.5rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .legend-container h4 {
+      margin: 0 0 1rem 0;
+      color: var(--primary);
+    }
+
+    .legend-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .legend-color {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
+
+    .entities-container {
+      max-width: 1200px;
+      margin: 0 auto 3rem;
+      padding: 1.5rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .entities-container h4 {
+      margin: 0 0 1rem 0;
+      color: var(--primary);
+    }
+
+    .entities-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    .entities-table th,
+    .entities-table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .entities-table th {
+      background: var(--bg-base);
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .entities-table tr:hover {
+      background: rgba(79, 209, 149, 0.05);
+    }
+
+    .entity-type {
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .entity-value {
+      font-family: monospace;
+      color: var(--text-primary);
+    }
+
+    .entity-placeholder {
+      font-family: monospace;
+      color: var(--primary);
+    }
+
+    @media (max-width: 768px) {
+      .demo-container {
+        grid-template-columns: 1fr;
+      }
+
+      .panel-actions {
+        flex-direction: column;
+      }
+
+      .legend-items {
+        justify-content: center;
+      }
+
+      .entities-table {
+        display: block;
+        overflow-x: auto;
+      }
+    }
+  </style>
+</Layout>
