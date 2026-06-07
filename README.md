@@ -215,11 +215,9 @@ curl -X POST http://localhost:9999/api/mask/batch \
 
 ## License
 
-- **Lite**: MIT License (free for personal/commercial use)
-- **Pro**: ¥99/month per team (20 concurrent users)
-- **Enterprise**: Custom pricing (100+ concurrent users, SLA)
+This project is source-available. See [LICENSE](LICENSE) for details.
 
-[Buy Pro License](https://privacygw.pages.dev/pricing)
+For pricing and commercial licenses, visit [privacygw.pages.dev/pricing](https://privacygw.pages.dev/pricing).
 
 ## Contributing
 

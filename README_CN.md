@@ -140,10 +140,9 @@ python build_chain.py --version pro --license-key YOUR_KEY --customer-id YOUR_ID
 
 ## License
 
-- **Lite**: MIT License（免费用于个人/商业用途）
-- **Pro/Enterprise**: 需要商业授权
+本项目为源码可见（source-available）。详见 [LICENSE](LICENSE)。
 
-详见 [LICENSE](LICENSE)。
+定价与商业授权请访问 [privacygw.pages.dev/pricing](https://privacygw.pages.dev/pricing)。
 
 ## 贡献
 
