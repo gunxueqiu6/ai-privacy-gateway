@@ -18,7 +18,7 @@ class Config:
 
     # 版本信息
     VERSION: str = os.environ.get("VERSION", "lite")
-    VERSION_TYPE: VersionType = VersionType(os.environ.get("VERSION", "lite").lower())
+    VERSION_TYPE: VersionType = VersionType.LITE  # real value set below
 
     # License 配置
     LICENSE_KEY: str = os.environ.get("LICENSE_KEY", "free_version")
@@ -100,6 +100,16 @@ class Config:
         }
         return display_names.get(self.VERSION_TYPE, "Lite 个人版")
 
+
+# 解析版本类型，带容错
+def _parse_version_type() -> VersionType:
+    raw = os.environ.get("VERSION", "lite").lower()
+    try:
+        return VersionType(raw)
+    except ValueError:
+        return VersionType.LITE
+
+Config.VERSION_TYPE = _parse_version_type()
 
 # 全局配置实例
 config = Config()
