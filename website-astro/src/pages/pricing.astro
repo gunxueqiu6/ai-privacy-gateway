@@ -2,7 +2,10 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="定价 - AI Privacy Gateway">
+<Layout
+  title="定价 — AI Privacy Gateway | Lite 免费 · Pro ¥99/月 · Enterprise 定制"
+  description="AI Privacy Gateway 提供三个版本：Lite 个人免费版（开源）、Pro 团队版 ¥99/月（20 人）、Enterprise 企业版（定制年费）。选择适合你的版本。"
+  canonicalURL="https://privacygw.pages.dev/pricing">
   <div class="gradient-orb gradient-orb-1"></div>
   <div class="gradient-orb gradient-orb-2"></div>
 
@@ -115,9 +118,9 @@ import Layout from '../layouts/Layout.astro';
             <span>邮件技术支持</span>
           </li>
         </ul>
-        <a href="https://lemonsqueezy.com/checkout/buy/your-product-id" class="btn btn-primary">
+        <button class="btn btn-primary" onclick="openCheckout('pro')">
           立即购买
-        </a>
+        </button>
       </div>
 
       <!-- Enterprise Version -->
@@ -194,6 +197,58 @@ import Layout from '../layouts/Layout.astro';
     </div>
   </section>
 
+  <!-- 购买弹窗 -->
+  <div class="checkout-overlay" id="checkoutOverlay" style="display:none">
+    <div class="checkout-modal glass">
+      <button class="checkout-close" onclick="closeCheckout()">×</button>
+      <h3 id="checkoutTitle">购买 Pro 版</h3>
+      <p class="checkout-price" id="checkoutPrice">¥99/月</p>
+
+      <!-- 步骤 1: 输入邮箱 -->
+      <div id="checkoutStep1">
+        <label class="checkout-label">邮箱地址（用于接收 License Key）</label>
+        <input type="email" id="customerEmail" class="checkout-input" placeholder="your@email.com" required>
+        <div class="checkout-methods">
+          <button class="payment-method-btn active" onclick="selectPayment('paypal')" id="paypalTab">
+            <span class="method-icon">💳</span> PayPal / 信用卡
+          </button>
+          <button class="payment-method-btn" onclick="selectPayment('wechat')" id="wechatTab">
+            <span class="method-icon">💚</span> 微信支付
+          </button>
+        </div>
+
+        <!-- PayPal 支付区域 -->
+        <div id="paypalSection" class="payment-section">
+          <div id="paypal-button-container" style="margin-top:1rem"></div>
+        </div>
+
+        <!-- 微信支付区域 -->
+        <div id="wechatSection" class="payment-section" style="display:none">
+          <div class="wechat-pay-info">
+            <div class="wechat-qr-placeholder">
+              <div class="qr-code-frame">
+                <img src="/wechat-pay-qr.jpg" alt="微信支付收款码" width="220" height="220" loading="lazy" />
+              </div>
+              <p class="wechat-note">微信扫码支付 ¥99</p>
+              <p class="wechat-instruction">支付完成后，请发送支付截图和接收邮箱至<br/><strong>lichengfei7@gmail.com</strong></p>
+              <p class="wechat-manual">我们将在 24 小时内发送 License Key 到您的邮箱</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 步骤 2: 购买成功 -->
+      <div id="checkoutStep2" style="display:none">
+        <div class="success-icon">✅</div>
+        <h4>购买成功！</h4>
+        <p class="success-text">License Key 已发送到您的邮箱</p>
+        <div class="license-display" id="licenseDisplay"></div>
+        <p class="success-note">请检查收件箱（或垃圾邮件箱）</p>
+        <button class="btn btn-primary" onclick="closeCheckout()">关闭</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 页脚 -->
   <footer class="footer">
     <div class="container footer-content">
@@ -212,6 +267,106 @@ import Layout from '../layouts/Layout.astro';
       </p>
     </div>
   </footer>
+
+  <script src="https://www.paypal.com/sdk/js?client-id=AXO6jh-66p-C8s_kaBXq9JVQN4MVpHj5uZztJv-8k6ut5Z-B9c97BYBTtPxC90Uij1DT7cl0ytsPiukq&currency=CNY&intent=capture" async></script>
+  <script>
+    const LICENSE_SERVER = 'https://149.104.12.203:8443';
+    let selectedTier = 'pro';
+    let selectedPayment = 'paypal';
+
+    function openCheckout(tier) {
+      selectedTier = tier;
+      const overlay = document.getElementById('checkoutOverlay');
+      const title = document.getElementById('checkoutTitle');
+      const price = document.getElementById('checkoutPrice');
+      if (tier === 'pro') {
+        title.textContent = '购买 Pro 版';
+        price.textContent = '¥99/月';
+      } else {
+        title.textContent = '咨询 Enterprise 版';
+        price.textContent = '定制年费';
+      }
+      document.getElementById('checkoutStep1').style.display = 'block';
+      document.getElementById('checkoutStep2').style.display = 'none';
+      overlay.style.display = 'flex';
+      if (tier === 'pro' && selectedPayment === 'paypal') {
+        setTimeout(renderPayPalButton, 200);
+      }
+    }
+
+    function closeCheckout() {
+      document.getElementById('checkoutOverlay').style.display = 'none';
+    }
+
+    function selectPayment(method) {
+      selectedPayment = method;
+      document.getElementById('paypalTab').classList.toggle('active', method === 'paypal');
+      document.getElementById('wechatTab').classList.toggle('active', method === 'wechat');
+      document.getElementById('paypalSection').style.display = method === 'paypal' ? 'block' : 'none';
+      document.getElementById('wechatSection').style.display = method === 'wechat' ? 'block' : 'none';
+      if (method === 'paypal') {
+        setTimeout(renderPayPalButton, 200);
+      }
+    }
+
+    function renderPayPalButton() {
+      const container = document.getElementById('paypal-button-container');
+      if (!container || typeof paypal === 'undefined') return;
+      container.innerHTML = '';
+      paypal.Buttons({
+        style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
+        createOrder: function(data, actions) {
+          return actions.order.create({
+            purchase_units: [{
+              description: 'AI Privacy Gateway Pro — 月度订阅',
+              amount: { currency_code: 'CNY', value: '99.00' }
+            }]
+          });
+        },
+        onApprove: function(data, actions) {
+          const email = document.getElementById('customerEmail').value.trim();
+          if (!email) {
+            alert('请先输入邮箱地址');
+            return;
+          }
+          // 调用 License Server 完成支付 + 生成 License
+          fetch(`${LICENSE_SERVER}/api/payment/complete`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              order_id: data.orderID,
+              customer_email: email,
+              tier: selectedTier,
+              expires_in_days: 365,
+              max_concurrent: 20
+            })
+          })
+          .then(r => r.json())
+          .then(result => {
+            if (result.status === 'completed') {
+              document.getElementById('checkoutStep1').style.display = 'none';
+              document.getElementById('checkoutStep2').style.display = 'block';
+              document.getElementById('licenseDisplay').textContent = result.license_key;
+            } else {
+              alert('支付验证失败，请联系 support@privacygw.com');
+            }
+          })
+          .catch(err => {
+            console.error('Payment completion error:', err);
+            alert('网络错误，请稍后重试。如果已扣款，请联系 support@privacygw.com');
+          });
+        },
+        onError: function(err) {
+          console.error('PayPal error:', err);
+          alert('PayPal 支付出错，请重试或选择其他支付方式');
+        }
+      }).render('#paypal-button-container');
+    }
+
+    document.getElementById('checkoutOverlay').addEventListener('click', function(e) {
+      if (e.target === this) closeCheckout();
+    });
+  </script>
 </Layout>
 
 <style>
@@ -483,5 +638,173 @@ import Layout from '../layouts/Layout.astro';
     .pricing-card.popular {
       transform: none;
     }
+  }
+
+  /* 购买弹窗 */
+  .checkout-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .checkout-modal {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2.5rem;
+    max-width: 480px;
+    width: 100%;
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .checkout-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .checkout-close:hover { color: var(--text-primary); }
+
+  .checkout-modal h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary);
+  }
+
+  .checkout-price {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+  }
+
+  .checkout-label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+  }
+
+  .checkout-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-base);
+    color: var(--text-primary);
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  .checkout-input:focus {
+    border-color: var(--primary);
+  }
+
+  .checkout-methods {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .payment-method-btn {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-base);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.3s;
+  }
+
+  .payment-method-btn.active {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-bg, rgba(79, 209, 149, 0.1));
+  }
+
+  .method-icon { margin-right: 0.25rem; }
+
+  .payment-section { margin-top: 0.5rem; }
+
+  .wechat-qr-placeholder {
+    text-align: center;
+    padding: 1.5rem;
+  }
+
+  .qr-code-frame {
+    display: inline-block;
+    padding: 12px;
+    background: white;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+  }
+
+  .wechat-note {
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .wechat-instruction {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+  }
+
+  .wechat-manual {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .success-icon {
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+
+  .success-text {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+  }
+
+  .license-display {
+    background: var(--bg-base);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    font-family: monospace;
+    font-size: 1.2rem;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+    word-break: break-all;
+  }
+
+  .success-note {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
   }
 </style>

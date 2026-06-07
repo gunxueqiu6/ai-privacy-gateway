@@ -77,9 +77,9 @@ spec:
               path: /health
               port: http
             initialDelaySeconds: 10
-            periodSeconds: {{ .Values.healthCheck.interval | default "30s" }}
-            timeoutSeconds: {{ .Values.healthCheck.timeout | default "10s" }}
-            failureThreshold: {{ .Values.healthCheck.retries | default 3 }}
+            periodSeconds: {{ .Values.healthCheck.interval }}
+            timeoutSeconds: {{ .Values.healthCheck.timeout }}
+            failureThreshold: {{ .Values.healthCheck.retries }}
           readinessProbe:
             httpGet:
               path: /health

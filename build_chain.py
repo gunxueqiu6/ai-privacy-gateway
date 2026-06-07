@@ -86,7 +86,9 @@ def run_rust_build():
 
     try:
         # 使用 maturin 编译
-        cmd = ["maturin", "develop", "--release", "--out", BUILD_DIR]
+        rust_out = Path(BUILD_DIR) / "rust_modules"
+        rust_out.mkdir(parents=True, exist_ok=True)
+        cmd = ["maturin", "develop", "--release", "--out", str(rust_out)]
         print(f"  [BUILD] Running maturin...")
         result = subprocess.run(cmd, cwd=str(rust_dir), capture_output=True, text=True)
 
@@ -97,12 +99,11 @@ def run_rust_build():
             return None
 
         # 查找编译产物
-        compiled_dir = Path(BUILD_DIR)
-        pyd_files = list(compiled_dir.glob("*.pyd")) + list(compiled_dir.glob("*.so"))
+        pyd_files = list(rust_out.glob("*.pyd")) + list(rust_out.glob("*.so"))
 
         if pyd_files:
             print(f"  [OUTPUT] Found {len(pyd_files)} compiled module(s)")
-            return str(compiled_dir)
+            return str(rust_out)
 
         return None
 
@@ -270,6 +271,13 @@ def build_pro_version(license_key: str, watermark_data: dict):
     if not compiled_dir:
         print("[FAILED] Cython step failed")
         return False
+
+    # 合并 Rust 模块到 compiled_dir 供 Nuitka 打包
+    if rust_dir:
+        for f in os.listdir(rust_dir):
+            if f.endswith('.so') or f.endswith('.pyd'):
+                shutil.copy(Path(rust_dir) / f, Path(compiled_dir) / f)
+                print(f"  [MERGE] {f} (Rust → Nuitka)")
 
     # Step 3: Nuitka 编译
     binary_path = run_nuitka(compiled_dir)
