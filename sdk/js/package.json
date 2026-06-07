@@ -1,0 +1,32 @@
+{
+  "name": "@privacygw/sdk",
+  "version": "0.1.0",
+  "description": "AI Privacy Gateway JavaScript SDK — client-side data masking and gateway proxy client",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  },
+  "keywords": [
+    "privacy", "data-masking", "pii", "llm-security", "ai-privacy",
+    "deepseek", "openai", "cursor-privacy", "data-sanitization"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gunxueqiu6/ai-privacy-gateway"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "AI Privacy Gateway",
+  "version": "0.1.0",
+  "description": "一键保护 AI 对话中的敏感数据 — 自动脱敏后发送给 LLM，响应中自动还原",
+  "permissions": ["storage", "declarativeNetRequest"],
+  "host_permissions": [
+    "https://api.openai.com/*",
+    "https://api.deepseek.com/*",
+    "https://api.anthropic.com/*",
+    "https://generativelanguage.googleapis.com/*",
+    "https://*.openai.azure.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "AI Privacy Gateway"
+  },
+  "icons": {
+    "16": "icons/icon.svg",
+    "48": "icons/icon.svg",
+    "128": "icons/icon.svg"
+  }
+}

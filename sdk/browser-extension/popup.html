@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Privacy Gateway</title>
+  <style>
+    :root {
+      --ink: #0a0a0f;
+      --surface: #1a1a26;
+      --green: #3cfc8c;
+      --text: #e8e8ed;
+      --text-dim: #8b8b9e;
+      --border: rgba(255,255,255,0.08);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 300px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+      background: var(--ink);
+      color: var(--text);
+      padding: 16px;
+    }
+    .header {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+    }
+    .logo {
+      width: 28px; height: 28px; background: var(--green);
+      border-radius: 4px; display: flex; align-items: center;
+      justify-content: center; font-weight: 900; font-size: 0.65rem; color: #000;
+    }
+    .title { font-weight: 700; font-size: 0.95rem; }
+    .row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 0; border-top: 1px solid var(--border);
+    }
+    .label { font-size: 0.85rem; color: var(--text-dim); }
+    input[type="text"] {
+      width: 100%; margin-top: 8px; padding: 8px 10px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 4px; color: var(--text); font-size: 0.82rem;
+    }
+    .toggle {
+      position: relative; width: 40px; height: 22px;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 22px; transition: 0.2s;
+    }
+    .slider::before {
+      content: ''; position: absolute; height: 16px; width: 16px;
+      left: 2px; bottom: 2px; background: var(--text-dim);
+      border-radius: 50%; transition: 0.2s;
+    }
+    input:checked + .slider { background: rgba(60,252,140,0.2); border-color: var(--green); }
+    input:checked + .slider::before { transform: translateX(18px); background: var(--green); }
+    .status {
+      margin-top: 12px; padding: 8px 10px; border-radius: 4px;
+      font-size: 0.78rem; text-align: center;
+    }
+    .status.on { background: rgba(60,252,140,0.1); color: var(--green); }
+    .status.off { background: rgba(255,255,255,0.04); color: var(--text-dim); }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">PG</div>
+    <span class="title">Privacy Gateway</span>
+  </div>
+  <div class="row">
+    <span class="label">启用</span>
+    <label class="toggle">
+      <input type="checkbox" id="enabledToggle" checked>
+      <span class="slider"></span>
+    </label>
+  </div>
+  <input type="text" id="gatewayUrl" placeholder="http://localhost:9999">
+  <div class="status on" id="status">正在保护</div>
+  <script src="popup.js"></script>
+</body>
+</html>
