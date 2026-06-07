@@ -1,73 +1,11 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
 ---
 
 <Layout title="文档中心 - AI Privacy Gateway">
-  <div class="gradient-orb gradient-orb-1"></div>
-  <div class="gradient-orb gradient-orb-2"></div>
-
-  <!-- 导航栏 -->
-  <nav class="nav glass">
-    <div class="container nav-container">
-      <div class="nav-brand">
-        <span class="brand-icon">🔒</span>
-        <span class="brand-text">Privacy Gateway</span>
-      </div>
-      <div class="nav-links">
-        <a href="/#features" class="nav-link">功能</a>
-        <a href="/#how-it-works" class="nav-link">原理</a>
-        <a href="/pricing" class="nav-link">定价</a>
-        <a href="/download" class="btn btn-secondary">下载</a>
-      </div>
-    </div>
-  </nav>
-
-  <style>
-    .docs-grid {
-      display: grid; 
-      grid-template-columns: repeat(3, 1fr); 
-      gap: 1.5rem;
-      max-width: 900px; 
-      margin: 0 auto;
-    }
-    .docs-card {
-      background: var(--bg-surface); 
-      border: 1px solid var(--border);
-      border-radius: 12px; 
-      padding: 2rem;
-      display: block; 
-      color: var(--text-primary); 
-      text-decoration: none;
-      transition: all 0.3s ease;
-    }
-    .docs-card:hover { 
-      border-color: var(--border-hover); 
-      transform: translateY(-2px);
-    }
-    .docs-card .idx {
-      font-size: 0.75rem; 
-      font-weight: 600; 
-      color: var(--text-muted);
-      letter-spacing: 0.1em; 
-      margin-bottom: 1rem;
-    }
-    .docs-card h3 { 
-      font-size: 1.1rem; 
-      font-weight: 600; 
-      margin-bottom: 0.5rem; 
-      letter-spacing: -0.02em; 
-      color: var(--primary);
-    }
-    .docs-card p { 
-      color: var(--text-secondary); 
-      font-size: 0.9rem; 
-      line-height: 1.5; 
-    }
-
-    @media (max-width: 768px) {
-      .docs-grid { grid-template-columns: 1fr; }
-    }
-  </style>
+  <Nav />
 
   <div class="page-header">
     <h1>文档中心</h1>
@@ -109,24 +47,7 @@ import Layout from '../../layouts/Layout.astro';
     </div>
   </section>
 
-  <!-- 页脚 -->
-  <footer class="footer">
-    <div class="container footer-content">
-      <div class="footer-brand">
-        <span class="brand-icon">🔒</span>
-        <span class="brand-text">Privacy Gateway</span>
-      </div>
-      <div class="footer-links">
-        <a href="/download">下载</a>
-        <a href="/pricing">定价</a>
-        <a href="https://github.com/gunxueqiu6/ai-privacy-gateway">GitHub</a>
-        <a href="mailto:contact@privacygw.com">联系我们</a>
-      </div>
-      <p class="footer-copyright">
-        © 2026 AI Privacy Gateway. MIT License.
-      </p>
-    </div>
-  </footer>
+  <Footer />
 </Layout>
 
 <style>
@@ -150,94 +71,53 @@ import Layout from '../../layouts/Layout.astro';
     padding-bottom: 4rem;
   }
 
-  .nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
-    padding: 1rem 0;
-  }
-
-  .nav-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .nav-brand {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .brand-icon {
-    font-size: 1.5rem;
-  }
-
-  .brand-text {
-    font-weight: 600;
-    font-size: 1.1rem;
-    letter-spacing: -0.02em;
-  }
-
-  .nav-links {
-    display: flex;
-    align-items: center;
+  .docs-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
+    max-width: 900px;
+    margin: 0 auto;
   }
 
-  .nav-link {
-    color: var(--text-secondary);
-    font-weight: 500;
-    transition: color 0.3s ease;
-  }
-
-  .nav-link:hover {
-    color: var(--primary);
-  }
-
-  .btn-secondary {
-    background: var(--glass-bg);
+  .docs-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    display: block;
     color: var(--text-primary);
-    border: 1px solid var(--border-hover);
-    backdrop-filter: var(--glass-blur);
-    padding: 0.5rem 1rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
   }
 
-  .btn-secondary:hover {
-    border-color: var(--primary);
+  .docs-card:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+  }
+
+  .docs-card .idx {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+  }
+
+  .docs-card h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
     color: var(--primary);
   }
 
-  .footer {
-    padding: 4rem 0;
-    border-top: 1px solid var(--border);
+  .docs-card p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
   }
 
-  .footer-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
-  }
-
-  .footer-links {
-    display: flex;
-    gap: 2rem;
-  }
-
-  .footer-links a {
-    color: var(--text-muted);
-    transition: color 0.3s ease;
-  }
-
-  .footer-links a:hover {
-    color: var(--primary);
-  }
-
-  .footer-copyright {
-    color: var(--text-muted);
-    font-size: 0.875rem;
+  @media (max-width: 768px) {
+    .docs-grid { grid-template-columns: 1fr; }
   }
 </style>

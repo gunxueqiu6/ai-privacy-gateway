@@ -1,30 +1,14 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
 ---
 
 <Layout
   title="AI Privacy Gateway — 你的 AI 数据正在裸奔，30 秒装上防火墙"
   description="开源的 AI API 隐私隔离网关。自动识别并脱敏发给 AI 的手机号、邮箱、身份证、银行卡、API Key 等敏感信息。支持 Cursor、DeepSeek、Kimi、通义千问等所有 OpenAI 兼容 API。Lite 版永久免费。"
   canonicalURL="https://privacygw.pages.dev">
-  <!-- 渐变光球背景 -->
-  <div class="gradient-orb gradient-orb-1"></div>
-  <div class="gradient-orb gradient-orb-2"></div>
-
-  <!-- 导航栏 -->
-  <nav class="nav glass">
-    <div class="container nav-container">
-      <div class="nav-brand">
-        <span class="brand-icon">🔒</span>
-        <span class="brand-text">Privacy Gateway</span>
-      </div>
-      <div class="nav-links">
-        <a href="#features" class="nav-link">功能</a>
-        <a href="#how-it-works" class="nav-link">原理</a>
-        <a href="/pricing" class="nav-link">定价</a>
-        <a href="/download" class="btn btn-secondary">下载</a>
-      </div>
-    </div>
-  </nav>
+  <Nav />
 
   <!-- Hero -->
   <section class="hero">
@@ -210,92 +194,10 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
     </div>
   </section>
 
-  <!-- 页脚 -->
-  <footer class="footer">
-    <div class="container footer-content">
-      <div class="footer-brand">
-        <span class="brand-icon">🔒</span>
-        <span class="brand-text">Privacy Gateway</span>
-      </div>
-      <div class="footer-links">
-        <a href="/download">下载</a>
-        <a href="/pricing">定价</a>
-        <a href="https://github.com/gunxueqiu6/ai-privacy-gateway">GitHub</a>
-        <a href="mailto:contact@privacygw.com">联系我们</a>
-      </div>
-      <p class="footer-copyright">
-        © 2026 AI Privacy Gateway. MIT License.
-      </p>
-    </div>
-  </footer>
+  <Footer />
 </Layout>
 
 <style>
-  /* 导航栏 */
-  .nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
-    padding: 1rem 0;
-  }
-
-  .nav-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .nav-brand {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .brand-icon {
-    font-size: 1.5rem;
-  }
-
-  .brand-text {
-    font-weight: 600;
-    font-size: 1.1rem;
-    letter-spacing: -0.02em;
-  }
-
-  .nav-links {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-  }
-
-  .nav-link {
-    color: var(--text-secondary);
-    font-weight: 500;
-    transition: color 0.3s ease;
-  }
-
-  .nav-link:hover {
-    color: var(--primary);
-  }
-
-  .btn-outline {
-    background: transparent;
-    color: var(--text-primary);
-    border: 1px solid var(--border);
-    padding: 0.5rem 1rem;
-  }
-
-  .btn-outline:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-  }
-
-  .github-icon {
-    width: 16px;
-    height: 16px;
-  }
-
   /* Hero */
   .hero {
     padding: 10rem 0 8rem;
@@ -426,6 +328,23 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
   .code-comment { color: var(--text-muted); }
   .code-keyword { color: var(--accent); }
   .code-string { color: var(--primary); }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    padding: 0.5rem 1rem;
+  }
+
+  .btn-outline:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  .github-icon {
+    width: 16px;
+    height: 16px;
+  }
 
   /* 问题区 */
   .problem {
@@ -609,38 +528,6 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
     justify-content: center;
   }
 
-  /* Footer */
-  .footer {
-    padding: 4rem 0;
-    border-top: 1px solid var(--border);
-  }
-
-  .footer-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
-  }
-
-  .footer-links {
-    display: flex;
-    gap: 2rem;
-  }
-
-  .footer-links a {
-    color: var(--text-muted);
-    transition: color 0.3s ease;
-  }
-
-  .footer-links a:hover {
-    color: var(--primary);
-  }
-
-  .footer-copyright {
-    color: var(--text-muted);
-    font-size: 0.875rem;
-  }
-
   @media (max-width: 1024px) {
     .hero-content {
       grid-template-columns: 1fr;
@@ -660,10 +547,6 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
   }
 
   @media (max-width: 768px) {
-    .nav-links {
-      gap: 1rem;
-    }
-
     .hero-title {
       font-size: 2.25rem;
     }

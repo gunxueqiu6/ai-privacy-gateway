@@ -1,29 +1,14 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
 ---
 
 <Layout
   title="下载 AI Privacy Gateway — Docker / Windows / macOS"
   description="下载 AI Privacy Gateway 客户端。支持 Docker 镜像、Windows .exe、macOS .dmg。30 秒部署，保护你发给 AI 的敏感数据。"
   canonicalURL="https://privacygw.pages.dev/download">
-  <div class="gradient-orb gradient-orb-1"></div>
-  <div class="gradient-orb gradient-orb-2"></div>
-
-  <!-- 导航栏 -->
-  <nav class="nav glass">
-    <div class="container nav-container">
-      <div class="nav-brand">
-        <span class="brand-icon">🔒</span>
-        <span class="brand-text">Privacy Gateway</span>
-      </div>
-      <div class="nav-links">
-        <a href="/#features" class="nav-link">功能</a>
-        <a href="/#how-it-works" class="nav-link">原理</a>
-        <a href="/pricing" class="nav-link">定价</a>
-        <a href="/download" class="btn btn-secondary">下载</a>
-      </div>
-    </div>
-  </nav>
+  <Nav />
 
   <section class="download-section">
     <div class="container download-content">
@@ -47,8 +32,8 @@ import Layout from '../layouts/Layout.astro';
           <div class="download-icon">🪟</div>
           <h3>Windows</h3>
           <p class="download-desc">便携版，双击运行</p>
-          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/releases/download/v1.0.0/PrivacyGateway.exe" class="btn btn-primary">
-            下载 v1.0.0
+          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/releases/download/v1.0.1/PrivacyGateway.exe" class="btn btn-primary">
+            下载 v1.0.1
           </a>
         </div>
 
@@ -57,8 +42,8 @@ import Layout from '../layouts/Layout.astro';
           <div class="download-icon">🍎</div>
           <h3>macOS</h3>
           <p class="download-desc">便携版，直接运行</p>
-          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/releases/download/v1.0.0/PrivacyGateway-macos" class="btn btn-primary">
-            下载 v1.0.0
+          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/releases/download/v1.0.1/PrivacyGateway-macos" class="btn btn-primary">
+            下载 v1.0.1
           </a>
         </div>
 
@@ -102,38 +87,22 @@ import Layout from '../layouts/Layout.astro';
       </div>
 
       <div class="release-notes">
-        <h3>v1.0.0 更新日志</h3>
+        <h3>v1.0.1 更新日志</h3>
         <ul>
+          <li>✅ 修复：Docker 镜像构建问题（多阶段构建 Python 依赖）</li>
+          <li>✅ 新增：Helm ServiceAccount 模板</li>
+          <li>✅ 新增：网站网站地图 (sitemap.xml)</li>
           <li>✅ 新增：手机号、身份证、邮箱、银行卡自动脱敏</li>
           <li>✅ 新增：流式响应完美支持（SSE）</li>
           <li>✅ 新增：本地 SQLite 存储映射关系</li>
           <li>✅ 新增：自定义敏感词管理</li>
           <li>✅ 新增：可视化管理后台</li>
-          <li>✅ 优化：性能提升 30%</li>
-          <li>✅ 修复：若干 bug</li>
         </ul>
       </div>
     </div>
   </section>
 
-  <!-- 页脚 -->
-  <footer class="footer">
-    <div class="container footer-content">
-      <div class="footer-brand">
-        <span class="brand-icon">🔒</span>
-        <span class="brand-text">Privacy Gateway</span>
-      </div>
-      <div class="footer-links">
-        <a href="/download">下载</a>
-        <a href="/pricing">定价</a>
-        <a href="https://github.com/gunxueqiu6/ai-privacy-gateway">GitHub</a>
-        <a href="mailto:contact@privacygw.com">联系我们</a>
-      </div>
-      <p class="footer-copyright">
-        © 2026 AI Privacy Gateway. MIT License.
-      </p>
-    </div>
-  </footer>
+  <Footer />
 </Layout>
 
 <style>
@@ -275,96 +244,6 @@ import Layout from '../layouts/Layout.astro';
     color: var(--text-secondary);
     font-size: 0.9rem;
     padding: 0.25rem 0;
-  }
-
-  .nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
-    padding: 1rem 0;
-  }
-
-  .nav-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .nav-brand {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .brand-icon {
-    font-size: 1.5rem;
-  }
-
-  .brand-text {
-    font-weight: 600;
-    font-size: 1.1rem;
-    letter-spacing: -0.02em;
-  }
-
-  .nav-links {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-  }
-
-  .nav-link {
-    color: var(--text-secondary);
-    font-weight: 500;
-    transition: color 0.3s ease;
-  }
-
-  .nav-link:hover {
-    color: var(--primary);
-  }
-
-  .btn-outline {
-    background: transparent;
-    color: var(--text-primary);
-    border: 1px solid var(--border);
-    padding: 0.5rem 1rem;
-  }
-
-  .btn-outline:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-  }
-
-  .footer {
-    padding: 4rem 0;
-    border-top: 1px solid var(--border);
-  }
-
-  .footer-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
-  }
-
-  .footer-links {
-    display: flex;
-    gap: 2rem;
-  }
-
-  .footer-links a {
-    color: var(--text-muted);
-    transition: color 0.3s ease;
-  }
-
-  .footer-links a:hover {
-    color: var(--primary);
-  }
-
-  .footer-copyright {
-    color: var(--text-muted);
-    font-size: 0.875rem;
   }
 
   @media (max-width: 768px) {

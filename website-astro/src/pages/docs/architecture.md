@@ -1,6 +1,8 @@
 ---
 layout: ../../layouts/DocsLayout.astro
 title: 架构说明
+description: AI Privacy Gateway 架构说明 — 数据流设计、SSE 流式处理、Rust 完整性检查、请求/响应脱敏还原链路。
+canonicalURL: https://privacygw.pages.dev/docs/architecture
 ---
 
 # 架构说明

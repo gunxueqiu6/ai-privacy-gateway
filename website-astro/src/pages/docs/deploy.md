@@ -1,6 +1,8 @@
 ---
 layout: ../../layouts/DocsLayout.astro
 title: 部署指南
+description: 生产环境部署 AI Privacy Gateway — Docker Compose、裸机部署、systemd 服务、Nginx 反向代理。
+canonicalURL: https://privacygw.pages.dev/docs/deploy
 ---
 
 # 部署指南

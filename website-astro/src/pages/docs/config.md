@@ -1,6 +1,8 @@
 ---
 layout: ../../layouts/DocsLayout.astro
 title: 配置参考
+description: AI Privacy Gateway 完整配置参考 — 环境变量、脱敏规则、License 激活、自定义敏感词配置。
+canonicalURL: https://privacygw.pages.dev/docs/config
 ---
 
 # 配置参考

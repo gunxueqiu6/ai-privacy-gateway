@@ -1,6 +1,8 @@
 ---
 layout: ../../layouts/DocsLayout.astro
 title: API 参考
+description: AI Privacy Gateway 管理 API 参考 — 健康检查、统计查询、License 验证、敏感词管理接口。
+canonicalURL: https://privacygw.pages.dev/docs/api
 ---
 
 # API 参考
