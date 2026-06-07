@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Privacy Gateway - 管理面板</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --border: #2a2d3a;
+      --text: #e4e6eb;
+      --text-secondary: #8b8fa3;
+      --accent: #6366f1;
+      --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --radius: 10px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .app { display: flex; min-height: 100vh; }
+
+    .sidebar {
+      width: 240px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-logo {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 32px;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .sidebar-nav { display: flex; flex-direction: column; gap: 4px; }
+
+    .sidebar-nav button {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    .sidebar-nav button:hover { background: rgba(99, 102, 241, 0.1); color: var(--text); }
+    .sidebar-nav button.active { background: rgba(99, 102, 241, 0.2); color: #a5b4fc; font-weight: 600; }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .sidebar-footer button {
+      width: 100%;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .sidebar-footer button:hover { border-color: var(--danger); color: var(--danger); }
+
+    .main {
+      flex: 1;
+      padding: 32px;
+      overflow-y: auto;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .page-header {
+      margin-bottom: 24px;
+    }
+
+    .page-header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .page-header p { color: var(--text-secondary); font-size: 14px; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .stat-card .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 4px;
+    }
+
+    .stat-card .stat-label { color: var(--text-secondary); font-size: 13px; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 16px;
+      background: var(--accent-gradient);
+      border-radius: 2px;
+    }
+
+    .entity-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .entity-table th, .entity-table td {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .entity-table th {
+      color: var(--text-secondary);
+      font-weight: 500;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge.on { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+    .badge.off { background: rgba(139, 143, 163, 0.15); color: var(--text-secondary); }
+
+    .input-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .input-group input {
+      flex: 1;
+      padding: 10px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .input-group input:focus { outline: none; border-color: var(--accent); }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-primary { background: var(--accent-gradient); color: white; }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+
+    .keyword-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--accent);
+      border-radius: 20px;
+      font-size: 13px;
+      margin: 4px;
+    }
+
+    .keyword-tag button {
+      background: none;
+      border: none;
+      color: var(--accent);
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    .info-row:last-child { border-bottom: none; }
+    .info-label { color: var(--text-secondary); }
+    .info-value { font-weight: 500; }
+
+    .decay-bar {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      margin-top: 4px;
+      overflow: hidden;
+    }
+
+    .decay-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.5s, background 0.5s;
+    }
+
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 9999;
+      animation: slideIn 0.3s ease;
+    }
+
+    .toast.success { background: #065f46; color: #d1fae5; }
+    .toast.error { background: #7f1d1d; color: #fee2e2; }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { padding: 16px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar-logo">🛡 Privacy Gateway</div>
+      <nav class="sidebar-nav">
+        <button data-page="dashboard" class="active">📊 仪表盘</button>
+        <button data-page="keywords">🔑 敏感词管理</button>
+        <button data-page="system">⚙️ 系统状态</button>
+      </nav>
+      <div class="sidebar-footer">
+        <button id="logoutBtn">退出登录</button>
+      </div>
+    </aside>
+
+    <main class="main" id="mainContent">
+      <!-- Loading -->
+      <div id="loading" style="text-align:center;padding:80px;color:var(--text-secondary)">
+        <div style="font-size:32px;margin-bottom:16px">⏳</div>
+        <div>加载中...</div>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" style="display:none"></div>
+
+  <script>
+    const API = '';
+    const TOKEN = localStorage.getItem('admin_token');
+
+    if (!TOKEN) {
+      window.location.href = '/admin/static/login.html';
+    }
+
+    async function api(path, opts = {}) {
+      const res = await fetch(API + path, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${TOKEN}`
+        },
+        ...opts
+      });
+      if (res.status === 401) {
+        localStorage.removeItem('admin_token');
+        window.location.href = '/admin/static/login.html';
+        throw new Error('Unauthorized');
+      }
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || body.error || `HTTP ${res.status}`);
+      }
+      return res.json();
+    }
+
+    function toast(msg, type) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className = `toast ${type}`;
+      el.style.display = 'block';
+      setTimeout(() => { el.style.display = 'none'; }, 3000);
+    }
+
+    // Tab switching
+    document.querySelectorAll('.sidebar-nav button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.sidebar-nav button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const page = btn.dataset.page;
+        if (page === 'dashboard') renderDashboard();
+        else if (page === 'keywords') renderKeywords();
+        else if (page === 'system') renderSystem();
+      });
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      try { await api('/admin/logout', { method: 'POST' }); } catch(e) {}
+      localStorage.removeItem('admin_token');
+      window.location.href = '/admin/static/login.html';
+    });
+
+    // ==================== Dashboard ====================
+    async function renderDashboard() {
+      const main = document.getElementById('mainContent');
+      try {
+        const stats = await api('/admin/stats');
+        main.innerHTML = `
+          <div class="page-header">
+            <h1>仪表盘</h1>
+            <p>实时监控隐私网关运行状态</p>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-value">${stats.today_masked || 0}</div>
+              <div class="stat-label">今日脱敏次数</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">${stats.today_entities || 0}</div>
+              <div class="stat-label">今日拦截实体</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">${stats.total_sessions || 0}</div>
+              <div class="stat-label">活跃会话</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">${stats.total_mappings || 0}</div>
+              <div class="stat-label">映射记录总数</div>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title">版本信息</div>
+            <div class="info-row"><span class="info-label">版本</span><span class="info-value">${stats.version || '—'}</span></div>
+            <div class="info-row"><span class="info-label">运行时间</span><span class="info-value">${stats.uptime || '—'}</span></div>
+          </div>
+        `;
+      } catch(e) {
+        main.innerHTML = `<div class="page-header"><h1>仪表盘</h1></div>
+          <div class="section"><div class="empty-state">❌ 加载失败: ${e.message}</div></div>`;
+      }
+    }
+
+    // ==================== Keywords ====================
+    let keywordList = [];
+    let entityList = [];
+
+    async function renderKeywords() {
+      const main = document.getElementById('mainContent');
+      main.innerHTML = `
+        <div class="page-header">
+          <h1>敏感词管理</h1>
+          <p>管理自定义敏感词和实体类型</p>
+        </div>
+        <div class="section">
+          <div class="section-title">自定义敏感词</div>
+          <div class="input-group">
+            <input type="text" id="keywordInput" placeholder="输入敏感词，回车添加">
+            <button class="btn btn-primary" id="addKeywordBtn">添加</button>
+          </div>
+          <div id="keywordsList"><div class="empty-state">加载中...</div></div>
+        </div>
+        <div class="section" id="entitySection">
+          <div class="section-title">实体类型</div>
+          <div id="entityTable"><div class="empty-state">加载中...</div></div>
+        </div>
+      `;
+
+      document.getElementById('addKeywordBtn').addEventListener('click', addKeyword);
+      document.getElementById('keywordInput').addEventListener('keydown', e => {
+        if (e.key === 'Enter') addKeyword();
+      });
+
+      await Promise.all([loadKeywords(), loadEntities()]);
+    }
+
+    async function loadKeywords() {
+      try {
+        const data = await api('/admin/keywords');
+        keywordList = data.keywords || [];
+        renderKeywordTags();
+      } catch(e) {
+        document.getElementById('keywordsList').innerHTML = `<div class="empty-state">加载失败</div>`;
+      }
+    }
+
+    function renderKeywordTags() {
+      const el = document.getElementById('keywordsList');
+      if (keywordList.length === 0) {
+        el.innerHTML = '<div class="empty-state">暂无自定义敏感词，请添加</div>';
+        return;
+      }
+      el.innerHTML = keywordList.map(kw => `
+        <span class="keyword-tag">
+          ${kw}
+          <button data-kw="${kw}" onclick="deleteKeyword('${kw}')">×</button>
+        </span>
+      `).join('');
+    }
+
+    async function addKeyword() {
+      const input = document.getElementById('keywordInput');
+      const kw = input.value.trim();
+      if (!kw) return;
+      try {
+        await api('/admin/keywords/add', { method: 'POST', body: JSON.stringify({ keyword: kw }) });
+        keywordList.push(kw);
+        input.value = '';
+        renderKeywordTags();
+        toast(`关键词 "${kw}" 已添加`, 'success');
+      } catch(e) {
+        toast(e.message, 'error');
+      }
+    }
+
+    async function deleteKeyword(kw) {
+      try {
+        await api('/admin/keywords/delete', { method: 'POST', body: JSON.stringify({ keyword: kw }) });
+        keywordList = keywordList.filter(k => k !== kw);
+        renderKeywordTags();
+        toast(`关键词 "${kw}" 已删除`, 'success');
+      } catch(e) {
+        toast(e.message, 'error');
+      }
+    }
+
+    async function loadEntities() {
+      try {
+        const data = await api('/api/entities');
+        entityList = data.entities || [];
+        renderEntityTable();
+      } catch(e) {
+        document.getElementById('entityTable').innerHTML = `<div class="empty-state">加载失败</div>`;
+      }
+    }
+
+    function renderEntityTable() {
+      document.getElementById('entityTable').innerHTML = `
+        <table class="entity-table">
+          <thead><tr><th>类型</th><th>名称</th><th>描述</th><th>状态</th></tr></thead>
+          <tbody>
+            ${entityList.map(e => `
+              <tr>
+                <td><code style="font-size:12px;color:var(--accent)">${e.type}</code></td>
+                <td>${e.name}</td>
+                <td style="color:var(--text-secondary)">${e.description}</td>
+                <td><span class="badge ${e.enabled ? 'on' : 'off'}">${e.enabled ? '启用' : '禁用'}</span></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // ==================== System ====================
+    async function renderSystem() {
+      const main = document.getElementById('mainContent');
+      main.innerHTML = `
+        <div class="page-header">
+          <h1>系统状态</h1>
+          <p>查看系统版本、完整性、衰减等级</p>
+        </div>
+        <div id="systemContent"><div class="empty-state">加载中...</div></div>
+      `;
+
+      try {
+        const [version, integrity] = await Promise.all([
+          api('/admin/version'),
+          api('/admin/integrity').catch(() => ({ available: false, message: '不可用' }))
+        ]);
+
+        const decayLevels = ['正常', '警告', '规则过期', '延迟注入', '丢弃5%', '已禁用', '已关闭'];
+        const decayColors = ['#10b981', '#f59e0b', '#f97316', '#ef4444', '#ef4444', '#7f1d1d', '#7f1d1d'];
+
+        document.getElementById('systemContent').innerHTML = `
+          <div class="section">
+            <div class="section-title">版本</div>
+            <div class="info-row"><span class="info-label">版本号</span><span class="info-value">${version.version}</span></div>
+            <div class="info-row"><span class="info-label">版本类型</span><span class="info-value">${version.version_type}</span></div>
+            <div class="info-row"><span class="info-label">显示版本</span><span class="info-value">${version.version_display}</span></div>
+          </div>
+          <div class="section">
+            <div class="section-title">功能开关</div>
+            ${Object.entries(version.features || {}).map(([k, v]) => `
+              <div class="info-row"><span class="info-label">${k}</span><span class="info-value"><span class="badge ${v ? 'on' : 'off'}">${v ? 'ON' : 'OFF'}</span></span></div>
+            `).join('')}
+          </div>
+          <div class="section">
+            <div class="section-title">完整性检查</div>
+            <div class="info-row"><span class="info-label">可用性</span><span class="info-value"><span class="badge ${integrity.available ? 'on' : 'off'}">${integrity.available ? '可用' : '不可用'}</span></span></div>
+            ${integrity.anomaly_count !== undefined ? `
+              <div class="info-row"><span class="info-label">异常计数</span><span class="info-value">${integrity.anomaly_count}</span></div>
+            ` : ''}
+          </div>
+          <div class="section">
+            <div class="section-title">危险操作</div>
+            <button class="btn btn-danger" id="clearMappingsBtn">清除所有映射记录</button>
+          </div>
+        `;
+
+        document.getElementById('clearMappingsBtn').addEventListener('click', async () => {
+          if (!confirm('确定要清除所有映射记录吗？此操作不可撤销！')) return;
+          try {
+            await api('/admin/clear', { method: 'POST' });
+            toast('映射记录已清除', 'success');
+          } catch(e) {
+            toast(e.message, 'error');
+          }
+        });
+      } catch(e) {
+        document.getElementById('systemContent').innerHTML = `<div class="section"><div class="empty-state">❌ 加载失败: ${e.message}</div></div>`;
+      }
+    }
+
+    // Initial load
+    renderDashboard();
+  </script>
+</body>
+</html>

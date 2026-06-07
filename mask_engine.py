@@ -1,6 +1,7 @@
 """
 脱敏引擎模块 - 抽象接口设计
 支持正则引擎 (Lite/Pro) 和 AC 自动机 (Enterprise)
+集成 NER 命名实体识别，支持 13 种实体类型
 """
 import re
 import hashlib
@@ -11,6 +12,13 @@ from typing import Tuple, Dict, List, Optional
 from config import config
 
 logger = logging.getLogger(__name__)
+
+try:
+    from ner_engine import get_ner_engine, NEREntityType
+    HAS_NER = True
+except ImportError:
+    HAS_NER = False
+    logger.warning("NER engine not available, using regex only")
 
 
 class MaskEngineInterface(ABC):
@@ -59,66 +67,178 @@ class RegexMaskEngine(MaskEngineInterface):
     # 加密密钥
     SECRET_KEY = "ai_privacy_vault_key_2024"
 
-    # 内置正则规则
+    # 序列计数器（用于确定性格式）
+    _sequence_counter = 0
+
+    # 内置正则规则 - 扩展到 13 种实体类型
     BUILTIN_RULES = {
         "phone": re.compile(r'(?<!\d)(1[3-9]\d{9})(?!\d)'),
         "email": re.compile(r'\b([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b'),
         "idcard": re.compile(r'(?<!\d)([1-9]\d{5}(?:19|20)\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])\d{3}[\dXx])(?!\d)'),
         "bankcard": re.compile(r'(?<!\d)([1-9]\d{15,18})(?!\d)'),
+        "plate": re.compile(r'[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z][A-Z0-9]{5}'),
+        "ip": re.compile(r'(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'),
+        "url": re.compile(r'https?://[^\s]+'),
+        "date": re.compile(r'\d{4}[-/年](?:0?[1-9]|1[0-2])[-/月](?:0?[1-9]|[12]\d|3[01])日?'),
+        "amount": re.compile(r'(?:¥|￥|\$)\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?'),
+        "postcode": re.compile(r'(?<!\d)([1-9]\d{5})(?!\d)'),
+    }
+
+    # 实体类型映射
+    ENTITY_TYPE_MAP = {
+        "phone": "PII_PHONE",
+        "email": "PII_EMAIL",
+        "idcard": "PII_IDCARD",
+        "bankcard": "PII_BANK",
+        "plate": "PII_PLATE",
+        "ip": "PII_IP",
+        "url": "PII_URL",
+        "date": "PII_DATE",
+        "amount": "PII_AMOUNT",
+        "postcode": "PII_POSTCODE",
+        "person": "PII_PER",
+        "location": "PII_LOC",
+        "organization": "PII_ORG",
+        "custom": "PII_CUST",
     }
 
     def __init__(self):
         self.custom_keywords: List[str] = []
+        self._ner_engine = None
+        if HAS_NER:
+            self._ner_engine = get_ner_engine()
+
+    @classmethod
+    def _get_next_sequence(cls) -> str:
+        """获取下一个序列号（线程安全）"""
+        import threading
+        with threading.Lock():
+            cls._sequence_counter += 1
+            return f"{cls._sequence_counter:08d}"
 
     def _encrypt(self, text: str) -> str:
         """生成占位符哈希（确定性）"""
-        return hashlib.sha256(f"{self.SECRET_KEY}_{text}".encode()).hexdigest()[:16]
+        return hashlib.sha256(f"{self.SECRET_KEY}_{text}".encode()).hexdigest()[:12]
+
+    def _create_placeholder(self, entity_type: str, value: str) -> str:
+        """创建标准占位符"""
+        if config.feature_deterministic_hash:
+            # Pro/Enterprise 版：确定性格式，支持离线还原
+            hash_value = self._encrypt(value)
+            return f"[PII_{entity_type.upper()}_{hash_value}]"
+        else:
+            # Lite 版：序列格式
+            sequence = self._get_next_sequence()
+            return f"[PII_{entity_type.upper()}_{sequence}]"
 
     def mask(self, text: str) -> Tuple[str, Dict[str, str], Dict[str, int]]:
-        """正则脱敏处理"""
+        """正则脱敏处理 - 支持 13 种实体类型"""
         result = text
         mappings = {}
-        stats = {"phone": 0, "email": 0, "idcard": 0, "bankcard": 0, "custom": 0}
+        stats = {
+            "phone": 0, "email": 0, "idcard": 0, "bankcard": 0,
+            "plate": 0, "ip": 0, "url": 0, "date": 0, "amount": 0, "postcode": 0,
+            "person": 0, "location": 0, "organization": 0, "custom": 0
+        }
 
-        # 1. 手机号
+        # 1. 使用 NER 引擎检测人名、地名、机构名
+        if self._ner_engine:
+            entities = self._ner_engine.detect(text)
+            for entity in entities:
+                entity_type = entity.entity_type.value.lower()
+                if entity_type in stats:
+                    placeholder = self._create_placeholder(entity_type, entity.value)
+                    result = result.replace(entity.value, placeholder)
+                    mappings[placeholder] = entity.value
+                    stats[entity_type] += 1
+                    logger.debug(f"[脱敏] {entity_type} '{entity.value}' -> {placeholder}")
+
+        # 2. 手机号
         for match in self.BUILTIN_RULES["phone"].findall(result):
-            placeholder = f"[VAULT_PHONE_{self._encrypt(match)}]"
+            placeholder = self._create_placeholder("phone", match)
             result = result.replace(match, placeholder)
             mappings[placeholder] = match
             stats["phone"] += 1
             logger.debug(f"[脱敏] 手机号 -> {placeholder}")
 
-        # 2. 邮箱
+        # 3. 邮箱
         for match in self.BUILTIN_RULES["email"].findall(result):
-            placeholder = f"[VAULT_EMAIL_{self._encrypt(match)}]"
+            placeholder = self._create_placeholder("email", match)
             result = result.replace(match, placeholder)
             mappings[placeholder] = match
             stats["email"] += 1
-            logger.debug(f"[脱敏] 邉箱 -> {placeholder}")
+            logger.debug(f"[脱敏] 邮箱 -> {placeholder}")
 
-        # 3. 身份证
+        # 4. 身份证
         for match in self.BUILTIN_RULES["idcard"].findall(result):
-            placeholder = f"[VAULT_IDCARD_{self._encrypt(match)}]"
+            placeholder = self._create_placeholder("idcard", match)
             result = result.replace(match, placeholder)
             mappings[placeholder] = match
             stats["idcard"] += 1
             logger.debug(f"[脱敏] 身份证 -> {placeholder}")
 
-        # 4. 银行卡
+        # 5. 银行卡
         for match in self.BUILTIN_RULES["bankcard"].findall(result):
-            # 排除手机号格式
             if len(match) == 11 and match.startswith('1'):
                 continue
-            placeholder = f"[VAULT_BANK_{self._encrypt(match)}]"
+            placeholder = self._create_placeholder("bankcard", match)
             result = result.replace(match, placeholder)
             mappings[placeholder] = match
             stats["bankcard"] += 1
             logger.debug(f"[脱敏] 银行卡 -> {placeholder}")
 
-        # 5. 自定义关键词
+        # 6. 车牌号
+        for match in self.BUILTIN_RULES["plate"].findall(result):
+            placeholder = self._create_placeholder("plate", match)
+            result = result.replace(match, placeholder)
+            mappings[placeholder] = match
+            stats["plate"] += 1
+            logger.debug(f"[脱敏] 车牌号 -> {placeholder}")
+
+        # 7. IP 地址
+        for match in self.BUILTIN_RULES["ip"].findall(result):
+            placeholder = self._create_placeholder("ip", match)
+            result = result.replace(match, placeholder)
+            mappings[placeholder] = match
+            stats["ip"] += 1
+            logger.debug(f"[脱敏] IP地址 -> {placeholder}")
+
+        # 8. URL
+        for match in self.BUILTIN_RULES["url"].findall(result):
+            placeholder = self._create_placeholder("url", match)
+            result = result.replace(match, placeholder)
+            mappings[placeholder] = match
+            stats["url"] += 1
+            logger.debug(f"[脱敏] URL -> {placeholder}")
+
+        # 9. 日期
+        for match in self.BUILTIN_RULES["date"].findall(result):
+            placeholder = self._create_placeholder("date", match)
+            result = result.replace(match, placeholder)
+            mappings[placeholder] = match
+            stats["date"] += 1
+            logger.debug(f"[脱敏] 日期 -> {placeholder}")
+
+        # 10. 金额
+        for match in self.BUILTIN_RULES["amount"].findall(result):
+            placeholder = self._create_placeholder("amount", match)
+            result = result.replace(match, placeholder)
+            mappings[placeholder] = match
+            stats["amount"] += 1
+            logger.debug(f"[脱敏] 金额 -> {placeholder}")
+
+        # 11. 邮编
+        for match in self.BUILTIN_RULES["postcode"].findall(result):
+            placeholder = self._create_placeholder("postcode", match)
+            result = result.replace(match, placeholder)
+            mappings[placeholder] = match
+            stats["postcode"] += 1
+            logger.debug(f"[脱敏] 邮编 -> {placeholder}")
+
+        # 12. 自定义关键词
         for keyword in self.custom_keywords:
             if keyword in result:
-                placeholder = f"[VAULT_CUST_{self._encrypt(keyword)}]"
+                placeholder = self._create_placeholder("custom", keyword)
                 result = result.replace(keyword, placeholder)
                 mappings[placeholder] = keyword
                 stats["custom"] += 1

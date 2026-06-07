@@ -3,7 +3,6 @@ RBAC 权限控制模块 - Enterprise 版
 角色：超级管理员 / 审计员 / 普通用户
 用户数据持久化到数据库，会话令牌保留在内存
 """
-import hashlib
 import json
 import logging
 import time
@@ -113,11 +112,18 @@ class RBACManager:
         self._init_default_users()
 
     def _hash_password(self, password: str) -> str:
-        """哈希密码"""
-        return hashlib.sha256(f"rbac_salt_{password}".encode()).hexdigest()
+        """哈希密码 - 使用 database.py 中的 bcrypt"""
+        db = self._get_db()
+        return db.hash_password(password)
+
+    def _verify_password(self, password: str, stored_hash: str) -> bool:
+        """验证密码 - 支持旧 SHA-256 和新 bcrypt"""
+        db = self._get_db()
+        return db.verify_password(password, stored_hash)
 
     def _generate_token(self, user_id: str) -> str:
         """生成会话令牌"""
+        import hashlib
         return hashlib.sha256(f"{user_id}_{time.time()}".encode()).hexdigest()
 
     def _get_db(self):
@@ -140,18 +146,29 @@ class RBACManager:
         logger.info("[RBAC] 默认用户已创建并持久化到数据库")
 
     def authenticate(self, username: str, password: str) -> Optional[str]:
-        """认证用户"""
+        """认证用户 - 支持密码自动升级"""
         db = self._get_db()
         row = db.get_rbac_user_by_username(username)
-        if row and row["is_active"] and row["password_hash"] == self._hash_password(password):
-            token = self._generate_token(row["user_id"])
-            self.sessions[token] = row["user_id"]
-            db.update_rbac_user_login(row["user_id"], datetime.now().isoformat())
-            logger.info(f"[RBAC] 用户 {username} 登录成功")
-            return token
+        if not row or not row["is_active"]:
+            logger.warning(f"[RBAC] 用户 {username} 不存在或已禁用")
+            return None
 
-        logger.warning(f"[RBAC] 用户 {username} 登录失败")
-        return None
+        # 验证密码（支持旧 SHA-256 和新 bcrypt）
+        if not self._verify_password(password, row["password_hash"]):
+            logger.warning(f"[RBAC] 用户 {username} 密码验证失败")
+            return None
+
+        # 如果密码是旧格式，自动升级到 bcrypt
+        if db.needs_password_upgrade(row["password_hash"]):
+            new_hash = self._hash_password(password)
+            db.update_rbac_user_password(row["user_id"], new_hash)
+            logger.info(f"[RBAC] 用户 {username} 密码已升级到 bcrypt")
+
+        token = self._generate_token(row["user_id"])
+        self.sessions[token] = row["user_id"]
+        db.update_rbac_user_login(row["user_id"], datetime.now().isoformat())
+        logger.info(f"[RBAC] 用户 {username} 登录成功")
+        return token
 
     def logout(self, token: str):
         """登出"""

@@ -91,6 +91,11 @@ class Config:
         """License 验证 - Pro/Enterprise"""
         return self.is_pro or self.is_enterprise
 
+    @property
+    def feature_deterministic_hash(self) -> bool:
+        """确定性格式占位符 - Pro/Enterprise"""
+        return self.is_pro or self.is_enterprise
+
     def get_version_display(self) -> str:
         """获取版本显示名称"""
         display_names = {

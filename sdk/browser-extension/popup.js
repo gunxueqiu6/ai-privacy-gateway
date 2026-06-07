@@ -1,28 +1,113 @@
-const enabledToggle = document.getElementById('enabledToggle');
-const gatewayInput = document.getElementById('gatewayUrl');
-const statusEl = document.getElementById('status');
+class PopupHandler {
+  constructor() {
+    this.init();
+  }
 
-chrome.storage.sync.get(['enabled', 'gatewayUrl'], (result) => {
-  enabledToggle.checked = result.enabled !== false;
-  gatewayInput.value = result.gatewayUrl || 'http://localhost:9999';
-  updateStatus();
-});
+  init() {
+    this.setupEventListeners();
+    this.loadStats();
+    this.checkGatewayStatus();
+    this.loadMaskState();
+  }
 
-enabledToggle.addEventListener('change', () => {
-  chrome.storage.sync.set({ enabled: enabledToggle.checked });
-  updateStatus();
-});
+  setupEventListeners() {
+    document.getElementById('maskToggle').addEventListener('click', () => {
+      this.toggleMask();
+    });
 
-gatewayInput.addEventListener('change', () => {
-  chrome.storage.sync.set({ gatewayUrl: gatewayInput.value });
-});
+    document.getElementById('openOptions').addEventListener('click', () => {
+      chrome.runtime.openOptionsPage();
+    });
 
-function updateStatus() {
-  if (enabledToggle.checked) {
-    statusEl.textContent = '正在保护';
-    statusEl.className = 'status on';
-  } else {
-    statusEl.textContent = '已暂停';
-    statusEl.className = 'status off';
+    document.getElementById('openDocs').addEventListener('click', () => {
+      chrome.tabs.create({ url: 'https://privacygw.pages.dev/docs' });
+    });
+  }
+
+  async loadStats() {
+    const response = await chrome.runtime.sendMessage({ action: 'getStats' });
+    if (response) {
+      document.getElementById('maskCount').textContent = response.maskCount || 0;
+      document.getElementById('entityCount').textContent = response.entityCount || 0;
+      
+      if (response.lastUpdate) {
+        const date = new Date(response.lastUpdate);
+        document.getElementById('lastUpdate').textContent = date.toLocaleString('zh-CN');
+      }
+    }
+  }
+
+  async checkGatewayStatus() {
+    const settings = await chrome.runtime.sendMessage({ action: 'getSettings' });
+    const gatewayUrl = settings?.gatewayUrl || 'http://localhost:9999';
+
+    try {
+      const response = await fetch(`${gatewayUrl}/health`);
+      if (response.ok) {
+        this.setGatewayStatus(true, '网关已连接');
+      } else {
+        this.setGatewayStatus(false, '网关未响应');
+      }
+    } catch (error) {
+      this.setGatewayStatus(false, '网关不可达');
+    }
+  }
+
+  setGatewayStatus(online, message) {
+    const dot = document.getElementById('statusDot');
+    const text = document.getElementById('statusText');
+    
+    if (online) {
+      dot.classList.add('online');
+    } else {
+      dot.classList.remove('online');
+    }
+    text.textContent = message;
+  }
+
+  async loadMaskState() {
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tabs.length > 0) {
+      try {
+        const response = await chrome.tabs.sendMessage(tabs[0].id, { action: 'getState' });
+        if (response) {
+          this.updateToggle(response.isMaskEnabled);
+        }
+      } catch (error) {
+        this.updateToggle(true);
+      }
+    }
+  }
+
+  async toggleMask() {
+    const toggle = document.getElementById('maskToggle');
+    const isEnabled = !toggle.classList.contains('active');
+    
+    this.updateToggle(isEnabled);
+
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tabs.length > 0) {
+      try {
+        await chrome.tabs.sendMessage(tabs[0].id, { 
+          action: 'toggleMask', 
+          enabled: isEnabled 
+        });
+      } catch (error) {
+        console.log('Content script not available');
+      }
+    }
+  }
+
+  updateToggle(isEnabled) {
+    const toggle = document.getElementById('maskToggle');
+    if (isEnabled) {
+      toggle.classList.add('active');
+    } else {
+      toggle.classList.remove('active');
+    }
   }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  new PopupHandler();
+});

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Privacy Gateway - 设置</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .header {
+      padding: 20px 0;
+      border-bottom: 1px solid #e0e0e0;
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    .header p {
+      font-size: 14px;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .section {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 2px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+    }
+
+    .entity-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .entity-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      background: #f9f9f9;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .entity-item:hover {
+      background: #f0f0f0;
+    }
+
+    .entity-label {
+      flex: 1;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .entity-description {
+      font-size: 12px;
+      color: #999;
+      margin-top: 2px;
+    }
+
+    .switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      background: #ddd;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .switch.active {
+      background: #667eea;
+    }
+
+    .switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.3s;
+    }
+
+    .switch.active::after {
+      transform: translateX(20px);
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #666;
+      margin-left: 12px;
+    }
+
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+
+    .keywords-section {
+      margin-top: 16px;
+    }
+
+    .keywords-input-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .keywords-input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .keywords-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .keyword-tag {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: #e8f4fd;
+      color: #1e88e5;
+      border-radius: 20px;
+      font-size: 13px;
+    }
+
+    .keyword-tag button {
+      background: none;
+      border: none;
+      color: #1e88e5;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .status-message {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-top: 16px;
+      display: none;
+    }
+
+    .status-message.success {
+      background: #e8f5e9;
+      color: #2e7d32;
+      display: block;
+    }
+
+    .status-message.error {
+      background: #ffebee;
+      color: #c62828;
+      display: block;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .stat-card {
+      background: #f9f9f9;
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #999;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 20px 0;
+      color: #999;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔒 AI Privacy Gateway</h1>
+      <p>配置您的隐私保护设置</p>
+    </div>
+
+    <div class="section">
+      <div class="section-title">网关配置</div>
+      <div class="form-group">
+        <label class="form-label">网关地址</label>
+        <input type="text" class="form-input" id="gatewayUrl" placeholder="http://localhost:9999">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">实体类型</div>
+      <div class="entity-list" id="entityList"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">自定义敏感词</div>
+      <div class="keywords-section">
+        <div class="keywords-input-group">
+          <input type="text" class="keywords-input" id="keywordInput" placeholder="输入敏感词">
+          <button class="btn btn-primary" id="addKeyword">添加</button>
+        </div>
+        <div class="keywords-list" id="keywordsList"></div>
+      </div>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
+      <button class="btn btn-secondary" id="resetBtn">重置</button>
+      <button class="btn btn-primary" id="saveBtn">保存设置</button>
+    </div>
+
+    <div class="section" style="margin-top: 16px;">
+      <div class="section-title">脱敏统计</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="totalMasked">--</div>
+          <div class="stat-label">累计脱敏次数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="totalEntities">--</div>
+          <div class="stat-label">累计拦截实体</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="lastUpdated">--</div>
+          <div class="stat-label">最后更新</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="activeStatus">--</div>
+          <div class="stat-label">保护状态</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="status-message" id="statusMessage"></div>
+
+    <div class="footer">
+      AI Privacy Gateway v1.0.0 | 保护您的 AI 对话隐私
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
