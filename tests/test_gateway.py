@@ -18,7 +18,7 @@ class TestMaskEngine:
         masked, mappings, stats = engine.mask(text)
 
         assert "13812345678" not in masked
-        assert "[VAULT_" in masked
+        assert "[PII_PHONE_" in masked
         assert len(mappings) > 0
         assert stats["phone"] >= 1
 
@@ -31,7 +31,7 @@ class TestMaskEngine:
         masked, mappings, stats = engine.mask(text)
 
         assert "test@example.com" not in masked
-        assert "[VAULT_" in masked
+        assert "[PII_EMAIL_" in masked
         assert stats["email"] >= 1
 
     def test_idcard_mask(self):
@@ -43,7 +43,7 @@ class TestMaskEngine:
         masked, mappings, stats = engine.mask(text)
 
         assert "110101199001011234" not in masked
-        assert "[VAULT_" in masked
+        assert "[PII_IDCARD_" in masked
         assert stats["idcard"] >= 1
 
     def test_unmask(self):
@@ -57,6 +57,7 @@ class TestMaskEngine:
 
         assert "13812345678" in unmasked
         assert "test@example.com" in unmasked
+        assert "[PII_PHONE_" in masked or "[PII_EMAIL_" in masked
 
     def test_custom_keyword(self):
         """测试自定义敏感词"""
@@ -68,7 +69,7 @@ class TestMaskEngine:
         masked, mappings, stats = engine.mask(text)
 
         assert "密码" not in masked
-        assert "[VAULT_" in masked
+        assert "[PII_" in masked
 
 
 class TestStreamBuffer:
