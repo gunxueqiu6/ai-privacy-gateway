@@ -2,9 +2,16 @@
 interface Props {
   title: string;
   description?: string;
+  ogImage?: string;
+  canonicalURL?: string;
 }
 
-const { title, description = 'AI Privacy Gateway - Your team\'s AI data is exposed. Install a firewall in 30 seconds.' } = Astro.props;
+const {
+  title,
+  description = 'AI Privacy Gateway — 你的 AI 数据正在裸奔，30 秒装上防火墙。开源 AI API 隐私隔离网关，自动脱敏手机号/邮箱/身份证/银行卡，支持 Cursor/DeepSeek/Kimi。',
+  ogImage = 'https://privacygw.pages.dev/og-image.png',
+  canonicalURL = 'https://privacygw.pages.dev',
+} = Astro.props;
 ---
 
 <!DOCTYPE html>
@@ -12,9 +19,56 @@ const { title, description = 'AI Privacy Gateway - Your team\'s AI data is expos
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content={description}>
+
+  <!-- Primary Meta -->
   <title>{title}</title>
+  <meta name="description" content={description}>
+  <meta name="keywords" content="AI隐私,数据脱敏,隐私网关,LLM安全,Cursor隐私,DeepSeek代理,API隐私隔离,PII检测,数据掩码,开源">
+  <meta name="author" content="AI Privacy Gateway">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href={canonicalURL}>
+
+  <!-- Open Graph -->
+  <meta property="og:title" content={title}>
+  <meta property="og:description" content={description}>
+  <meta property="og:type" content="website">
+  <meta property="og:url" content={canonicalURL}>
+  <meta property="og:image" content={ogImage}>
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:site_name" content="AI Privacy Gateway">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content={title}>
+  <meta name="twitter:description" content={description}>
+  <meta name="twitter:image" content={ogImage}>
+
+  <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/favicon.svg">
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'AI Privacy Gateway',
+    applicationCategory: 'SecurityApplication',
+    operatingSystem: 'Linux, Windows, macOS',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'CNY',
+      description: 'Lite 版 — 永久免费开源'
+    },
+    description: description,
+    url: 'https://privacygw.pages.dev',
+    author: {
+      '@type': 'Organization',
+      name: 'AI Privacy Gateway'
+    }
+  })} />
 </head>
 <body>
   <slot />

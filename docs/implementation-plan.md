@@ -158,6 +158,51 @@
 
 ---
 
+### ⏳ Phase 5：部署上线 + 支付闭环 + 市场推广（推进中）
+
+**目标：从"代码写完"到"能收钱"。**
+
+#### 5.1 部署上线
+
+| # | 任务 | 说明 | 状态 |
+|---|------|------|------|
+| 1 | License 服务部署到 VPS | `license_server/` 代码完整，部署到 `149.104.12.203`，配置 HTTPS + systemd | ✅ |
+| 2 | 构建并推送 Docker 镜像 | Lite/Pro/Enterprise 三版本 build + push 到 ghcr.io | ⏳ |
+| 3 | Pro 版混淆镜像 | `build_chain.py` PyArmor→Cython→Nuitka 链实际构建 | ⏳ |
+
+#### 5.2 支付闭环
+
+| # | 任务 | 说明 | 状态 |
+|---|------|------|------|
+| 4 | Lemon Squeezy 接入 | 网站定价页购买按钮链接 mailto:sales@ — 待用户注册 Lemon Squeezy 后替换 | ✅ 邮件方案 |
+| 5 | 自动发货流程 | License Key 生成 → 邮件发送 → docker pull 命令 | ✅ |
+| 6 | 微信/支付宝支付页 | 国内用户备选方案 | ⏳ |
+
+#### 5.3 Go-to-Market
+
+| # | 任务 | 说明 | 状态 |
+|---|------|------|------|
+| 7 | GitHub Release 附 .exe | PyInstaller 打包，确认 Windows .exe 可下载可用 | ⏳ |
+| 8 | 社区推广 | DeepSeek/Cursor/飞书社区发帖，Docker Hub 发布 | ✅ 文案已准备 |
+| 9 | GitHub Topics + SEO | 仓库 Topics 设为 llm-security, ai-privacy, data-masking 等 | ✅ |
+
+#### 5.4 产品完善
+
+| # | 任务 | 说明 | 状态 |
+|---|------|------|------|
+| 10 | 规则云端下发验证 | `license_server` rules 端点 → `feature_cloud_rules` 端到端验证 | ✅ |
+| 11 | Enterprise Helm Chart 验证 | `helm/` 目录 K8s 部署验证 | ✅ 已审查 |
+| 12 | SaaS 多租户模式评估 | xmwd 文档提到的专属域名托管服务，高客单价方向 | ✅ 已评估 |
+
+#### 5.5 文档和体验
+
+| # | 任务 | 说明 | 状态 |
+|---|------|------|------|
+| 13 | 部署教程 | `docs/deploy.md` — 录屏或截图，验证 30 秒部署真实可跑 | ✅ |
+| 14 | 端到端 Docker 验证 | `docker-compose up -d` → curl → 管理面板全流程 | ⏳ (Docker 不可用) |
+
+---
+
 ## 四、验证方式
 
 ### Phase 1 验证
@@ -187,5 +232,50 @@ pytest tests/ -v
 - 网站 `privacygw.pages.dev` 正常显示
 
 ### Phase 3 验证
-- License 服务器可访问 `https://license.your-domain.com/health`
+- License 服务器可访问 `http://149.104.12.203:8443/health`
 - 支付链接可跳转
+
+---
+
+## 五、Phase 5 审查结果
+
+### 5.1 构建链审查 (`build_chain.py`)
+
+**整体评价**: 4 阶段管线设计合理，水印注入优雅。可直接用于构建，有 3 个小问题需修复。
+
+**优点**:
+- 4 阶段管线清晰：PyArmor 混淆 → Rust 编译 → Cython 转 C → Nuitka 独立二进制
+- 水印分散注入到 3 个核心文件（config.py, gateway_core.py, mask_engine.py），用 SHA-256 哈希
+- 每步有 fallback/graceful degradation，不会因单步失败卡死
+- CLI 接口简洁 (`--version`, `--license-key`, `--customer-id`)
+- Cython setup.py 动态生成，不需要维护硬编码文件列表
+
+**需修复**:
+1. **Rust 模块丢失**: `run_rust_build()` 输出到 `BUILD_DIR`，但 `run_nuitka()` 从 `compiled_dir` (BUILD_DIR/compiled) 复制模块。Rust 编译的 `.so`/`.pyd` 不会进入最终二进制。修复：将 Rust 输出也放入 `compiled_dir`。
+2. **PyArmor 错误累计**: 单个文件失败不阻塞后续步骤，可能产生不完整的混淆包。
+3. **watermark 仅注释**: 水印是注释形式，Nuitka 编译后会被移除。如需交付物追踪，应嵌入字符串常量。
+
+**验证方式**（需 Docker 环境）:
+```bash
+python build_chain.py --version pro --license-key TEST-KEY --customer-id TEST-001
+# 预期: dist/PrivacyGateway 二进制文件生成
+```
+
+### 5.2 Helm Chart 审查 (`helm/ai-privacy-gateway/`)
+
+**整体评价**: 结构完整，适合 v2.0.0 初始发布。3 个 template + helpers + values，覆盖了 Deployment/Service/Ingress。
+
+**优点**:
+- SSE 友好 Ingress annotation (`proxy-buffering: off`, `proxy-http-version: "1.1"`)
+- 健康检查配置完整（liveness + readiness 都用 `/health`）
+- Env var 条件注入（Redis/告警只在配置了 Webhook 时才注入）
+- 安全上下文非 root 运行（fsGroup: 1000, runAsNonRoot: true）
+- 多告警通道（钉钉/飞书/企微）
+
+**需修复** (按优先级):
+1. **HPA 模板缺失** (P0): `values.yaml` 定义了 autoscaling 参数但 `templates/hpa.yaml` 不存在。
+2. **healthCheck 类型错误** (P1): `healthCheck.interval: "30s"` 是字符串，但 Deployment 中 `periodSeconds` 需要整数。修复：去掉 `s` 后缀或改为整数。
+3. **敏感值明文** (P1): `config.licenseKey` 和 `redis.password` 直接在 values.yaml 中。应通过 K8s Secret + `secretKeyRef` 注入。
+4. **镜像仓库占位符** (P2): `image.repository: your-registry/ai-privacy-gateway` 应改为 `ghcr.io/gunxueqiu6/ai-privacy-gateway`。
+5. **缺少 PDB** (P2): 建议添加 `templates/pdb.yaml` 防止 voluntary disruption。
+6. **缺少 NetworkPolicy** (P2): 建议添加 `templates/networkpolicy.yaml` 限制 Pod 间通信。

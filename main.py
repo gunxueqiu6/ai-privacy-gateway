@@ -16,7 +16,15 @@ from sse_starlette.sse import EventSourceResponse
 from config import config, get_config
 from database import db
 from gateway_core import get_gateway_core
-from integrity_checker import get_integrity_checker, start_integrity_checker
+try:
+    from integrity_checker import get_integrity_checker, start_integrity_checker
+    _has_integrity_checker = True
+except ImportError:
+    _has_integrity_checker = False
+    def get_integrity_checker():
+        raise NotImplementedError("integrity_checker not available in Lite")
+    def start_integrity_checker(app_dir=None):
+        pass
 from mask_engine import get_mask_engine
 
 # 配置日志
@@ -215,6 +223,8 @@ async def get_version_info():
 @app.get("/admin/integrity")
 async def get_integrity_status():
     """获取运行时完整性检查状态"""
+    if not _has_integrity_checker:
+        return {"available": False, "message": "完整性检查仅在 Pro/Enterprise 版可用"}
     checker = get_integrity_checker()
     last = checker.last_result
     return {
@@ -235,8 +245,11 @@ if __name__ == "__main__":
     logger.info(f"目标AI服务: {config.TARGET_LLM}")
     logger.info(f"数据库: {config.DB_PATH}")
 
-    # 启动运行时完整性检查
-    start_integrity_checker()
+    # 启动运行时完整性检查（仅 Pro/Enterprise）
+    if _has_integrity_checker:
+        start_integrity_checker()
+    else:
+        logger.info("完整性检查模块未加载（Lite 版跳过）")
 
     uvicorn.run(
         app,

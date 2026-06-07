@@ -4,7 +4,7 @@
 replicaCount: 3
 
 image:
-  repository: your-registry/ai-privacy-gateway
+  repository: ghcr.io/gunxueqiu6/ai-privacy-gateway
   tag: enterprise
   pullPolicy: Always
 
@@ -99,6 +99,6 @@ persistence:
 # Health check
 healthCheck:
   enabled: true
-  interval: 30s
-  timeout: 10s
+  interval: 30
+  timeout: 10
   retries: 3
