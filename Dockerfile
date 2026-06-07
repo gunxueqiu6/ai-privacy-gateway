@@ -18,8 +18,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 复制源码
-COPY config.py mask_engine.py stream_buffer.py gateway_core.py database.py \
-     license_client.py decay_manager.py main.py ./
+COPY config.py mask_engine.py stream_buffer.py gateway_core.py database.py main.py ./
 
 # 复制静态文件
 COPY static ./static

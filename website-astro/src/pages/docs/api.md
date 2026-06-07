@@ -1,13 +1,13 @@
 ---
 layout: ../../layouts/DocsLayout.astro
 title: API 参考
-description: AI Privacy Gateway 管理 API 参考 — 健康检查、统计查询、License 验证、敏感词管理接口。
+description: AI Privacy Gateway 管理 API 参考 — 健康检查、统计查询、版本信息、敏感词管理接口。
 canonicalURL: https://privacygw.pages.dev/docs/api
 ---
 
 # API 参考
 
-管理接口、统计查询、License 验证。
+管理接口、统计查询、敏感词管理。
 
 ## 健康检查
 
@@ -58,37 +58,6 @@ GET /admin/version
 }
 ```
 
-## 完整性检查 (Pro+)
-
-```bash
-GET /admin/integrity
-```
-
-```json
-{
-  "ok": true,
-  "checksum": "sha256:abc123...",
-  "records": 487
-}
-```
-
-## License 管理
-
-```bash
-POST /admin/license
-Content-Type: application/json
-
-{"key": "APG-XXXX-XXXX-XXXX"}
-```
-
-```json
-{
-  "activated": true,
-  "edition": "pro",
-  "expires_at": "2027-06-06",
-  "seats": 20
-}
-```
 
 ## 敏感词管理
 
@@ -112,6 +81,6 @@ DELETE /admin/keywords/{id}
 |--------|------|
 | 200 | 成功 |
 | 400 | 请求参数错误 |
-| 401 | License 无效或过期 |
+| 401 | 未授权访问 |
 | 429 | 请求频率超限 |
 | 500 | 内部错误 |

@@ -1,5 +1,5 @@
 """
-测试用例 - AI Privacy Gateway
+测试用例 - AI Privacy Gateway Lite
 """
 import pytest
 import asyncio
@@ -116,7 +116,7 @@ class TestDatabase:
         from database import db
 
         session_id = "test_session_001"
-        placeholder = "[VAULT_PHONE_abc123]"
+        placeholder = "[PII_PHONE_abc123]"
         real_value = "13812345678"
 
         db.save_mappings(session_id, {placeholder: real_value}, "phone")
@@ -137,119 +137,6 @@ class TestDatabase:
         assert keyword in keywords
 
         db.delete_custom_keyword(keyword)
-
-
-class TestLicenseClient:
-    """License 客户端测试"""
-
-    @pytest.mark.asyncio
-    async def test_no_server_fallback(self):
-        """测试无服务器时的回退"""
-        from license_client import LicenseClient
-
-        client = LicenseClient()
-        client.server_url = None
-
-        success, msg = await client.activate()
-        assert success is True
-        assert msg == "no_server"
-
-    def test_hardware_fingerprint(self):
-        """测试硬件指纹采集"""
-        from license_client import HardwareFingerprint
-
-        fp = HardwareFingerprint.collect()
-
-        assert "board_serial" in fp
-        assert "disk_uuid" in fp
-        assert "mac_address" in fp
-
-
-class TestDecayManager:
-    """衰减管理器测试"""
-
-    def test_normal_level(self):
-        """测试正常等级"""
-        from decay_manager import DecayManager
-
-        manager = DecayManager()
-        level = manager.update()
-
-        assert level.value == 0
-
-    def test_warning_message(self):
-        """测试警告消息"""
-        from decay_manager import DecayManager
-
-        manager = DecayManager()
-        msg = manager.get_warning_message()
-
-        assert msg is None
-
-
-class TestRBAC:
-    """RBAC 测试"""
-
-    def test_default_users(self):
-        """测试默认用户"""
-        from rbac import get_rbac_manager
-
-        rbac = get_rbac_manager()
-        users = rbac.list_users()
-
-        assert len(users) >= 2
-
-    def test_authenticate(self):
-        """测试认证"""
-        from rbac import get_rbac_manager
-
-        rbac = get_rbac_manager()
-        token = rbac.authenticate("admin", "admin123")
-
-        assert token is not None
-
-    def test_wrong_password(self):
-        """测试错误密码"""
-        from rbac import get_rbac_manager
-
-        rbac = get_rbac_manager()
-        token = rbac.authenticate("admin", "wrongpassword")
-
-        assert token is None
-
-    def test_permission_check(self):
-        """测试权限检查"""
-        from rbac import get_rbac_manager, Permission
-
-        rbac = get_rbac_manager()
-        token = rbac.authenticate("admin", "admin123")
-
-        assert rbac.check_permission(token, Permission.MANAGE_USERS) is True
-        assert rbac.check_permission(token, Permission.VIEW_STATS) is True
-
-
-class TestIntegrityCheck:
-    """完整性校验测试"""
-
-    def test_compute_hash(self):
-        """测试哈希计算"""
-        try:
-            from integrity_check import compute_bytes_hash
-
-            result = compute_bytes_hash(b"test data")
-            assert len(result) == 64
-        except ImportError:
-            pytest.skip("integrity_check module not available")
-
-    def test_detect_debugger(self):
-        """测试调试器检测"""
-        try:
-            from integrity_check import detect_debugger
-
-            result = detect_debugger()
-            assert isinstance(result, bool)
-        except ImportError:
-            pytest.skip("integrity_check module not available")
 
 
 if __name__ == "__main__":

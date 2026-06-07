@@ -1,17 +1,9 @@
 import sqlite3
 import os
 import logging
-import hashlib
 from datetime import datetime
 from typing import Dict, List, Optional
 from contextlib import contextmanager
-
-try:
-    import bcrypt
-    HAS_BCRYPT = True
-except ImportError:
-    HAS_BCRYPT = False
-    logger.warning("bcrypt not installed, falling back to SHA-256")
 
 logger = logging.getLogger(__name__)
 
@@ -73,18 +65,7 @@ class Database:
                     custom_count INTEGER DEFAULT 0,
                     total_count INTEGER DEFAULT 0
                 );
-
-                CREATE TABLE IF NOT EXISTS rbac_users (
-                    user_id TEXT PRIMARY KEY,
-                    username TEXT UNIQUE NOT NULL,
-                    role TEXT NOT NULL,
-                    password_hash TEXT NOT NULL,
-                    created_at TEXT NOT NULL,
-                    last_login TEXT,
-                    is_active INTEGER DEFAULT 1
-                );
             """)
-        logger.info("✅ 数据库初始化完成")
 
     def save_mappings(self, session_id: str, mappings: Dict[str, str], data_type: str = "unknown"):
         with self.get_conn() as conn:
@@ -119,7 +100,6 @@ class Database:
         with self.get_conn() as conn:
             cursor = conn.cursor()
             cursor.execute("DELETE FROM vault_mappings WHERE session_id = ?", (session_id,))
-        logger.info(f"已清除会话 {session_id} 的映射记录")
 
     def update_stats(self, stats: Dict[str, int]):
         today = datetime.now().strftime("%Y-%m-%d")
@@ -194,80 +174,5 @@ class Database:
         with self.get_conn() as conn:
             cursor = conn.cursor()
             cursor.execute("DELETE FROM vault_mappings")
-        logger.info("已清除所有映射记录")
-
-    # ---- RBAC 用户管理 ----
-
-    def create_rbac_user(self, user_id: str, username: str, role: str, password_hash: str, created_at: str) -> bool:
-        try:
-            with self.get_conn() as conn:
-                conn.execute(
-                    "INSERT INTO rbac_users (user_id, username, role, password_hash, created_at, is_active) VALUES (?, ?, ?, ?, ?, 1)",
-                    (user_id, username, role, password_hash, created_at)
-                )
-            return True
-        except sqlite3.IntegrityError:
-            return False
-
-    def get_rbac_user_by_id(self, user_id: str) -> Optional[Dict]:
-        with self.get_conn() as conn:
-            row = conn.execute("SELECT * FROM rbac_users WHERE user_id = ?", (user_id,)).fetchone()
-            return dict(row) if row else None
-
-    def get_rbac_user_by_username(self, username: str) -> Optional[Dict]:
-        with self.get_conn() as conn:
-            row = conn.execute("SELECT * FROM rbac_users WHERE username = ?", (username,)).fetchone()
-            return dict(row) if row else None
-
-    def get_all_rbac_users(self) -> List[Dict]:
-        with self.get_conn() as conn:
-            rows = conn.execute("SELECT * FROM rbac_users").fetchall()
-            return [dict(r) for r in rows]
-
-    def delete_rbac_user(self, user_id: str) -> bool:
-        with self.get_conn() as conn:
-            cursor = conn.execute("DELETE FROM rbac_users WHERE user_id = ?", (user_id,))
-            return cursor.rowcount > 0
-
-    def update_rbac_user_role(self, user_id: str, new_role: str) -> bool:
-        with self.get_conn() as conn:
-            cursor = conn.execute("UPDATE rbac_users SET role = ? WHERE user_id = ?", (new_role, user_id))
-            return cursor.rowcount > 0
-
-    def update_rbac_user_login(self, user_id: str, last_login: str):
-        with self.get_conn() as conn:
-            conn.execute("UPDATE rbac_users SET last_login = ? WHERE user_id = ?", (last_login, user_id))
-
-    def update_rbac_user_password(self, user_id: str, new_password_hash: str):
-        with self.get_conn() as conn:
-            cursor = conn.execute("UPDATE rbac_users SET password_hash = ? WHERE user_id = ?", (new_password_hash, user_id))
-            return cursor.rowcount > 0
-
-    def hash_password(self, password: str) -> str:
-        """使用 bcrypt 哈希密码"""
-        if HAS_BCRYPT:
-            return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-        else:
-            # 降级到 SHA-256（仅用于开发环境）
-            return hashlib.sha256(password.encode('utf-8')).hexdigest()
-
-    def verify_password(self, password: str, stored_hash: str) -> bool:
-        """验证密码，支持旧的 SHA-256 和新的 bcrypt"""
-        if self.is_old_hash(stored_hash):
-            # 旧格式：纯 SHA-256
-            return hashlib.sha256(password.encode('utf-8')).hexdigest() == stored_hash
-        else:
-            # 新格式：bcrypt
-            if HAS_BCRYPT:
-                return bcrypt.checkpw(password.encode('utf-8'), stored_hash.encode('utf-8'))
-            return False
-
-    def is_old_hash(self, stored_hash: str) -> bool:
-        """检测是否是旧的 SHA-256 哈希（64 位十六进制）"""
-        return len(stored_hash) == 64 and all(c in '0123456789abcdefABCDEF' for c in stored_hash)
-
-    def needs_password_upgrade(self, stored_hash: str) -> bool:
-        """检查密码是否需要升级（从 SHA-256 升级到 bcrypt）"""
-        return self.is_old_hash(stored_hash) and HAS_BCRYPT
 
 db = Database()

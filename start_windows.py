@@ -41,9 +41,6 @@ def open_admin_page():
 
 def start_server():
     """启动服务器"""
-    # 设置环境变量
-    os.environ['VERSION'] = 'lite'
-    os.environ['LICENSE_KEY'] = 'free_version'
     os.environ['LISTEN_PORT'] = '9999'
 
     # 启动 main.py

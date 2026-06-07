@@ -16,7 +16,7 @@ docker run -d \
   --name ai-privacy-gw \
   -p 9999:9999 \
   -v ./vault_data:/app/vault_data \
-  -e VERSION=lite \
+  -e TARGET_LLM=https://api.openai.com \
   ghcr.io/gunxueqiu6/ai-privacy-gateway:lite
 ```
 
