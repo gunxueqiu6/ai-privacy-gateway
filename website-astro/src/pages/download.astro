@@ -2,104 +2,379 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="下载">
+<Layout title="下载 - AI Privacy Gateway">
+  <div class="gradient-orb gradient-orb-1"></div>
+  <div class="gradient-orb gradient-orb-2"></div>
 
-  <style>
-    .dl-grid {
-      display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px;
-      max-width: 900px; margin: 0 auto;
-    }
-    .dl-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-lg); padding: 36px 32px;
-    }
-    .dl-card.full { grid-column: span 2; }
-    .dl-card .platform-label {
-      display: inline-block; font-size: 0.7rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.08em;
-      padding: 3px 10px; border-radius: 3px; margin-bottom: 18px;
-    }
-    .dl-card .platform-label.docker { background: rgba(60,252,140,0.1); color: var(--green); }
-    .dl-card .platform-label.win { background: rgba(96,165,250,0.1); color: var(--blue); }
-    .dl-card .platform-label.mac { background: rgba(167,139,250,0.1); color: var(--purple); }
-    .dl-card .platform-label.src { background: rgba(240,160,48,0.1); color: var(--amber); }
+  <!-- 导航栏 -->
+  <nav class="nav glass">
+    <div class="container nav-container">
+      <div class="nav-brand">
+        <span class="brand-icon">🔒</span>
+        <span class="brand-text">Privacy Gateway</span>
+      </div>
+      <div class="nav-links">
+        <a href="/#features" class="nav-link">功能</a>
+        <a href="/#how-it-works" class="nav-link">原理</a>
+        <a href="/pricing" class="nav-link">定价</a>
+        <a href="/download" class="btn btn-secondary">下载</a>
+      </div>
+    </div>
+  </nav>
 
-    .dl-card h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.01em; }
-    .dl-card .meta { color: var(--text-quiet); font-size: 0.85rem; margin-bottom: 18px; }
-    .dl-card pre {
-      background: rgba(0,0,0,0.3); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 16px 18px; margin-bottom: 18px;
-      font-size: 0.82rem; line-height: 1.65; overflow-x: auto;
-    }
-    .dl-card pre code { font-family: 'Fira Code', 'Cascadia Code', monospace; color: var(--text-dim); }
-    .dl-card .btn { width: 100%; justify-content: center; }
+  <section class="download-section">
+    <div class="container download-content">
+      <h1 class="download-title">下载 Privacy Gateway</h1>
+      <p class="download-description">选择适合你的版本开始保护 AI 数据隐私</p>
 
-    @media (max-width: 768px) {
-      .dl-grid { grid-template-columns: 1fr; }
-      .dl-card.full { grid-column: span 1; }
-    }
-  </style>
+      <div class="download-grid">
+        <!-- Docker -->
+        <div class="download-card glass">
+          <div class="download-icon">🐳</div>
+          <h3>Docker</h3>
+          <p class="download-desc">一键部署，适合服务器环境</p>
+          <div class="code-block">
+            <pre><code>docker-compose up -d</code></pre>
+          </div>
+          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway#docker" class="btn btn-outline">查看文档</a>
+        </div>
 
-  <div class="page-header">
-    <h1>下载 AI Privacy Gateway</h1>
-    <p>选择你的平台，30 秒开始保护 AI 数据隐私</p>
-  </div>
+        <!-- Windows -->
+        <div class="download-card glass">
+          <div class="download-icon">🪟</div>
+          <h3>Windows</h3>
+          <p class="download-desc">便携版，双击运行</p>
+          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/releases/download/v1.0.0/PrivacyGateway.exe" class="btn btn-primary">
+            下载 v1.0.0
+          </a>
+        </div>
 
-  <section style="padding-top:10px">
-    <div class="dl-grid">
-      <div class="dl-card full">
-        <span class="platform-label docker">推荐</span>
-        <h3>Docker</h3>
-        <p class="meta">Linux / macOS / Windows — 一键部署</p>
-        <pre><code>docker run -d \
-  -p 9999:9999 \
-  -v ./vault_data:/app/vault_data \
-  ghcr.io/gunxueqiu6/ai-privacy-gateway:lite</code></pre>
-        <a href="/docs/deploy" class="btn btn-outline">部署文档</a>
+        <!-- macOS -->
+        <div class="download-card glass">
+          <div class="download-icon">🍎</div>
+          <h3>macOS</h3>
+          <p class="download-desc">便携版，直接运行</p>
+          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/releases/download/v1.0.0/PrivacyGateway-macos" class="btn btn-primary">
+            下载 v1.0.0
+          </a>
+        </div>
+
+        <!-- Source Code -->
+        <div class="download-card glass">
+          <div class="download-icon">📦</div>
+          <h3>源代码</h3>
+          <p class="download-desc">开源免费，欢迎贡献</p>
+          <div class="code-block">
+            <pre><code>git clone https://github.com/gunxueqiu6/ai-privacy-gateway</code></pre>
+          </div>
+          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-outline">GitHub</a>
+        </div>
       </div>
 
-      <div class="dl-card">
-        <span class="platform-label win">Windows</span>
-        <h3>Windows</h3>
-        <p class="meta">单文件 .exe · Windows 10 / 11</p>
-        <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/releases" class="btn btn-primary">前往下载</a>
+      <div class="quick-start glass">
+        <h3>快速开始</h3>
+        <div class="quick-start-grid">
+          <div class="quick-step">
+            <span class="step-num">1</span>
+            <div>
+              <h4>下载并启动</h4>
+              <p>运行可执行文件或 Docker 容器</p>
+            </div>
+          </div>
+          <div class="quick-step">
+            <span class="step-num">2</span>
+            <div>
+              <h4>修改 API 地址</h4>
+              <p>将 AI 客户端的 API 地址改为 <code>http://localhost:9999/v1</code></p>
+            </div>
+          </div>
+          <div class="quick-step">
+            <span class="step-num">3</span>
+            <div>
+              <h4>完成</h4>
+              <p>敏感数据自动脱敏，无需其他配置</p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="dl-card">
-        <span class="platform-label mac">macOS</span>
-        <h3>macOS</h3>
-        <p class="meta">单文件可执行 · macOS 12+</p>
-        <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/releases" class="btn btn-primary">前往下载</a>
-      </div>
-
-      <div class="dl-card full">
-        <span class="platform-label src">源码</span>
-        <h3>Python 源码</h3>
-        <p class="meta">pip 安装 · Python 3.11+</p>
-        <pre><code>git clone https://github.com/gunxueqiu6/ai-privacy-gateway
-cd ai-privacy-gateway
-pip install -r requirements.txt
-python main.py</code></pre>
-        <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-outline" target="_blank">GitHub</a>
+      <div class="release-notes">
+        <h3>v1.0.0 更新日志</h3>
+        <ul>
+          <li>✅ 新增：手机号、身份证、邮箱、银行卡自动脱敏</li>
+          <li>✅ 新增：流式响应完美支持（SSE）</li>
+          <li>✅ 新增：本地 SQLite 存储映射关系</li>
+          <li>✅ 新增：自定义敏感词管理</li>
+          <li>✅ 新增：可视化管理后台</li>
+          <li>✅ 优化：性能提升 30%</li>
+          <li>✅ 修复：若干 bug</li>
+        </ul>
       </div>
     </div>
   </section>
 
-  <section>
-    <div class="faq-list" style="max-width:900px">
-      <div class="faq-item">
-        <h4>1. 验证运行</h4>
-        <p>打开浏览器访问 <code>http://localhost:9999/health</code>，看到 <code>{'{'}"status":"healthy"{'}'}</code> 即成功。</p>
+  <!-- 页脚 -->
+  <footer class="footer">
+    <div class="container footer-content">
+      <div class="footer-brand">
+        <span class="brand-icon">🔒</span>
+        <span class="brand-text">Privacy Gateway</span>
       </div>
-      <div class="faq-item">
-        <h4>2. 配置 AI 客户端</h4>
-        <p>将 API 地址从 <code>https://api.openai.com</code> 改为 <code>http://localhost:9999</code>，API Key 不变。</p>
+      <div class="footer-links">
+        <a href="/download">下载</a>
+        <a href="/pricing">定价</a>
+        <a href="https://github.com/gunxueqiu6/ai-privacy-gateway">GitHub</a>
+        <a href="mailto:contact@privacygw.com">联系我们</a>
       </div>
-      <div class="faq-item">
-        <h4>3. 查看管理后台</h4>
-        <p>访问 <code>http://localhost:9999/admin</code> 查看拦截统计和脱敏日志。</p>
-      </div>
+      <p class="footer-copyright">
+        © 2026 AI Privacy Gateway. MIT License.
+      </p>
     </div>
-  </section>
-
+  </footer>
 </Layout>
+
+<style>
+  .download-section {
+    padding: 8rem 0 6rem;
+  }
+
+  .download-content {
+    max-width: 900px;
+  }
+
+  .download-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+
+  .download-description {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-bottom: 3rem;
+  }
+
+  .download-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .download-card {
+    padding: 2rem;
+  }
+
+  .download-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .download-card h3 {
+    margin-bottom: 0.5rem;
+  }
+
+  .download-desc {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .code-block {
+    background: rgba(0,0,0,0.3);
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    overflow-x: auto;
+  }
+
+  .code-block pre {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--primary);
+  }
+
+  .quick-start {
+    padding: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .quick-start h3 {
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .quick-start-grid {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .quick-step {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    gap: 1rem;
+  }
+
+  .step-num {
+    width: 2.5rem;
+    height: 2.5rem;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dim));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--bg-deep);
+    flex-shrink: 0;
+  }
+
+  .quick-step h4 {
+    margin-bottom: 0.25rem;
+  }
+
+  .quick-step p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .quick-step code {
+    background: var(--bg-surface);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: var(--primary);
+  }
+
+  .release-notes {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+  }
+
+  .release-notes h3 {
+    margin-bottom: 1rem;
+    color: var(--primary);
+  }
+
+  .release-notes ul {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .release-notes li {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    padding: 0.25rem 0;
+  }
+
+  .nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: 1rem 0;
+  }
+
+  .nav-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .brand-icon {
+    font-size: 1.5rem;
+  }
+
+  .brand-text {
+    font-weight: 600;
+    font-size: 1.1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .nav-link {
+    color: var(--text-secondary);
+    font-weight: 500;
+    transition: color 0.3s ease;
+  }
+
+  .nav-link:hover {
+    color: var(--primary);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    padding: 0.5rem 1rem;
+  }
+
+  .btn-outline:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  .footer {
+    padding: 4rem 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 2rem;
+  }
+
+  .footer-links a {
+    color: var(--text-muted);
+    transition: color 0.3s ease;
+  }
+
+  .footer-links a:hover {
+    color: var(--primary);
+  }
+
+  .footer-copyright {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+  }
+
+  @media (max-width: 768px) {
+    .download-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .quick-start-grid {
+      flex-direction: column;
+    }
+
+    .release-notes ul {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

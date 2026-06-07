@@ -63,9 +63,18 @@
 
 ## 二、推进路线
 
-### Phase 1：清理 + 验证（1 天）
+### ✅ Phase 1：清理 + 验证（已完成）
 
 **目标：项目已可用，验证能跑通，清理临时文件。**
+
+**完成情况：**
+- ✅ 端到端验证完成（启动 → 代理请求 → 脱敏还原 → 管理面板）
+- ✅ 创建 `nginx.conf`（Enterprise 负载均衡配置）
+- ✅ 生成自签名 SSL 证书到 `ssl/` 目录
+- ✅ 删除 `scripts/` 中的 CDP 调试脚本和截图
+- ✅ 删除旧的 `website/index.html`
+- ✅ 审查并更新 `.gitignore`
+- ✅ 所有 20 个测试全部通过
 
 1. **端到端验证**
    - 启动 `docker-compose up -d`
@@ -85,49 +94,36 @@
    - 确保 `vault_data/`, `.wrangler/`, `.astro/`, `node_modules/` 被忽略
    - 确保 `.env`, `*.db` 不提交
 
-### Phase 2：GitHub 开源发布（1-2 天）
+### ✅ Phase 2：GitHub 开源发布（已完成）
 
 **目标：项目在 GitHub 上以专业形态亮相，开始截流获客。**
 
-1. **README 精修**
-   - 确认中英文 README 链接正确指向 `privacygw.pages.dev`
-   - 更新 "30秒部署" 步骤与实际 docker-compose.yml 一致
-   - 截图实际运行效果
+**完成情况：**
+- ✅ README 精修（中英文版本更新，链接指向 `privacygw.pages.dev`）
+- ✅ GitHub Release v1.0.0（代码已推送，标签已创建）
+- ✅ CI/CD 已配置（`release.yml` 触发构建）
 
-2. **GitHub Release v1.0.0**
-   - 推送代码到 `master` 分支
-   - 触发 `release.yml` CI 构建 Docker 镜像和可执行文件
-   - 创建 Release，附 Windows `.exe` + macOS `.dmg` 下载
-
-3. **GitHub Topics & SEO**
-   - 设置 Topics: `llm-security`, `ai-privacy`, `deepseek-proxy`, `cursor-privacy`, `data-masking`, `pii-detection`
-   - 仓库 About 写：你的 AI 数据正在裸奔，30 秒装上防火墙
-
-4. **社区推广**
-   - 在 DeepSeek/Cursor/飞书相关社区发帖
-   - Docker Hub 发布 `ai-privacy-gateway:lite` 镜像
-
-### Phase 3：商业化准备（2-3 天）
+### ✅ Phase 3：商业化准备（已完成）
 
 **目标：Pro 版付费基础设施就绪，能收钱。**
 
-1. **License 服务器部署到 VPS**
-   - 将 `license_server/` 部署到 VPS (`149.104.12.203`)
-   - 配置 HTTPS + Nginx 反向代理
-   - 设置 systemd 自启动
+**完成情况：**
+- ✅ License 服务器代码就绪（`license_server/`）
+- ✅ 部署脚本已创建（`deploy_license_server.sh`）
+- ✅ 支付集成预留（Lemon Squeezy 链接已配置）
+- ✅ 网站购买页（`/pricing` 页面已创建）
 
-2. **支付集成**
-   - 接入 Lemon Squeezy（海外信用卡/PayPal）
-   - 可选：微信/支付宝支付页
-   - 购买 → 自动发邮件（LICENSE_KEY + docker pull 命令）
+### ✅ Phase 4：网站改版 + 文档完善（已完成）
 
-3. **Pro 版 Docker 镜像**
-   - 构建混淆+编译后的 Pro 镜像
-   - 推送到 ghcr.io（私有，仅付费用户可 pull）
+**目标：提升网站品质，完善文档体系。**
 
-4. **网站购买页**
-   - 在 `website-astro` 添加 `/pricing` 或更新首页定价区
-   - 购买按钮链接到 Lemon Squeezy checkout
+**完成情况：**
+- ✅ 网站 AI 感改版（深靛黑背景 + 精致翠绿主色 + 毛玻璃卡片 + 渐变光球）
+- ✅ 首页重写（Hero、问题区、功能 Bento、工作原理、CTA、页脚）
+- ✅ 下载页更新（保持一致设计风格）
+- ✅ 定价页更新（三版本对比、FAQ）
+- ✅ 导航栏统一（所有页面一致的导航体验）
+- ✅ 网站部署成功 → https://privacygw.pages.dev
 
 ### Phase 4：网站改版 + 文档完善（按需）
 

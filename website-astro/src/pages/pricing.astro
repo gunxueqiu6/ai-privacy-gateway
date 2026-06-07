@@ -1,0 +1,487 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="定价 - AI Privacy Gateway">
+  <div class="gradient-orb gradient-orb-1"></div>
+  <div class="gradient-orb gradient-orb-2"></div>
+
+  <!-- 导航栏 -->
+  <nav class="nav glass">
+    <div class="container nav-container">
+      <div class="nav-brand">
+        <span class="brand-icon">🔒</span>
+        <span class="brand-text">Privacy Gateway</span>
+      </div>
+      <div class="nav-links">
+        <a href="/#features" class="nav-link">功能</a>
+        <a href="/#how-it-works" class="nav-link">原理</a>
+        <a href="/pricing" class="nav-link">定价</a>
+        <a href="/download" class="btn btn-secondary">下载</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <h1>选择你的版本</h1>
+    <p>从个人到企业，为不同规模团队设计</p>
+  </div>
+
+  <section>
+    <div class="pricing-container">
+      <!-- Lite Version -->
+      <div class="pricing-card">
+        <div class="pricing-header">
+          <div class="tier-label">免费版</div>
+          <h2>Lite</h2>
+        </div>
+        <div class="pricing-price">
+          <span class="price">免费</span>
+        </div>
+        <ul class="pricing-features">
+          <li class="feature-item">
+            <span class="check">✓</span>
+            <span>正则脱敏（手机号/邮箱/身份证/银行卡）</span>
+          </li>
+          <li class="feature-item">
+            <span class="check">✓</span>
+            <span>流式代理 + 缓冲区管理</span>
+          </li>
+          <li class="feature-item">
+            <span class="check">✓</span>
+            <span>自定义敏感词（手动添加）</span>
+          </li>
+          <li class="feature-item">
+            <span class="check">✓</span>
+            <span>基础管理后台</span>
+          </li>
+          <li class="feature-item disabled">
+            <span class="cross">✗</span>
+            <span>多人并发支持</span>
+          </li>
+          <li class="feature-item disabled">
+            <span class="cross">✗</span>
+            <span>团队看板</span>
+          </li>
+          <li class="feature-item disabled">
+            <span class="cross">✗</span>
+            <span>云端规则自动更新</span>
+          </li>
+        </ul>
+        <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-outline">
+          GitHub 下载
+        </a>
+      </div>
+
+      <!-- Pro Version -->
+      <div class="pricing-card popular">
+        <div class="popular-badge">最受欢迎</div>
+        <div class="pricing-header">
+          <div class="tier-label">团队版</div>
+          <h2>Pro</h2>
+        </div>
+        <div class="pricing-price">
+          <span class="price">¥99</span>
+          <span class="period">/月</span>
+        </div>
+        <p class="pricing-description">适合 20 人以下团队使用</p>
+        <ul class="pricing-features">
+          <li class="feature-item">
+            <span class="check">✓</span>
+            <span>全部 Lite 功能</span>
+          </li>
+          <li class="feature-item">
+            <span class="check">✓</span>
+            <span>多人并发（20 人）</span>
+          </li>
+          <li class="feature-item">
+            <span class="check">✓</span>
+            <span>SQLite WAL 模式</span>
+          </li>
+          <li class="feature-item">
+            <span class="check">✓</span>
+            <span>团队看板 + 会话查询</span>
+          </li>
+          <li class="feature-item">
+            <span class="check">✓</span>
+            <span>云端规则自动更新</span>
+          </li>
+          <li class="feature-item">
+            <span class="check">✓</span>
+            <span>日/周/月统计报告</span>
+          </li>
+          <li class="feature-item">
+            <span class="check">✓</span>
+            <span>邮件技术支持</span>
+          </li>
+        </ul>
+        <a href="https://lemonsqueezy.com/checkout/buy/your-product-id" class="btn btn-primary">
+          立即购买
+        </a>
+      </div>
+
+      <!-- Enterprise Version -->
+      <div class="pricing-card">
+        <div class="pricing-header">
+          <div class="tier-label">企业版</div>
+          <h2>Enterprise</h2>
+        </div>
+        <div class="pricing-price">
+          <span class="price">定制</span>
+          <span class="period">年费</span>
+        </div>
+        <p class="pricing-description">适合大型企业部署</p>
+        <ul class="pricing-features">
+          <li class="feature-item">
+            <span class="check">✓</span>
+            <span>全部 Pro 功能</span>
+          </li>
+          <li class="feature-item">
+            <span class="check">✓</span>
+            <span>100+ 人高并发支持</span>
+          </li>
+          <li class="feature-item">
+            <span class="check">✓</span>
+            <span>Redis 集群存储</span>
+          </li>
+          <li class="feature-item">
+            <span class="check">✓</span>
+            <span>AC 自动机（万级词库）</span>
+          </li>
+          <li class="feature-item">
+            <span class="check">✓</span>
+            <span>审计日志 + 告警通知</span>
+          </li>
+          <li class="feature-item">
+            <span class="check">✓</span>
+            <span>权限控制 (RBAC)</span>
+          </li>
+          <li class="feature-item">
+            <span class="check">✓</span>
+            <span>驻场支持 + SLA 保障</span>
+          </li>
+        </ul>
+        <a href="mailto:contact@privacygw.com?subject=Enterprise%20咨询" class="btn btn-outline">
+          联系我们
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="faq-container">
+      <h3>常见问题</h3>
+      
+      <div class="faq-item">
+        <h4>购买后如何获取 License Key？</h4>
+        <p>购买完成后，License Key 会发送到您的邮箱。在管理后台输入 Key 即可激活 Pro 版功能。</p>
+      </div>
+      
+      <div class="faq-item">
+        <h4>支持退款吗？</h4>
+        <p>支持 7 天无理由退款。如果您对产品不满意，请发送邮件至 support@privacygw.com。</p>
+      </div>
+      
+      <div class="faq-item">
+        <h4>License 可以在多台机器使用吗？</h4>
+        <p>Pro 版 License 绑定硬件指纹，支持最多 3 台设备轮换。如需更多设备，请联系我们升级。</p>
+      </div>
+      
+      <div class="faq-item">
+        <h4>如何升级到 Enterprise 版？</h4>
+        <p>请发送邮件至 contact@privacygw.com，我们会根据您的需求提供定制方案。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 页脚 -->
+  <footer class="footer">
+    <div class="container footer-content">
+      <div class="footer-brand">
+        <span class="brand-icon">🔒</span>
+        <span class="brand-text">Privacy Gateway</span>
+      </div>
+      <div class="footer-links">
+        <a href="/download">下载</a>
+        <a href="/pricing">定价</a>
+        <a href="https://github.com/gunxueqiu6/ai-privacy-gateway">GitHub</a>
+        <a href="mailto:contact@privacygw.com">联系我们</a>
+      </div>
+      <p class="footer-copyright">
+        © 2026 AI Privacy Gateway. MIT License.
+      </p>
+    </div>
+  </footer>
+</Layout>
+
+<style>
+  .page-header {
+    text-align: center;
+    padding: 8rem 0 3rem;
+  }
+
+  .page-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--primary);
+  }
+
+  .page-header p {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+  }
+
+  .pricing-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto 4rem;
+  }
+
+  .pricing-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2.5rem;
+    position: relative;
+    transition: all 0.3s ease;
+  }
+
+  .pricing-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary-dim);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+  }
+
+  .pricing-card.popular {
+    border-color: var(--primary);
+    box-shadow: 0 0 40px var(--primary-glow);
+    transform: scale(1.02);
+  }
+
+  .popular-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--primary-dim), var(--primary));
+    color: white;
+    padding: 4px 16px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .tier-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .pricing-header h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .pricing-price {
+    margin-bottom: 1rem;
+  }
+
+  .pricing-price .price {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .pricing-price .period {
+    font-size: 1rem;
+    color: var(--text-muted);
+    margin-left: 0.5rem;
+  }
+
+  .pricing-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .pricing-features {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 2rem;
+  }
+
+  .feature-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+
+  .feature-item.disabled {
+    opacity: 0.5;
+    text-decoration: line-through;
+  }
+
+  .check, .cross {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.75rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+
+  .check {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+  }
+
+  .cross {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+  }
+
+  .faq-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .faq-container h3 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--primary);
+  }
+
+  .faq-item {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .faq-item h4 {
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .faq-item p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: 1rem 0;
+  }
+
+  .nav-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .brand-icon {
+    font-size: 1.5rem;
+  }
+
+  .brand-text {
+    font-weight: 600;
+    font-size: 1.1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .nav-link {
+    color: var(--text-secondary);
+    font-weight: 500;
+    transition: color 0.3s ease;
+  }
+
+  .nav-link:hover {
+    color: var(--primary);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    padding: 0.5rem 1rem;
+  }
+
+  .btn-outline:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  .footer {
+    padding: 4rem 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 2rem;
+  }
+
+  .footer-links a {
+    color: var(--text-muted);
+    transition: color 0.3s ease;
+  }
+
+  .footer-links a:hover {
+    color: var(--primary);
+  }
+
+  .footer-copyright {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+  }
+
+  @media (max-width: 1024px) {
+    .pricing-container {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .pricing-container {
+      grid-template-columns: 1fr;
+    }
+
+    .pricing-card.popular {
+      transform: none;
+    }
+  }
+</style>
