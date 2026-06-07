@@ -61,10 +61,10 @@ class RegexMaskEngine(MaskEngineInterface):
 
     # 内置正则规则
     BUILTIN_RULES = {
-        "phone": re.compile(r'(1[3-9]\d{9})(?=[^0-9]|$)'),
-        "email": re.compile(r'([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(?=[^a-zA-Z0-9@._-]|$)'),
-        "idcard": re.compile(r'([1-9]\d{5}(?:19|20)\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])\d{3}[\dXx])(?=[^0-9Xx]|$)'),
-        "bankcard": re.compile(r'([1-9]\d{15,18})(?=[^0-9]|$)'),
+        "phone": re.compile(r'(?<!\d)(1[3-9]\d{9})(?!\d)'),
+        "email": re.compile(r'\b([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b'),
+        "idcard": re.compile(r'(?<!\d)([1-9]\d{5}(?:19|20)\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])\d{3}[\dXx])(?!\d)'),
+        "bankcard": re.compile(r'(?<!\d)([1-9]\d{15,18})(?!\d)'),
     }
 
     def __init__(self):

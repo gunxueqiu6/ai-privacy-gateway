@@ -97,6 +97,22 @@ class Database:
                 mappings[row["placeholder"]] = row["real_value"]
         return mappings
 
+    def get_mapping(self, session_id: str, placeholder: str) -> Optional[str]:
+        with self.get_conn() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT real_value FROM vault_mappings WHERE session_id = ? AND placeholder = ?",
+                (session_id, placeholder)
+            )
+            row = cursor.fetchone()
+            return row["real_value"] if row else None
+
+    def clear_session(self, session_id: str):
+        with self.get_conn() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM vault_mappings WHERE session_id = ?", (session_id,))
+        logger.info(f"已清除会话 {session_id} 的映射记录")
+
     def update_stats(self, stats: Dict[str, int]):
         today = datetime.now().strftime("%Y-%m-%d")
         with self.get_conn() as conn:

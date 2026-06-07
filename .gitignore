@@ -28,16 +28,26 @@ vault_data/
 # macOS
 .DS_Store
 
-# Rust
-rust_src/**/target/
+# 前端构建
+.wrangler/
+.astro/
+node_modules/
+
+# SSL证书
+ssl/
+
+# 调试脚本
+scripts/
+
+# Rust编译产物
+rust_src/target/
+
+# Python扩展模块
 *.pyd
-*.dll
-*.so
 
-# IDE
-.idea/
-.vscode/
-*.swp
+# 可执行文件
+*.exe
+*.dmg
 
-# Docker
-*.tar
+# PyInstaller配置
+*.spec

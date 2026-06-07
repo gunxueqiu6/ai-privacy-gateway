@@ -1,10 +1,12 @@
 # AI Privacy Gateway
 
-> 你的团队 AI 数据正在裸奔。30 秒装上防火墙。
+> 你的 AI 数据正在裸奔。30 秒装上防火墙。
 
 高性能反向代理，自动脱敏 AI API 请求/响应中的敏感数据（手机号、身份证、邮箱、银行卡），支持所有 OpenAI 兼容服务，包括 DeepSeek、Claude、ChatGPT 和 Cursor。
 
 [English](README.md) | [简体中文](README_CN.md)
+
+🔒 **保护隐私** | ⚡ **零配置** | 🔄 **完整流式支持**
 
 ---
 
@@ -48,7 +50,7 @@ python main.py
 
 ### Windows 可执行文件
 
-从 [Releases](https://github.com/your-repo/ai-privacy-gateway/releases) 下载并运行 `PrivacyGateway.exe`。
+从 [Releases](https://github.com/gunxueqiu6/ai-privacy-gateway/releases) 下载并运行 `PrivacyGateway.exe`。
 
 ## 工作原理
 
@@ -123,7 +125,7 @@ ai-privacy-gateway/
 
 ```bash
 # 克隆
-git clone https://github.com/your-repo/ai-privacy-gateway
+git clone https://github.com/gunxueqiu6/ai-privacy-gateway
 cd ai-privacy-gateway
 
 # 安装依赖
@@ -149,6 +151,6 @@ python build_chain.py --version pro --license-key YOUR_KEY --customer-id YOUR_ID
 
 ## 链接
 
-- [文档](https://docs.your-website.com)
-- [官网](https://your-website.com)
-- [GitHub Issues](https://github.com/your-repo/ai-privacy-gateway/issues)
+- [文档](https://privacygw.pages.dev/docs)
+- [官网](https://privacygw.pages.dev)
+- [GitHub Issues](https://github.com/gunxueqiu6/ai-privacy-gateway/issues)
