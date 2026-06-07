@@ -2,7 +2,7 @@
 name = "integrity_check"
 version = "2.0.0"
 edition = "2021"
-
+python-source = "python"
 sdist-include = ["Cargo.toml", "src/**/*.rs"]
 
 [tool.maturin.python]

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#0a0a0f"/>
+  <rect x="1" y="1" width="62" height="62" rx="13" fill="none" stroke="#3cfc8c" stroke-width="1" stroke-opacity="0.3"/>
+  <!-- shield shape -->
+  <path d="M32 10 L44 16 L44 32 C44 42 32 54 32 54 C32 54 20 42 20 32 L20 16 Z" fill="none" stroke="#3cfc8c" stroke-width="3" stroke-linejoin="round"/>
+  <!-- lock circle -->
+  <circle cx="32" cy="32" r="5" fill="#3cfc8c"/>
+</svg>

@@ -11,7 +11,6 @@ class VersionType(Enum):
     LITE = "lite"
     PRO = "pro"
     ENTERPRISE = "enterprise"
-    TEST = "test"
 
 
 class Config:

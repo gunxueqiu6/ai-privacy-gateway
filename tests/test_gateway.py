@@ -11,9 +11,9 @@ class TestMaskEngine:
 
     def test_phone_mask(self):
         """测试手机号脱敏"""
-        from mask_engine import RegexMaskEngine
+        from mask_engine import get_mask_engine
 
-        engine = RegexMaskEngine()
+        engine = get_mask_engine()
         text = "我的手机号是13812345678，请联系我"
         masked, mappings, stats = engine.mask(text)
 
@@ -24,9 +24,9 @@ class TestMaskEngine:
 
     def test_email_mask(self):
         """测试邮箱脱敏"""
-        from mask_engine import RegexMaskEngine
+        from mask_engine import get_mask_engine
 
-        engine = RegexMaskEngine()
+        engine = get_mask_engine()
         text = "我的邮箱是 test@example.com"
         masked, mappings, stats = engine.mask(text)
 
@@ -36,9 +36,9 @@ class TestMaskEngine:
 
     def test_idcard_mask(self):
         """测试身份证脱敏"""
-        from mask_engine import RegexMaskEngine
+        from mask_engine import get_mask_engine
 
-        engine = RegexMaskEngine()
+        engine = get_mask_engine()
         text = "身份证号110101199001011234"
         masked, mappings, stats = engine.mask(text)
 
@@ -48,9 +48,9 @@ class TestMaskEngine:
 
     def test_unmask(self):
         """测试还原"""
-        from mask_engine import RegexMaskEngine
+        from mask_engine import get_mask_engine
 
-        engine = RegexMaskEngine()
+        engine = get_mask_engine()
         text = "手机号13812345678和邮箱test@example.com"
         masked, mappings, stats = engine.mask(text)
         unmasked = engine.unmask(masked, mappings)
@@ -60,9 +60,9 @@ class TestMaskEngine:
 
     def test_custom_keyword(self):
         """测试自定义敏感词"""
-        from mask_engine import RegexMaskEngine
+        from mask_engine import get_mask_engine
 
-        engine = RegexMaskEngine()
+        engine = get_mask_engine()
         engine.add_custom_keyword("密码")
         text = "这是一个密码测试"
         masked, mappings, stats = engine.mask(text)
@@ -83,7 +83,9 @@ class TestStreamBuffer:
         buffer.feed("Hello ")
         buffer.feed("World")
 
-        assert len(buffer.buffer) == 2
+        full_text = ''.join([chunk.raw for chunk in buffer.chunks])
+        assert "Hello " in full_text
+        assert "World" in full_text
 
     def test_sse_line_parsing(self):
         """测试 SSE 行解析"""
@@ -91,20 +93,18 @@ class TestStreamBuffer:
 
         buffer = StreamBuffer()
 
-        buffer.feed("data: Hello\n\n")
-        chunks = buffer.chunks
-
+        chunks = buffer.feed("data: Hello\n\n")
         assert len(chunks) >= 0
 
-    def test_clear(self):
-        """测试缓冲区清空"""
+    def test_reset(self):
+        """测试缓冲区重置"""
         from stream_buffer import StreamBuffer
 
         buffer = StreamBuffer()
         buffer.feed("test")
         buffer.reset()
 
-        assert buffer.buffer == []
+        assert len(buffer.chunks) == 0
 
 
 class TestDatabase:
@@ -119,12 +119,11 @@ class TestDatabase:
         real_value = "13812345678"
 
         db.save_mappings(session_id, {placeholder: real_value}, "phone")
-        all_mappings = db.get_all_mappings()
+        retrieved = db.get_mapping(session_id, placeholder)
 
-        assert placeholder in all_mappings
-        assert all_mappings[placeholder] == real_value
+        assert retrieved == real_value
 
-        db.clear_all_mappings()
+        db.clear_session(session_id)
 
     def test_custom_keywords(self):
         """测试自定义敏感词"""
@@ -148,7 +147,7 @@ class TestLicenseClient:
         from license_client import LicenseClient
 
         client = LicenseClient()
-        client.server_url = None  # 无服务器
+        client.server_url = None
 
         success, msg = await client.activate()
         assert success is True
@@ -175,7 +174,7 @@ class TestDecayManager:
         manager = DecayManager()
         level = manager.update()
 
-        assert level.value == 0  # NORMAL
+        assert level.value == 0
 
     def test_warning_message(self):
         """测试警告消息"""
@@ -184,7 +183,7 @@ class TestDecayManager:
         manager = DecayManager()
         msg = manager.get_warning_message()
 
-        assert msg is None  # 正常状态无警告
+        assert msg is None
 
 
 class TestRBAC:
@@ -197,7 +196,7 @@ class TestRBAC:
         rbac = get_rbac_manager()
         users = rbac.list_users()
 
-        assert len(users) >= 2  # 至少 admin 和 auditor
+        assert len(users) >= 2
 
     def test_authenticate(self):
         """测试认证"""
@@ -237,7 +236,7 @@ class TestIntegrityCheck:
             from integrity_check import compute_bytes_hash
 
             result = compute_bytes_hash(b"test data")
-            assert len(result) == 64  # SHA256 十六进制长度
+            assert len(result) == 64
         except ImportError:
             pytest.skip("integrity_check module not available")
 

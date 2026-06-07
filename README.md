@@ -1,10 +1,12 @@
 # AI Privacy Gateway
 
-> Your team's AI data is exposed. Install a firewall in 30 seconds.
+> Your AI data is exposed. Install a firewall in 30 seconds.
 
 A high-performance reverse proxy that automatically masks sensitive data (phone numbers, ID cards, emails, bank cards) in AI API requests/responses, supporting all OpenAI-compatible services including DeepSeek, Claude, ChatGPT, and Cursor.
 
 [简体中文](README_CN.md) | [English](README.md)
+
+🔒 **Protect Your Privacy** | ⚡ **Zero Configuration** | 🔄 **Full Streaming Support**
 
 ---
 
@@ -48,7 +50,7 @@ python main.py
 
 ### Windows Executable
 
-Download from [Releases](https://github.com/your-repo/ai-privacy-gateway/releases) and run `PrivacyGateway.exe`.
+Download from [Releases](https://github.com/gunxueqiu6/ai-privacy-gateway/releases) and run `PrivacyGateway.exe`.
 
 ## How It Works
 
@@ -123,7 +125,7 @@ ai-privacy-gateway/
 
 ```bash
 # Setup
-git clone https://github.com/your-repo/ai-privacy-gateway
+git clone https://github.com/gunxueqiu6/ai-privacy-gateway
 cd ai-privacy-gateway
 pip install -r requirements.txt
 
@@ -147,6 +149,6 @@ Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Links
 
-- [Documentation](https://docs.your-website.com)
-- [Website](https://your-website.com)
-- [GitHub Issues](https://github.com/your-repo/ai-privacy-gateway/issues)
+- [Documentation](https://privacygw.pages.dev/docs)
+- [Website](https://privacygw.pages.dev)
+- [GitHub Issues](https://github.com/gunxueqiu6/ai-privacy-gateway/issues)
