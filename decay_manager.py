@@ -6,7 +6,7 @@ import asyncio
 import logging
 import random
 import time
-from enum import Enum
+from enum import IntEnum
 from typing import Optional
 
 from config import config
@@ -15,7 +15,7 @@ from license_client import get_license_client
 logger = logging.getLogger(__name__)
 
 
-class DecayLevel(Enum):
+class DecayLevel(IntEnum):
     """衰减等级"""
     NORMAL = 0          # 正常运行
     WARNING = 1         # 显示警告

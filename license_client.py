@@ -237,21 +237,39 @@ class LicenseClient:
 
     async def heartbeat(self) -> Tuple[bool, Dict]:
         """
-        发送心跳
+        发送心跳（增强版，包含运维数据）
         """
         if not self.server_url or not self.jwt_token:
             return True, {"status": "no_heartbeat_needed"}
+
+        # 构建心跳 payload
+        payload = {
+            "license_key": self.license_key,
+            "session_token": self.jwt_token,
+            "status": self.status,
+            "timestamp": int(time.time()),
+            "version": config.VERSION,
+            "version_type": config.VERSION_TYPE.value,
+            "hostname": platform.node(),
+            "mask_count": 0,
+            "entity_count": 0,
+            "error_count": 0
+        }
+
+        # 尝试从审计日志获取统计数据
+        try:
+            from audit_log import get_today_mask_count, get_today_entity_count, get_today_error_count
+            payload["mask_count"] = get_today_mask_count()
+            payload["entity_count"] = get_today_entity_count()
+            payload["error_count"] = get_today_error_count()
+        except Exception:
+            pass
 
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:
                 response = await client.post(
                     f"{self.server_url}/api/license/heartbeat",
-                    json={
-                        "license_key": self.license_key,
-                        "session_token": self.jwt_token,
-                        "status": self.status,
-                        "timestamp": int(time.time())
-                    }
+                    json=payload
                 )
 
                 if response.status_code != 200:
@@ -259,7 +277,7 @@ class LicenseClient:
 
                 data = response.json()
 
-                if data["status"] == "expired":
+                if data.get("status") == "expired":
                     self.status = "expired"
                     return False, data
 
