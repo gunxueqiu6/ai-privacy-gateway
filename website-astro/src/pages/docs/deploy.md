@@ -21,8 +21,7 @@ services:
     volumes:
       - ./vault_data:/app/vault_data
     environment:
-      - VERSION=lite
-      - UPSTREAM_URL=https://api.deepseek.com
+      - TARGET_LLM=https://api.deepseek.com
     restart: unless-stopped
 ```
 

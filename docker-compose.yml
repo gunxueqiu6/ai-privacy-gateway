@@ -11,8 +11,6 @@ services:
     volumes:
       - ./vault_data:/app/vault_data
     environment:
-      - VERSION=lite
-      - LICENSE_KEY=free_version
       - TARGET_LLM=https://api.openai.com
       - LISTEN_PORT=9999
       - DB_TYPE=sqlite

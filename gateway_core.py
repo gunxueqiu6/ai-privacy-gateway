@@ -1,6 +1,5 @@
 """
 网关核心模块 - 上行脱敏 + 下行还原 + HTTP 代理转发
-与 FastAPI 解耦，可独立测试
 """
 import json
 import logging
@@ -12,9 +11,6 @@ import httpx
 
 from config import config
 from mask_engine import get_mask_engine, MaskEngineInterface
-from audit_log import get_audit_logger
-from alert_manager import get_alert_manager
-from decay_manager import get_decay_manager
 
 
 logger = logging.getLogger(__name__)
@@ -32,24 +28,12 @@ class GatewayCore:
         """生成会话ID"""
         return f"sess_{int(time.time() * 1000)}_{uuid.uuid4().hex[:8]}"
 
-    def mask_request(self, body: Dict[str, Any], user_id: str = None, ip_address: str = None) -> Tuple[Dict[str, Any], Dict[str, str], Dict[str, int], str]:
+    def mask_request(self, body: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, str], Dict[str, int], str]:
         """
         上行脱敏处理
         返回: (脱敏后的body, mappings, stats, session_id)
         """
         session_id = self.generate_session_id()
-
-        # 衰减检查
-        decay = get_decay_manager()
-        decay.update()
-
-        if decay.should_disable_masking():
-            logger.warning(f"[衰减] 脱敏已禁用 (等级 {decay.current_level.value})，明文转发")
-            return body, {}, {"phone": 0, "email": 0, "idcard": 0, "bankcard": 0, "custom": 0}, session_id
-
-        if decay.should_drop_request():
-            logger.warning(f"[衰减] 随机丢弃请求 (等级 {decay.current_level.value})")
-            raise RuntimeError("Service degraded, request dropped")
 
         all_mappings = {}
         total_stats = {"phone": 0, "email": 0, "idcard": 0, "bankcard": 0, "custom": 0}
@@ -70,24 +54,6 @@ class GatewayCore:
         total_count = sum(total_stats.values())
         logger.info(f"[网关拦截] 会话 {session_id}，拦截敏感信息 {total_count} 条")
 
-        # 审计日志
-        if config.feature_audit_log:
-            audit = get_audit_logger()
-            audit.log_mask_action(
-                session_id=session_id,
-                original_content=json.dumps(body.get("messages", [])),
-                masked_content=json.dumps(messages),
-                mappings=all_mappings,
-                stats=total_stats,
-                user_id=user_id,
-                ip_address=ip_address
-            )
-
-        # 高频脱敏告警
-        if total_count >= 100:
-            alert = get_alert_manager()
-            alert.check_high_frequency(session_id, total_count)
-
         return body, all_mappings, total_stats, session_id
 
     def unmask_response(self, text: str, mappings: Dict[str, str], session_id: str = None) -> str:
@@ -98,17 +64,6 @@ class GatewayCore:
             return text
 
         result = self.mask_engine.unmask(text, mappings)
-
-        # 审计日志
-        if config.feature_audit_log and session_id:
-            audit = get_audit_logger()
-            audit.log_unmask_action(
-                session_id=session_id,
-                masked_content=text[:500] if len(text) > 500 else text,
-                unmasked_content=result[:500] if len(result) > 500 else result,
-                mappings=mappings
-            )
-
         return result
 
     async def proxy_request(
@@ -176,7 +131,6 @@ class GatewayCore:
                                 yield "data: [DONE]\n\n"
                                 break
 
-                            # 还原敏感信息
                             unmasked_data = self.unmask_response(data, mappings)
                             yield f"data: {unmasked_data}\n\n"
                         else:

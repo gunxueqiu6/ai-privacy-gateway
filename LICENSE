@@ -19,22 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-## Pro / Enterprise 版授权说明
-
-Pro 版和 Enterprise 版为商业软件，需购买 License Key 方可使用。
-
-- **Pro 版**: ¥99/月，支持 20 人团队
-- **Enterprise 版**: 年费制，支持 100+ 人企业
-
-购买后获得的 License Key 绑定硬件指纹，禁止分享或转售。
-
-未经授权使用 Pro/Enterprise 版功能将触发渐进式衰减：
-- 1 小时：规则过期
-- 6 小时：请求丢弃
-- 24 小时：功能停止
-- 7 天：服务关闭
-
-购买渠道：https://your-website.com/pricing
