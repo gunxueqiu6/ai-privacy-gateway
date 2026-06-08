@@ -34,7 +34,11 @@ python main.py
 
 ### Windows Executable
 
-Download from [Releases](https://github.com/gunxueqiu6/ai-privacy-gateway/releases) and run `PrivacyGateway.exe`.
+Download `PrivacyGateway.exe` from [Releases](https://github.com/gunxueqiu6/ai-privacy-gateway/releases) and double-click to run.
+
+### macOS Binary
+
+Download from [Releases](https://github.com/gunxueqiu6/ai-privacy-gateway/releases), make it executable (`chmod +x PrivacyGateway`), and run `./PrivacyGateway`.
 
 ## Configuration
 
@@ -47,6 +51,47 @@ client = OpenAI(
     base_url="http://localhost:9999/v1",
     api_key="your-api-key"
 )
+```
+
+### Cursor / VS Code
+
+Settings → API Key → Base URL → `http://localhost:9999`
+
+### Systemd (Linux Server)
+
+```ini
+[Unit]
+Description=AI Privacy Gateway
+After=network.target
+
+[Service]
+Type=simple
+User=privacygw
+WorkingDirectory=/opt/privacy-gateway
+ExecStart=/usr/bin/python3 main.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### Nginx Reverse Proxy
+
+```nginx
+server {
+    listen 80;
+    server_name gw.example.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:9999;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
 ```
 
 ### Environment Variables
