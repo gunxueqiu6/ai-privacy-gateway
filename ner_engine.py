@@ -166,6 +166,13 @@ class NEREngine:
                         start=pos[0],
                         end=positions[i+2][1]
                     ))
+            elif 2 <= len(token) <= 3 and token[0] in surname_list:
+                entities.append(NEREntity(
+                    entity_type=NEREntityType.PERSON,
+                    value=token,
+                    start=pos[0],
+                    end=pos[1]
+                ))
         
         return entities
     
