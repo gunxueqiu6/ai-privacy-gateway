@@ -1,0 +1,5 @@
+[run]
+omit =
+    test_*.py
+    start_windows.py
+    */site-packages/*

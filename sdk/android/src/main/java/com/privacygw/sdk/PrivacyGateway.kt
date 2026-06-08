@@ -1,6 +1,7 @@
 package com.privacygw.sdk
 
 import com.google.gson.Gson
+import kotlinx.coroutines.runBlocking
 import okhttp3.*
 import java.io.IOException
 
@@ -134,19 +135,19 @@ class PrivacyGateway private constructor(
         }
 
         fun mask(text: String): MaskResult {
-            return getInstance().mask(text)
+            return runBlocking { getInstance().mask(text) }
         }
 
         fun restore(maskedText: String, mappings: Map<String, String>): RestoreResult {
-            return getInstance().restore(maskedText, mappings)
+            return runBlocking { getInstance().restore(maskedText, mappings) }
         }
 
         fun maskBatch(texts: List<String>): BatchMaskResponse {
-            return getInstance().maskBatch(texts)
+            return runBlocking { getInstance().maskBatch(texts) }
         }
 
         fun getEntities(): EntitiesResponse {
-            return getInstance().getEntities()
+            return runBlocking { getInstance().getEntities() }
         }
     }
 }
