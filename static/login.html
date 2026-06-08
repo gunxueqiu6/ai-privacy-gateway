@@ -227,7 +227,7 @@
             })
             .then(resp => {
                 if (resp.ok) {
-                    window.location.href = '/static/admin.html';
+                    window.location.href = '/admin/static/admin.html';
                 } else {
                     localStorage.removeItem('admin_token');
                 }
@@ -270,7 +270,7 @@
                     localStorage.setItem('admin_token', data.token);
                     
                     // Redirect to admin panel
-                    window.location.href = '/static/admin.html';
+                    window.location.href = '/admin/static/admin.html';
                 } else {
                     showError(data.message || data.detail || '登录失败，请检查用户名和密码');
                     loginBtn.disabled = false;
