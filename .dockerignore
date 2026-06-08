@@ -1,0 +1,54 @@
+# Git
+.git/
+.gitignore
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Coverage
+.coverage
+.coverage.*
+
+# Tests
+tests/
+
+# Docs
+docs/
+
+# Vault data
+vault_data/
+
+# Scripts
+scripts/
+
+# Rust sources
+rust_src/
+
+# Build artifacts
+build/
+dist/
+*.spec
+*.log
+
+# Environment files
+.env
+.env.local
+
+# Config files
+.coveragerc
+pytest.ini
+
+# IDE
+.idea/
+.vscode/
+.DS_Store
+
+# Website
+website-astro/
+
+# SDK — only keep what's needed in the image
+sdk/

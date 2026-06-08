@@ -1,8 +1,10 @@
 """
 网关核心模块 - 上行脱敏 + 下行还原 + HTTP 代理转发
 """
+import copy
 import json
 import logging
+import re
 import time
 import uuid
 from typing import Dict, Any, Tuple, AsyncGenerator, Optional
@@ -29,28 +31,31 @@ class GatewayCore:
         """生成会话ID"""
         return f"sess_{int(time.time() * 1000)}_{uuid.uuid4().hex[:8]}"
 
-    def mask_request(self, body: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, str], Dict[str, int], str]:
+    def mask_request(self, body: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, str], Dict[str, int], str, set]:
         """
         上行脱敏处理
-        返回: (脱敏后的body, mappings, stats, session_id)
+        返回: (脱敏后的body, mappings, stats, session_id, used_placeholders)
         """
         session_id = self.generate_session_id()
 
         all_mappings = {}
         total_stats = {
             "phone": 0, "email": 0, "idcard": 0, "bankcard": 0, "custom": 0,
-            "person": 0, "location": 0, "org": 0, "organization": 0, 
+            "person": 0, "location": 0, "org": 0, "organization": 0,
             "plate": 0, "ip": 0, "url": 0, "date": 0, "amount": 0, "postcode": 0
         }
 
         messages = body.get("messages", [])
-        for msg in messages:
+        for i, msg in enumerate(messages):
             content = msg.get("content", "")
             if not content:
                 continue
 
             masked_content, mappings, stats = self.mask_engine.mask(content)
+            # 深拷贝消息对象以保留原始内容
+            msg = copy.deepcopy(msg)
             msg["content"] = masked_content
+            messages[i] = msg
             all_mappings.update(mappings)
 
             for k, v in stats.items():
@@ -59,21 +64,33 @@ class GatewayCore:
 
         total_count = sum(total_stats.values())
         logger.info(f"[网关拦截] 会话 {session_id}，拦截敏感信息 {total_count} 条")
-        
+
         # 记录审计日志
         db.log_audit(session_id, "mask_request", {
             "entity_count": total_count,
             "stats": total_stats
         })
 
-        return body, all_mappings, total_stats, session_id
+        # 提取实际出现在脱敏文本中的占位符
+        pii_pattern = re.compile(r'\[PII_\w+_\d{8}\]')
+        used_placeholders: set = set()
+        for msg in messages:
+            content = msg.get("content", "")
+            if content:
+                used_placeholders.update(pii_pattern.findall(content))
 
-    def unmask_response(self, text: str, mappings: Dict[str, str], session_id: str = None) -> str:
+        return body, all_mappings, total_stats, session_id, used_placeholders
+
+    def unmask_response(self, text: str, mappings: Dict[str, str], session_id: str = None, used_placeholders: set = None) -> str:
         """
         下行还原处理
         """
         if not mappings:
             return text
+
+        # 仅还原实际出现在请求脱敏输出中的占位符，防注入
+        if used_placeholders is not None:
+            mappings = {k: v for k, v in mappings.items() if k in used_placeholders}
 
         result = self.mask_engine.unmask(text, mappings)
         return result
@@ -120,13 +137,14 @@ class GatewayCore:
             except httpx.RequestError as e:
                 logger.error(f"[网关错误] 请求失败: {e}")
                 db.log_audit(session_id, "proxy_error", {"error": str(e)})
-                return 502, {"error": str(e)}, {}
+                return 502, {"error": "Upstream service unavailable"}, {}
 
     async def proxy_stream_request(
         self,
         body: Dict[str, Any],
         headers: Dict[str, str],
-        mappings: Dict[str, str]
+        mappings: Dict[str, str],
+        used_placeholders: set = None
     ) -> AsyncGenerator[str, None]:
         """
         流式代理转发
@@ -155,7 +173,7 @@ class GatewayCore:
                                 yield "data: [DONE]\n\n"
                                 break
 
-                            unmasked_data = self.unmask_response(data, mappings)
+                            unmasked_data = self.unmask_response(data, mappings, used_placeholders=used_placeholders)
                             yield f"data: {unmasked_data}\n\n"
                         else:
                             yield f"{line}\n"
@@ -165,7 +183,7 @@ class GatewayCore:
                 yield 'data: {"error": "Gateway Timeout"}\n\n'
             except httpx.RequestError as e:
                 logger.error(f"[流式错误] 请求失败: {e}")
-                yield f"data: {json.dumps({'error': str(e)})}\n\n"
+                yield f"data: {json.dumps({'error': 'Upstream service unavailable'})}\n\n"
 
     async def proxy_generic_request(
         self,
@@ -192,7 +210,7 @@ class GatewayCore:
 
             except httpx.RequestError as e:
                 logger.error(f"[代理错误] {e}")
-                return 502, {"error": str(e)}, {}
+                return 502, {"error": "Upstream service unavailable"}, {}
 
 
 # 全局网关核心实例

@@ -48,5 +48,16 @@ RUN mkdir -p /app/vault_data
 # 暴露端口
 EXPOSE 9999
 
+# 创建非 root 用户
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+RUN chown -R appuser:appuser /app
+
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:9999/health')" || exit 1
+
+# 切换非 root 用户
+USER appuser
+
 # 启动命令
 CMD ["python", "main.py"]

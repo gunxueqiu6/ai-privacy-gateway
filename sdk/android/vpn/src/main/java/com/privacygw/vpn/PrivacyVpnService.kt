@@ -34,6 +34,9 @@ class PrivacyVpnService : VpnService() {
         const val NOTIFICATION_CHANNEL_ID = "privacy_vpn_channel"
         const val NOTIFICATION_ID = 1001
 
+        // DNS服务器地址（TODO: 改为可配置，应从配置界面/远程设置读取）
+        val DNS_SERVERS = listOf("8.8.8.8", "8.8.4.4")
+
         // AI服务域名白名单（这些域名的请求会被脱敏）
         val AI_SERVICE_DOMAINS = setOf(
             "openai.com",
@@ -167,9 +170,8 @@ class PrivacyVpnService : VpnService() {
             builder.addDisallowedApplication(packageName)
         }
 
-        // DNS配置
-        builder.addDnsServer("8.8.8.8")
-        builder.addDnsServer("8.8.4.4")
+        // DNS配置（TODO: 改成可配置，目前硬编码为Google DNS）
+        DNS_SERVERS.forEach { builder.addDnsServer(it) }
 
         vpnInterface = builder.establish()
         Log.i(TAG, "VPN interface established: ${vpnInterface != null}")
@@ -226,7 +228,8 @@ class PrivacyVpnService : VpnService() {
         totalRequests++
 
         // TODO: 完整的HTTP解析和脱敏逻辑
-        // 当前版本：直接转发（直通模式）
+        // 当前版本：VPN处于直通模式（passthrough），所有流量直接转发，不做过滤。
+        // 实际流量过滤（TLS/HTTP解析 → AI服务域名匹配 → 调用网关脱敏）待后续实现。
         output.write(packet)
     }
 

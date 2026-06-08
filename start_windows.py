@@ -7,6 +7,7 @@ import time
 import threading
 import webbrowser
 import subprocess
+import logging
 
 # 托盘图标（需要 pystray）
 try:
@@ -44,7 +45,27 @@ def start_server():
     os.environ['LISTEN_PORT'] = '9999'
 
     # 启动 main.py
-    subprocess.Popen([sys.executable, 'main.py'])
+    proc = subprocess.Popen([sys.executable, 'main.py'])
+    _active_processes.append(proc)
+    return proc
+
+
+# 活跃子进程列表
+_active_processes = []
+
+
+def _monitor_process(proc):
+    """监控子进程，退出时记录日志"""
+    try:
+        exit_code = proc.wait()
+        logger = logging.getLogger(__name__)
+        if exit_code != 0:
+            logger.error(f"主服务进程异常退出，退出码: {exit_code}")
+            print(f"\n!!! 主服务进程异常退出，退出码: {exit_code} !!!\n")
+        else:
+            logger.info("主服务进程正常退出")
+    except Exception as e:
+        logging.getLogger(__name__).error(f"监控子进程时发生异常: {e}")
 
 
 def quit_app(icon=None):
@@ -85,8 +106,9 @@ def main():
     print("将你的 AI 客户端 API 地址改为 http://localhost:9999")
     print()
 
-    # 启动服务器
-    start_server()
+    # 启动服务器并监控子进程
+    proc = start_server()
+    threading.Thread(target=_monitor_process, args=(proc,), daemon=True).start()
 
     # 自动打开管理页
     threading.Thread(target=open_admin_page, daemon=True).start()

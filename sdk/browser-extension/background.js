@@ -18,7 +18,16 @@ class PrivacyGatewayBackground {
   async loadSettings() {
     const result = await chrome.storage.local.get(['gatewayUrl', 'enabledEntities']);
     if (result.gatewayUrl) {
-      this.gatewayUrl = result.gatewayUrl;
+      try {
+        const parsed = new URL(result.gatewayUrl);
+        if (parsed.protocol !== 'https:' && parsed.hostname !== 'localhost' && parsed.hostname !== '127.0.0.1') {
+          console.warn('Gateway URL is not HTTPS, reverting to default:', result.gatewayUrl);
+        } else {
+          this.gatewayUrl = result.gatewayUrl;
+        }
+      } catch {
+        console.warn('Invalid gateway URL stored, using default');
+      }
     }
     this.enabledEntities = result.enabledEntities || {
       PII_PHONE: true,
@@ -99,6 +108,11 @@ class PrivacyGatewayBackground {
 
   setupMessageListener() {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+      // H-16: Validate message sender
+      if (sender.id !== chrome.runtime.id) {
+        console.warn('Rejected message from unknown sender:', sender.id);
+        return;
+      }
       switch (request.action) {
         case 'maskText':
           this.maskText(request.text).then(sendResponse);
@@ -141,19 +155,33 @@ class PrivacyGatewayBackground {
       return data;
     } catch (error) {
       console.error('Mask text error:', error);
-      return { error: error.message };
+      return { error: '操作失败，请检查网关连接' };
     }
   }
 
   async getSettings() {
     const result = await chrome.storage.local.get(['gatewayUrl', 'enabledEntities']);
+    let safeUrl = result.gatewayUrl || 'http://localhost:9999';
+    try {
+      const parsed = new URL(safeUrl);
+      if (parsed.protocol !== 'https:' && parsed.hostname !== 'localhost' && parsed.hostname !== '127.0.0.1') {
+        safeUrl = 'http://localhost:9999';
+      }
+    } catch {
+      safeUrl = 'http://localhost:9999';
+    }
     return {
-      gatewayUrl: result.gatewayUrl || 'http://localhost:9999',
+      gatewayUrl: safeUrl,
       enabledEntities: result.enabledEntities || this.enabledEntities
     };
   }
 
   async updateSettings(settings) {
+    const url = settings.gatewayUrl;
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'https:' && parsed.hostname !== 'localhost' && parsed.hostname !== '127.0.0.1') {
+      return { error: '网关地址必须使用 HTTPS 连接（本地开发可使用 localhost）' };
+    }
     await chrome.storage.local.set({
       gatewayUrl: settings.gatewayUrl,
       enabledEntities: settings.enabledEntities

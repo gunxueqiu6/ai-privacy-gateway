@@ -93,7 +93,14 @@ export class PrivacyGateway {
 
   detectEntities(text: string): Entity[] {
     const entities: Entity[] = [];
-    
+
+    // ReDoS protection: limit input length for regex entity detection
+    const MAX_DETECT_LENGTH = 50000;
+    if (text.length > MAX_DETECT_LENGTH) {
+      console.warn(`Entity detection input too long (${text.length} chars), truncating to ${MAX_DETECT_LENGTH}`);
+      text = text.slice(0, MAX_DETECT_LENGTH);
+    }
+
     const patterns: Record<string, RegExp> = {
       PII_PHONE: /(?<!\d)(1[3-9]\d{9})(?!\d)/g,
       PII_EMAIL: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g,

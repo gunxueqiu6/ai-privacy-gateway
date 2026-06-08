@@ -67,14 +67,28 @@ class MainActivity : Activity() {
         }
     }
 
+    @Suppress("DEPRECATION")
     private fun loadConfig() {
+        // TODO: Migrate to EncryptedSharedPreferences for secure storage.
+        // Add dependency: implementation 'androidx.security:security-crypto:1.1.0-alpha06'
+        // Then replace with:
+        //   val masterKey = MasterKey.Builder(this)
+        //       .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+        //       .build()
+        //   val prefs = EncryptedSharedPreferences.create(
+        //       this, PrivacyVpnService.PREFS_NAME, masterKey,
+        //       EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        //       EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        //   )
         val prefs = getSharedPreferences(PrivacyVpnService.PREFS_NAME, MODE_PRIVATE)
         editGatewayUrl.setText(prefs.getString("gateway_url", "http://localhost:9999"))
         editApiKey.setText(prefs.getString("api_key", ""))
         switchVpn.isChecked = PrivacyVpnService.isRunning
     }
 
+    @Suppress("DEPRECATION")
     private fun saveConfig() {
+        // TODO: Migrate to EncryptedSharedPreferences (see loadConfig() for code).
         val prefs = getSharedPreferences(PrivacyVpnService.PREFS_NAME, MODE_PRIVATE)
         prefs.edit()
             .putString("gateway_url", editGatewayUrl.text.toString())

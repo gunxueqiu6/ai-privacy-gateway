@@ -35,6 +35,10 @@ jobs:
           docker build --no-cache -t ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:lite .
           docker tag ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:lite ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:latest
 
+      - name: Scan Docker image with Trivy
+        run: |
+          docker run --rm aquasec/trivy image ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:lite --severity CRITICAL,HIGH --exit-code 0
+
       - name: Verify Docker image
         run: |
           docker run -d --name ci-test -p 19999:9999 ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:lite
@@ -47,6 +51,15 @@ jobs:
           docker push ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:lite
           docker push ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:latest
           docker save ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:lite > lite_image.tar
+
+      - name: Generate Docker image checksum
+        run: sha256sum lite_image.tar > lite_image.tar.sha256
+
+      - name: Upload Docker checksum
+        uses: actions/upload-artifact@v4
+        with:
+          name: lite-docker-checksum
+          path: lite_image.tar.sha256
 
       - name: Upload Lite Docker image
         uses: actions/upload-artifact@v4
@@ -72,6 +85,15 @@ jobs:
       - name: Build Windows executable
         run: pyinstaller --onefile --name PrivacyGateway --add-data "static;static" main.py
 
+      - name: Generate Windows executable checksum
+        run: certutil -hashfile dist/PrivacyGateway.exe SHA256 > PrivacyGateway.exe.sha256
+
+      - name: Upload Windows checksum
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-checksum
+          path: PrivacyGateway.exe.sha256
+
       - name: Upload Windows executable
         uses: actions/upload-artifact@v4
         with:
@@ -96,6 +118,15 @@ jobs:
       - name: Build macOS executable
         run: pyinstaller --onefile --name PrivacyGateway --add-data "static:static" main.py
 
+      - name: Generate macOS executable checksum
+        run: shasum -a 256 dist/PrivacyGateway > PrivacyGateway.sha256
+
+      - name: Upload macOS checksum
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-checksum
+          path: PrivacyGateway.sha256
+
       - name: Upload macOS executable
         uses: actions/upload-artifact@v4
         with:
@@ -114,8 +145,11 @@ jobs:
         with:
           files: |
             lite-docker-image/lite_image.tar
+            lite-docker-checksum/lite_image.tar.sha256
             windows-exe/PrivacyGateway.exe
+            windows-checksum/PrivacyGateway.exe.sha256
             macos-exe/PrivacyGateway
+            macos-checksum/PrivacyGateway.sha256
           body: |
             ## AI Privacy Gateway Lite
 

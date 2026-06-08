@@ -12,9 +12,9 @@ from typing import Dict, Optional
 from fastapi import FastAPI, Request, Response, HTTPException
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from sse_starlette.sse import EventSourceResponse
 from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from jose import JWTError, jwt
 import bcrypt
@@ -41,28 +41,52 @@ app = FastAPI(
 # 挂载静态文件 - 管理面板
 app.mount("/admin/static", StaticFiles(directory="static"), name="admin_static")
 
-# 速率限制
-limiter = Limiter(key_func=get_remote_address)
+# 速率限制 — 使用 client.host 忽略 X-Forwarded-For 防伪造
+def _get_client_ip(request: Request) -> str:
+    if request.client:
+        return request.client.host
+    return "unknown"
+
+limiter = Limiter(key_func=_get_client_ip)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# 全局映射缓存
-_mappings_cache: Dict[str, str] = {}
-_cache_lock = asyncio.Lock()
+# CORS 中间件
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:9999", "http://127.0.0.1:9999"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
+)
+
+# 请求体大小上限
+MAX_REQUEST_BODY = 1024 * 1024  # 1MB
+
+# 代理请求头白名单 — 只转发 Content-Type 和 Authorization
+ALLOWED_PROXY_HEADERS = {"content-type", "authorization"}
+
+def filter_proxy_headers(headers: dict) -> dict:
+    return {k: v for k, v in headers.items() if k.lower() in ALLOWED_PROXY_HEADERS}
+
+# Token 黑名单 (登出后失效)
+_token_blacklist: set = set()
 
 
 # ==================== 认证依赖 ====================
 
 def create_jwt_token() -> str:
-    """创建 JWT 令牌"""
-    expire = datetime.utcnow() + timedelta(hours=24)
-    to_encode = {"sub": "admin", "exp": expire}
+    """创建 JWT 令牌 — 1 小时有效"""
+    expire = datetime.utcnow() + timedelta(hours=1)
+    to_encode = {"sub": "admin", "exp": expire, "iat": datetime.utcnow()}
     encoded_jwt = jwt.encode(to_encode, config.JWT_SECRET, algorithm="HS256")
     return encoded_jwt
 
 
 def verify_jwt_token(token: str) -> bool:
     """验证 JWT 令牌"""
+    if token in _token_blacklist:
+        return False
     try:
         jwt.decode(token, config.JWT_SECRET, algorithms=["HS256"])
         return True
@@ -90,13 +114,6 @@ async def require_admin(request: Request) -> str:
     return token
 
 
-async def refresh_cache():
-    """刷新映射缓存"""
-    global _mappings_cache
-    async with _cache_lock:
-        _mappings_cache = db.get_all_mappings()
-
-
 # ==================== 主代理路由 ====================
 
 @app.post("/v1/chat/completions")
@@ -107,21 +124,25 @@ async def chat_completions(request: Request):
 
     body = await request.json()
 
+    # 验证客户端 Authorization 头
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header:
+        return JSONResponse(status_code=401, content={"error": "未授权 - 需要 API Key"})
+
     # 上行脱敏
-    masked_body, mappings, stats, session_id = gateway.mask_request(body)
+    masked_body, mappings, stats, session_id, used_placeholders = gateway.mask_request(body)
 
     # 保存映射到数据库
     if mappings:
         db.save_mappings(session_id, mappings)
         db.update_stats(stats)
-        asyncio.create_task(refresh_cache())
 
-    headers = dict(request.headers)
+    headers = filter_proxy_headers(request.headers)
 
     # 判断是否流式请求
     if body.get("stream", False):
         async def generate():
-            async for chunk in gateway.proxy_stream_request(masked_body, headers, mappings):
+            async for chunk in gateway.proxy_stream_request(masked_body, headers, mappings, used_placeholders):
                 yield chunk
 
         return EventSourceResponse(generate())
@@ -136,7 +157,7 @@ async def chat_completions(request: Request):
                     for choice in resp_json["choices"]:
                         if "message" in choice:
                             choice["message"]["content"] = gateway.unmask_response(
-                                choice["message"]["content"], mappings, session_id
+                                choice["message"]["content"], mappings, session_id, used_placeholders
                             )
                     resp_body = json.dumps(resp_json).encode()
             except json.JSONDecodeError:
@@ -149,14 +170,28 @@ async def chat_completions(request: Request):
         )
 
 
+# 允许代理的 v1 API 路径白名单
+ALLOWED_V1_PROXY_PATHS = {"models", "embeddings", "moderations"}
+
+
 @app.api_route("/v1/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 @limiter.limit("60/minute")
 async def proxy_v1(request: Request, path: str):
-    """通用 v1 路由代理"""
+    """通用 v1 路由代理（仅白名单路径）"""
+    # 路径白名单校验
+    if path not in ALLOWED_V1_PROXY_PATHS:
+        logger.warning(f"拒绝代理未知路径: /v1/{path}")
+        raise HTTPException(status_code=404, detail="未知的 API 路径")
+
     gateway = get_gateway_core()
 
+    # 验证客户端 Authorization 头
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header:
+        return JSONResponse(status_code=401, content={"error": "未授权 - 需要 API Key"})
+
     method = request.method
-    headers = dict(request.headers)
+    headers = filter_proxy_headers(request.headers)
     body = await request.body() if method in ["POST", "PUT", "PATCH"] else None
 
     status_code, resp_body, resp_headers = await gateway.proxy_generic_request(
@@ -177,6 +212,10 @@ async def api_mask(request: Request):
 
     if not text:
         return JSONResponse(status_code=400, content={"error": "text 参数不能为空"})
+
+    # 限制输入大小
+    if len(text) > 102400:
+        return JSONResponse(status_code=413, content={"error": "输入文本过长，最大支持 100KB"})
 
     engine = get_mask_engine()
     masked_text, mappings, stats = engine.mask(text)
@@ -238,6 +277,10 @@ async def api_restore(request: Request):
     if not masked_text:
         return JSONResponse(status_code=400, content={"error": "text 参数不能为空"})
 
+    # 限制输入大小
+    if len(masked_text) > 102400:
+        return JSONResponse(status_code=413, content={"error": "输入文本过长，最大支持 100KB"})
+
     engine = get_mask_engine()
     original_text = engine.unmask(masked_text, mappings)
 
@@ -258,6 +301,11 @@ async def api_mask_batch(request: Request):
 
     if len(texts) > 50:
         return JSONResponse(status_code=400, content={"error": "单次批量处理最多 50 条"})
+
+    # 限制每条输入大小
+    for i, t in enumerate(texts):
+        if len(t) > 102400:
+            return JSONResponse(status_code=413, content={"error": f"第 {i+1} 条文本过长，最大支持 100KB"})
 
     engine = get_mask_engine()
     results = []
@@ -350,11 +398,13 @@ async def admin_login(request: Request):
         if not bcrypt.checkpw(password_bytes, hash_bytes):
             db.record_login_attempt(client_ip, success=False)
             _, remaining = db.check_login_attempt(client_ip)
-            raise HTTPException(status_code=401, detail=f"密码错误，剩余尝试次数：{remaining}")
+            logger.warning(f"管理员登录失败 (IP: {client_ip}), 剩余尝试次数: {remaining}")
+            raise HTTPException(status_code=401, detail="密码错误")
     except HTTPException:
         raise
-    except Exception:
+    except Exception as e:
         db.record_login_attempt(client_ip, success=False)
+        logger.error(f"管理员登录异常 (IP: {client_ip}): {e}")
         raise HTTPException(status_code=401, detail="密码错误")
 
     # 登录成功，清除尝试记录
@@ -367,7 +417,7 @@ async def admin_login(request: Request):
     token = create_jwt_token()
 
     response = JSONResponse({"status": "ok", "message": "登录成功", "token": token})
-    response.set_cookie(key="session_token", value=token, httponly=True, secure=False, max_age=86400)
+    response.set_cookie(key="session_token", value=token, httponly=True, secure=request.url.scheme == "https", samesite="strict", max_age=86400)
     return response
 
 
@@ -375,10 +425,16 @@ async def admin_login(request: Request):
 @limiter.limit("10/minute")
 async def admin_logout(request: Request):
     """管理员登出"""
-    # 记录审计日志
     client_ip = request.client.host if request.client else "unknown"
+
+    # 将当前 token 加入黑名单
+    token = await get_current_user_token(request)
+    if token:
+        _token_blacklist.add(token)
+
+    # 记录审计日志
     db.log_audit(None, "admin_logout", {"ip": client_ip})
-    
+
     response = JSONResponse({"status": "ok", "message": "登出成功"})
     response.delete_cookie(key="session_token")
     return response
@@ -420,6 +476,12 @@ async def add_keyword(request: Request):
 
     if not keyword:
         return JSONResponse(status_code=400, content={"error": "关键词不能为空"})
+
+    if len(keyword) > 200:
+        return JSONResponse(status_code=400, content={"error": "关键词长度不能超过 200 个字符"})
+
+    if not keyword.isprintable():
+        return JSONResponse(status_code=400, content={"error": "关键词包含不可见字符"})
 
     engine = get_mask_engine()
     if engine.add_custom_keyword(keyword):

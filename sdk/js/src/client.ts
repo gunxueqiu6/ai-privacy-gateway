@@ -61,9 +61,15 @@ export interface EntitiesResponse {
 export class GatewayClient {
   private baseUrl: string;
   private apiKey?: string;
+  private static readonly MAX_TEXT_LENGTH = 102400;
 
   constructor(options: GatewayOptions) {
-    this.baseUrl = options.baseUrl.replace(/\/$/, '');
+    const url = options.baseUrl.replace(/\/$/, '');
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'https:' && parsed.hostname !== 'localhost' && parsed.hostname !== '127.0.0.1') {
+      throw new Error('Gateway URL must use HTTPS (localhost allowed for development)');
+    }
+    this.baseUrl = url;
     this.apiKey = options.apiKey;
   }
 
@@ -82,7 +88,8 @@ export class GatewayClient {
     });
     if (!res.ok) {
       const text = await res.text();
-      throw new Error(`Gateway error ${res.status}: ${text}`);
+      console.error(`Gateway error ${res.status}:`, text);
+      throw new Error(`Gateway error ${res.status}`);
     }
     return res.json();
   }
@@ -91,12 +98,18 @@ export class GatewayClient {
     if (!text || typeof text !== 'string') {
       throw new Error('text must be a non-empty string');
     }
+    if (text.length > GatewayClient.MAX_TEXT_LENGTH) {
+      throw new Error(`text exceeds maximum length of ${GatewayClient.MAX_TEXT_LENGTH} characters`);
+    }
     return this.request<MaskResult>('/api/mask', 'POST', { text });
   }
 
   async restore(maskedText: string, mappings?: Record<string, string>): Promise<RestoreResult> {
     if (!maskedText || typeof maskedText !== 'string') {
       throw new Error('maskedText must be a non-empty string');
+    }
+    if (maskedText.length > GatewayClient.MAX_TEXT_LENGTH) {
+      throw new Error(`maskedText exceeds maximum length of ${GatewayClient.MAX_TEXT_LENGTH} characters`);
     }
     return this.request<RestoreResult>('/api/restore', 'POST', { text: maskedText, mappings });
   }
@@ -123,7 +136,8 @@ export class GatewayClient {
     });
     if (!res.ok) {
       const body = await res.text();
-      throw new Error(`Gateway error ${res.status}: ${body}`);
+      console.error(`Gateway error ${res.status}:`, body);
+      throw new Error(`Gateway error ${res.status}`);
     }
     return res.json();
   }
@@ -136,7 +150,8 @@ export class GatewayClient {
     });
     if (!res.ok) {
       const body = await res.text();
-      throw new Error(`Gateway error ${res.status}: ${body}`);
+      console.error(`Gateway error ${res.status}:`, body);
+      throw new Error(`Gateway error ${res.status}`);
     }
     const reader = res.body?.getReader();
     if (!reader) throw new Error('No response body');

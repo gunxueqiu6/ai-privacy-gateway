@@ -35,17 +35,13 @@ class PrivacyGatewayContent {
     const button = document.createElement('button');
     button.id = 'privacy-gateway-toggle';
     button.className = 'privacy-gateway-btn';
-    button.innerHTML = this.isMaskEnabled 
-      ? '<span>🔒</span> 脱敏开启' 
-      : '<span>🔓</span> 脱敏关闭';
     button.title = '点击切换敏感信息脱敏';
-    
+    this.updateToggleButton(button);
+
     button.addEventListener('click', () => {
       this.isMaskEnabled = !this.isMaskEnabled;
-      button.innerHTML = this.isMaskEnabled 
-        ? '<span>🔒</span> 脱敏开启' 
-        : '<span>🔓</span> 脱敏关闭';
-      
+      this.updateToggleButton(button);
+
       if (this.isMaskEnabled) {
         button.classList.add('enabled');
         button.classList.remove('disabled');
@@ -56,6 +52,14 @@ class PrivacyGatewayContent {
     });
 
     this.injectButton(button);
+  }
+
+  updateToggleButton(button) {
+    const span = document.createElement('span');
+    span.textContent = this.isMaskEnabled ? '🔒' : '🔓';
+    button.textContent = '';
+    button.appendChild(span);
+    button.appendChild(document.createTextNode(this.isMaskEnabled ? ' 脱敏开启' : ' 脱敏关闭'));
   }
 
   injectButton(button) {
@@ -83,11 +87,26 @@ class PrivacyGatewayContent {
   }
 
   setupEntityHighlightListener() {
+    // AI chat input selector whitelist
+    const AI_INPUT_SELECTORS = [
+      '.ProseMirror',          // ChatGPT
+      '[contenteditable]',      // Claude and other editable divs
+      'textarea',               // Generic AI chat textareas
+      'input[type="text"]',     // Generic text inputs
+    ];
+
+    const isAiChatInput = (el) => {
+      // Never monitor password fields
+      if (el.type === 'password') return false;
+      if (el.tagName === 'INPUT' && !el.matches('input[type="text"], input:not([type])')) return false;
+      return AI_INPUT_SELECTORS.some(sel => el.matches(sel) || el.closest(sel));
+    };
+
     // 监听全局 input 事件，实时高亮检测到的实体
     document.addEventListener('input', (e) => {
       if (!this.isMaskEnabled) return;
       const target = e.target;
-      if (target.tagName === 'TEXTAREA' || (target.tagName === 'INPUT' && target.type === 'text')) {
+      if (isAiChatInput(target)) {
         this.showEntityDetection(target);
       }
     }, true);
@@ -96,7 +115,7 @@ class PrivacyGatewayContent {
     document.addEventListener('focusin', (e) => {
       if (!this.isMaskEnabled) return;
       const target = e.target;
-      if (target.tagName === 'TEXTAREA' || (target.tagName === 'INPUT' && target.type === 'text')) {
+      if (isAiChatInput(target)) {
         if (target.value && target.value.trim()) {
           this.showEntityDetection(target);
         }
@@ -142,14 +161,26 @@ class PrivacyGatewayContent {
     }
 
     const totalCount = detected.reduce((sum, d) => sum + d.count, 0);
-    const items = detected.map(d =>
-      `<div style="display:flex;justify-content:space-between;gap:12px"><span>${d.label}</span><span>${d.count}个</span></div>`
-    ).join('');
 
-    badge.innerHTML = `
-      <div style="margin-bottom:4px">检测到 ${totalCount} 个敏感实体</div>
-      ${items}
-    `;
+    badge.textContent = '';
+    const header = document.createElement('div');
+    header.style.marginBottom = '4px';
+    header.textContent = `检测到 ${totalCount} 个敏感实体`;
+    badge.appendChild(header);
+
+    detected.forEach(d => {
+      const row = document.createElement('div');
+      row.style.display = 'flex';
+      row.style.justifyContent = 'space-between';
+      row.style.gap = '12px';
+      const labelSpan = document.createElement('span');
+      labelSpan.textContent = d.label;
+      const countSpan = document.createElement('span');
+      countSpan.textContent = `${d.count}个`;
+      row.appendChild(labelSpan);
+      row.appendChild(countSpan);
+      badge.appendChild(row);
+    });
   }
 
   removeDetectionBadge() {
@@ -259,9 +290,7 @@ class PrivacyGatewayContent {
           this.isMaskEnabled = request.enabled;
           const button = document.getElementById('privacy-gateway-toggle');
           if (button) {
-            button.innerHTML = this.isMaskEnabled 
-              ? '<span>🔒</span> 脱敏开启' 
-              : '<span>🔓</span> 脱敏关闭';
+            this.updateToggleButton(button);
           }
           sendResponse({ success: true });
           break;
@@ -281,14 +310,52 @@ class PrivacyGatewayContent {
       { pattern: /[1-9]\d{5}(18|19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[\dXx]/g, type: 'idcard' },
     ];
 
-    let highlighted = text;
+    // Split text into segments: entity matches (to wrap) and non-matches (plain text)
+    const allMatches = [];
     entityPatterns.forEach(({ pattern, type }) => {
-      highlighted = highlighted.replace(pattern, (match) => {
-        return `<span class="privacy-gateway-highlight" title="${type}">${match}</span>`;
-      });
+      // Reset lastIndex and clone to avoid cross-pattern interference
+      const p = new RegExp(pattern.source, 'g');
+      let match;
+      while ((match = p.exec(text)) !== null) {
+        allMatches.push({ start: match.index, end: match.index + match[0].length, type, value: match[0] });
+      }
     });
 
-    return highlighted;
+    if (allMatches.length === 0) return text;
+
+    allMatches.sort((a, b) => a.start - b.start);
+
+    // Merge overlapping ranges
+    const merged = [];
+    for (const m of allMatches) {
+      if (merged.length > 0 && m.start <= merged[merged.length - 1].end) {
+        if (m.end > merged[merged.length - 1].end) {
+          merged[merged.length - 1].end = m.end;
+        }
+      } else {
+        merged.push({ start: m.start, end: m.end, type: m.type });
+      }
+    }
+
+    // Build result as DOM nodes
+    const container = document.createElement('div');
+    let lastIndex = 0;
+    merged.forEach(({ start, end, type }) => {
+      if (start > lastIndex) {
+        container.appendChild(document.createTextNode(text.slice(lastIndex, start)));
+      }
+      const span = document.createElement('span');
+      span.className = 'privacy-gateway-highlight';
+      span.title = type;
+      span.textContent = text.slice(start, end);
+      container.appendChild(span);
+      lastIndex = end;
+    });
+    if (lastIndex < text.length) {
+      container.appendChild(document.createTextNode(text.slice(lastIndex)));
+    }
+
+    return container.innerHTML;
   }
 }
 
