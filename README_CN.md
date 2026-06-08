@@ -34,7 +34,11 @@ python main.py
 
 ### Windows 可执行文件
 
-从 [Releases](https://github.com/gunxueqiu6/ai-privacy-gateway/releases) 下载并运行 `PrivacyGateway.exe`。
+从 [Releases](https://github.com/gunxueqiu6/ai-privacy-gateway/releases) 下载 `PrivacyGateway.exe`，双击运行。
+
+### macOS 可执行文件
+
+从 [Releases](https://github.com/gunxueqiu6/ai-privacy-gateway/releases) 下载，添加执行权限（`chmod +x PrivacyGateway`），然后运行 `./PrivacyGateway`。
 
 ## 配置
 
@@ -47,6 +51,47 @@ client = OpenAI(
     base_url="http://localhost:9999/v1",
     api_key="your-api-key"
 )
+```
+
+### Cursor / VS Code
+
+设置 → API Key → Base URL → `http://localhost:9999`
+
+### Systemd（Linux 服务器）
+
+```ini
+[Unit]
+Description=AI Privacy Gateway
+After=network.target
+
+[Service]
+Type=simple
+User=privacygw
+WorkingDirectory=/opt/privacy-gateway
+ExecStart=/usr/bin/python3 main.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### Nginx 反向代理
+
+```nginx
+server {
+    listen 80;
+    server_name gw.example.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:9999;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
 ```
 
 ### 环境变量

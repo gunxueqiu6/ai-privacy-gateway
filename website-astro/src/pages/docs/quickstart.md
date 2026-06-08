@@ -20,6 +20,12 @@ docker run -d \
   ghcr.io/gunxueqiu6/ai-privacy-gateway:lite
 ```
 
+或使用 Docker Compose：
+
+```bash
+docker-compose up -d
+```
+
 验证：
 
 ```bash
