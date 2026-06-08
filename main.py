@@ -6,7 +6,7 @@ import json
 import logging
 import os
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, Optional
 
 from fastapi import FastAPI, Request, Response, HTTPException
@@ -16,6 +16,8 @@ from sse_starlette.sse import EventSourceResponse
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+from jose import JWTError, jwt
+import bcrypt
 
 from config import config, get_config
 from database import db
@@ -36,6 +38,9 @@ app = FastAPI(
     version="2.0"
 )
 
+# 挂载静态文件 - 管理面板
+app.mount("/admin/static", StaticFiles(directory="static"), name="admin_static")
+
 # 速率限制
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
@@ -47,6 +52,23 @@ _cache_lock = asyncio.Lock()
 
 
 # ==================== 认证依赖 ====================
+
+def create_jwt_token() -> str:
+    """创建 JWT 令牌"""
+    expire = datetime.utcnow() + timedelta(hours=24)
+    to_encode = {"sub": "admin", "exp": expire}
+    encoded_jwt = jwt.encode(to_encode, config.JWT_SECRET, algorithm="HS256")
+    return encoded_jwt
+
+
+def verify_jwt_token(token: str) -> bool:
+    """验证 JWT 令牌"""
+    try:
+        jwt.decode(token, config.JWT_SECRET, algorithms=["HS256"])
+        return True
+    except JWTError:
+        return False
+
 
 async def get_current_user_token(request: Request) -> Optional[str]:
     """从请求中获取用户令牌"""
@@ -61,8 +83,10 @@ async def require_admin(request: Request) -> str:
     token = await get_current_user_token(request)
     if not token:
         raise HTTPException(status_code=401, detail="未授权 - 需要登录")
-    if token != config.ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="密码错误")
+    
+    if not verify_jwt_token(token):
+        raise HTTPException(status_code=401, detail="无效的会话")
+    
     return token
 
 
@@ -102,7 +126,7 @@ async def chat_completions(request: Request):
 
         return EventSourceResponse(generate())
     else:
-        status_code, resp_body, resp_headers = await gateway.proxy_request(masked_body, headers, mappings)
+        status_code, resp_body, resp_headers = await gateway.proxy_request(masked_body, headers, mappings, session_id)
 
         # 还原响应内容
         if isinstance(resp_body, bytes):
@@ -126,6 +150,7 @@ async def chat_completions(request: Request):
 
 
 @app.api_route("/v1/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+@limiter.limit("60/minute")
 async def proxy_v1(request: Request, path: str):
     """通用 v1 路由代理"""
     gateway = get_gateway_core()
@@ -268,13 +293,13 @@ async def api_get_entities(request: Request):
         {"type": "PII_BANK", "name": "银行卡", "description": "银行卡号码", "enabled": True},
         {"type": "PII_PER", "name": "人名", "description": "中文人名", "enabled": True},
         {"type": "PII_LOC", "name": "地名", "description": "省份、城市、区县等", "enabled": True},
-        {"type": "PII_ORG", "name": "机构名", "description": "公司、组织名称", "enabled": False},
-        {"type": "PII_PLATE", "name": "车牌号", "description": "中国车牌号", "enabled": False},
-        {"type": "PII_IP", "name": "IP地址", "description": "IPv4 地址", "enabled": False},
-        {"type": "PII_URL", "name": "URL", "description": "网址链接", "enabled": False},
-        {"type": "PII_DATE", "name": "日期", "description": "日期格式", "enabled": False},
-        {"type": "PII_AMOUNT", "name": "金额", "description": "货币金额", "enabled": False},
-        {"type": "PII_POSTCODE", "name": "邮编", "description": "邮政编码", "enabled": False},
+        {"type": "PII_ORG", "name": "机构名", "description": "公司、组织名称", "enabled": True},
+        {"type": "PII_PLATE", "name": "车牌号", "description": "中国车牌号", "enabled": True},
+        {"type": "PII_IP", "name": "IP地址", "description": "IPv4 地址", "enabled": True},
+        {"type": "PII_URL", "name": "URL", "description": "网址链接", "enabled": True},
+        {"type": "PII_DATE", "name": "日期", "description": "日期格式", "enabled": True},
+        {"type": "PII_AMOUNT", "name": "金额", "description": "货币金额", "enabled": True},
+        {"type": "PII_POSTCODE", "name": "邮编", "description": "邮政编码", "enabled": True},
         {"type": "PII_CUST", "name": "自定义", "description": "自定义敏感词", "enabled": True},
     ]
 
@@ -307,14 +332,42 @@ async def health():
 @limiter.limit("10/minute")
 async def admin_login(request: Request):
     """管理员登录"""
+    # 获取客户端 IP
+    client_ip = request.client.host if request.client else "unknown"
+    
+    # 检查是否被锁定
+    is_locked, remaining = db.check_login_attempt(client_ip)
+    if is_locked:
+        raise HTTPException(status_code=429, detail="登录尝试次数过多，请稍后再试")
+    
     body = await request.json()
     password = body.get("password", "")
 
-    if password != config.ADMIN_PASSWORD:
+    # 验证密码
+    try:
+        password_bytes = password.encode()
+        hash_bytes = config.ADMIN_PASSWORD_HASH.encode()
+        if not bcrypt.checkpw(password_bytes, hash_bytes):
+            db.record_login_attempt(client_ip, success=False)
+            _, remaining = db.check_login_attempt(client_ip)
+            raise HTTPException(status_code=401, detail=f"密码错误，剩余尝试次数：{remaining}")
+    except HTTPException:
+        raise
+    except Exception:
+        db.record_login_attempt(client_ip, success=False)
         raise HTTPException(status_code=401, detail="密码错误")
 
-    response = JSONResponse({"status": "ok", "message": "登录成功"})
-    response.set_cookie(key="session_token", value=password, httponly=True, secure=False)
+    # 登录成功，清除尝试记录
+    db.record_login_attempt(client_ip, success=True)
+    
+    # 记录审计日志
+    db.log_audit(None, "admin_login", {"ip": client_ip})
+    
+    # 生成 JWT 令牌
+    token = create_jwt_token()
+
+    response = JSONResponse({"status": "ok", "message": "登录成功", "token": token})
+    response.set_cookie(key="session_token", value=token, httponly=True, secure=False, max_age=86400)
     return response
 
 
@@ -322,6 +375,10 @@ async def admin_login(request: Request):
 @limiter.limit("10/minute")
 async def admin_logout(request: Request):
     """管理员登出"""
+    # 记录审计日志
+    client_ip = request.client.host if request.client else "unknown"
+    db.log_audit(None, "admin_logout", {"ip": client_ip})
+    
     response = JSONResponse({"status": "ok", "message": "登出成功"})
     response.delete_cookie(key="session_token")
     return response
@@ -390,6 +447,49 @@ async def delete_keyword(request: Request):
         return {"status": "ok", "message": f"关键词 '{keyword}' 已删除"}
 
     return JSONResponse(status_code=404, content={"error": "关键词不存在"})
+
+
+@app.get("/admin/version")
+@limiter.limit("10/minute")
+async def get_version(request: Request):
+    """获取版本信息"""
+    await require_admin(request)
+
+    return {
+        "version": "2.0",
+        "version_type": "Lite (Open Core)",
+        "version_display": "Lite",
+        "target_llm": config.TARGET_LLM
+    }
+
+
+@app.get("/admin/integrity")
+@limiter.limit("10/minute")
+async def check_integrity(request: Request):
+    """完整性检查"""
+    await require_admin(request)
+
+    import os
+    db_path = config.DB_PATH
+    config_path = "config.py"
+
+    issues = []
+    if not os.path.exists(db_path):
+        issues.append("数据库文件缺失")
+
+    try:
+        stats = db.get_today_stats()
+        if stats.get("total_count", 0) < 0:
+            issues.append("统计数据异常")
+    except Exception as e:
+        issues.append(f"数据库查询异常: {str(e)}")
+
+    status = "ok" if not issues else "error"
+    return {
+        "available": True,
+        "last_result": {"status": status},
+        "message": "所有检查通过" if status == "ok" else "; ".join(issues)
+    }
 
 
 @app.post("/admin/clear")

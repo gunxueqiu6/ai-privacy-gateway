@@ -2,6 +2,7 @@
 配置模块 - 环境变量管理
 """
 import os
+import bcrypt
 
 
 class Config:
@@ -18,8 +19,21 @@ class Config:
     # 脱敏引擎配置
     MASK_ENGINE_TYPE: str = os.environ.get("MASK_ENGINE_TYPE", "regex")
 
-    # 管理员密码
+    # 管理员密码（明文，用于首次生成哈希）
     ADMIN_PASSWORD: str = os.environ.get("ADMIN_PASSWORD", "admin123")
+    
+    # 管理员密码哈希
+    ADMIN_PASSWORD_HASH: str = os.environ.get("ADMIN_PASSWORD_HASH", "")
+    
+    # JWT 密钥
+    JWT_SECRET: str = os.environ.get("JWT_SECRET", os.urandom(32).hex())
+
+    def __init__(self):
+        """初始化配置，自动为明文密码生成哈希"""
+        if not self.ADMIN_PASSWORD_HASH and self.ADMIN_PASSWORD:
+            # 如果没有哈希但有明文密码，自动生成哈希
+            salt = bcrypt.gensalt()
+            self.ADMIN_PASSWORD_HASH = bcrypt.hashpw(self.ADMIN_PASSWORD.encode(), salt).decode()
 
 
 # 全局配置实例

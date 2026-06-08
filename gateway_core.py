@@ -11,6 +11,7 @@ import httpx
 
 from config import config
 from mask_engine import get_mask_engine, MaskEngineInterface
+from database import db
 
 
 logger = logging.getLogger(__name__)
@@ -36,7 +37,11 @@ class GatewayCore:
         session_id = self.generate_session_id()
 
         all_mappings = {}
-        total_stats = {"phone": 0, "email": 0, "idcard": 0, "bankcard": 0, "custom": 0}
+        total_stats = {
+            "phone": 0, "email": 0, "idcard": 0, "bankcard": 0, "custom": 0,
+            "person": 0, "location": 0, "org": 0, "organization": 0, 
+            "plate": 0, "ip": 0, "url": 0, "date": 0, "amount": 0, "postcode": 0
+        }
 
         messages = body.get("messages", [])
         for msg in messages:
@@ -49,10 +54,17 @@ class GatewayCore:
             all_mappings.update(mappings)
 
             for k, v in stats.items():
-                total_stats[k] += v
+                if k in total_stats:
+                    total_stats[k] += v
 
         total_count = sum(total_stats.values())
         logger.info(f"[网关拦截] 会话 {session_id}，拦截敏感信息 {total_count} 条")
+        
+        # 记录审计日志
+        db.log_audit(session_id, "mask_request", {
+            "entity_count": total_count,
+            "stats": total_stats
+        })
 
         return body, all_mappings, total_stats, session_id
 
@@ -70,13 +82,15 @@ class GatewayCore:
         self,
         body: Dict[str, Any],
         headers: Dict[str, str],
-        mappings: Dict[str, str]
+        mappings: Dict[str, str],
+        session_id: str = None
     ) -> Tuple[int, Any, Dict[str, str]]:
         """
         代理转发请求到目标 LLM
         返回: (status_code, response_body, response_headers)
         """
         target_url = f"{self.target_url}/v1/chat/completions"
+        start_time = time.time()
 
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             try:
@@ -89,13 +103,23 @@ class GatewayCore:
                     }
                 )
 
+                latency_ms = int((time.time() - start_time) * 1000)
+                
+                # 记录审计日志
+                db.log_audit(session_id, "proxy_request", {
+                    "status_code": response.status_code,
+                    "latency_ms": latency_ms
+                })
+
                 return response.status_code, response.content, dict(response.headers)
 
             except httpx.TimeoutException:
                 logger.error(f"[网关错误] 请求超时")
+                db.log_audit(session_id, "proxy_error", {"error": "Timeout"})
                 return 504, {"error": "Gateway Timeout"}, {}
             except httpx.RequestError as e:
                 logger.error(f"[网关错误] 请求失败: {e}")
+                db.log_audit(session_id, "proxy_error", {"error": str(e)})
                 return 502, {"error": str(e)}, {}
 
     async def proxy_stream_request(
