@@ -334,27 +334,30 @@ async def api_mask_batch(request: Request):
 @app.get("/api/entities")
 async def api_get_entities(request: Request):
     """获取支持的实体类型列表"""
+    from mask_engine import HAS_NER
+
     entities = [
-        {"type": "PII_PHONE", "name": "手机号", "description": "中国大陆手机号", "enabled": True},
-        {"type": "PII_EMAIL", "name": "邮箱", "description": "电子邮箱地址", "enabled": True},
-        {"type": "PII_IDCARD", "name": "身份证", "description": "中国身份证号码", "enabled": True},
-        {"type": "PII_BANK", "name": "银行卡", "description": "银行卡号码", "enabled": True},
-        {"type": "PII_PER", "name": "人名", "description": "中文人名", "enabled": True},
-        {"type": "PII_LOC", "name": "地名", "description": "省份、城市、区县等", "enabled": True},
-        {"type": "PII_ORG", "name": "机构名", "description": "公司、组织名称", "enabled": True},
-        {"type": "PII_PLATE", "name": "车牌号", "description": "中国车牌号", "enabled": True},
-        {"type": "PII_IP", "name": "IP地址", "description": "IPv4 地址", "enabled": True},
-        {"type": "PII_URL", "name": "URL", "description": "网址链接", "enabled": True},
-        {"type": "PII_DATE", "name": "日期", "description": "日期格式", "enabled": True},
-        {"type": "PII_AMOUNT", "name": "金额", "description": "货币金额", "enabled": True},
-        {"type": "PII_POSTCODE", "name": "邮编", "description": "邮政编码", "enabled": True},
-        {"type": "PII_CUST", "name": "自定义", "description": "自定义敏感词", "enabled": True},
+        {"type": "PII_PHONE", "name": "手机号", "description": "中国大陆手机号", "enabled": True, "engine": "regex"},
+        {"type": "PII_EMAIL", "name": "邮箱", "description": "电子邮箱地址", "enabled": True, "engine": "regex"},
+        {"type": "PII_IDCARD", "name": "身份证", "description": "中国身份证号码", "enabled": True, "engine": "regex"},
+        {"type": "PII_BANK", "name": "银行卡", "description": "银行卡号码", "enabled": True, "engine": "regex"},
+        {"type": "PII_PER", "name": "人名", "description": "中文人名", "enabled": HAS_NER, "engine": "ner" if HAS_NER else "unavailable"},
+        {"type": "PII_LOC", "name": "地名", "description": "省份、城市、区县等", "enabled": HAS_NER, "engine": "ner" if HAS_NER else "unavailable"},
+        {"type": "PII_ORG", "name": "机构名", "description": "公司、组织名称", "enabled": HAS_NER, "engine": "ner" if HAS_NER else "unavailable"},
+        {"type": "PII_PLATE", "name": "车牌号", "description": "中国车牌号", "enabled": True, "engine": "regex"},
+        {"type": "PII_IP", "name": "IP地址", "description": "IPv4 地址", "enabled": True, "engine": "regex"},
+        {"type": "PII_URL", "name": "URL", "description": "网址链接", "enabled": True, "engine": "regex"},
+        {"type": "PII_DATE", "name": "日期", "description": "日期格式", "enabled": True, "engine": "regex"},
+        {"type": "PII_AMOUNT", "name": "金额", "description": "货币金额", "enabled": True, "engine": "regex"},
+        {"type": "PII_POSTCODE", "name": "邮编", "description": "邮政编码", "enabled": True, "engine": "regex"},
+        {"type": "PII_CUST", "name": "自定义", "description": "自定义敏感词", "enabled": True, "engine": "regex"},
     ]
 
     return {
         "entities": entities,
         "total": len(entities),
-        "version": "Lite"
+        "version": "Lite",
+        "ner_available": HAS_NER
     }
 
 
