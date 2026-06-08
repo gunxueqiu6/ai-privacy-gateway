@@ -31,6 +31,8 @@ const pageUrl = fm.canonicalURL || canonicalURL;
   <meta name="description" content={pageDescription}>
   <meta name="keywords" content="AI隐私,数据脱敏,隐私网关,LLM安全,技术文档,部署指南,API参考,架构说明">
   <meta name="robots" content="index, follow">
+  {import.meta.env.PUBLIC_BAIDU_VERIFICATION && <meta name="baidu-site-verification" content={import.meta.env.PUBLIC_BAIDU_VERIFICATION}>}
+  {import.meta.env.PUBLIC_GOOGLE_VERIFICATION && <meta name="google-site-verification" content={import.meta.env.PUBLIC_GOOGLE_VERIFICATION}>}
   <link rel="canonical" href={pageUrl}>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 

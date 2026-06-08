@@ -66,15 +66,15 @@ jobs:
 
       - name: Check code style (Black)
         run: |
-          black --check --diff . || true
+          black --check --diff .
 
       - name: Run flake8
         run: |
-          flake8 . --max-line-length=120 --extend-ignore=E203,W503 || true
+          flake8 . --max-line-length=120 --extend-ignore=E203,W503
 
       - name: Run mypy
         run: |
-          mypy . --ignore-missing-imports || true
+          mypy . --ignore-missing-imports
 
   docker-build:
     runs-on: ubuntu-latest

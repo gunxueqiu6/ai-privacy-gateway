@@ -1,2 +1,61 @@
 /* AI Privacy Gateway - Content Script Styles */
-/* Toggle button and detection badge styles are injected inline by content.js */
+
+.privacy-gateway-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.privacy-gateway-btn.enabled {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.privacy-gateway-btn.disabled {
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+  color: white;
+}
+
+.privacy-gateway-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.privacy-gateway-btn span {
+  font-size: 16px;
+}
+
+.privacy-gateway-highlight {
+  background-color: rgba(248, 215, 218, 0.8) !important;
+  border-bottom: 2px solid #ef4444 !important;
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+#privacy-gateway-detection-badge {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  z-index: 9998;
+  background: rgba(239, 68, 68, 0.95);
+  color: white;
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+  max-width: 220px;
+  line-height: 1.5;
+}
