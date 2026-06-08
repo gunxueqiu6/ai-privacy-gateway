@@ -1,60 +1,62 @@
 package com.privacygw.sdk
 
+import com.google.gson.annotations.SerializedName
+
 data class MaskResult(
-    val maskedText: String,
-    val entities: List<Entity>,
-    val stats: Stats
+    @SerializedName("masked_text") val maskedText: String,
+    @SerializedName("entities") val entities: List<Entity>,
+    @SerializedName("stats") val stats: Stats
 )
 
 data class Entity(
-    val type: String,
-    val value: String,
-    val placeholder: String,
-    val position: Int
+    @SerializedName("type") val type: String,
+    @SerializedName("value") val value: String,
+    @SerializedName("placeholder") val placeholder: String,
+    @SerializedName("position") val position: Int
 )
 
 data class Stats(
-    val phone: Int = 0,
-    val email: Int = 0,
-    val idcard: Int = 0,
-    val bank: Int = 0,
-    val person: Int = 0,
-    val location: Int = 0,
-    val organization: Int = 0,
-    val plate: Int = 0,
-    val ip: Int = 0,
-    val url: Int = 0,
-    val date: Int = 0,
-    val amount: Int = 0,
-    val postcode: Int = 0,
-    val custom: Int = 0
+    @SerializedName("phone") val phone: Int = 0,
+    @SerializedName("email") val email: Int = 0,
+    @SerializedName("idcard") val idcard: Int = 0,
+    @SerializedName("bankcard") val bank: Int = 0,
+    @SerializedName("person") val person: Int = 0,
+    @SerializedName("location") val location: Int = 0,
+    @SerializedName("organization") val organization: Int = 0,
+    @SerializedName("plate") val plate: Int = 0,
+    @SerializedName("ip") val ip: Int = 0,
+    @SerializedName("url") val url: Int = 0,
+    @SerializedName("date") val date: Int = 0,
+    @SerializedName("amount") val amount: Int = 0,
+    @SerializedName("postcode") val postcode: Int = 0,
+    @SerializedName("custom") val custom: Int = 0
 )
 
 data class RestoreResult(
-    val originalText: String
+    @SerializedName("original_text") val originalText: String
 )
 
 data class BatchMaskResponse(
-    val results: List<BatchResult>,
-    val totalCount: Int
+    @SerializedName("results") val results: List<BatchResult>,
+    @SerializedName("total_count") val totalCount: Int
 )
 
 data class BatchResult(
-    val original: String,
-    val masked: String,
-    val entities: List<Entity>,
-    val stats: Stats
+    @SerializedName("original") val original: String,
+    @SerializedName("masked") val masked: String,
+    @SerializedName("entities") val entities: List<Entity>,
+    @SerializedName("stats") val stats: Stats
 )
 
 data class EntitiesResponse(
-    val entities: List<EntityInfo>,
-    val total: Int,
-    val version: String
+    @SerializedName("entities") val entities: List<EntityInfo>,
+    @SerializedName("total") val total: Int,
+    @SerializedName("version") val version: String
 )
 
 data class EntityInfo(
-    val type: String,
-    val name: String,
-    val description: String,
-    val enabled: Boolean
+    @SerializedName("type") val type: String,
+    @SerializedName("name") val name: String,
+    @SerializedName("description") val description: String,
+    @SerializedName("enabled") val enabled: Boolean
 )

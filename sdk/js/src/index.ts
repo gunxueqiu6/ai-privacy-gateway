@@ -122,7 +122,7 @@ export class PrivacyGateway {
   }
 }
 
-export {
+export type {
   Entity,
   MaskResult,
   RestoreResult,
@@ -131,6 +131,6 @@ export {
   EntityType,
   EntitiesResponse,
   GatewayConfig
-};
+} from './types';
 
 export default PrivacyGateway;
