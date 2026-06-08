@@ -10,7 +10,6 @@ describe('GatewayClient', () => {
   beforeEach(() => {
     client = new GatewayClient({
       baseUrl: 'http://localhost:9999',
-      targetApi: 'https://api.openai.com',
       apiKey: 'test-api-key'
     });
     mockFetch.mockClear();
@@ -36,75 +35,107 @@ describe('GatewayClient', () => {
       expect(result.choices[0].message.content).toBe('Hello!');
     });
 
+    it('should send request with stream:false to gateway', async () => {
+      const mockResponse = {
+        id: 'chat-123',
+        choices: [{ message: { content: 'Hi' } }]
+      };
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse)
+      });
+
+      await client.chatCompletion({
+        model: 'gpt-4',
+        messages: [{ role: 'user', content: 'Hi' }],
+        stream: true
+      });
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/v1/chat/completions'),
+        expect.objectContaining({
+          method: 'POST',
+          body: expect.stringContaining('"stream":false')
+        })
+      );
+    });
+  });
+
+  describe('chatCompletionStream()', () => {
     it('should handle streaming request', async () => {
-      // Mock streaming response
+      const encoder = new TextEncoder();
+      const chunks = [
+        'data: {"choices":[{"delta":{"content":"Hello"}}]}\n',
+        'data: {"choices":[{"delta":{"content":" world"}}]}\n',
+        'data: [DONE]\n'
+      ];
+      const streamData = encoder.encode(chunks.join('\n'));
+
+      let readCount = 0;
       const mockStreamResponse = {
         ok: true,
         body: {
           getReader: () => ({
-            read: () => Promise.resolve({ done: true, value: new Uint8Array() })
+            read: () => {
+              if (readCount === 0) {
+                readCount++;
+                return Promise.resolve({ done: false, value: streamData });
+              }
+              return Promise.resolve({ done: true });
+            }
           })
         }
       };
 
       mockFetch.mockResolvedValueOnce(mockStreamResponse);
 
-      const result = await client.chatCompletion({
+      const results: string[] = [];
+      for await (const chunk of client.chatCompletionStream({
         model: 'gpt-4',
-        messages: [{ role: 'user', content: 'Hi' }],
-        stream: true
-      });
+        messages: [{ role: 'user', content: 'Hi' }]
+      })) {
+        results.push(chunk);
+      }
 
-      // Verify stream handling
+      expect(results.length).toBeGreaterThan(0);
       expect(mockFetch).toHaveBeenCalled();
     });
+  });
 
-    it('should mask sensitive data in request', async () => {
-      const mockMaskResponse = {
+  describe('mask()', () => {
+    it('should call /api/mask and return masked result', async () => {
+      const mockResponse = {
         masked_text: '我的手机号是[PII_PHONE_00000001]',
         entities: [{ type: 'PII_PHONE', value: '13812345678', placeholder: '[PII_PHONE_00000001]' }],
         stats: { phone: 1 }
       };
 
-      const mockChatResponse = {
-        id: 'chat-123',
-        choices: [{ message: { content: '收到' } }]
-      };
-
-      mockFetch
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockMaskResponse)
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockChatResponse)
-        });
-
-      const result = await client.chatCompletion({
-        model: 'gpt-4',
-        messages: [{ role: 'user', content: '我的手机号是13812345678' }]
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse)
       });
 
-      expect(mockFetch).toHaveBeenCalledTimes(2);
+      const result = await client.mask('我的手机号是13812345678');
+
+      expect(result.masked_text).toContain('[PII_PHONE_00000001]');
+      expect(result.entities.length).toBe(1);
     });
   });
 
-  describe('proxyRequest()', () => {
-    it('should proxy generic API request', async () => {
-      const mockResponse = {
-        ok: true,
-        json: () => Promise.resolve({ data: 'test' })
-      };
+  describe('error handling', () => {
+    it('should throw on non-ok response', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        text: () => Promise.resolve('Unauthorized'),
+        json: () => Promise.resolve({ error: 'Unauthorized' })
+      });
 
-      mockFetch.mockResolvedValueOnce(mockResponse);
-
-      await client.proxyRequest('/v1/models', 'GET');
-
-      expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:9999/v1/models',
-        expect.objectContaining({ method: 'GET' })
-      );
+      await expect(client.chatCompletion({
+        model: 'gpt-4',
+        messages: [{ role: 'user', content: 'Hi' }]
+      })).rejects.toThrow('Gateway error 401');
     });
   });
 });
