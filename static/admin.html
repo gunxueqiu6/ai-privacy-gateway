@@ -423,11 +423,18 @@
                 const resp = await authFetch('/admin/keywords');
                 const data = await resp.json();
                 const list = document.getElementById('keywords-list');
-                list.innerHTML = '';
+                while (list.firstChild) list.removeChild(list.firstChild);
                 data.keywords.forEach(kw => {
                     const item = document.createElement('div');
                     item.className = 'keyword-item';
-                    item.innerHTML = `<span>${kw}</span><span class="delete" onclick="deleteKeyword('${kw}')">×</span>`;
+                    const span = document.createElement('span');
+                    span.textContent = kw;
+                    const del = document.createElement('span');
+                    del.className = 'delete';
+                    del.textContent = '×';
+                    del.addEventListener('click', () => deleteKeyword(kw));
+                    item.appendChild(span);
+                    item.appendChild(del);
                     list.appendChild(item);
                 });
             } catch (e) { console.error('获取关键词失败:', e); }
@@ -470,16 +477,32 @@
                 const resp = await fetch('/api/entities');
                 const data = await resp.json();
                 const tbody = document.getElementById('entity-table-body');
-                tbody.innerHTML = '';
-                
+                while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
+
                 data.entities.forEach(entity => {
                     const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${entity.type}</td>
-                        <td>${entity.name}</td>
-                        <td>${entity.description}</td>
-                        <td><span style="color:${entity.enabled ? 'var(--accent)' : 'var(--text-secondary)'}">${entity.enabled ? '启用' : '禁用'}</span></td>
-                    `;
+                    const tdType = document.createElement('td');
+                    tdType.textContent = entity.type;
+                    const tdName = document.createElement('td');
+                    tdName.textContent = entity.name;
+                    const tdDesc = document.createElement('td');
+                    tdDesc.textContent = entity.description;
+                    const tdStatus = document.createElement('td');
+                    const statusSpan = document.createElement('span');
+                    statusSpan.textContent = entity.enabled ? '启用' : '禁用';
+                    statusSpan.style.color = entity.enabled ? 'var(--accent)' : 'var(--text-secondary)';
+                    tdStatus.appendChild(statusSpan);
+                    // Show engine info if available
+                    if (entity.engine) {
+                        const engineBadge = document.createElement('span');
+                        engineBadge.textContent = entity.engine;
+                        engineBadge.style.cssText = 'margin-left:8px;font-size:0.75em;opacity:0.6';
+                        tdStatus.appendChild(engineBadge);
+                    }
+                    row.appendChild(tdType);
+                    row.appendChild(tdName);
+                    row.appendChild(tdDesc);
+                    row.appendChild(tdStatus);
                     tbody.appendChild(row);
                 });
             } catch (e) { console.error('获取实体类型失败:', e); }
