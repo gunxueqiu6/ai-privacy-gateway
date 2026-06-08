@@ -34,7 +34,7 @@ import Footer from '../components/Footer.astro';
         <!-- Input -->
         <div class="demo-panel glass">
           <div class="panel-header">
-            <h3>原始文本</h3>
+            <h2>原始文本</h2>
             <span class="panel-badge">输入</span>
           </div>
           <textarea
@@ -51,7 +51,7 @@ import Footer from '../components/Footer.astro';
         <!-- Output -->
         <div class="demo-panel glass">
           <div class="panel-header">
-            <h3>脱敏结果</h3>
+            <h2>脱敏结果</h2>
             <span class="panel-badge">输出</span>
           </div>
           <div class="demo-output" id="outputText">
@@ -66,7 +66,7 @@ import Footer from '../components/Footer.astro';
 
       <!-- Legend -->
       <div class="legend glass">
-        <h4>实体类型图例</h4>
+        <h3>实体类型图例</h3>
         <div class="legend-tags">
           <span class="legend-tag tag-phone">手机号</span>
           <span class="legend-tag tag-email">邮箱</span>
@@ -80,7 +80,7 @@ import Footer from '../components/Footer.astro';
 
       <!-- Entities Table -->
       <div class="entities-panel glass" id="entitiesPanel" style="display: none;">
-        <h4>检测到的敏感实体</h4>
+        <h3>检测到的敏感实体</h3>
         <div class="entities-table-wrap">
           <table class="entities-table">
             <thead>
@@ -96,7 +96,7 @@ import Footer from '../components/Footer.astro';
   <Footer />
 
   <script is:inline>
-    const API_ENDPOINT = 'http://localhost:9999/api/mask';
+    const API_ENDPOINT = import.meta.env.PUBLIC_API_URL || 'http://localhost:9999/api/mask';
     let isProcessing = false;
 
     function loadExample() {
@@ -212,7 +212,7 @@ import Footer from '../components/Footer.astro';
     .demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; max-width: 1200px; margin: 0 auto 2rem; }
     .demo-panel { padding: 1.5rem; display: flex; flex-direction: column; }
     .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-    .panel-header h3 { margin: 0; color: var(--primary); font-size: 1.1rem; }
+    .panel-header h2 { margin: 0; color: var(--primary); font-size: 1.1rem; }
     .panel-badge {
       font-size: 0.7rem; padding: 0.2rem 0.75rem; border-radius: 20px;
       background: rgba(134, 239, 172, 0.1); color: var(--primary); font-weight: 600;
@@ -253,7 +253,7 @@ import Footer from '../components/Footer.astro';
     .stats-row .stat-label { display: block; font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.15rem; }
 
     .legend { padding: 1.25rem 1.5rem; margin-bottom: 2rem; }
-    .legend h4 { margin: 0 0 0.75rem 0; color: var(--primary); font-size: 0.95rem; }
+    .legend h3 { margin: 0 0 0.75rem 0; color: var(--primary); font-size: 0.95rem; }
     .legend-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
     .legend-tag { padding: 0.3rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 500; }
     .tag-phone { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
@@ -265,7 +265,7 @@ import Footer from '../components/Footer.astro';
     .tag-org { background: rgba(148, 163, 184, 0.15); color: #94a3b8; }
 
     .entities-panel { padding: 1.5rem; margin-bottom: 2rem; }
-    .entities-panel h4 { margin: 0 0 1rem 0; color: var(--primary); font-size: 0.95rem; }
+    .entities-panel h3 { margin: 0 0 1rem 0; color: var(--primary); font-size: 0.95rem; }
     .entities-table-wrap { overflow-x: auto; }
     .entities-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
     .entities-table th, .entities-table td { padding: 0.7rem 0.9rem; text-align: left; border-bottom: 1px solid var(--border); }
