@@ -48,6 +48,13 @@ rust_src/target/
 # 可执行文件
 *.exe
 *.dmg
+*.zip
+
+# 测试覆盖率
+.coverage
+
+# 临时脚本
+test_imports.py
 
 # PyInstaller配置
 *.spec
