@@ -17,9 +17,11 @@ class GatewayConfig {
   });
 
   Map<String, String> buildHeaders() {
-    final Map<String, String> result = Map.from(headers);
-    if (apiKey != null) {
-      result['X-API-Key'] = apiKey!;
+    final Map<String, String> result = Map<String, String>.from(headers);
+    // Copy to local variable for type promotion (Dart does not promote class fields).
+    final key = apiKey;
+    if (key != null) {
+      result['X-API-Key'] = key;
     }
     return result;
   }

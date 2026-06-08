@@ -1,6 +1,8 @@
 package com.privacygw.sdk
 
+import androidx.annotation.WorkerThread
 import com.google.gson.Gson
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import okhttp3.*
 import java.io.IOException
@@ -134,20 +136,24 @@ class PrivacyGateway private constructor(
             return headers
         }
 
+        @WorkerThread
         fun mask(text: String): MaskResult {
-            return runBlocking { getInstance().mask(text) }
+            return runBlocking(Dispatchers.IO) { getInstance().mask(text) }
         }
 
+        @WorkerThread
         fun restore(maskedText: String, mappings: Map<String, String>): RestoreResult {
-            return runBlocking { getInstance().restore(maskedText, mappings) }
+            return runBlocking(Dispatchers.IO) { getInstance().restore(maskedText, mappings) }
         }
 
+        @WorkerThread
         fun maskBatch(texts: List<String>): BatchMaskResponse {
-            return runBlocking { getInstance().maskBatch(texts) }
+            return runBlocking(Dispatchers.IO) { getInstance().maskBatch(texts) }
         }
 
+        @WorkerThread
         fun getEntities(): EntitiesResponse {
-            return runBlocking { getInstance().getEntities() }
+            return runBlocking(Dispatchers.IO) { getInstance().getEntities() }
         }
     }
 }

@@ -1,5 +1,6 @@
 import json
 import os
+import hashlib
 import logging
 import sqlite3
 from datetime import datetime, timedelta
@@ -9,6 +10,12 @@ from contextlib import contextmanager
 logger = logging.getLogger(__name__)
 
 DB_PATH = os.environ.get("DB_PATH", "./vault_data/privacy_vault.db")
+
+ALLOWED_STATS_COLUMNS = frozenset({
+    "phone", "email", "idcard", "bankcard", "custom",
+    "person", "location", "org", "plate", "ip",
+    "url", "date", "amount", "postcode", "total",
+})
 
 class Database:
     def __init__(self, db_path: str = None):
@@ -31,6 +38,23 @@ class Database:
         except Exception as e:
             conn.rollback()
             raise e
+        finally:
+            conn.close()
+
+    @contextmanager
+    def _exclusive_conn(self):
+        """获取具有排他写锁的数据库连接（BEGIN IMMEDIATE），用于原子操作"""
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA synchronous=NORMAL")
+        conn.execute("BEGIN IMMEDIATE")
+        try:
+            yield conn
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
         finally:
             conn.close()
 
@@ -100,6 +124,13 @@ class Database:
                 CREATE INDEX IF NOT EXISTS idx_login_ip ON login_attempts(ip_address);
             """)
 
+            # Migrate existing audit_log table to add prev_hash column
+            cursor.execute("PRAGMA table_info(audit_log)")
+            audit_columns = {row[1] for row in cursor.fetchall()}
+            if "prev_hash" not in audit_columns:
+                cursor.execute("ALTER TABLE audit_log ADD COLUMN prev_hash TEXT")
+                logger.info("已为 audit_log 表添加 prev_hash 列")
+
     def save_mappings(self, session_id: str, mappings: Dict[str, str], data_type: str = "unknown"):
         with self.get_conn() as conn:
             cursor = conn.cursor()
@@ -109,6 +140,17 @@ class Database:
                     (session_id, placeholder, real_value, data_type)
                 )
         logger.info(f"保存 {len(mappings)} 条映射记录")
+
+    def cleanup_expired_mappings(self, retention_hours: int = 72) -> int:
+        """清理超过保留时长的映射记录"""
+        cutoff = (datetime.utcnow() - timedelta(hours=retention_hours)).strftime("%Y-%m-%d %H:%M:%S")
+        with self.get_conn() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM vault_mappings WHERE created_at < ?", (cutoff,))
+            deleted = cursor.rowcount
+        if deleted > 0:
+            logger.info(f"清理了 {deleted} 条过期映射记录 (保留 {retention_hours} 小时)")
+        return deleted
 
     def get_all_mappings(self) -> Dict[str, str]:
         mappings = {}
@@ -164,54 +206,114 @@ class Database:
             cursor.execute("DELETE FROM vault_mappings")
 
     def log_audit(self, session_id: Optional[str], action: str, detail: Optional[Dict] = None):
-        """记录审计日志"""
+        """记录审计日志（哈希链完整性保护）"""
         with self.get_conn() as conn:
             cursor = conn.cursor()
             detail_json = json.dumps(detail) if detail else None
+
+            # 获取最后一条审计记录，构建哈希链
             cursor.execute(
-                "INSERT INTO audit_log (session_id, action, detail_json) VALUES (?, ?, ?)",
-                (session_id, action, detail_json)
+                "SELECT id, session_id, action, detail_json, created_at, prev_hash "
+                "FROM audit_log ORDER BY id DESC LIMIT 1"
+            )
+            last = cursor.fetchone()
+
+            if last:
+                prev_content = "|".join(str(v) for v in [
+                    last['prev_hash'] or '',
+                    last['session_id'] or '',
+                    last['action'],
+                    last['detail_json'] or '',
+                    last['created_at'] or ''
+                ])
+                prev_hash = hashlib.sha256(prev_content.encode('utf-8')).hexdigest()
+            else:
+                prev_hash = None
+
+            now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+            cursor.execute(
+                "INSERT INTO audit_log (session_id, action, detail_json, created_at, prev_hash) VALUES (?, ?, ?, ?, ?)",
+                (session_id, action, detail_json, now, prev_hash)
             )
         logger.debug(f"审计日志: action={action}, session_id={session_id}")
+
+    def verify_audit_integrity(self) -> bool:
+        """验证审计日志哈希链完整性"""
+        with self.get_conn() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT id, session_id, action, detail_json, created_at, prev_hash "
+                "FROM audit_log ORDER BY id ASC"
+            )
+            rows = cursor.fetchall()
+
+            if len(rows) <= 1:
+                return True
+
+            intact = True
+            for i in range(1, len(rows)):
+                prev = rows[i - 1]
+                curr = rows[i]
+
+                prev_content = "|".join(str(v) for v in [
+                    prev['prev_hash'] or '',
+                    prev['session_id'] or '',
+                    prev['action'],
+                    prev['detail_json'] or '',
+                    prev['created_at'] or ''
+                ])
+                expected_hash = hashlib.sha256(prev_content.encode('utf-8')).hexdigest()
+
+                if curr['prev_hash'] is not None and curr['prev_hash'] != expected_hash:
+                    logger.warning(f"审计日志哈希链断裂: id={curr['id']} prev_hash 不匹配")
+                    intact = False
+
+            if intact:
+                logger.info("审计日志完整性验证通过")
+            else:
+                logger.error("审计日志完整性验证失败 — 可能存在篡改")
+
+            return intact
 
     def check_login_attempt(self, ip_address: str) -> Tuple[bool, Optional[int]]:
         """
         检查登录尝试情况
         返回: (是否锁定, 剩余尝试次数)
         """
-        with self.get_conn() as conn:
+        with self._exclusive_conn() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM login_attempts WHERE ip_address = ?", (ip_address,))
             row = cursor.fetchone()
-            
+
             now = datetime.now()
-            
+
             if not row:
                 return False, 5
-            
+
             locked_until = None
             if row["locked_until"]:
                 try:
                     locked_until = datetime.fromisoformat(row["locked_until"])
                 except:
                     pass
-            
+
             if locked_until and now < locked_until:
                 return True, 0
-            
+
             attempt_count = row["attempt_count"]
             remaining = max(0, 5 - attempt_count)
             return False, remaining
 
     def record_login_attempt(self, ip_address: str, success: bool):
         """记录登录尝试"""
-        with self.get_conn() as conn:
+        with self._exclusive_conn() as conn:
             cursor = conn.cursor()
             now = datetime.now()
-            
+
+            # 在同一个 IMMEDIATE 事务中读取并写入，防止竞态条件
             cursor.execute("SELECT * FROM login_attempts WHERE ip_address = ?", (ip_address,))
             row = cursor.fetchone()
-            
+
             if success:
                 if row:
                     cursor.execute(
@@ -258,6 +360,9 @@ class Database:
             update_params = []
             for data_type, count in normalized_stats.items():
                 if count <= 0:
+                    continue
+                if data_type not in ALLOWED_STATS_COLUMNS:
+                    logger.warning(f"跳过未知统计字段: {data_type}")
                     continue
                 column = f"{data_type}_count"
                 set_clauses.append(f"{column} = {column} + ?")

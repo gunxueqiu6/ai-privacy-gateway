@@ -23,6 +23,11 @@ class FilterManager: ObservableObject {
      * 加载配置
      */
     func loadConfiguration() {
+        // TODO: Migrate to Keychain storage (C-10).
+        // API keys must not be stored in UserDefaults (plaintext plist).
+        // Use a Keychain wrapper:
+        //   let keychain = KeychainWrapper.standard
+        //   gatewayApiKey = keychain.string(forKey: "api_key") ?? gatewayApiKey
         let defaults = UserDefaults(suiteName: appGroup)
         gatewayUrl = defaults?.string(forKey: "gateway_url") ?? gatewayUrl
         gatewayApiKey = defaults?.string(forKey: "api_key") ?? gatewayApiKey
@@ -36,6 +41,8 @@ class FilterManager: ObservableObject {
      * 保存配置
      */
     func saveConfiguration() {
+        // TODO: Migrate to Keychain storage (C-10).
+        // See loadConfiguration() for the migration code pattern.
         let defaults = UserDefaults(suiteName: appGroup)
         defaults?.set(gatewayUrl, forKey: "gateway_url")
         defaults?.set(gatewayApiKey, forKey: "api_key")

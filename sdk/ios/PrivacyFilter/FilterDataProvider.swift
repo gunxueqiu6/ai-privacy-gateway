@@ -185,7 +185,12 @@ class FilterDataProvider: NEFilterDataProvider {
      * 加载配置
      */
     private func loadConfiguration() {
-        // 从UserDefaults读取配置
+        // TODO: Migrate to Keychain for secure storage (C-10).
+        // UserDefaults stores data in plaintext on disk — API keys and tokens
+        // must be stored in the Keychain instead.
+        // Use a Keychain wrapper (e.g. SwiftKeychainWrapper or SecItem API):
+        //   let keychain = KeychainWrapper.standard
+        //   gatewayApiKey = keychain.string(forKey: "api_key") ?? gatewayApiKey
         let defaults = UserDefaults(suiteName: "group.com.privacygw.filter")
         gatewayUrl = defaults?.string(forKey: "gateway_url") ?? gatewayUrl
         gatewayApiKey = defaults?.string(forKey: "api_key") ?? gatewayApiKey
@@ -255,7 +260,10 @@ class FilterDataProvider: NEFilterDataProvider {
         }
 
         // 构建请求
-        let url = URL(string: "\(gatewayUrl)/api/mask")!
+        guard let url = URL(string: "\(gatewayUrl)/api/mask") else {
+            logger.error("Invalid gateway URL: \(gatewayUrl)")
+            return nil
+        }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -269,26 +277,24 @@ class FilterDataProvider: NEFilterDataProvider {
 
         // 发送请求（同步，因为Network Extension不支持异步）
         // 注意：实际实现需要使用更复杂的异步处理
-        do {
-            let semaphore = DispatchSemaphore(value: 0)
-            var result: String?
+        // TODO: 重新设计异步架构，消除 DispatchSemaphore 阻塞。
+        // 当前使用同步模式会阻塞线程，影响吞吐量。
+        // 可考虑使用 NEFilterFlow 的异步回调链或 OperationQueue 管理。
+        let semaphore = DispatchSemaphore(value: 0)
+        var result: String?
 
-            URLSession.shared.dataTask(with: request) { data, response, error in
-                if let data = data {
-                    if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                        result = json["masked_text"] as? String
-                    }
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let data = data {
+                if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                    result = json["masked_text"] as? String
                 }
-                semaphore.signal()
-            }.resume()
+            }
+            semaphore.signal()
+        }.resume()
 
-            semaphore.wait()
+        _ = semaphore.wait(timeout: .now() + 30)
 
-            return result
-        } catch {
-            logger.error("Mask request failed: \(error)")
-            return nil
-        }
+        return result
     }
 
     /**

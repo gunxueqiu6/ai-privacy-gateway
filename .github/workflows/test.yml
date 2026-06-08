@@ -115,3 +115,26 @@ jobs:
           pip install maturin
           cd rust_src/integrity_check
           maturin develop --release || echo "Maturin build skipped"
+
+  security-scan:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install security scanning tools
+        run: |
+          pip install pip-audit bandit
+
+      - name: Run pip-audit (dependency vulnerability scan)
+        run: |
+          pip-audit
+
+      - name: Run bandit (SAST)
+        run: |
+          bandit -r . --exclude ./tests,./website-astro,./sdk --level medium

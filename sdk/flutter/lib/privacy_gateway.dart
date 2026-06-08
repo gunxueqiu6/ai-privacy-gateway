@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as dev;
 
 import 'package:http/http.dart' as http;
 
@@ -72,6 +73,7 @@ class PrivacyGateway {
 
   Future<Map<String, dynamic>> _get(String path) async {
     final url = Uri.parse('$_baseUrl$path');
+    _validateUrlScheme(url);
     final request = http.Request('GET', url);
     _headers.forEach((key, value) => request.headers[key] = value);
 
@@ -82,21 +84,36 @@ class PrivacyGateway {
 
   Future<Map<String, dynamic>> _post(String path, Map<String, dynamic> body) async {
     final url = Uri.parse('$_baseUrl$path');
+    _validateUrlScheme(url);
     final headers = {'Content-Type': 'application/json', ..._headers};
-    
+
     final response = await http.post(
       url,
       headers: headers,
       body: jsonEncode(body),
     ).timeout(Duration(milliseconds: _timeout));
-    
+
     return _parseResponse(response);
+  }
+
+  /// Validates that the URL uses HTTPS unless targeting localhost/127.0.0.1.
+  void _validateUrlScheme(Uri url) {
+    if (url.host == 'localhost' || url.host == '127.0.0.1') {
+      return; // localhost is allowed for development
+    }
+    if (url.scheme != 'https') {
+      throw PrivacyGatewayException(
+        'Insecure URL: "$url". HTTPS is required for non-localhost endpoints.',
+      );
+    }
   }
 
   Map<String, dynamic> _parseResponse(http.Response response) {
     if (response.statusCode < 200 || response.statusCode >= 300) {
+      // Log the full body for debugging, but only expose a generic message.
+      _logError('Request failed with status ${response.statusCode}: ${response.body}');
       throw PrivacyGatewayException(
-        'Request failed: ${response.body}',
+        'Request failed with status ${response.statusCode}',
         response.statusCode,
       );
     }
@@ -106,6 +123,12 @@ class PrivacyGateway {
     } catch (e) {
       throw PrivacyGatewayException('Failed to parse response: $e');
     }
+  }
+
+  /// Logs an error message to the developer console.
+  /// Response bodies are logged here for debugging and never exposed to callers.
+  static void _logError(String message) {
+    dev.log(message, name: 'PrivacyGateway');
   }
 
   static Future<MaskResult> maskText(String text) => instance.mask(text);

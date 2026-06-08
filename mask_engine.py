@@ -61,7 +61,7 @@ class MaskEngineInterface(ABC):
 class RegexMaskEngine(MaskEngineInterface):
     """正则表达式脱敏引擎"""
 
-    SECRET_KEY = "ai_privacy_vault_key_2024"
+    # 占位符使用随机序列号标识，无需固定密钥
     _sequence_counter = 0
 
     BUILTIN_RULES = {
@@ -74,6 +74,7 @@ class RegexMaskEngine(MaskEngineInterface):
         "url": re.compile(r'https?://[^\s]+'),
         "date": re.compile(r'\d{4}[-/年](?:0?[1-9]|1[0-2])[-/月](?:0?[1-9]|[12]\d|3[01])日?'),
         "amount": re.compile(r'(?:¥|￥|\$)\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?'),
+        # 邮编 - 注意：可能误匹配6位连续数字（如订单号、快递单号等）
         "postcode": re.compile(r'(?<!\d)([1-9]\d{5})(?!\d)'),
     }
 
