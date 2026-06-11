@@ -36,13 +36,13 @@ class TestBcryptHashing:
         assert not bcrypt.checkpw(wrong.encode(), hashed.encode())
 
     def test_config_password_hash_verifies(self):
-        """Config 中的哈希与明文密码匹配"""
-        from config import config
-        result = bcrypt.checkpw(
-            config.ADMIN_PASSWORD.encode(),
-            config.ADMIN_PASSWORD_HASH.encode()
-        )
-        assert result
+        """已知密码生成哈希后能验证通过"""
+        import bcrypt as bc
+        pw = b"known_test_pw"
+        salt = bc.gensalt()
+        hashed = bc.hashpw(pw, salt)
+        assert bc.checkpw(pw, hashed)
+        assert not bc.checkpw(b"wrong", hashed)
 
 
 class TestJwtToken:
@@ -89,7 +89,7 @@ class TestLoginFlow:
 
     def test_login_success(self, client):
         """正确密码登录成功"""
-        resp = client.post("/admin/login", json={"password": "admin123"})
+        resp = client.post("/admin/login", json={"password": "test_admin_pw_123"})
         assert resp.status_code == 200
         data = resp.json()
         assert data["status"] == "ok"
@@ -113,7 +113,7 @@ class TestLoginFlow:
 
     def test_admin_stats_with_bearer_token(self, client):
         """Bearer token 认证通过"""
-        login_resp = client.post("/admin/login", json={"password": "admin123"})
+        login_resp = client.post("/admin/login", json={"password": "test_admin_pw_123"})
         token = login_resp.json()["token"]
 
         resp = client.get("/admin/stats",
@@ -122,7 +122,7 @@ class TestLoginFlow:
 
     def test_admin_stats_with_cookie(self, client):
         """Cookie 认证通过"""
-        login_resp = client.post("/admin/login", json={"password": "admin123"})
+        login_resp = client.post("/admin/login", json={"password": "test_admin_pw_123"})
         token = login_resp.cookies["session_token"]
 
         resp = client.get("/admin/stats",

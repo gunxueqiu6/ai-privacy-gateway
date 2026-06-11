@@ -48,7 +48,7 @@ class TestMaskRequest:
                 {"role": "user", "content": "Hello 13812345678"}
             ]
         }
-        masked_body, mappings, stats, session_id = gateway.mask_request(body)
+        masked_body, mappings, stats, session_id, _ = gateway.mask_request(body)
 
         assert "13812345678" not in masked_body["messages"][0]["content"]
         assert "[PII_PHONE_0001]" in masked_body["messages"][0]["content"]
@@ -71,7 +71,7 @@ class TestMaskRequest:
                 {"role": "assistant", "content": "email test@x.com"}
             ]
         }
-        masked_body, mappings, stats, _ = gateway.mask_request(body)
+        masked_body, mappings, stats, _, _ = gateway.mask_request(body)
 
         assert masked_body["messages"][0]["content"] == "masked_a"
         assert masked_body["messages"][1]["content"] == "masked_b"
@@ -87,7 +87,7 @@ class TestMaskRequest:
                 {"role": "system", "content": ""}
             ]
         }
-        masked_body, mappings, stats, _ = gateway.mask_request(body)
+        masked_body, mappings, stats, _, _ = gateway.mask_request(body)
         assert mappings == {}
 
     def test_mask_no_content_field(self, gateway):
@@ -97,7 +97,7 @@ class TestMaskRequest:
                 {"role": "user"}
             ]
         }
-        masked_body, mappings, stats, _ = gateway.mask_request(body)
+        masked_body, mappings, stats, _, _ = gateway.mask_request(body)
         assert mappings == {}
 
 
@@ -163,7 +163,7 @@ class TestMaskRequestStats:
                 {"role": "user", "content": "b"}
             ]
         }
-        _, _, stats, _ = gateway.mask_request(body)
+        _, _, stats, _, _ = gateway.mask_request(body)
 
         assert stats["phone"] == 3
         assert stats["email"] == 1
