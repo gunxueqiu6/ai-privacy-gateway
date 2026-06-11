@@ -25,3 +25,4 @@ jobs:
       - run: npx wrangler pages deploy dist --project-name=privacygw --branch=main
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: f1846b332b815c45d4dd011a5a71923a
