@@ -371,6 +371,7 @@ class Database:
             if not set_clauses:
                 return
 
+            # nosec B608 — columns from ALLOWED_STATS_COLUMNS allowlist
             sql = f"""
                 INSERT INTO stats (date, {', '.join([f"{f}_count" for f in old_fields + new_fields])}, total_count)
                 VALUES (?, {', '.join(['?'] * (len(old_fields + new_fields) + 1))})

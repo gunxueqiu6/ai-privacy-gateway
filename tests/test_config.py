@@ -61,10 +61,10 @@ class TestConfigFromEnv:
 
     def test_env_db_path_override(self, monkeypatch):
         import importlib, config
-        monkeypatch.setenv("DB_PATH", "/tmp/test.db")
+        monkeypatch.setenv("DB_PATH", "/tmp/test.db")  # nosec B108 — test-only temp path
         importlib.reload(config)
         c = config.Config()
-        assert c.DB_PATH == "/tmp/test.db"
+        assert c.DB_PATH == "/tmp/test.db"  # nosec B108
 
     def test_env_password_hash(self, monkeypatch):
         """环境变量提供已有哈希则直接使用"""
