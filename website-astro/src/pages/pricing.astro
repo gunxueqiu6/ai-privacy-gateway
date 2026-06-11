@@ -73,13 +73,13 @@ import Footer from '../components/Footer.astro';
       </div>
 
       <!-- Pro -->
-      <div class="pricing-card popular">
+      <div class="pricing-card popular" id="pro-card">
         <div class="popular-badge">最受欢迎</div>
         <div class="tier-label">团队版</div>
         <h2>Pro</h2>
         <div class="pricing-price">
-          <span class="price">¥99</span>
-          <span class="period">/月</span>
+          <span class="price">$99</span>
+          <span class="period">/年</span>
         </div>
         <p class="pricing-desc">适合 20 人以下团队</p>
         <ul class="pricing-features">
@@ -112,19 +112,19 @@ import Footer from '../components/Footer.astro';
             <span>邮件技术支持</span>
           </li>
         </ul>
-        <div class="contact-info">
-          <span>QQ: 1024294229</span>
-          <a href="https://t.me/chirstmas_7">TG: @chirstmas_7</a>
-        </div>
+        <button class="btn btn-primary btn-block btn-pay" data-tier="pro" id="btn-pro">
+          <span class="btn-pay-icon">$</span>
+          立即购买
+        </button>
       </div>
 
       <!-- Enterprise -->
-      <div class="pricing-card glass">
+      <div class="pricing-card glass" id="enterprise-card">
         <div class="tier-label">企业版</div>
         <h2>Enterprise</h2>
         <div class="pricing-price">
-          <span class="price">定制</span>
-          <span class="period">年费</span>
+          <span class="price">$999</span>
+          <span class="period">/年</span>
         </div>
         <p class="pricing-desc">适合大型企业部署</p>
         <ul class="pricing-features">
@@ -157,10 +157,10 @@ import Footer from '../components/Footer.astro';
             <span>驻场支持 + SLA 保障</span>
           </li>
         </ul>
-        <div class="contact-info">
-          <span>QQ: 1024294229</span>
-          <a href="https://t.me/chirstmas_7">TG: @chirstmas_7</a>
-        </div>
+        <button class="btn btn-primary btn-block btn-pay" data-tier="enterprise" id="btn-enterprise">
+          <span class="btn-pay-icon">$</span>
+          立即购买
+        </button>
       </div>
     </div>
   </section>
@@ -172,7 +172,7 @@ import Footer from '../components/Footer.astro';
       <div class="faq-grid">
         <div class="faq-card glass">
           <h3>如何获取 Pro 或 Enterprise 版？</h3>
-          <p>请联系 <a href="https://t.me/chirstmas_7">Telegram @chirstmas_7</a>（海外）或 QQ 1024294229（国内），我们会根据您的团队规模和需求提供专属方案。</p>
+          <p>点击对应版本的"立即购买"按钮，输入邮箱后通过 PayPal 在线支付。支付成功后 License Key 自动发送到您的邮箱，下载 Pro 版后激活即可使用。</p>
         </div>
         <div class="faq-card glass">
           <h3>支持退款吗？</h3>
@@ -184,13 +184,185 @@ import Footer from '../components/Footer.astro';
         </div>
         <div class="faq-card glass">
           <h3>如何升级到 Enterprise 版？</h3>
-          <p>请联系 <a href="https://t.me/chirstmas_7">Telegram @chirstmas_7</a>（海外）或 QQ 1024294229（国内），我们会根据您的需求提供定制方案。</p>
+          <p>点击 Enterprise 版"立即购买"按钮，在线完成 PayPal 支付后 License Key 将自动发送到您的邮箱。如需定制方案也可联系 <a href="https://t.me/chirstmas_7">Telegram @chirstmas_7</a>。</p>
         </div>
       </div>
     </div>
   </section>
 
+  <!-- Email Modal -->
+  <div class="modal-overlay" id="email-modal">
+    <div class="modal glass">
+      <h3>输入邮箱接收 License</h3>
+      <p class="modal-desc">支付完成后 License Key 将发送到此邮箱</p>
+      <input type="email" id="email-input" class="modal-input" placeholder="your@email.com" required />
+      <span class="modal-error" id="email-error"></span>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeEmailModal()">取消</button>
+        <button class="btn btn-primary" id="btn-confirm-email">确认并支付</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Result Modal -->
+  <div class="modal-overlay" id="result-modal">
+    <div class="modal glass">
+      <h3 id="result-title">支付成功</h3>
+      <div id="result-body"></div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" onclick="closeResultModal()">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PayPal container (hidden, SDK renders here) -->
+  <div id="paypal-button-container" style="display:none;"></div>
+
   <Footer />
+
+  <script>
+    // Pass build-time env to inline script
+    window.__PAYMENT_API_BASE__ = import.meta.env.PUBLIC_API_BASE || 'https://surf-illinois-servers-wrote.trycloudflare.com';
+  </script>
+
+  <script is:inline>
+    var API_BASE = window.__PAYMENT_API_BASE__;
+    let paypalLoaded = false;
+    let currentTier = '';
+    let currentEmail = '';
+    let paypalButtonsRendered = false;
+
+    function $(id) { return document.getElementById(id); }
+
+    // --- Email Modal ---
+    function showEmailModal(tier) {
+      currentTier = tier;
+      $('email-input').value = '';
+      $('email-error').textContent = '';
+      $('email-modal').classList.add('active');
+    }
+
+    function closeEmailModal() {
+      $('email-modal').classList.remove('active');
+    }
+
+    // --- Result Modal ---
+    function showResult(title, bodyHtml) {
+      $('result-title').textContent = title;
+      $('result-body').innerHTML = bodyHtml;
+      $('result-modal').classList.add('active');
+    }
+
+    function closeResultModal() {
+      $('result-modal').classList.remove('active');
+    }
+
+    // --- Load PayPal SDK ---
+    async function loadPayPalSDK() {
+      if (paypalLoaded) return;
+      try {
+        const resp = await fetch(`${API_BASE}/api/paypal-config`);
+        const config = await resp.json();
+        const script = document.createElement('script');
+        script.src = `https://www.paypal.com/sdk/js?client-id=${config.client_id}&currency=USD`;
+        $('paypal-button-container').appendChild(script);
+        await new Promise((resolve) => { script.onload = resolve; });
+        paypalLoaded = true;
+      } catch (e) {
+        console.error('Failed to load PayPal SDK:', e);
+        showResult('加载失败', '<p>无法连接支付服务，请稍后重试。</p>');
+      }
+    }
+
+    // --- Render PayPal Buttons ---
+    function renderPayPalButtons() {
+      if (paypalButtonsRendered) return;
+      paypalButtonsRendered = true;
+
+      paypal.Buttons({
+        createOrder: async () => {
+          const resp = await fetch(`${API_BASE}/api/payment/create-order`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tier: currentTier })
+          });
+          const data = await resp.json();
+          if (!resp.ok) throw new Error('创建订单失败');
+          return data.id;
+        },
+        onApprove: async (data) => {
+          $('paypal-button-container').style.display = 'none';
+          showResult('支付处理中...', '<div class="spinner"></div><p>正在生成 License，请稍候...</p>');
+
+          try {
+            const resp = await fetch(`${API_BASE}/api/payment/complete`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                order_id: data.orderID,
+                customer_email: currentEmail,
+                tier: currentTier
+              })
+            });
+            const result = await resp.json();
+
+            if (result.status === 'completed') {
+              showResult('支付成功!',
+                `<div class="license-box">
+                  <p>您的 License Key:</p>
+                  <code class="license-key">${result.license_key}</code>
+                  <p class="license-info">版本: ${result.tier === 'pro' ? 'Pro 团队版' : 'Enterprise 企业版'}</p>
+                  <p class="license-info">有效期至: ${result.expires_at}</p>
+                  <p class="license-info">License 已发送至 ${currentEmail}</p>
+                </div>`
+              );
+            } else {
+              showResult('支付异常', '<p>支付验证失败，请联系客服。</p>');
+            }
+          } catch (e) {
+            console.error('Payment complete error:', e);
+            showResult('处理失败', '<p>支付确认失败，请联系客服并提供您的 PayPal 订单号。</p>');
+          }
+        },
+        onCancel: () => {
+          showResult('支付取消', '<p>您取消了支付。如需购买，可随时重试。</p>');
+        },
+        onError: (err) => {
+          console.error('PayPal error:', err);
+          showResult('支付错误', '<p>支付过程中发生错误，请稍后重试。</p>');
+        }
+      }).render('#paypal-button-container');
+    }
+
+    // --- Purchase Flow ---
+    $('btn-confirm-email').addEventListener('click', async () => {
+      const email = $('email-input').value.trim();
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        $('email-error').textContent = '请输入有效的邮箱地址';
+        return;
+      }
+      currentEmail = email;
+      closeEmailModal();
+
+      $('paypal-button-container').style.display = 'block';
+      await loadPayPalSDK();
+      renderPayPalButtons();
+      // Scroll to the PayPal button
+      $('paypal-button-container').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // Wire up buy buttons
+    document.querySelectorAll('.btn-pay').forEach(btn => {
+      btn.addEventListener('click', () => {
+        showEmailModal(btn.dataset.tier);
+      });
+    });
+
+    // Enter key in email input
+    $('email-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') $('btn-confirm-email').click();
+    });
+  </script>
 </Layout>
 
 <style>
@@ -450,6 +622,132 @@ import Footer from '../components/Footer.astro';
     color: var(--text-secondary);
     font-size: 0.9rem;
     line-height: 1.7;
+  }
+
+  /* Payment buttons */
+  .btn-pay {
+    margin-top: auto;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.85rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .btn-pay-icon {
+    font-size: 1.1rem;
+    font-weight: 700;
+    opacity: 0.8;
+  }
+
+  .btn-pay:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 32px rgba(134, 239, 172, 0.25);
+  }
+
+  /* Modals */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.active {
+    display: flex;
+  }
+
+  .modal {
+    width: 100%;
+    max-width: 440px;
+    padding: 2rem;
+    margin: 1rem;
+    z-index: 1001;
+  }
+
+  .modal h3 {
+    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+  }
+
+  .modal-desc {
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .modal-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  .modal-input:focus {
+    border-color: var(--primary);
+  }
+
+  .modal-error {
+    display: block;
+    color: var(--danger);
+    font-size: 0.8rem;
+    margin-top: 0.4rem;
+    min-height: 1.2em;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+  }
+
+  .modal-actions .btn {
+    flex: 1;
+  }
+
+  /* License result */
+  .license-box {
+    text-align: center;
+    padding: 1rem 0;
+  }
+
+  .license-key {
+    display: inline-block;
+    background: var(--bg-deep);
+    color: var(--primary);
+    font-family: 'Fira Code', monospace;
+    font-size: 1.3rem;
+    font-weight: 700;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    border: 1px dashed var(--primary);
+    margin: 0.75rem 0;
+    letter-spacing: 0.05em;
+    word-break: break-all;
+  }
+
+  .license-info {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin: 0.25rem 0;
+  }
+
+  #paypal-button-container {
+    max-width: 400px;
+    margin: 2rem auto;
   }
 
   @media (max-width: 1024px) {
