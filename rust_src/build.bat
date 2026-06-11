@@ -3,7 +3,7 @@ echo ========================================
 echo Building Rust Integrity Check Module
 echo ========================================
 
-cd /d "%~dp0"
+cd /d "%~dp0integrity_check"
 
 REM 检查 Rust 环境
 where cargo >nul 2>&1

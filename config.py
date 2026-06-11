@@ -31,7 +31,7 @@ class Config:
     # JWT 密钥
     JWT_SECRET: str = os.environ.get("JWT_SECRET", os.urandom(32).hex())
 
-    def __init__(self):
+    def __init__(self) -> None:
         """初始化配置，自动为明文密码生成哈希"""
         if not self.ADMIN_PASSWORD_HASH and self.ADMIN_PASSWORD:
             # 如果没有哈希但有明文密码，自动生成哈希

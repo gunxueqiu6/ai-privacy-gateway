@@ -7,7 +7,7 @@ import logging
 import re
 import time
 import uuid
-from typing import Dict, Any, Tuple, AsyncGenerator, Optional
+from typing import Dict, Any, Tuple, AsyncGenerator, Optional, Set, Union
 
 import httpx
 
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 class GatewayCore:
     """网关核心处理类"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.mask_engine = get_mask_engine()
         self.target_url = config.TARGET_LLM
         self.timeout = 120.0
@@ -31,7 +31,7 @@ class GatewayCore:
         """生成会话ID"""
         return f"sess_{int(time.time() * 1000)}_{uuid.uuid4().hex[:8]}"
 
-    def mask_request(self, body: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, str], Dict[str, int], str, set]:
+    def mask_request(self, body: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, str], Dict[str, int], str, Set[str]]:
         """
         上行脱敏处理
         返回: (脱敏后的body, mappings, stats, session_id, used_placeholders)
@@ -73,7 +73,7 @@ class GatewayCore:
 
         # 提取实际出现在脱敏文本中的占位符
         pii_pattern = re.compile(r'\[PII_\w+_\d{8}\]')
-        used_placeholders: set = set()
+        used_placeholders: Set[str] = set()
         for msg in messages:
             content = msg.get("content", "")
             if content:
@@ -81,7 +81,7 @@ class GatewayCore:
 
         return body, all_mappings, total_stats, session_id, used_placeholders
 
-    def unmask_response(self, text: str, mappings: Dict[str, str], session_id: str = None, used_placeholders: set = None) -> str:
+    def unmask_response(self, text: str, mappings: Dict[str, str], session_id: Optional[str] = None, used_placeholders: Optional[Set[str]] = None) -> str:
         """
         下行还原处理
         """
@@ -100,8 +100,8 @@ class GatewayCore:
         body: Dict[str, Any],
         headers: Dict[str, str],
         mappings: Dict[str, str],
-        session_id: str = None
-    ) -> Tuple[int, Any, Dict[str, str]]:
+        session_id: Optional[str] = None
+    ) -> Tuple[int, Union[bytes, Dict[str, Any]], Dict[str, str]]:
         """
         代理转发请求到目标 LLM
         返回: (status_code, response_body, response_headers)
@@ -144,7 +144,7 @@ class GatewayCore:
         body: Dict[str, Any],
         headers: Dict[str, str],
         mappings: Dict[str, str],
-        used_placeholders: set = None
+        used_placeholders: Optional[Set[str]] = None
     ) -> AsyncGenerator[str, None]:
         """
         流式代理转发

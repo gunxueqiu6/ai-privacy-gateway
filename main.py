@@ -7,7 +7,7 @@ import logging
 import os
 import time
 from datetime import UTC, datetime, timedelta
-from typing import Dict, Optional
+from typing import Any, Dict, Optional, Set, Union
 
 from fastapi import FastAPI, Request, Response, HTTPException
 from fastapi.responses import JSONResponse, StreamingResponse
@@ -66,11 +66,11 @@ MAX_REQUEST_BODY = 1024 * 1024  # 1MB
 # 代理请求头白名单 — 只转发 Content-Type 和 Authorization
 ALLOWED_PROXY_HEADERS = {"content-type", "authorization"}
 
-def filter_proxy_headers(headers: dict) -> dict:
+def filter_proxy_headers(headers: Any) -> Dict[str, str]:
     return {k: v for k, v in headers.items() if k.lower() in ALLOWED_PROXY_HEADERS}
 
 # Token 黑名单 (登出后失效)
-_token_blacklist: set = set()
+_token_blacklist: Set[str] = set()
 
 
 # ==================== 认证依赖 ====================
@@ -118,7 +118,7 @@ async def require_admin(request: Request) -> str:
 
 @app.post("/v1/chat/completions")
 @limiter.limit("60/minute")
-async def chat_completions(request: Request):
+async def chat_completions(request: Request) -> Response:
     """聊天完成接口 - 核心脱敏代理"""
     gateway = get_gateway_core()
 
@@ -176,7 +176,7 @@ ALLOWED_V1_PROXY_PATHS = {"models", "embeddings", "moderations"}
 
 @app.api_route("/v1/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 @limiter.limit("60/minute")
-async def proxy_v1(request: Request, path: str):
+async def proxy_v1(request: Request, path: str) -> Response:
     """通用 v1 路由代理（仅白名单路径）"""
     # 路径白名单校验
     if path not in ALLOWED_V1_PROXY_PATHS:
@@ -332,7 +332,7 @@ async def api_mask_batch(request: Request):
 
 
 @app.get("/api/entities")
-async def api_get_entities(request: Request):
+async def api_get_entities(request: Request) -> dict:
     """获取支持的实体类型列表"""
     from mask_engine import HAS_NER
 
@@ -364,7 +364,7 @@ async def api_get_entities(request: Request):
 # ==================== 管理后台 API ====================
 
 @app.get("/")
-async def root():
+async def root() -> dict:
     """根路由 - 健康检查"""
     return {
         "status": "healthy",
@@ -374,14 +374,14 @@ async def root():
 
 
 @app.get("/health")
-async def health():
+async def health() -> dict:
     """健康检查接口"""
     return {"status": "healthy", "timestamp": datetime.now().isoformat()}
 
 
 @app.post("/admin/login")
 @limiter.limit("10/minute")
-async def admin_login(request: Request):
+async def admin_login(request: Request) -> JSONResponse:
     """管理员登录"""
     # 获取客户端 IP
     client_ip = request.client.host if request.client else "unknown"
@@ -426,7 +426,7 @@ async def admin_login(request: Request):
 
 @app.post("/admin/logout")
 @limiter.limit("10/minute")
-async def admin_logout(request: Request):
+async def admin_logout(request: Request) -> JSONResponse:
     """管理员登出"""
     client_ip = request.client.host if request.client else "unknown"
 
@@ -445,7 +445,7 @@ async def admin_logout(request: Request):
 
 @app.get("/admin/stats")
 @limiter.limit("10/minute")
-async def get_stats(request: Request, date: str = None):
+async def get_stats(request: Request, date: Optional[str] = None) -> dict:
     """获取统计信息 - 需要认证"""
     await require_admin(request)
 
@@ -460,7 +460,7 @@ async def get_stats(request: Request, date: str = None):
 
 @app.get("/admin/keywords")
 @limiter.limit("10/minute")
-async def list_keywords(request: Request):
+async def list_keywords(request: Request) -> dict:
     """获取自定义敏感词列表 - 需要认证"""
     await require_admin(request)
 
@@ -516,7 +516,7 @@ async def delete_keyword(request: Request):
 
 @app.get("/admin/version")
 @limiter.limit("10/minute")
-async def get_version(request: Request):
+async def get_version(request: Request) -> dict:
     """获取版本信息"""
     await require_admin(request)
 
@@ -530,7 +530,7 @@ async def get_version(request: Request):
 
 @app.get("/admin/integrity")
 @limiter.limit("10/minute")
-async def check_integrity(request: Request):
+async def check_integrity(request: Request) -> dict:
     """完整性检查"""
     await require_admin(request)
 
@@ -559,7 +559,7 @@ async def check_integrity(request: Request):
 
 @app.post("/admin/clear")
 @limiter.limit("10/minute")
-async def clear_mappings(request: Request):
+async def clear_mappings(request: Request) -> dict:
     """清除所有映射记录 - 需要认证"""
     await require_admin(request)
 
