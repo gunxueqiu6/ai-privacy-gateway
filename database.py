@@ -3,7 +3,7 @@ import os
 import hashlib
 import logging
 import sqlite3
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Dict, List, Optional, Tuple
 from contextlib import contextmanager
 
@@ -230,7 +230,7 @@ class Database:
             else:
                 prev_hash = None
 
-            now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+            now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
             cursor.execute(
                 "INSERT INTO audit_log (session_id, action, detail_json, created_at, prev_hash) VALUES (?, ?, ?, ?, ?)",
                 (session_id, action, detail_json, now, prev_hash)

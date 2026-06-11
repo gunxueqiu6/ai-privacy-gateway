@@ -293,10 +293,8 @@ class TestIntegrationAdminAuth:
         session_cookie = login_response.cookies.get("session_token")
 
         # 带 cookie 访问
-        response = client.get(
-            "/admin/stats",
-            cookies={"session_token": session_cookie}
-        )
+        client.cookies = {"session_token": session_cookie}
+        response = client.get("/admin/stats")
 
         assert response.status_code == 200
 
