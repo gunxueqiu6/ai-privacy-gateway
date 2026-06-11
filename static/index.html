@@ -337,6 +337,8 @@
       window.location.href = '/admin/static/login.html';
     }
 
+    function h(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
     async function api(path, opts = {}) {
       const res = await fetch(API + path, {
         headers: {
@@ -419,11 +421,7 @@
         `;
       } catch(e) {
         main.innerHTML = `<div class="page-header"><h1>仪表盘</h1></div>
-          <div class="section"><div class="empty-state">❌ 加载失败: ${e.message}</div></div>`;
-      }
-    }
-
-    // ==================== Keywords ====================
+          <div class="section"><div class="empty-state">❌ 加载失败: ${h(e.message)}</div></div>`;
     let keywordList = [];
     let entityList = [];
 
@@ -468,16 +466,26 @@
 
     function renderKeywordTags() {
       const el = document.getElementById('keywordsList');
+      while (el.firstChild) el.removeChild(el.firstChild);
       if (keywordList.length === 0) {
-        el.innerHTML = '<div class="empty-state">暂无自定义敏感词，请添加</div>';
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.textContent = '暂无自定义敏感词，请添加';
+        el.appendChild(empty);
         return;
       }
-      el.innerHTML = keywordList.map(kw => `
-        <span class="keyword-tag">
-          ${kw}
-          <button data-kw="${kw}" onclick="deleteKeyword('${kw}')">×</button>
-        </span>
-      `).join('');
+      keywordList.forEach(kw => {
+        const tag = document.createElement('span');
+        tag.className = 'keyword-tag';
+        const textSpan = document.createElement('span');
+        textSpan.textContent = kw;
+        const delBtn = document.createElement('button');
+        delBtn.textContent = '×';
+        delBtn.addEventListener('click', () => deleteKeyword(kw));
+        tag.appendChild(textSpan);
+        tag.appendChild(delBtn);
+        el.appendChild(tag);
+      });
     }
 
     async function addKeyword() {
@@ -590,7 +598,7 @@
           }
         });
       } catch(e) {
-        document.getElementById('systemContent').innerHTML = `<div class="section"><div class="empty-state">❌ 加载失败: ${e.message}</div></div>`;
+        document.getElementById('systemContent').innerHTML = `<div class="section"><div class="empty-state">❌ 加载失败: ${h(e.message)}</div></div>`;
       }
     }
 
