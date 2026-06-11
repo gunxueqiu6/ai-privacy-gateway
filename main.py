@@ -579,7 +579,7 @@ if __name__ == "__main__":
 
     uvicorn.run(
         app,
-        host="0.0.0.0",
+        host="0.0.0.0",  # nosec B104 — gateway intentionally binds all interfaces
         port=config.LISTEN_PORT,
         log_level="info"
     )
