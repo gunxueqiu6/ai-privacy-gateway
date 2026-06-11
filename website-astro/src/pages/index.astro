@@ -12,6 +12,8 @@ import Footer from '../components/Footer.astro';
 
   <!-- Hero -->
   <section class="hero">
+    <div class="hero-orb"></div>
+    <div class="hero-orb-secondary"></div>
     <div class="container hero-content">
       <div class="hero-text">
         <div class="hero-badge">
@@ -29,8 +31,8 @@ import Footer from '../components/Footer.astro';
         </p>
         <div class="hero-actions">
           <a href="/download" class="btn btn-primary">立即开始</a>
-          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-outline">
-            <svg class="github-icon" viewBox="0 0 24 24" fill="currentColor">
+          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-ghost">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
             </svg>
             GitHub
@@ -75,21 +77,38 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
 
   <!-- 问题区 -->
   <section class="problem">
-    <div class="container problem-content">
+    <div class="container">
       <h2 class="section-title">为什么需要保护？</h2>
       <div class="problem-grid">
         <div class="problem-card glass">
-          <div class="problem-icon">📤</div>
+          <div class="problem-icon-wrap">
+            <svg class="problem-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5"/>
+              <path d="M2 12l10 5 10-5"/>
+            </svg>
+          </div>
           <h3>数据裸奔</h3>
           <p>每次调用 AI，你的手机号、邮箱、身份证等敏感信息都在裸奔</p>
         </div>
         <div class="problem-card glass">
-          <div class="problem-icon">🔍</div>
+          <div class="problem-icon-wrap">
+            <svg class="problem-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
           <h3>历史泄露</h3>
           <p>大模型训练会记住你的数据，可能在未来泄露给其他用户</p>
         </div>
         <div class="problem-card glass">
-          <div class="problem-icon">⚖️</div>
+          <div class="problem-icon-wrap">
+            <svg class="problem-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
           <h3>合规风险</h3>
           <p>未经脱敏的用户数据流向第三方，违反数据保护法规</p>
         </div>
@@ -98,39 +117,83 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
   </section>
 
   <!-- 功能 Bento -->
-  <section class="features">
-    <div class="container features-content" id="features">
+  <section class="features" id="features">
+    <div class="container">
       <h2 class="section-title">核心功能</h2>
-      <div class="features-grid">
-        <div class="feature-card glass feature-card-large">
-          <div class="feature-icon">🔒</div>
-          <h3>智能脱敏</h3>
-          <p>自动识别并脱敏手机号、身份证、邮箱、银行卡等敏感数据</p>
+      <div class="bento-grid">
+        <div class="bento-card glass bento-feature">
+          <div class="bento-badge">核心引擎</div>
+          <div class="bento-icon-large">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <h3 class="bento-title-large">智能脱敏引擎</h3>
+          <p class="bento-desc">正则 + NLP 双引擎识别 13 类敏感实体。手机号、身份证、邮箱、银行卡、姓名、地址、车牌、IP、URL、日期、金额、邮编、组织机构 — 自动检测，零配置。</p>
+          <div class="bento-stats">
+            <div class="bento-stat">
+              <span class="bento-stat-num">13</span>
+              <span class="bento-stat-label">实体类型</span>
+            </div>
+            <div class="bento-stat">
+              <span class="bento-stat-num">&lt;1ms</span>
+              <span class="bento-stat-label">检测延迟</span>
+            </div>
+            <div class="bento-stat">
+              <span class="bento-stat-num">99.9%</span>
+              <span class="bento-stat-label">识别率</span>
+            </div>
+          </div>
         </div>
-        <div class="feature-card glass">
-          <div class="feature-icon">🌊</div>
+        <div class="bento-card glass">
+          <div class="bento-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="4 17 10 11 4 5"/>
+              <line x1="12" y1="19" x2="20" y2="19"/>
+            </svg>
+          </div>
           <h3>流式支持</h3>
-          <p>完美处理 AI 流式响应</p>
+          <p>完美代理 SSE 流式响应，实时脱敏/还原，零延迟感知</p>
         </div>
-        <div class="feature-card glass">
-          <div class="feature-icon">🗂️</div>
+        <div class="bento-card glass">
+          <div class="bento-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            </svg>
+          </div>
           <h3>本地存储</h3>
-          <p>所有映射仅存储在本地</p>
+          <p>SQLite 本地加密存储，映射数据永不离开你的机器</p>
         </div>
-        <div class="feature-card glass">
-          <div class="feature-icon">⚡</div>
-          <h3>零配置</h3>
-          <p>30 秒一键部署</p>
+        <div class="bento-card glass">
+          <div class="bento-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <h3>30 秒部署</h3>
+          <p>单二进制文件，下载即用。Docker / pip / 手动运行皆可</p>
         </div>
-        <div class="feature-card glass">
-          <div class="feature-icon">🔧</div>
+        <div class="bento-card glass">
+          <div class="bento-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </div>
           <h3>自定义规则</h3>
-          <p>支持自定义敏感词库</p>
+          <p>支持正则 + 关键词自定义脱敏规则，灵活适配业务需求</p>
         </div>
-        <div class="feature-card glass">
-          <div class="feature-icon">📊</div>
-          <h3>实时监控</h3>
-          <p>可视化管理后台</p>
+        <div class="bento-card glass">
+          <div class="bento-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+              <line x1="8" y1="21" x2="16" y2="21"/>
+              <line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+          </div>
+          <h3>管理后台</h3>
+          <p>实时统计面板，查看脱敏次数、实体分布、映射记录</p>
         </div>
       </div>
     </div>
@@ -138,35 +201,33 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
 
   <!-- 工作原理 -->
   <section class="how-it-works" id="how-it-works">
-    <div class="container how-it-works-content">
+    <div class="container">
       <h2 class="section-title">工作原理</h2>
       <div class="steps-container">
         <div class="step-item">
-          <div class="step-number">1</div>
+          <div class="step-number">01</div>
           <div class="step-card glass">
             <h3>请求拦截</h3>
             <p>网关拦截所有发往 AI 的请求，识别其中的敏感数据</p>
           </div>
         </div>
-        <div class="step-arrow">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M5 12h14M12 5l7 7-7 7"/>
-          </svg>
+        <div class="step-connector">
+          <div class="connector-line"></div>
+          <div class="connector-dot"></div>
         </div>
         <div class="step-item">
-          <div class="step-number">2</div>
+          <div class="step-number">02</div>
           <div class="step-card glass">
             <h3>自动脱敏</h3>
             <p>将敏感数据替换为唯一占位符，映射关系存储在本地数据库</p>
           </div>
         </div>
-        <div class="step-arrow">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M5 12h14M12 5l7 7-7 7"/>
-          </svg>
+        <div class="step-connector">
+          <div class="connector-line"></div>
+          <div class="connector-dot"></div>
         </div>
         <div class="step-item">
-          <div class="step-number">3</div>
+          <div class="step-number">03</div>
           <div class="step-card glass">
             <h3>响应还原</h3>
             <p>接收 AI 响应，将占位符还原为原始数据后返回给客户端</p>
@@ -176,9 +237,76 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
     </div>
   </section>
 
+  <!-- 全平台覆盖 -->
+  <section class="platforms">
+    <div class="container">
+      <h2 class="section-title">全平台覆盖</h2>
+      <p class="platforms-subtitle">一套网关，所有平台 SDK 开箱即用</p>
+      <div class="platforms-grid">
+        <div class="platform-card glass">
+          <div class="platform-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M15.4 2.4C18.3 4.5 20.5 8.2 20.5 12c0 3.8-2.2 7.5-5.1 9.6-.3.2-.6.4-.9.6l-.6-1.2c.3-.2.6-.4.8-.6 2.4-1.8 4.1-5.3 4.1-8.4s-1.7-6.6-4.1-8.4c-.3-.2-.5-.4-.8-.6l.6-1.2c.3.2.6.4.9.6zM8.6 2.4c.3.2.6.4.9.6l.6 1.2c-.3.2-.6.4-.8.6C6.9 6.6 5.6 10.1 5.6 12s1.3 5.4 3.7 7.2c.3.2.5.4.8.6l-.6 1.2c-.3-.2-.6-.4-.9-.6C5.7 18.4 3.5 14.7 3.5 12s2.2-6.4 5.1-9.6zM12 2c1.1 0 2 .9 2 2v16c0 1.1-.9 2-2 2s-2-.9-2-2V4c0-1.1.9-2 2-2z"/>
+            </svg>
+          </div>
+          <h3>Python SDK</h3>
+          <p>pip install，一行代码接入</p>
+        </div>
+        <div class="platform-card glass">
+          <div class="platform-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+            </svg>
+          </div>
+          <h3>JavaScript SDK</h3>
+          <p>npm install，前端/Node 通用</p>
+        </div>
+        <div class="platform-card glass">
+          <div class="platform-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.5 2h-11C5.1 2 4 3.1 4 4.5v15C4 20.9 5.1 22 6.5 22h11c1.4 0 2.5-1.1 2.5-2.5v-15C20 3.1 18.9 2 17.5 2zM12 20c-.8 0-1.5-.7-1.5-1.5S11.2 17 12 17s1.5.7 1.5 1.5S12.8 20 12 20zm5-4H7V5h10v11z"/>
+            </svg>
+          </div>
+          <h3>Flutter SDK</h3>
+          <p>跨平台移动端原生集成</p>
+        </div>
+        <div class="platform-card glass">
+          <div class="platform-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M6 18c0 .6.4 1 1 1h2c.6 0 1-.4 1-1v-2H6v2zM14 18c0 .6.4 1 1 1h2c.6 0 1-.4 1-1v-2h-4v2zM4 8v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8H4zm16-2V4c0-1.1-.9-2-2-2H6C4.9 2 4 2.9 4 4v2h16z"/>
+              <rect x="8" y="10" width="3" height="4" rx="0.5"/>
+              <rect x="13" y="10" width="3" height="4" rx="0.5"/>
+            </svg>
+          </div>
+          <h3>Android SDK</h3>
+          <p>原生 Kotlin，Gradle 一键引入</p>
+        </div>
+        <div class="platform-card glass">
+          <div class="platform-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.7 1.3c-.4-.4-1-.4-1.4 0l-2 2c-.4.4-.4 1 0 1.4.4.4 1 .4 1.4 0l2-2c.4-.4.4-1 0-1.4zM3.9 3.9c-.4.4-.4 1 0 1.4l2 2c.4.4 1 .4 1.4 0 .4-.4.4-1 0-1.4l-2-2c-.4-.4-1-.4-1.4 0zm11.3 2.8L8.9 13c-.4.4-.4 1 0 1.4.4.4 1 .4 1.4 0l6.3-6.3c.4-.4.4-1 0-1.4-.4-.4-1-.4-1.4 0zM20 12c-.6 0-1 .4-1 1v6H5V5h6c.6 0 1-.4 1-1s-.4-1-1-1H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-8c0-.6-.4-1-1-1z"/>
+            </svg>
+          </div>
+          <h3>iOS SDK</h3>
+          <p>原生 Swift，SPM 一键集成</p>
+        </div>
+        <div class="platform-card glass">
+          <div class="platform-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+            </svg>
+          </div>
+          <h3>浏览器扩展</h3>
+          <p>Chrome / Edge 一键安装，网页端即装即用</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- CTA -->
   <section class="cta">
     <div class="cta-orb"></div>
+    <div class="cta-orb-secondary"></div>
     <div class="container cta-content">
       <h2 class="cta-title">
         现在开始保护你的
@@ -189,7 +317,7 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
       </p>
       <div class="cta-actions">
         <a href="/download" class="btn btn-primary">立即下载</a>
-        <a href="/pricing" class="btn btn-outline">查看定价</a>
+        <a href="/pricing" class="btn btn-ghost btn-ghost-light">查看定价</a>
       </div>
     </div>
   </section>
@@ -198,30 +326,63 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
 </Layout>
 
 <style>
-  /* Hero */
+  /* ===========================================
+     Hero
+     =========================================== */
   .hero {
     padding: 10rem 0 8rem;
     position: relative;
+    overflow: hidden;
+  }
+
+  .hero-orb {
+    position: absolute;
+    top: -300px;
+    right: -200px;
+    width: 900px;
+    height: 900px;
+    background: radial-gradient(circle, var(--primary-glow) 0%, rgba(134, 239, 172, 0.1) 30%, transparent 60%);
+    border-radius: 50%;
+    filter: blur(120px);
+    animation: breathe 15s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .hero-orb-secondary {
+    position: absolute;
+    bottom: -200px;
+    left: -200px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, var(--accent-glow) 0%, rgba(167, 139, 250, 0.08) 30%, transparent 60%);
+    border-radius: 50%;
+    filter: blur(100px);
+    animation: breathe 18s ease-in-out infinite reverse;
+    pointer-events: none;
   }
 
   .hero-content {
     display: grid;
     grid-template-columns: 1.2fr 0.8fr;
-    gap: 4rem;
+    gap: 6rem;
     align-items: center;
+    position: relative;
+    z-index: 1;
   }
 
   .hero-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    background: var(--bg-surface);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
     padding: 0.5rem 1rem;
     border-radius: 20px;
     font-size: 0.875rem;
     font-weight: 500;
     color: var(--primary);
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border);
   }
 
   .badge-dot {
@@ -230,19 +391,20 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
     background: var(--primary);
     border-radius: 50%;
     animation: pulse 2s ease-in-out infinite;
+    box-shadow: 0 0 8px var(--primary-glow);
   }
 
   @keyframes pulse {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+    50% { opacity: 0.4; }
   }
 
   .hero-title {
-    font-size: 4rem;
+    font-size: 4.5rem;
     font-weight: 700;
     letter-spacing: -0.04em;
     margin-bottom: 1.5rem;
-    line-height: 1.1;
+    line-height: 1.05;
   }
 
   .gradient-text {
@@ -257,13 +419,36 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
     color: var(--text-secondary);
     line-height: 1.8;
     margin-bottom: 2rem;
-    max-width: 500px;
+    max-width: 480px;
   }
 
   .hero-actions {
     display: flex;
     gap: 1rem;
-    margin-bottom: 3rem;
+    margin-bottom: 3.5rem;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: rgba(134, 239, 172, 0.05);
   }
 
   .hero-stats {
@@ -281,9 +466,10 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
   }
 
   .stat-value {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: 700;
     color: var(--primary);
+    letter-spacing: -0.02em;
   }
 
   .stat-label {
@@ -297,6 +483,7 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
     background: var(--border);
   }
 
+  /* Terminal code block */
   .hero-code {
     position: relative;
     overflow: hidden;
@@ -306,7 +493,8 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
     display: flex;
     gap: 8px;
     padding: 0.75rem 1rem;
-    background: rgba(0,0,0,0.3);
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid var(--border);
   }
 
   .code-dot {
@@ -320,42 +508,28 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
   .code-dot-green { background: #27c93f; }
 
   .code-content {
-    padding: 1rem;
-    font-size: 0.875rem;
-    line-height: 1.6;
+    padding: 1.25rem 1.25rem 1rem;
+    font-size: 0.8125rem;
+    line-height: 1.7;
   }
 
   .code-comment { color: var(--text-muted); }
   .code-keyword { color: var(--accent); }
   .code-string { color: var(--primary); }
 
-  .btn-outline {
-    background: transparent;
-    color: var(--text-primary);
-    border: 1px solid var(--border);
-    padding: 0.5rem 1rem;
-  }
-
-  .btn-outline:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-  }
-
-  .github-icon {
-    width: 16px;
-    height: 16px;
-  }
-
-  /* 问题区 */
+  /* ===========================================
+     Problem Section
+     =========================================== */
   .problem {
     padding: 6rem 0;
   }
 
   .section-title {
-    font-size: 2.5rem;
+    font-size: 2.75rem;
     font-weight: 600;
     text-align: center;
-    margin-bottom: 3rem;
+    margin-bottom: 3.5rem;
+    letter-spacing: -0.03em;
   }
 
   .problem-grid {
@@ -365,124 +539,296 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
   }
 
   .problem-card {
-    padding: 2rem;
+    padding: 2.5rem 2rem;
     text-align: center;
   }
 
-  .problem-icon {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
+  .problem-icon-wrap {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(134, 239, 172, 0.1), rgba(167, 139, 250, 0.1));
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    transition: border-color 0.3s, transform 0.3s;
+  }
+
+  .problem-card:hover .problem-icon-wrap {
+    border-color: var(--border-hover);
+    transform: scale(1.05);
+  }
+
+  .problem-svg {
+    width: 24px;
+    height: 24px;
+    color: var(--primary);
   }
 
   .problem-card h3 {
     margin-bottom: 0.75rem;
+    font-size: 1.125rem;
   }
 
   .problem-card p {
     color: var(--text-secondary);
     font-size: 0.9rem;
+    line-height: 1.7;
   }
 
-  /* 功能 Bento */
+  /* ===========================================
+     Features Bento Grid
+     =========================================== */
   .features {
     padding: 6rem 0;
   }
 
-  .features-grid {
+  .bento-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: auto;
+    gap: 1.25rem;
   }
 
-  .feature-card {
-    padding: 2rem;
+  .bento-card {
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
   }
 
-  .feature-card-large {
+  .bento-feature {
     grid-column: span 2;
+    grid-row: span 2;
+    padding: 2.25rem;
+    position: relative;
+    overflow: hidden;
   }
 
-  .feature-icon {
-    font-size: 2rem;
+  .bento-feature::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(134, 239, 172, 0.06) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .bento-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 1.25rem;
+  }
+
+  .bento-icon-large {
+    margin-bottom: 1.25rem;
+  }
+
+  .bento-icon-large svg {
+    width: 36px;
+    height: 36px;
+    color: var(--primary);
+  }
+
+  .bento-title-large {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .bento-desc {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.75;
+    margin-bottom: 1.75rem;
+    flex: 1;
+  }
+
+  .bento-stats {
+    display: flex;
+    gap: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .bento-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .bento-stat-num {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .bento-stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .bento-icon {
     margin-bottom: 1rem;
   }
 
-  .feature-card h3 {
+  .bento-icon svg {
+    width: 28px;
+    height: 28px;
+    color: var(--primary);
+  }
+
+  .bento-grid .bento-card:not(.bento-feature) h3 {
+    font-size: 1rem;
     margin-bottom: 0.5rem;
-    color: var(--text-primary);
   }
 
-  .feature-card p {
+  .bento-grid .bento-card:not(.bento-feature) p {
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    line-height: 1.6;
   }
 
-  /* 工作原理 */
+  /* ===========================================
+     How It Works
+     =========================================== */
   .how-it-works {
     padding: 6rem 0;
   }
 
   .steps-container {
     display: flex;
-    align-items: center;
-    gap: 2rem;
-    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0;
+    max-width: 960px;
+    margin: 0 auto;
   }
 
   .step-item {
     flex: 1;
-    min-width: 280px;
+    min-width: 0;
     position: relative;
   }
 
   .step-number {
-    position: absolute;
-    top: -1rem;
-    left: -1rem;
-    width: 3rem;
-    height: 3rem;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dim));
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 1.25rem;
-    color: var(--bg-deep);
-    box-shadow: 0 0 20px var(--primary-glow);
+    font-size: 5rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    background: linear-gradient(180deg, var(--primary) 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 0.5rem;
   }
 
   .step-card {
-    padding: 2rem;
-    margin-top: 2rem;
+    padding: 1.75rem;
   }
 
   .step-card h3 {
     margin-bottom: 0.5rem;
+    font-size: 1.125rem;
   }
 
   .step-card p {
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: 0.875rem;
+    line-height: 1.6;
   }
 
-  .step-arrow {
-    color: var(--primary);
-    width: 40px;
-    height: 40px;
+  .step-connector {
+    flex: 0 0 80px;
+    display: flex;
+    align-items: center;
+    padding-top: 3.5rem;
+  }
+
+  .connector-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), var(--primary-dim), var(--border));
+  }
+
+  .connector-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--primary);
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 10px var(--primary-glow);
+  }
+
+  /* ===========================================
+     Platforms
+     =========================================== */
+  .platforms {
+    padding: 6rem 0;
+  }
+
+  .platforms-subtitle {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    margin-top: -2rem;
+    margin-bottom: 3rem;
+  }
+
+  .platforms-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+
+  .platform-card {
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .platform-icon-wrap {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: linear-gradient(135deg, rgba(134, 239, 172, 0.08), rgba(167, 139, 250, 0.08));
+    border-radius: 10px;
+    border: 1px solid var(--border);
   }
 
-  .step-arrow svg {
-    width: 24px;
-    height: 24px;
+  .platform-icon-wrap svg {
+    width: 22px;
+    height: 22px;
+    color: var(--primary);
   }
 
-  /* CTA */
+  .platform-card h3 {
+    font-size: 0.95rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .platform-card p {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+
+  /* ===========================================
+     CTA
+     =========================================== */
   .cta {
-    padding: 8rem 0;
+    padding: 10rem 0;
     position: relative;
     overflow: hidden;
   }
@@ -492,12 +838,26 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 800px;
-    height: 800px;
-    background: radial-gradient(circle, rgba(134, 239, 172, 0.2) 0%, rgba(167, 139, 250, 0.1) 50%, transparent 70%);
+    width: 900px;
+    height: 900px;
+    background: radial-gradient(circle, rgba(134, 239, 172, 0.18) 0%, rgba(167, 139, 250, 0.08) 40%, transparent 65%);
+    border-radius: 50%;
+    filter: blur(100px);
+    animation: breathe 16s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .cta-orb-secondary {
+    position: absolute;
+    top: 30%;
+    left: 20%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(167, 139, 250, 0.12) 0%, transparent 60%);
     border-radius: 50%;
     filter: blur(80px);
-    animation: breathe 15s ease-in-out infinite;
+    animation: breathe 20s ease-in-out infinite reverse;
+    pointer-events: none;
   }
 
   .cta-content {
@@ -507,16 +867,16 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
   }
 
   .cta-title {
-    font-size: 3rem;
+    font-size: 3.25rem;
     font-weight: 700;
     margin-bottom: 1.5rem;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
   }
 
   .cta-description {
     font-size: 1.125rem;
     color: var(--text-secondary);
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
     max-width: 500px;
     margin-left: auto;
     margin-right: auto;
@@ -528,51 +888,99 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
     justify-content: center;
   }
 
+  .btn-ghost-light {
+    color: var(--text-secondary);
+  }
+
+  .btn-ghost-light:hover {
+    color: var(--text-primary);
+    border-color: var(--border-hover);
+  }
+
+  /* ===========================================
+     Responsive
+     =========================================== */
   @media (max-width: 1024px) {
     .hero-content {
       grid-template-columns: 1fr;
+      gap: 4rem;
     }
 
     .hero-title {
-      font-size: 3rem;
+      font-size: 3.5rem;
     }
 
-    .features-grid {
+    .bento-grid {
       grid-template-columns: repeat(2, 1fr);
     }
 
-    .feature-card-large {
+    .bento-feature {
       grid-column: span 2;
+    }
+
+    .platforms-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .steps-container {
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .step-connector {
+      flex: 0 0 48px;
+      flex-direction: column;
+      padding-top: 0;
+    }
+
+    .connector-line {
+      width: 1px;
+      height: 32px;
+      background: linear-gradient(180deg, var(--border), var(--primary-dim), var(--border));
     }
   }
 
   @media (max-width: 768px) {
+    .hero {
+      padding: 6rem 0 4rem;
+    }
+
     .hero-title {
-      font-size: 2.25rem;
+      font-size: 2.5rem;
+    }
+
+    .section-title {
+      font-size: 2rem;
     }
 
     .problem-grid {
       grid-template-columns: 1fr;
     }
 
-    .features-grid {
+    .bento-grid {
       grid-template-columns: 1fr;
     }
 
-    .feature-card-large {
+    .bento-feature {
       grid-column: span 1;
+      grid-row: auto;
     }
 
-    .steps-container {
-      flex-direction: column;
+    .platforms-grid {
+      grid-template-columns: 1fr;
     }
 
-    .step-arrow {
-      transform: rotate(90deg);
+    .hero-stats {
+      gap: 1.25rem;
+    }
+
+    .stat-value {
+      font-size: 1.25rem;
     }
 
     .cta-title {
-      font-size: 2rem;
+      font-size: 2.25rem;
     }
   }
 </style>
