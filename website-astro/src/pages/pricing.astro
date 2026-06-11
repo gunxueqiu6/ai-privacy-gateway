@@ -112,7 +112,10 @@ import Footer from '../components/Footer.astro';
             <span>邮件技术支持</span>
           </li>
         </ul>
-        <a href="https://t.me/chirstmas_7" class="btn btn-primary btn-block">联系客服 (Telegram)</a>
+        <div class="contact-info">
+          <span>QQ: 1024294229</span>
+          <a href="https://t.me/chirstmas_7">TG: @chirstmas_7</a>
+        </div>
       </div>
 
       <!-- Enterprise -->
@@ -154,7 +157,10 @@ import Footer from '../components/Footer.astro';
             <span>驻场支持 + SLA 保障</span>
           </li>
         </ul>
-        <a href="https://t.me/chirstmas_7" class="btn btn-outline btn-block">联系我们 (Telegram)</a>
+        <div class="contact-info">
+          <span>QQ: 1024294229</span>
+          <a href="https://t.me/chirstmas_7">TG: @chirstmas_7</a>
+        </div>
       </div>
     </div>
   </section>
@@ -391,6 +397,23 @@ import Footer from '../components/Footer.astro';
 
   .btn-block {
     width: 100%;
+  }
+
+  .contact-info {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 0.75rem 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+
+  .contact-info a {
+    color: var(--primary);
+  }
+
+  .contact-info a:hover {
+    opacity: 0.8;
   }
 
   /* FAQ */
