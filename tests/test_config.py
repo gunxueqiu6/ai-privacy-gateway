@@ -29,7 +29,7 @@ class TestConfigDefaults:
         assert config.MASK_ENGINE_TYPE == "regex"
 
     def test_default_admin_password(self, config):
-        assert config.ADMIN_PASSWORD == "admin123"
+        assert config.ADMIN_PASSWORD == ""
 
     def test_admin_password_hash_generated(self, config):
         """密码哈希自动从明文生成"""

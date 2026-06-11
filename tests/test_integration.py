@@ -218,7 +218,8 @@ class TestIntegrationChatCompletion:
                 {"model": "gpt-3.5-turbo", "messages": [{"role": "user", "content": "手机号[PII_PHONE_00000001]"}]},
                 {},
                 {},
-                "test-session"
+                "test-session",
+                set()
             )
             mock_core.proxy_request = AsyncMock(return_value=(
                 200,
@@ -273,7 +274,7 @@ class TestIntegrationAdminAuth:
         """测试正确登录"""
         response = client.post(
             "/admin/login",
-            json={"password": "admin123"}
+            json={"password": "test_admin_pw_123"}
         )
 
         assert response.status_code == 200
@@ -287,7 +288,7 @@ class TestIntegrationAdminAuth:
         # 先登录获取 cookie
         login_response = client.post(
             "/admin/login",
-            json={"password": "admin123"}
+            json={"password": "test_admin_pw_123"}
         )
         session_cookie = login_response.cookies.get("session_token")
 
