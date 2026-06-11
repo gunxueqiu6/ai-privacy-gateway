@@ -5,6 +5,7 @@ on:
     branches: [master]
     paths:
       - 'website-astro/**'
+  workflow_dispatch:
 
 jobs:
   deploy:
