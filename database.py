@@ -294,7 +294,7 @@ class Database:
             if row["locked_until"]:
                 try:
                     locked_until = datetime.fromisoformat(row["locked_until"])
-                except:
+                except (ValueError, TypeError):
                     pass
 
             if locked_until and now < locked_until:
