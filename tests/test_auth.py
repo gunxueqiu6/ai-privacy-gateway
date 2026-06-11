@@ -70,11 +70,11 @@ class TestJwtToken:
 
     def test_expired_token_fails(self):
         """过期令牌验证失败"""
-        from datetime import datetime, timedelta
+        from datetime import UTC, datetime, timedelta
         from jose import jwt
         from config import config
 
-        expired = datetime.utcnow() - timedelta(hours=1)
+        expired = datetime.now(UTC) - timedelta(hours=1)
         token = jwt.encode(
             {"sub": "admin", "exp": expired},
             config.JWT_SECRET,
@@ -125,8 +125,8 @@ class TestLoginFlow:
         login_resp = client.post("/admin/login", json={"password": "test_admin_pw_123"})
         token = login_resp.cookies["session_token"]
 
-        resp = client.get("/admin/stats",
-                          cookies={"session_token": token})
+        client.cookies = {"session_token": token}
+        resp = client.get("/admin/stats")
         assert resp.status_code == 200
 
     def test_admin_stats_invalid_token(self, client):

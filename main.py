@@ -6,7 +6,7 @@ import json
 import logging
 import os
 import time
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Dict, Optional
 
 from fastapi import FastAPI, Request, Response, HTTPException
@@ -77,8 +77,8 @@ _token_blacklist: set = set()
 
 def create_jwt_token() -> str:
     """创建 JWT 令牌 — 1 小时有效"""
-    expire = datetime.utcnow() + timedelta(hours=1)
-    to_encode = {"sub": "admin", "exp": expire, "iat": datetime.utcnow()}
+    expire = datetime.now(UTC) + timedelta(hours=1)
+    to_encode = {"sub": "admin", "exp": expire, "iat": datetime.now(UTC)}
     encoded_jwt = jwt.encode(to_encode, config.JWT_SECRET, algorithm="HS256")
     return encoded_jwt
 
