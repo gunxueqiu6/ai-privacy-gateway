@@ -58,7 +58,7 @@ class NEREntity:
 class NEREngine:
     """NER 命名实体识别引擎"""
     
-    def __init__(self, model_path: str = None):
+    def __init__(self, model_path: Optional[str] = None):
         self._session = None
         self._tokenizer = None
         self._model_path = model_path or os.environ.get("NER_MODEL_PATH", "./models/ner/model.onnx")
@@ -129,7 +129,7 @@ class NEREngine:
     
     def _detect_chinese_names(self, text: str) -> List[NEREntity]:
         """检测中文人名（基于规则）"""
-        entities = []
+        entities: list[NEREntity] = []
         if not HAS_JIEBA:
             return entities
         
@@ -233,7 +233,7 @@ class NEREngine:
             return []
         
         sorted_entities = sorted(entities, key=lambda e: (e.start, -(e.end - e.start)))
-        result = []
+        result: list[NEREntity] = []
         
         for entity in sorted_entities:
             is_overlapping = False

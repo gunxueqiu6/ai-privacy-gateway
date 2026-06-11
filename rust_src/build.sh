@@ -5,7 +5,7 @@ echo "========================================"
 echo "Building Rust Integrity Check Module"
 echo "========================================"
 
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/integrity_check"
 
 # 检查 Rust 环境
 if ! command -v cargo &> /dev/null; then
@@ -30,4 +30,4 @@ echo "Build Complete!"
 echo "========================================"
 echo ""
 echo "Python module: integrity_check"
-echo "Test with: python -c 'from integrity_check import run_integrity_check; print(run_integrity_check())'"
+echo "Test with: python -c 'from integrity_check import verify, compute_checksum; print(verify(\"test.db\"))'"

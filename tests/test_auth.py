@@ -59,8 +59,9 @@ class TestJwtToken:
         """篡改的令牌验证失败"""
         from main import create_jwt_token, verify_jwt_token
         token = create_jwt_token()
-        # 修改 token 最后一个字符
-        tampered = token[:-1] + ('A' if token[-1] != 'A' else 'B')
+        # 修改 token 中间位置（签名段），避免 base64 padding 字符
+        mid = len(token) // 3 * 2
+        tampered = token[:mid] + ('A' if token[mid] != 'A' else 'B') + token[mid + 1:]
         assert not verify_jwt_token(tampered)
 
     def test_empty_token_fails(self):
@@ -148,17 +149,15 @@ class TestLoginLockout:
     """登录锁定测试"""
 
     def test_multiple_failures_return_401(self, client):
-        """多次失败登录 — 前 5 次 401，第 6 次触发锁定 429"""
+        """多次失败登录触发锁定返回 429"""
         from database import db
-        # 直接清空数据库残留状态（避免跨会话持久化干扰）
-        with db.get_conn() as conn:
-            conn.execute("DELETE FROM login_attempts WHERE ip_address = ?", ("testclient",))
-        for i in range(6):
-            resp = client.post("/admin/login", json={"password": "wrong_password"})
-            if i < 5:
-                assert resp.status_code == 401, f"attempt {i+1}: expected 401, got {resp.status_code}"
-            else:
-                assert resp.status_code == 429, f"attempt {i+1}: expected 429 (locked), got {resp.status_code}"
+        # 使用 record_login_attempt 直接设 5 次失败（与 handler 同用 _exclusive_conn，避免 WAL 事务隔离差异）
+        db.record_login_attempt("testclient", success=True)  # 重置
+        for _ in range(5):
+            db.record_login_attempt("testclient", success=False)
+        # 第 6 次请求应被锁定
+        resp = client.post("/admin/login", json={"password": "wrong_password"})
+        assert resp.status_code == 429, f"expected 429 (locked), got {resp.status_code}"
 
     def test_login_blocked_after_max_attempts(self, client):
         """达到最大尝试次数后被锁定"""

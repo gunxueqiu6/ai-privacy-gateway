@@ -4,7 +4,7 @@ import hashlib
 import logging
 import sqlite3
 from datetime import UTC, datetime, timedelta
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Generator, Any
 from contextlib import contextmanager
 
 logger = logging.getLogger(__name__)
@@ -18,16 +18,16 @@ ALLOWED_STATS_COLUMNS = frozenset({
 })
 
 class Database:
-    def __init__(self, db_path: str = None):
+    def __init__(self, db_path: Optional[str] = None) -> None:
         self.db_path = db_path or DB_PATH
         self._ensure_dir()
         self._init_db()
 
-    def _ensure_dir(self):
+    def _ensure_dir(self) -> None:
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
 
     @contextmanager
-    def get_conn(self):
+    def get_conn(self) -> Generator[sqlite3.Connection, None, None]:
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA journal_mode=WAL")
@@ -42,7 +42,7 @@ class Database:
             conn.close()
 
     @contextmanager
-    def _exclusive_conn(self):
+    def _exclusive_conn(self) -> Generator[sqlite3.Connection, None, None]:
         """获取具有排他写锁的数据库连接（BEGIN IMMEDIATE），用于原子操作"""
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
@@ -58,7 +58,7 @@ class Database:
         finally:
             conn.close()
 
-    def _init_db(self):
+    def _init_db(self) -> None:
         with self.get_conn() as conn:
             cursor = conn.cursor()
             cursor.executescript("""
@@ -131,7 +131,7 @@ class Database:
                 cursor.execute("ALTER TABLE audit_log ADD COLUMN prev_hash TEXT")
                 logger.info("已为 audit_log 表添加 prev_hash 列")
 
-    def save_mappings(self, session_id: str, mappings: Dict[str, str], data_type: str = "unknown"):
+    def save_mappings(self, session_id: str, mappings: Dict[str, str], data_type: str = "unknown") -> None:
         with self.get_conn() as conn:
             cursor = conn.cursor()
             for placeholder, real_value in mappings.items():
@@ -171,7 +171,7 @@ class Database:
             row = cursor.fetchone()
             return row["real_value"] if row else None
 
-    def clear_session(self, session_id: str):
+    def clear_session(self, session_id: str) -> None:
         with self.get_conn() as conn:
             cursor = conn.cursor()
             cursor.execute("DELETE FROM vault_mappings WHERE session_id = ?", (session_id,))
@@ -200,12 +200,12 @@ class Database:
                 keywords.append(row["keyword"])
         return keywords
 
-    def clear_all_mappings(self):
+    def clear_all_mappings(self) -> None:
         with self.get_conn() as conn:
             cursor = conn.cursor()
             cursor.execute("DELETE FROM vault_mappings")
 
-    def log_audit(self, session_id: Optional[str], action: str, detail: Optional[Dict] = None):
+    def log_audit(self, session_id: Optional[str], action: str, detail: Optional[Dict[str, Any]] = None) -> None:
         """记录审计日志（哈希链完整性保护）"""
         with self.get_conn() as conn:
             cursor = conn.cursor()
@@ -304,7 +304,7 @@ class Database:
             remaining = max(0, 5 - attempt_count)
             return False, remaining
 
-    def record_login_attempt(self, ip_address: str, success: bool):
+    def record_login_attempt(self, ip_address: str, success: bool) -> None:
         """记录登录尝试"""
         with self._exclusive_conn() as conn:
             cursor = conn.cursor()
@@ -340,7 +340,7 @@ class Database:
                         (ip_address,)
                     )
 
-    def update_stats(self, stats: Dict[str, int]):
+    def update_stats(self, stats: Dict[str, int]) -> None:
         today = datetime.now().strftime("%Y-%m-%d")
         
         # 处理 organization 到 org 的映射
@@ -379,7 +379,7 @@ class Database:
                 total_count = total_count + ?
             """
 
-            insert_values = [today]
+            insert_values: List[Any] = [today]
             for f in old_fields + new_fields:
                 insert_values.append(normalized_stats.get(f, 0))
             insert_values.append(sum(normalized_stats.values()))
@@ -387,7 +387,7 @@ class Database:
             all_params = insert_values + update_params + [sum(normalized_stats.values())]
             cursor.execute(sql, all_params)
 
-    def get_today_stats(self) -> Dict:
+    def get_today_stats(self) -> Dict[str, Any]:
         today = datetime.now().strftime("%Y-%m-%d")
         with self.get_conn() as conn:
             cursor = conn.cursor()
