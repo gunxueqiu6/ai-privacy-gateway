@@ -22,7 +22,7 @@ import Footer from '../components/Footer.astro';
       </h1>
       <p class="hero-description">
         选择适合你平台的版本。Docker 一键部署，Windows/macOS 便携版双击即用。<br/>
-        全部开源免费，MIT 许可证。
+        Lite 版 MIT 许可证开源免费，Pro/Enterprise 版购买后 License Key 激活。
       </p>
     </div>
   </section>
@@ -114,6 +114,37 @@ import Footer from '../components/Footer.astro';
               <p>敏感数据自动脱敏，无需其他配置</p>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- License Activation -->
+      <div class="license-section glass">
+        <h3>License 激活</h3>
+        <div class="license-info-row">
+          <div class="license-item">
+            <h4>Lite 版（免费）</h4>
+            <p>MIT 开源许可证，下载即用，无需激活，可自由用于个人和商业项目</p>
+          </div>
+          <div class="license-item">
+            <h4>Pro 版</h4>
+            <p>购买后 License Key 自动发送至邮箱，下载 Pro 对应镜像后激活即可</p>
+          </div>
+          <div class="license-item">
+            <h4>Enterprise 版</h4>
+            <p>购买后 License Key 自动发送至邮箱，下载 Enterprise 对应镜像后激活</p>
+          </div>
+        </div>
+        <div class="license-howto">
+          <h4>激活步骤</h4>
+          <ol>
+            <li>下载对应版本的二进制文件或 Docker 镜像</li>
+            <li>运行服务时传入 License Key：<code>--license-key YOUR_KEY</code></li>
+            <li>或在管理后台"授权管理"页面输入 License Key 完成激活</li>
+          </ol>
+        </div>
+        <div class="license-links">
+          <a href="/pricing" class="btn btn-primary">购买 Pro / Enterprise</a>
+          <a href="/docs" class="btn btn-ghost" style="margin-left:0.5rem;">文档中心</a>
         </div>
       </div>
 
@@ -222,11 +253,49 @@ import Footer from '../components/Footer.astro';
   }
   .release-notes li { color: var(--text-secondary); font-size: 0.9rem; padding: 0.4rem 0; }
 
+  /* License Activation */
+  .license-section { padding: 2rem; margin-bottom: 3rem; }
+  .license-section h3 { margin-bottom: 1.5rem; color: var(--primary); }
+  .license-info-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .license-item {
+    padding: 1rem;
+    background: var(--bg-deep);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .license-item h4 { margin-bottom: 0.5rem; font-size: 1rem; color: var(--primary); }
+  .license-item p { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.6; }
+  .license-howto { margin-bottom: 1.5rem; }
+  .license-howto h4 { margin-bottom: 0.75rem; color: var(--text-primary); }
+  .license-howto ol {
+    padding-left: 1.25rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 2;
+  }
+  .license-howto code {
+    background: var(--bg-deep);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: var(--primary);
+    font-family: 'Fira Code', monospace;
+  }
+  .license-links { display: flex; align-items: center; }
+
   @media (max-width: 768px) {
     .hero-title { font-size: 2.25rem; }
     .download-grid { grid-template-columns: 1fr; }
     .steps { flex-direction: column; }
     .step-connector { transform: rotate(90deg); }
     .release-notes ul { grid-template-columns: 1fr; }
+    .license-info-row { grid-template-columns: 1fr; }
+    .license-links { flex-direction: column; gap: 0.5rem; align-items: stretch; }
+    .license-links .btn-ghost { margin-left: 0 !important; }
   }
 </style>

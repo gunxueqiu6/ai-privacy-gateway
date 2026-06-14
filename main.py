@@ -17,6 +17,22 @@ from sse_starlette.sse import EventSourceResponse
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from jose import JWTError, jwt
+import uuid as _uuid
+
+from payment import get_paypal_client, PayPalError
+from license import get_license_service, LicenseError
+from reports import (get_daily_report, get_weekly_report, get_monthly_report, export_report_csv, get_summary_stats)
+from alerts import get_alert_engine
+from redis_cache import get_redis_cache
+from team import (
+    create_team, get_team, get_team_members, get_member_count,
+    create_user, authenticate_user, get_user_by_id, get_user_by_api_key,
+    remove_user, update_user_role, regenerate_api_key,
+    create_session, validate_session, delete_session,
+    update_team_settings, get_team_settings,
+    ROLE_ADMIN, ROLE_MEMBER, ROLE_VIEWER, VALID_ROLES,
+    TeamError,
+)
 import bcrypt
 
 from config import config, get_config
@@ -114,6 +130,103 @@ async def require_admin(request: Request) -> str:
     return token
 
 
+# Tier enum and gating
+from enum import Enum
+
+class Tier(str, Enum):
+    LITE = "lite"
+    PRO = "pro"
+    ENTERPRISE = "enterprise"
+
+    def order(self) -> int:
+        _order = {"lite": 0, "pro": 1, "enterprise": 2}
+        return _order[self.value]
+
+    def __ge__(self, other: "Tier") -> bool:
+        if isinstance(other, Tier):
+            return self.order() >= other.order()
+        return NotImplemented
+
+    def __lt__(self, other: "Tier") -> bool:
+        if isinstance(other, Tier):
+            return self.order() < other.order()
+        return NotImplemented
+
+    def __le__(self, other: "Tier") -> bool:
+        if isinstance(other, Tier):
+            return self.order() <= other.order()
+        return NotImplemented
+
+    def __gt__(self, other: "Tier") -> bool:
+        if isinstance(other, Tier):
+            return self.order() > other.order()
+        return NotImplemented
+
+
+def require_tier(minimum: str):
+    """Decorator/dependency that requires a minimum license tier.
+    
+    Returns 402 Payment Required if the current tier is too low.
+    """
+    order = {"lite": 0, "pro": 1, "enterprise": 2}
+
+    async def _check(request: Request) -> None:
+        current = config.tier  # str: "lite", "pro", or "enterprise"
+        if order.get(current, 0) < order.get(minimum, 0):
+            raise HTTPException(
+                status_code=402,
+                detail=f"This feature requires at least {minimum.upper()} tier. Current: {current.upper()}"
+            )
+    return _check
+
+
+# ==================== Team-based Auth Functions ====================
+
+
+async def get_current_user(request: Request) -> Optional[Dict[str, Any]]:
+    """Get the currently authenticated team user from session token.
+
+    Checks Authorization header (Bearer), then falls back to user_session cookie.
+    Uses validate_session() from team.py to verify the token and return the user.
+    """
+    auth = request.headers.get("Authorization", "")
+    if auth.startswith("Bearer "):
+        token = auth[7:]
+        user = validate_session(token)
+        if user:
+            return user
+
+    session_token = request.cookies.get("user_session")
+    if session_token:
+        user = validate_session(session_token)
+        if user:
+            return user
+
+    return None
+
+
+def require_role(*roles: str):
+    """Dependency that checks if the authenticated user has one of the specified roles.
+
+    Uses get_current_user (session/api-key based auth) to find the user,
+    then checks their role. Returns 403 if the role does not match.
+
+    This is separate from require_admin (JWT-based admin auth) and can be
+    used alongside it on the same endpoint when needed.
+    """
+    async def _check(request: Request) -> Dict[str, Any]:
+        user = await get_current_user(request)
+        if not user:
+            raise HTTPException(status_code=401, detail="未授权 - 需要登录")
+        if user.get("role") not in roles:
+            raise HTTPException(
+                status_code=403,
+                detail=f"权限不足 - 需要角色: {', '.join(roles)}",
+            )
+        return user
+    return _check
+
+
 # ==================== 主代理路由 ====================
 
 @app.post("/v1/chat/completions")
@@ -129,15 +242,27 @@ async def chat_completions(request: Request) -> Response:
     if not auth_header:
         return JSONResponse(status_code=401, content={"error": "未授权 - 需要 API Key"})
 
+    # Check for gateway API key authentication
+    api_key_user = None
+    if auth_header.startswith("gw_api_"):
+        api_key_user = get_user_by_api_key(auth_header)
+        if not api_key_user:
+            return JSONResponse(status_code=401, content={"error": "无效的 API Key"})
+        request.state.team_id = api_key_user["team_id"]
+        # Gateway API key is not forwarded to upstream
+        headers = {k: v for k, v in request.headers.items()
+                   if k.lower() in ALLOWED_PROXY_HEADERS and k.lower() != "authorization"}
+    else:
+        headers = filter_proxy_headers(request.headers)
+
     # 上行脱敏
     masked_body, mappings, stats, session_id, used_placeholders = gateway.mask_request(body)
 
-    # 保存映射到数据库
+    # 保存映射到数据库（带 team_id 实现数据隔离）
     if mappings:
-        db.save_mappings(session_id, mappings)
+        team_id_for_storage = api_key_user["team_id"] if api_key_user else None
+        db.save_mappings(session_id, mappings, data_type="unknown", team_id=team_id_for_storage)
         db.update_stats(stats)
-
-    headers = filter_proxy_headers(request.headers)
 
     # 判断是否流式请求
     if body.get("stream", False):
@@ -190,8 +315,20 @@ async def proxy_v1(request: Request, path: str) -> Response:
     if not auth_header:
         return JSONResponse(status_code=401, content={"error": "未授权 - 需要 API Key"})
 
+    # Check for gateway API key authentication
+    api_key_user = None
+    if auth_header.startswith("gw_api_"):
+        api_key_user = get_user_by_api_key(auth_header)
+        if not api_key_user:
+            return JSONResponse(status_code=401, content={"error": "无效的 API Key"})
+        request.state.team_id = api_key_user["team_id"]
+        # Gateway API key is not forwarded to upstream
+        headers = {k: v for k, v in request.headers.items()
+                   if k.lower() in ALLOWED_PROXY_HEADERS and k.lower() != "authorization"}
+    else:
+        headers = filter_proxy_headers(request.headers)
+
     method = request.method
-    headers = filter_proxy_headers(request.headers)
     body = await request.body() if method in ["POST", "PUT", "PATCH"] else None
 
     status_code, resp_body, resp_headers = await gateway.proxy_generic_request(
@@ -365,13 +502,370 @@ async def api_get_entities(request: Request) -> dict:
 
 @app.get("/")
 async def root() -> dict:
-    """根路由 - 健康检查"""
+    """Root - health check with tier info."""
     return {
         "status": "healthy",
-        "service": "AI隐私网关",
-        "version": "Lite"
+        "service": "AI Privacy Gateway",
+        "version": config.tier.capitalize() if config.tier != "lite" else "Lite",
+        "tier": config.tier,
+        "team_id": config.license_team_id,
+        "seats": config.license_seats,
     }
 
+
+
+# ==================== Payment API ====================
+
+@app.post("/api/payment/create-order")
+@limiter.limit("10/minute")
+async def payment_create_order(request: Request) -> JSONResponse:
+    """Create a PayPal order for a Pro or Enterprise license."""
+    paypal = get_paypal_client()
+    if not paypal:
+        raise HTTPException(status_code=503, detail="Payment service not configured")
+
+    body = await request.json()
+    tier = body.get("tier", "pro")
+    email = body.get("email", "")
+
+    if tier not in ("pro", "enterprise"):
+        raise HTTPException(status_code=400, detail="Invalid tier. Must be 'pro' or 'enterprise'")
+
+    try:
+        order = await paypal.create_order(amount=0, tier=tier, email=email)
+        return JSONResponse({
+            "id": order["id"],
+            "status": order["status"],
+            "tier": tier,
+        })
+    except PayPalError as e:
+        raise HTTPException(status_code=e.status_code, detail=str(e))
+
+
+@app.get("/api/payment/paypal-config")
+@limiter.limit("30/minute")
+async def payment_paypal_config(request: Request) -> JSONResponse:
+    """Return PayPal client configuration for the frontend."""
+    client_id = os.environ.get("PAYPAL_CLIENT_ID", "")
+    if not client_id:
+        return JSONResponse({
+            "client_id": "",
+            "mode": config.PAYPAL_MODE,
+            "configured": False,
+        })
+    return JSONResponse({
+        "client_id": client_id,
+        "mode": config.PAYPAL_MODE,
+        "configured": True,
+    })
+
+
+@app.post("/api/payment/capture-order")
+@limiter.limit("10/minute")
+async def payment_capture_order(request: Request) -> JSONResponse:
+    """Capture a PayPal payment and issue a license."""
+    paypal = get_paypal_client()
+    if not paypal:
+        raise HTTPException(status_code=503, detail="Payment service not configured")
+
+    body = await request.json()
+    order_id = body.get("order_id", "")
+    email = body.get("email", "")
+    tier = body.get("tier", "pro")
+
+    if not order_id:
+        raise HTTPException(status_code=400, detail="order_id is required")
+
+    if tier not in ("pro", "enterprise"):
+        raise HTTPException(status_code=400, detail="Invalid tier")
+
+    try:
+        # Capture payment
+        capture = await paypal.capture_order(order_id)
+
+        if capture.get("status") != "COMPLETED":
+            return JSONResponse(
+                status_code=402,
+                content={"status": "failed", "message": "Payment not completed"}
+            )
+
+        # Generate license
+        license_svc = get_license_service()
+        team_id = f"T{int(_uuid.uuid4().hex[:8], 16) % 10**8:08d}"
+        license_token = license_svc.sign_license(
+            team_id=team_id,
+            tier=tier,
+            email=email,
+        )
+
+        # Decode to get expiration
+        from datetime import datetime, timezone
+        payload = license_svc.verify_license(license_token)[1]
+        expires_at = datetime.fromtimestamp(
+            payload["exp"], tz=timezone.utc
+        ).strftime("%Y-%m-%d") if payload else "Unknown"
+
+        # Save to database
+        license_id = str(_uuid.uuid4())
+        now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        db.save_license(
+            license_id=license_id,
+            team_id=team_id,
+            tier=tier,
+            seats=payload["seats"] if payload else 20,
+            email=email,
+            issued_at=now,
+            expires_at=expires_at,
+            jwt_token=license_token,
+            payment_id=order_id,
+        )
+
+        db.log_audit(None, "license_issued", {
+            "team_id": team_id,
+            "tier": tier,
+            "email": email,
+            "payment_id": order_id,
+        })
+
+        tier_name = "Pro (Team)" if tier == "pro" else "Enterprise"
+        return JSONResponse({
+            "status": "completed",
+            "license_key": license_token,
+            "team_id": team_id,
+            "tier": tier,
+            "tier_name": tier_name,
+            "expires_at": expires_at,
+        })
+
+    except PayPalError as e:
+        raise HTTPException(status_code=e.status_code, detail=str(e))
+    except LicenseError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/payment/webhook")
+@limiter.limit("30/minute")
+async def payment_webhook(request: Request) -> JSONResponse:
+    """Handle PayPal webhook events."""
+    paypal = get_paypal_client()
+    if not paypal:
+        return JSONResponse(status_code=200, content={"status": "ignored"})
+
+    body = await request.json()
+    headers = dict(request.headers)
+
+    verified, event_data = await paypal.handle_webhook(body, headers)
+
+    if verified:
+        logger.info(f"Verified PayPal webhook: {event_data}")
+        db.log_audit(None, "payment_webhook", event_data or {})
+
+    return JSONResponse({"status": "received"})
+
+
+# ==================== License Management API ====================
+
+@app.get("/admin/license")
+@limiter.limit("10/minute")
+async def admin_license_status(request: Request) -> JSONResponse:
+    """View current license status (requires admin auth)."""
+    await require_admin(request)
+
+    from datetime import datetime, timezone
+
+    license_svc = get_license_service()
+    current_token = config.LICENSE_KEY
+
+    if not current_token:
+        return JSONResponse({
+            "tier": config.tier,
+            "status": "lite",
+            "seats": 1,
+            "message": "No license activated. Running in Lite mode.",
+        })
+
+    valid, payload, error = license_svc.verify_license(current_token)
+    revoked = db.is_token_revoked(payload["tid"] if payload else "")
+
+    now_ts = int(datetime.now(timezone.utc).timestamp())
+    expires_ts = payload.get("exp", 0) if payload else 0
+    days_left = max(0, (expires_ts - now_ts) // 86400)
+
+    return JSONResponse({
+        "tier": config.tier,
+        "status": "active" if valid and not revoked else "invalid",
+        "seats": config.license_seats,
+        "team_id": config.license_team_id,
+        "expires_at": datetime.fromtimestamp(expires_ts, tz=timezone.utc).isoformat() if expires_ts else None,
+        "days_left": days_left,
+        "revoked": revoked,
+        "error": error if not valid else None,
+    })
+
+
+@app.post("/admin/license/activate")
+@limiter.limit("5/minute")
+async def admin_license_activate(request: Request) -> JSONResponse:
+    """Activate a license key (requires admin auth)."""
+    await require_admin(request)
+
+    body = await request.json()
+    license_key = body.get("license_key", "").strip()
+
+    if not license_key:
+        raise HTTPException(status_code=400, detail="license_key is required")
+
+    license_svc = get_license_service()
+
+    # Verify the license
+    valid, payload, error = license_svc.verify_license(license_key)
+    if not valid:
+        raise HTTPException(status_code=400, detail=f"Invalid license: {error}")
+
+    if payload is None:
+        raise HTTPException(status_code=400, detail="Invalid license payload")
+
+    team_id = payload.get("tid", "")
+    tier = payload.get("tier", "")
+    seats = payload.get("seats", 1)
+
+    # Check if this team's license is revoked
+    if db.is_token_revoked(team_id):
+        raise HTTPException(status_code=403, detail="This license has been revoked")
+
+    # Save to file
+    license_file = config.LICENSE_FILE
+    with open(license_file, "w", encoding="utf-8") as f:
+        f.write(license_key)
+
+    # Update runtime config
+    config.tier = tier
+    config.license_seats = seats
+    config.license_team_id = team_id
+    config.LICENSE_KEY = license_key
+
+    from datetime import datetime, timezone
+    expires_ts = payload.get("exp", 0)
+    config.license_expires_at = datetime.fromtimestamp(expires_ts, tz=timezone.utc).isoformat()
+
+    db.log_audit(None, "license_activated", {
+        "team_id": team_id,
+        "tier": tier,
+        "seats": seats,
+    })
+
+    logger.info(f"License activated: tier={tier}, team={team_id}, seats={seats}")
+
+    return JSONResponse({
+        "status": "ok",
+        "message": "License activated successfully",
+        "tier": tier,
+        "team_id": team_id,
+        "seats": seats,
+    })
+
+
+@app.post("/admin/license/refresh")
+@limiter.limit("5/minute")
+async def admin_license_refresh(request: Request) -> JSONResponse:
+    """Refresh the current license status (re-read from file)."""
+    await require_admin(request)
+
+    # Reload from file if exists
+    import os as _os
+    license_file = config.LICENSE_FILE
+    if not _os.path.exists(license_file):
+        # Reset to lite
+        config.tier = "lite"
+        config.license_seats = 1
+        config.license_team_id = None
+        config.license_expires_at = None
+        config.LICENSE_KEY = ""
+        return JSONResponse({
+            "status": "ok",
+            "tier": "lite",
+            "message": "No license file found. Running in Lite mode.",
+        })
+
+    with open(license_file, "r", encoding="utf-8") as f:
+        license_key = f.read().strip()
+
+    if not license_key:
+        config.tier = "lite"
+        config.license_seats = 1
+        config.license_team_id = None
+        config.license_expires_at = None
+        config.LICENSE_KEY = ""
+        return JSONResponse({
+            "status": "ok",
+            "tier": "lite",
+            "message": "Empty license file. Running in Lite mode.",
+        })
+
+    license_svc = get_license_service()
+    valid, payload, error = license_svc.verify_license(license_key)
+
+    if not valid:
+        logger.warning(f"License refresh failed: {error}")
+        config.tier = "lite"
+        config.license_seats = 1
+        config.license_team_id = None
+        config.license_expires_at = None
+        config.LICENSE_KEY = ""
+        return JSONResponse({
+            "status": "ok",
+            "tier": "lite",
+            "message": f"License invalid: {error}. Downgraded to Lite.",
+        })
+
+    if payload is None:
+        return JSONResponse({
+            "status": "ok",
+            "tier": "lite",
+            "message": "License payload is empty. Running in Lite mode.",
+        })
+
+    team_id = payload.get("tid", "")
+    if db.is_token_revoked(team_id):
+        config.tier = "lite"
+        config.license_seats = 1
+        config.license_team_id = None
+        config.license_expires_at = None
+        config.LICENSE_KEY = ""
+        return JSONResponse({
+            "status": "ok",
+            "tier": "lite",
+            "message": "License has been revoked. Downgraded to Lite.",
+        })
+
+    config.tier = payload.get("tier", "lite")
+    config.license_seats = payload.get("seats", 1)
+    config.license_team_id = team_id
+    config.LICENSE_KEY = license_key
+
+    from datetime import datetime, timezone
+    expires_ts = payload.get("exp", 0)
+    config.license_expires_at = datetime.fromtimestamp(expires_ts, tz=timezone.utc).isoformat()
+
+    return JSONResponse({
+        "status": "ok",
+        "tier": config.tier,
+        "team_id": config.license_team_id,
+        "seats": config.license_seats,
+        "expires_at": config.license_expires_at,
+    })
+
+
+@app.get("/admin/license/check")
+@limiter.limit("30/minute")
+async def admin_license_check(request: Request) -> JSONResponse:
+    """Public endpoint to check license status (no auth required)."""
+    return JSONResponse({
+        "tier": config.tier,
+        "team_id": config.license_team_id,
+        "seats": config.license_seats,
+        "expires_at": config.license_expires_at,
+    })
 
 @app.get("/health")
 async def health() -> dict:
@@ -517,15 +1011,26 @@ async def delete_keyword(request: Request):
 @app.get("/admin/version")
 @limiter.limit("10/minute")
 async def get_version(request: Request) -> dict:
-    """获取版本信息"""
+    """Get version info with license tier."""
     await require_admin(request)
 
+    tier_display = {"lite": "Lite (Open Core)", "pro": "Pro (Team)", "enterprise": "Enterprise"}
     return {
         "version": "2.0",
-        "version_type": "Lite (Open Core)",
-        "version_display": "Lite",
-        "target_llm": config.TARGET_LLM
+        "version_type": tier_display.get(config.tier, "Unknown"),
+        "version_display": config.tier.capitalize(),
+        "tier": config.tier,
+        "target_llm": config.TARGET_LLM,
+        "license": {
+            "team_id": config.license_team_id,
+            "seats": config.license_seats,
+            "expires_at": config.license_expires_at,
+        },
     }
+
+
+# Old version endpoint (replaced above)
+@app.get("/admin/version")
 
 
 @app.get("/admin/integrity")
@@ -565,6 +1070,395 @@ async def clear_mappings(request: Request) -> dict:
 
     db.clear_all_mappings()
     return {"status": "ok", "message": "所有映射记录已清除"}
+
+
+# ==================== User Auth API ====================
+
+@app.post("/auth/login")
+@limiter.limit("10/minute")
+async def user_login(request: Request) -> JSONResponse:
+    """User login with username, password, and optional team_id."""
+    body = await request.json()
+    username = body.get("username", "").strip()
+    password = body.get("password", "")
+    team_id = body.get("team_id", "").strip() or None
+
+    if not username or not password:
+        raise HTTPException(status_code=400, detail="Username and password are required")
+
+    client_ip = request.client.host if request.client else "unknown"
+    is_locked, _ = db.check_login_attempt(client_ip)
+    if is_locked:
+        raise HTTPException(status_code=429, detail="Too many login attempts. Try again later.")
+
+    success, user, error = authenticate_user(username, password, team_id)
+    if not success:
+        db.record_login_attempt(client_ip, success=False)
+        raise HTTPException(status_code=401, detail=error or "Login failed")
+
+    db.record_login_attempt(client_ip, success=True)
+    session_token = create_session(user["id"])
+    db.log_audit(None, "user_login", {"user_id": user["id"], "team_id": user["team_id"]})
+
+    response = JSONResponse({
+        "status": "ok", "message": "Login successful",
+        "user": user, "token": session_token,
+    })
+    response.set_cookie(key="user_session", value=session_token, httponly=True, samesite="strict", max_age=86400)
+    return response
+
+
+@app.post("/auth/logout")
+@limiter.limit("10/minute")
+async def user_logout(request: Request) -> JSONResponse:
+    """User logout."""
+    session_token = request.cookies.get("user_session")
+    if not session_token:
+        auth = request.headers.get("Authorization", "")
+        if auth.startswith("Bearer "):
+            session_token = auth[7:]
+    if session_token:
+        delete_session(session_token)
+    response = JSONResponse({"status": "ok", "message": "Logged out"})
+    response.delete_cookie("user_session")
+    return response
+
+
+@app.post("/auth/register")
+@limiter.limit("5/minute")
+async def user_register(request: Request) -> JSONResponse:
+    """Register a new user account.
+
+    Accepts username, password, and optional team_id.
+    - If team_id is provided, the user is added to that existing team
+      (seat limits from license config are enforced).
+    - If team_id is not provided, a new team is created with the user as admin.
+    Returns user info, API key, and session token.
+    """
+    body = await request.json()
+    username = body.get("username", "").strip()
+    password = body.get("password", "")
+    team_id = body.get("team_id", "").strip() or None
+
+    # Validate username
+    if not username:
+        raise HTTPException(status_code=400, detail="用户名不能为空")
+    if len(username) < 3:
+        raise HTTPException(status_code=400, detail="用户名至少需要 3 个字符")
+    if len(username) > 50:
+        raise HTTPException(status_code=400, detail="用户名不能超过 50 个字符")
+
+    # Validate password
+    if not password:
+        raise HTTPException(status_code=400, detail="密码不能为空")
+    if len(password) < 8:
+        raise HTTPException(status_code=400, detail="密码至少需要 8 个字符")
+
+    try:
+        if team_id:
+            # Joining an existing team — check it exists
+            team = get_team(team_id)
+            if not team:
+                raise HTTPException(status_code=404, detail="团队不存在")
+            # Enforce seat limits when tier is pro or enterprise
+            if config.tier in ("pro", "enterprise"):
+                member_count = get_member_count(team_id)
+                if member_count >= config.license_seats:
+                    raise HTTPException(
+                        status_code=402,
+                        detail=f"团队已达到座位上限 ({config.license_seats})",
+                    )
+            user = create_user(team_id, username, password, ROLE_MEMBER)
+        else:
+            # Create a new team with this user as admin
+            team_name = f"{username} 的团队"
+            team = create_team(team_name)
+            team_id = team["id"]
+            user = create_user(team_id, username, password, ROLE_ADMIN)
+    except TeamError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    # Create a session for the new user
+    session_token = create_session(user["id"])
+    db.log_audit(None, "user_registered", {
+        "user_id": user["id"],
+        "team_id": team_id,
+        "username": username,
+    })
+
+    return JSONResponse({
+        "status": "ok",
+        "message": "注册成功",
+        "user": {
+            "id": user["id"],
+            "username": user["username"],
+            "role": user["role"],
+            "team_id": user["team_id"],
+        },
+        "api_key": user["api_key"],
+        "token": session_token,
+    }, status_code=201)
+
+
+@app.get("/auth/me")
+@limiter.limit("30/minute")
+async def auth_me(request: Request) -> JSONResponse:
+    """Get current user info (session or API key based auth)."""
+    # Try session-based auth first
+    user = await get_current_user(request)
+    if not user:
+        # Fall back to API key auth
+        auth = request.headers.get("Authorization", "")
+        if auth and auth.startswith("gw_api_"):
+            user = get_user_by_api_key(auth)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    # Return safe user info (password_hash already removed by get_user_by_api_key / validate_session)
+    safe_user = {
+        "id": user.get("id"),
+        "username": user.get("username"),
+        "role": user.get("role"),
+        "team_id": user.get("team_id"),
+        "created_at": user.get("created_at"),
+        "last_login_at": user.get("last_login_at"),
+        "is_active": user.get("is_active"),
+    }
+    return JSONResponse(safe_user)
+
+
+# ==================== Statistics Reports API ====================
+
+@app.get("/admin/reports/daily")
+@limiter.limit("10/minute")
+async def admin_reports_daily(request: Request, date: Optional[str] = None) -> JSONResponse:
+    """Get daily statistics report."""
+    await require_admin(request)
+    await require_tier("pro")
+    team_id = config.license_team_id
+    report = get_daily_report(team_id, date)
+    return JSONResponse(report)
+
+
+@app.get("/admin/reports/weekly")
+@limiter.limit("10/minute")
+async def admin_reports_weekly(request: Request, end_date: Optional[str] = None) -> JSONResponse:
+    """Get weekly statistics report (daily breakdown for 7 days)."""
+    await require_admin(request)
+    await require_tier("pro")
+    team_id = config.license_team_id
+    report = get_weekly_report(team_id, end_date)
+    return JSONResponse({"days": report, "count": len(report)})
+
+
+@app.get("/admin/reports/monthly")
+@limiter.limit("10/minute")
+async def admin_reports_monthly(request: Request, year: Optional[int] = None, month: Optional[int] = None) -> JSONResponse:
+    """Get monthly statistics report."""
+    await require_admin(request)
+    await require_tier("pro")
+    team_id = config.license_team_id
+    report = get_monthly_report(team_id, year, month)
+    return JSONResponse({"days": report, "count": len(report)})
+
+
+@app.get("/admin/reports/summary")
+@limiter.limit("10/minute")
+async def admin_reports_summary(request: Request, days: int = 30) -> JSONResponse:
+    """Get aggregated summary stats for the last N days."""
+    await require_admin(request)
+    await require_tier("pro")
+    team_id = config.license_team_id
+    stats = get_summary_stats(team_id, days)
+    return JSONResponse(stats)
+
+
+@app.get("/admin/reports/export")
+@limiter.limit("5/minute")
+async def admin_reports_export(
+    request: Request,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+) -> Response:
+    """Export stats as CSV."""
+    await require_admin(request)
+    await require_tier("pro")
+    team_id = config.license_team_id
+    csv_data = export_report_csv(team_id, start_date, end_date)
+    return Response(
+        content=csv_data,
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=privacy_gateway_report.csv"},
+    )
+
+
+# ==================== Alert Engine API ====================
+
+@app.get("/admin/alerts/status")
+@limiter.limit("10/minute")
+async def admin_alerts_status(request: Request) -> JSONResponse:
+    """Get alert engine status."""
+    await require_admin(request)
+    await require_tier("enterprise")
+    engine = get_alert_engine()
+    return JSONResponse({
+        "rules_count": len(engine.rules),
+        "rules": [{"name": r.name, "condition": r.condition, "actions": r.actions} for r in engine.rules],
+    })
+
+
+@app.post("/admin/alerts/test")
+@limiter.limit("5/minute")
+async def admin_alerts_test(request: Request) -> JSONResponse:
+    """Test alert notifications by triggering a sample alert."""
+    await require_admin(request)
+    await require_tier("enterprise")
+    engine = get_alert_engine()
+    context = {
+        "stats": {"5min": 15000},
+        "license": {"expires_in": 3},
+    }
+    triggered = await engine.process(context)
+    return JSONResponse({
+        "triggered": len(triggered),
+        "alerts": triggered,
+    })
+
+
+# ==================== Cache Status API ====================
+
+@app.get("/admin/cache/status")
+@limiter.limit("10/minute")
+async def admin_cache_status(request: Request) -> JSONResponse:
+    """Get cache (Redis) status."""
+    await require_admin(request)
+    cache = get_redis_cache()
+    healthy = await cache.health_check() if cache.available else False
+    return JSONResponse({
+        "available": cache.available,
+        "healthy": healthy,
+        "type": "redis" if cache.available else "none",
+    })
+
+
+# ==================== Team Management API ====================
+
+@app.get("/admin/team")
+@limiter.limit("10/minute")
+async def admin_team(request: Request) -> JSONResponse:
+    """Get team info and member list (requires admin auth)."""
+    await require_admin(request)
+    team_id = config.license_team_id
+    if not team_id:
+        raise HTTPException(status_code=400, detail="No team associated with this license")
+    team = get_team(team_id)
+    if not team:
+        team = create_team(team_id[:16] if team_id else "Default Team", license_id=None)
+    members = get_team_members(team_id)
+    return JSONResponse({
+        "team": team, "members": members,
+        "member_count": get_member_count(team_id),
+        "seat_limit": config.license_seats,
+        "settings": get_team_settings(team_id),
+    })
+
+
+@app.post("/admin/team/members")
+@limiter.limit("10/minute")
+async def admin_team_add_member(request: Request) -> JSONResponse:
+    """Add a new team member (admin only)."""
+    await require_admin(request)
+    await require_tier("pro")
+    body = await request.json()
+    username = body.get("username", "").strip()
+    password = body.get("password", "")
+    role = body.get("role", "member")
+    if not username or not password:
+        raise HTTPException(status_code=400, detail="Username and password are required")
+    if role not in VALID_ROLES:
+        raise HTTPException(status_code=400, detail="Invalid role")
+    team_id = config.license_team_id
+    if not team_id:
+        raise HTTPException(status_code=400, detail="No team associated. Activate a license first.")
+    try:
+        user = create_user(team_id, username, password, role)
+        db.log_audit(None, "member_added", {"user_id": user["id"], "team_id": team_id})
+        return JSONResponse({"status": "ok", "user": user})
+    except TeamError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.delete("/admin/team/members/{user_id}")
+@limiter.limit("10/minute")
+async def admin_team_remove_member(user_id: str, request: Request) -> JSONResponse:
+    """Remove a team member (admin only)."""
+    await require_admin(request)
+    await require_tier("pro")
+    team_id = config.license_team_id
+    if not team_id:
+        raise HTTPException(status_code=400, detail="No team configured")
+    if remove_user(team_id, user_id):
+        db.log_audit(None, "member_removed", {"user_id": user_id, "team_id": team_id})
+        return JSONResponse({"status": "ok", "message": "Member removed"})
+    raise HTTPException(status_code=404, detail="Member not found")
+
+
+@app.put("/admin/team/members/{user_id}/role")
+@limiter.limit("10/minute")
+async def admin_team_update_role(user_id: str, request: Request) -> JSONResponse:
+    """Update a member role (admin only)."""
+    await require_admin(request)
+    await require_tier("pro")
+    body = await request.json()
+    role = body.get("role", "").strip()
+    if role not in VALID_ROLES:
+        raise HTTPException(status_code=400, detail=f"Invalid role: {role}")
+    team_id = config.license_team_id
+    if not team_id:
+        raise HTTPException(status_code=400, detail="No team configured")
+    if update_user_role(team_id, user_id, role):
+        db.log_audit(None, "member_role_updated", {"user_id": user_id, "role": role})
+        return JSONResponse({"status": "ok", "message": f"Role updated to {role}"})
+    raise HTTPException(status_code=404, detail="Member not found")
+
+
+@app.post("/admin/team/members/{user_id}/reset-api-key")
+@limiter.limit("5/minute")
+async def admin_team_reset_api_key(user_id: str, request: Request) -> JSONResponse:
+    """Regenerate a member API key (admin only)."""
+    await require_admin(request)
+    team_id = config.license_team_id
+    if not team_id:
+        raise HTTPException(status_code=400, detail="No team configured")
+    new_key = regenerate_api_key(user_id, team_id)
+    if new_key:
+        db.log_audit(None, "api_key_reset", {"user_id": user_id})
+        return JSONResponse({"status": "ok", "api_key": new_key})
+    raise HTTPException(status_code=404, detail="Member not found")
+
+
+@app.get("/admin/team/settings")
+@limiter.limit("10/minute")
+async def admin_team_get_settings(request: Request) -> JSONResponse:
+    """Get team settings (admin only)."""
+    await require_admin(request)
+    team_id = config.license_team_id
+    if not team_id:
+        return JSONResponse({})
+    return JSONResponse(get_team_settings(team_id))
+
+
+@app.put("/admin/team/settings")
+@limiter.limit("10/minute")
+async def admin_team_update_settings(request: Request) -> JSONResponse:
+    """Update team settings (admin only)."""
+    await require_admin(request)
+    body = await request.json()
+    team_id = config.license_team_id
+    if not team_id:
+        raise HTTPException(status_code=400, detail="No team configured")
+    update_team_settings(team_id, body)
+    db.log_audit(None, "team_settings_updated", {"team_id": team_id})
+    return JSONResponse({"status": "ok", "message": "Settings updated"})
 
 
 # ==================== 启动入口 ====================

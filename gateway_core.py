@@ -26,6 +26,14 @@ class GatewayCore:
         self.mask_engine = get_mask_engine()
         self.target_url = config.TARGET_LLM
         self.timeout = 120.0
+        # Tier-aware engine selection:
+        # Enterprise tier uses AC automaton (Phase 4: rust_src/ac_matcher)
+        # Pro/Lite use the standard regex-based engine.
+        # if config.tier == "enterprise":
+        #     from ac_engine import AcEngine
+        #     self.ac_engine = AcEngine()
+        # else:
+        #     self.ac_engine = None
 
     def generate_session_id(self) -> str:
         """生成会话ID"""

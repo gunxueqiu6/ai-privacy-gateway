@@ -222,7 +222,7 @@ import Footer from '../components/Footer.astro';
 
   <script>
     // Pass build-time env to inline script
-    window.__PAYMENT_API_BASE__ = import.meta.env.PUBLIC_API_BASE || 'https://surf-illinois-servers-wrote.trycloudflare.com';
+    window.__PAYMENT_API_BASE__ = import.meta.env.PUBLIC_API_BASE || '';
   </script>
 
   <script is:inline>
@@ -261,7 +261,7 @@ import Footer from '../components/Footer.astro';
     async function loadPayPalSDK() {
       if (paypalLoaded) return;
       try {
-        const resp = await fetch(`${API_BASE}/api/paypal-config`);
+        const resp = await fetch(`${API_BASE}/api/payment/paypal-config`);
         const config = await resp.json();
         const script = document.createElement('script');
         script.src = `https://www.paypal.com/sdk/js?client-id=${config.client_id}&currency=USD`;
@@ -284,7 +284,7 @@ import Footer from '../components/Footer.astro';
           const resp = await fetch(`${API_BASE}/api/payment/create-order`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tier: currentTier })
+            body: JSON.stringify({ tier: currentTier, email: currentEmail })
           });
           const data = await resp.json();
           if (!resp.ok) throw new Error('创建订单失败');
@@ -295,12 +295,12 @@ import Footer from '../components/Footer.astro';
           showResult('支付处理中...', '<div class="spinner"></div><p>正在生成 License，请稍候...</p>');
 
           try {
-            const resp = await fetch(`${API_BASE}/api/payment/complete`, {
+            const resp = await fetch(`${API_BASE}/api/payment/capture-order`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 order_id: data.orderID,
-                customer_email: currentEmail,
+                email: currentEmail,
                 tier: currentTier
               })
             });
@@ -311,7 +311,8 @@ import Footer from '../components/Footer.astro';
                 `<div class="license-box">
                   <p>您的 License Key:</p>
                   <code class="license-key">${result.license_key}</code>
-                  <p class="license-info">版本: ${result.tier === 'pro' ? 'Pro 团队版' : 'Enterprise 企业版'}</p>
+                  <p class="license-info">版本: ${result.tier_name}</p>
+                  <p class="license-info">团队 ID: ${result.team_id}</p>
                   <p class="license-info">有效期至: ${result.expires_at}</p>
                   <p class="license-info">License 已发送至 ${currentEmail}</p>
                 </div>`

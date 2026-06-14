@@ -62,6 +62,19 @@ class Database:
         with self.get_conn() as conn:
             cursor = conn.cursor()
             cursor.executescript("""
+                CREATE TABLE IF NOT EXISTS licenses (
+                    id TEXT PRIMARY KEY,
+                    team_id TEXT NOT NULL UNIQUE,
+                    tier TEXT NOT NULL,
+                    seats INTEGER NOT NULL,
+                    email TEXT,
+                    issued_at TEXT NOT NULL,
+                    expires_at TEXT NOT NULL,
+                    jwt_token TEXT NOT NULL,
+                    payment_id TEXT,
+                    revoked INTEGER DEFAULT 0
+                );
+
                 CREATE TABLE IF NOT EXISTS vault_mappings (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     session_id TEXT NOT NULL,
@@ -122,6 +135,43 @@ class Database:
                 );
                 
                 CREATE INDEX IF NOT EXISTS idx_login_ip ON login_attempts(ip_address);
+
+                -- Phase 3: Multi-user and team tables
+                CREATE TABLE IF NOT EXISTS teams (
+                    id TEXT PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    license_id TEXT,
+                    created_at TEXT NOT NULL,
+                    settings TEXT DEFAULT '{}'
+                );
+
+                CREATE TABLE IF NOT EXISTS users (
+                    id TEXT PRIMARY KEY,
+                    team_id TEXT NOT NULL,
+                    username TEXT NOT NULL,
+                    password_hash TEXT NOT NULL,
+                    role TEXT NOT NULL DEFAULT 'member',
+                    api_key TEXT UNIQUE,
+                    created_at TEXT NOT NULL,
+                    last_login_at TEXT,
+                    is_active INTEGER DEFAULT 1,
+                    UNIQUE(team_id, username)
+                );
+
+                CREATE INDEX IF NOT EXISTS idx_users_team ON users(team_id);
+                CREATE INDEX IF NOT EXISTS idx_users_api_key ON users(api_key);
+
+                CREATE TABLE IF NOT EXISTS sessions (
+                    id TEXT PRIMARY KEY,
+                    user_id TEXT NOT NULL,
+                    token TEXT UNIQUE NOT NULL,
+                    created_at TEXT NOT NULL,
+                    expires_at TEXT NOT NULL,
+                    FOREIGN KEY (user_id) REFERENCES users(id)
+                );
+
+                CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token);
+                CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
             """)
 
             # Migrate existing audit_log table to add prev_hash column
@@ -131,13 +181,34 @@ class Database:
                 cursor.execute("ALTER TABLE audit_log ADD COLUMN prev_hash TEXT")
                 logger.info("已为 audit_log 表添加 prev_hash 列")
 
-    def save_mappings(self, session_id: str, mappings: Dict[str, str], data_type: str = "unknown") -> None:
+            # Phase 3: Add team_id columns to existing tables
+            cursor.execute("PRAGMA table_info(vault_mappings)")
+            vm_cols = {row[1] for row in cursor.fetchall()}
+            if "team_id" not in vm_cols:
+                cursor.execute("ALTER TABLE vault_mappings ADD COLUMN team_id TEXT DEFAULT 'default'")
+                cursor.execute("CREATE INDEX IF NOT EXISTS idx_vault_team_session ON vault_mappings(team_id, session_id)")
+                logger.info("Added team_id column to vault_mappings")
+
+            cursor.execute("PRAGMA table_info(custom_keywords)")
+            ck_cols = {row[1] for row in cursor.fetchall()}
+            if "team_id" not in ck_cols:
+                cursor.execute("ALTER TABLE custom_keywords ADD COLUMN team_id TEXT DEFAULT 'default'")
+                logger.info("Added team_id column to custom_keywords")
+
+            cursor.execute("PRAGMA table_info(stats)")
+            st_cols = {row[1] for row in cursor.fetchall()}
+            if "team_id" not in st_cols:
+                cursor.execute("ALTER TABLE stats ADD COLUMN team_id TEXT DEFAULT 'default'")
+                cursor.execute("CREATE INDEX IF NOT EXISTS idx_stats_team_date ON stats(team_id, date)")
+                logger.info("Added team_id column to stats")
+
+    def save_mappings(self, session_id: str, mappings: Dict[str, str], data_type: str = "unknown", team_id: Optional[str] = None) -> None:
         with self.get_conn() as conn:
             cursor = conn.cursor()
             for placeholder, real_value in mappings.items():
                 cursor.execute(
-                    "INSERT INTO vault_mappings (session_id, placeholder, real_value, data_type) VALUES (?, ?, ?, ?)",
-                    (session_id, placeholder, real_value, data_type)
+                    "INSERT INTO vault_mappings (session_id, placeholder, real_value, data_type, team_id) VALUES (?, ?, ?, ?, COALESCE(?, 'default'))",
+                    (session_id, placeholder, real_value, data_type, team_id)
                 )
         logger.info(f"保存 {len(mappings)} 条映射记录")
 
@@ -418,4 +489,124 @@ class Database:
             }
 
 
+
+    def save_license(
+        self,
+        license_id: str,
+        team_id: str,
+        tier: str,
+        seats: int,
+        email: str,
+        issued_at: str,
+        expires_at: str,
+        jwt_token: str,
+        payment_id: Optional[str] = None,
+    ) -> None:
+        """Save a new license record."""
+        with self.get_conn() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """INSERT OR REPLACE INTO licenses
+                   (id, team_id, tier, seats, email, issued_at, expires_at, jwt_token, payment_id, revoked)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)""",
+                (license_id, team_id, tier, seats, email, issued_at, expires_at, jwt_token, payment_id),
+            )
+
+    def get_license_by_team(self, team_id: str) -> Optional[Dict[str, Any]]:
+        """Get the active license for a team."""
+        with self.get_conn() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """SELECT * FROM licenses
+                   WHERE team_id = ? AND revoked = 0
+                   ORDER BY issued_at DESC LIMIT 1""",
+                (team_id,),
+            )
+            row = cursor.fetchone()
+            return dict(row) if row else None
+
+    def revoke_license(self, team_id: str) -> bool:
+        """Revoke a team's license."""
+        with self.get_conn() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "UPDATE licenses SET revoked = 1 WHERE team_id = ? AND revoked = 0",
+                (team_id,),
+            )
+            return cursor.rowcount > 0
+
+    def is_token_revoked(self, team_id: str) -> bool:
+        """Check if a team's license has been revoked."""
+        with self.get_conn() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT revoked FROM licenses WHERE team_id = ? ORDER BY issued_at DESC LIMIT 1",
+                (team_id,),
+            )
+            row = cursor.fetchone()
+            if row is None:
+                return False
+            return bool(row["revoked"])
+
+    def get_license_count(self) -> int:
+        """Get count of active (non-revoked) licenses."""
+        with self.get_conn() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) as cnt FROM licenses WHERE revoked = 0")
+            row = cursor.fetchone()
+            return row["cnt"] if row else 0
+
+
+class EncryptedVault:
+    """Enterprise encrypted storage for vault mappings using AES-GCM."""
+    
+    def __init__(self, key: Optional[bytes] = None) -> None:
+        if key:
+            self._key = key
+        else:
+            import os as _os
+            key_env = _os.environ.get("VAULT_ENCRYPTION_KEY", "")
+            if key_env:
+                import base64
+                self._key = base64.b64decode(key_env)
+            else:
+                self._key = None
+    
+    @property
+    def available(self) -> bool:
+        return self._key is not None
+    
+    def encrypt(self, plaintext: str) -> str:
+        """Encrypt plaintext using AES-GCM. Returns base64-encoded ciphertext."""
+        if not self.available:
+            return plaintext
+        import os as _os
+        from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+        import base64
+        
+        aesgcm = AESGCM(self._key)
+        nonce = _os.urandom(12)
+        ciphertext = aesgcm.encrypt(nonce, plaintext.encode(), None)
+        # Combine nonce + ciphertext and base64 encode
+        combined = nonce + ciphertext
+        return base64.b64encode(combined).decode()
+    
+    def decrypt(self, ciphertext_b64: str) -> str:
+        """Decrypt base64-encoded ciphertext back to plaintext."""
+        if not self.available:
+            return ciphertext_b64
+        from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+        import base64
+        
+        aesgcm = AESGCM(self._key)
+        combined = base64.b64decode(ciphertext_b64)
+        nonce = combined[:12]
+        ciphertext = combined[12:]
+        return aesgcm.decrypt(nonce, ciphertext, None).decode()
+
+
+# Global encrypted vault instance
+encrypted_vault = EncryptedVault()
+
 db = Database()
+
