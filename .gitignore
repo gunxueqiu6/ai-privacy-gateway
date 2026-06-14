@@ -40,7 +40,7 @@ ssl/
 scripts/
 
 # Rust编译产物
-rust_src/target/
+rust_src/**/target/
 
 # Python扩展模块
 *.pyd
@@ -55,6 +55,13 @@ rust_src/target/
 
 # 临时脚本
 test_imports.py
+
+# 安全扫描输出
+bandit_results.json
+pytest_output.txt
+
+# JS 测试覆盖率
+sdk/js/coverage/
 
 # PyInstaller配置
 *.spec
