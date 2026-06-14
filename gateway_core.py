@@ -27,13 +27,20 @@ class GatewayCore:
         self.target_url = config.TARGET_LLM
         self.timeout = 120.0
         # Tier-aware engine selection:
-        # Enterprise tier uses AC automaton (Phase 4: rust_src/ac_matcher)
+        # Enterprise tier uses AC automaton (rust_src/ac_matcher) for
+        # high-performance multi-pattern matching of custom keywords.
         # Pro/Lite use the standard regex-based engine.
-        # if config.tier == "enterprise":
-        #     from ac_engine import AcEngine
-        #     self.ac_engine = AcEngine()
-        # else:
-        #     self.ac_engine = None
+        if config.tier == "enterprise":
+            try:
+                from ac_engine import AcEngine
+
+                self.ac_engine = AcEngine()
+                logger.info("AC自动机引擎已加载（企业版）")
+            except Exception as e:
+                logger.warning("AC自动机引擎加载失败，使用正则引擎: %s", e)
+                self.ac_engine = None
+        else:
+            self.ac_engine = None
 
     def generate_session_id(self) -> str:
         """生成会话ID"""

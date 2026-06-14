@@ -50,8 +50,16 @@ class Config:
     # JWT 密钥
     JWT_SECRET: str = os.environ.get("JWT_SECRET", os.urandom(32).hex())
 
+    # Vault 加密密钥（为空时加密功能禁用）
+    VAULT_ENCRYPT_KEY: str = os.environ.get("VAULT_ENCRYPT_KEY", "")
+
     def __init__(self) -> None:
         """Initialize config, auto-generate password hash, and load license."""
+        if not self.VAULT_ENCRYPT_KEY:
+            logging.getLogger(__name__).warning(
+                "VAULT_ENCRYPT_KEY not set — vault encryption is disabled"
+            )
+
         if not self.ADMIN_PASSWORD_HASH and self.ADMIN_PASSWORD:
             # 如果没有哈希但有明文密码，自动生成哈希
             salt = bcrypt.gensalt()

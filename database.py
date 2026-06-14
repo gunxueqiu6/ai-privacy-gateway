@@ -202,6 +202,28 @@ class Database:
                 cursor.execute("CREATE INDEX IF NOT EXISTS idx_stats_team_date ON stats(team_id, date)")
                 logger.info("Added team_id column to stats")
 
+            # Phase 4: OAuth columns
+            cursor.execute("PRAGMA table_info(users)")
+            usr_cols = {row[1] for row in cursor.fetchall()}
+            if "email" not in usr_cols:
+                cursor.execute("ALTER TABLE users ADD COLUMN email TEXT DEFAULT ''")
+                logger.info("Added email column to users")
+            if "oauth_provider" not in usr_cols:
+                cursor.execute("ALTER TABLE users ADD COLUMN oauth_provider TEXT")
+                logger.info("Added oauth_provider column to users")
+            if "oauth_id" not in usr_cols:
+                cursor.execute("ALTER TABLE users ADD COLUMN oauth_id TEXT")
+                logger.info("Added oauth_id column to users")
+            if "oauth_provider" in usr_cols and "oauth_id" in usr_cols:
+                # Create index for OAuth lookups if not exists
+                cursor.execute("PRAGMA index_list(users)")
+                idx_list = {row[2] for row in cursor.fetchall()}
+                if "idx_users_oauth" not in idx_list:
+                    cursor.execute(
+                        "CREATE INDEX IF NOT EXISTS idx_users_oauth ON users(oauth_provider, oauth_id)"
+                    )
+                    logger.info("Created idx_users_oauth index")
+
     def save_mappings(self, session_id: str, mappings: Dict[str, str], data_type: str = "unknown", team_id: Optional[str] = None) -> None:
         with self.get_conn() as conn:
             cursor = conn.cursor()

@@ -93,7 +93,7 @@ def get_team_members(team_id: str) -> List[Dict[str, Any]]:
     with _db.get_conn() as conn:
         cursor = conn.cursor()
         cursor.execute(
-            "SELECT id, team_id, username, role, created_at, last_login_at, is_active "
+            "SELECT id, team_id, username, email, role, created_at, last_login_at, is_active "
             "FROM users WHERE team_id = ? AND is_active = 1 ORDER BY role, username",
             (team_id,),
         )
@@ -145,6 +145,7 @@ def create_user(
     username: str,
     password: str,
     role: str = ROLE_MEMBER,
+    email: str = "",
 ) -> Dict[str, Any]:
     """Create a new user in a team. Raises TeamError on failure."""
     if role not in VALID_ROLES:
@@ -175,9 +176,10 @@ def create_user(
         with _db.get_conn() as conn:
             cursor = conn.cursor()
             cursor.execute(
-                """INSERT INTO users (id, team_id, username, password_hash, role, api_key, created_at, is_active)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, 1)""",
-                (user_id, team_id, username, password_hash, role, api_key, now),
+                """INSERT INTO users
+                   (id, team_id, username, email, password_hash, role, api_key, created_at, is_active)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)""",
+                (user_id, team_id, username, email, password_hash, role, api_key, now),
             )
     except Exception as e:
         if "UNIQUE" in str(e):
@@ -192,6 +194,7 @@ def create_user(
         "id": user_id,
         "team_id": team_id,
         "username": username,
+        "email": email,
         "role": role,
         "api_key": api_key,
         "created_at": now,
@@ -358,3 +361,121 @@ def delete_session(token: str) -> bool:
         cursor = conn.cursor()
         cursor.execute("DELETE FROM sessions WHERE token = ?", (token,))
         return cursor.rowcount > 0
+
+
+def find_or_create_oauth_user(
+    team_id: str,
+    email: str,
+    name: str,
+    provider: str,
+    provider_id: str,
+) -> Dict[str, Any]:
+    """Find an existing user by OAuth identity, or create a new one.
+
+    Looks up by (oauth_provider, oauth_id) in the users table.
+    If found, returns the existing user (updating email/name if changed).
+    If not found, creates a new user with a random password
+    (since they will authenticate via OAuth).
+
+    Args:
+        team_id: The team to create the user in.
+        email: The user's email from the OAuth provider.
+        name: The user's display name from the OAuth provider.
+        provider: The OAuth provider name ("google" or "github").
+        provider_id: The user's unique ID from the provider.
+
+    Returns:
+        User dict (without password_hash).
+
+    Raises:
+        TeamError: If user creation fails.
+    """
+    if not team_id or not provider or not provider_id:
+        raise TeamError(
+            "team_id, provider, and provider_id are required",
+            code="INVALID_OAUTH_PARAMS",
+        )
+
+    # Look up by OAuth identity
+    with _db.get_conn() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT * FROM users WHERE oauth_provider = ? AND oauth_id = ? AND is_active = 1",
+            (provider, provider_id),
+        )
+        row = cursor.fetchone()
+
+    if row:
+        user = dict(row)
+        # Update email/name if changed at the provider
+        if user.get("email") != email or user.get("name") != name:
+            with _db.get_conn() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "UPDATE users SET email = ?, username = ? WHERE id = ?",
+                    (email, name, user["id"]),
+                )
+            # Refresh the user dict with updated values
+            user["email"] = email
+            user["username"] = name
+        if "password_hash" in user:
+            del user["password_hash"]
+        logger.info("OAuth user found: provider=%s, provider_id=%s", provider, provider_id)
+        return user
+
+    # Check seat limit before creating
+    team = get_team(team_id)
+    if not team:
+        raise TeamError(f"Team not found: {team_id}", code="TEAM_NOT_FOUND")
+
+    from config import config as _cfg
+    if _cfg.tier in ("pro", "enterprise"):
+        member_count = get_member_count(team_id)
+        if member_count >= _cfg.license_seats:
+            raise TeamError(
+                f"Team has reached the seat limit ({_cfg.license_seats})",
+                code="SEAT_LIMIT_REACHED",
+            )
+
+    # Create user with random password (they'll use OAuth)
+    user_id = f"USR{secrets.token_hex(6).upper()}"
+    api_key = _generate_api_key()
+    random_password = secrets.token_urlsafe(24)
+    password_hash = _hash_password(random_password)
+    now = _now_iso()
+
+    try:
+        with _db.get_conn() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """INSERT INTO users
+                   (id, team_id, username, email, password_hash, role, api_key,
+                    oauth_provider, oauth_id, created_at, is_active)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)""",
+                (
+                    user_id, team_id, name, email, password_hash, ROLE_MEMBER,
+                    api_key, provider, provider_id, now,
+                ),
+            )
+    except Exception as e:
+        if "UNIQUE" in str(e):
+            # Race condition: user was created between our SELECT and INSERT
+            # Retry the lookup
+            return find_or_create_oauth_user(team_id, email, name, provider, provider_id)
+        raise TeamError(f"Failed to create OAuth user: {str(e)}", code="OAUTH_USER_CREATE_FAILED")
+
+    logger.info(
+        "OAuth user created: name=%s, email=%s, provider=%s",
+        name, email, provider,
+    )
+    return {
+        "id": user_id,
+        "team_id": team_id,
+        "username": name,
+        "email": email,
+        "role": ROLE_MEMBER,
+        "api_key": api_key,
+        "oauth_provider": provider,
+        "oauth_id": provider_id,
+        "created_at": now,
+    }

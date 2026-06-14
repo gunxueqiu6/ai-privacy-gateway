@@ -452,6 +452,26 @@
                 </div>
             </div>
 
+            <!-- SSO / OAuth Status -->
+            <div class="section" id="sso-section" style="display:none;">
+                <h2>SSO 单点登录 <span class="ent-badge">Enterprise</span></h2>
+                <div class="status-grid">
+                    <div class="status-item">
+                        <span class="label">Google OAuth</span>
+                        <span class="value" id="sso-google-status">未配置</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="label">GitHub OAuth</span>
+                        <span class="value" id="sso-github-status">未配置</span>
+                    </div>
+                </div>
+                <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:12px;">
+                    用户可通过登录页面的 "Sign in with Google/GitHub" 按钮进行 SSO 登录。
+                    在环境变量中设置 <code>GOOGLE_CLIENT_ID</code>、<code>GOOGLE_CLIENT_SECRET</code>、
+                    <code>GITHUB_CLIENT_ID</code> 和 <code>GITHUB_CLIENT_SECRET</code> 来启用。
+                </p>
+            </div>
+
             <!-- Team Management -->
             <div class="section">
                 <h2>团队管理 <span class="ent-badge">Enterprise</span></h2>
@@ -488,7 +508,16 @@
         
         // Check auth
         if (!token) {
-            window.location.href = '/admin/static/login.html';
+            // Check URL for token from OAuth callback redirect
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlToken = urlParams.get('token');
+            if (urlToken) {
+                localStorage.setItem('admin_token', urlToken);
+                window.history.replaceState({}, document.title, window.location.pathname);
+                token = urlToken;
+            } else {
+                window.location.href = '/admin/static/login.html';
+            }
         }
 
         // Tab switching
@@ -843,6 +872,39 @@
             window.location.href = '/admin/static/login.html';
         }
 
+        // ==================== SSO / OAuth ====================
+
+        async function fetchSSOStatus() {
+            try {
+                const resp = await authFetch('/admin/version');
+                const data = await resp.json();
+                if (data.tier === 'enterprise') {
+                    document.getElementById('sso-section').style.display = 'block';
+                    // Check provider config via a lightweight endpoint
+                    const checkResp = await fetch('/admin/license/check');
+                    const tierData = await checkResp.json();
+                    if (tierData.tier === 'enterprise') {
+                        // Try detecting provider config by hitting the OAuth login endpoint
+                        // Google
+                        const googleResp = await fetch('/admin/license/check');
+                        // Just show configured status — providers are detectable at startup
+                        const providersResp = await fetch(API_BASE + '/auth/oauth/login/google', {
+                            redirect: 'manual'
+                        });
+                        // We can't actually test without redirect, so we show based on version
+                        document.getElementById('sso-google-status').textContent =
+                            '需要配置 GOOGLE_CLIENT_ID';
+                        document.getElementById('sso-github-status').textContent =
+                            '需要配置 GITHUB_CLIENT_ID';
+                        document.getElementById('sso-google-status').style.color = 'var(--warning)';
+                        document.getElementById('sso-github-status').style.color = 'var(--warning)';
+                    }
+                }
+            } catch (e) {
+                console.error('获取 SSO 状态失败:', e);
+            }
+        }
+
         // Initialize
         fetchStats();
         fetchKeywords();
@@ -852,6 +914,7 @@
         fetchLicense();
         fetchApiKey();
         fetchTeam();
+        fetchSSOStatus();
         updateDecayIndicator(0);
 
         // Auto refresh

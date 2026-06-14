@@ -9,8 +9,8 @@ import time
 from datetime import UTC, datetime, timedelta
 from typing import Any, Dict, Optional, Set, Union
 
-from fastapi import FastAPI, Request, Response, HTTPException
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi import Depends, FastAPI, Request, Response, HTTPException
+from fastapi.responses import JSONResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from sse_starlette.sse import EventSourceResponse
@@ -21,6 +21,14 @@ import uuid as _uuid
 
 from payment import get_paypal_client, PayPalError
 from license import get_license_service, LicenseError
+from oauth import (
+    OAuthError,
+    oauth_config,
+    generate_state,
+    get_oauth_url,
+    exchange_code,
+    SUPPORTED_PROVIDERS,
+)
 from reports import (get_daily_report, get_weekly_report, get_monthly_report, export_report_csv, get_summary_stats)
 from alerts import get_alert_engine
 from redis_cache import get_redis_cache
@@ -29,6 +37,7 @@ from team import (
     create_user, authenticate_user, get_user_by_id, get_user_by_api_key,
     remove_user, update_user_role, regenerate_api_key,
     create_session, validate_session, delete_session,
+    find_or_create_oauth_user,
     update_team_settings, get_team_settings,
     ROLE_ADMIN, ROLE_MEMBER, ROLE_VIEWER, VALID_ROLES,
     TeamError,
@@ -164,20 +173,21 @@ class Tier(str, Enum):
 
 
 def require_tier(minimum: str):
-    """Decorator/dependency that requires a minimum license tier.
-    
+    """FastAPI dependency that requires a minimum license tier.
+
     Returns 402 Payment Required if the current tier is too low.
+    Use with ``Depends()``: ``_=require_tier("pro")``
     """
     order = {"lite": 0, "pro": 1, "enterprise": 2}
 
     async def _check(request: Request) -> None:
-        current = config.tier  # str: "lite", "pro", or "enterprise"
+        current = config.tier
         if order.get(current, 0) < order.get(minimum, 0):
             raise HTTPException(
                 status_code=402,
                 detail=f"This feature requires at least {minimum.upper()} tier. Current: {current.upper()}"
             )
-    return _check
+    return Depends(_check)
 
 
 # ==================== Team-based Auth Functions ====================
@@ -206,13 +216,14 @@ async def get_current_user(request: Request) -> Optional[Dict[str, Any]]:
 
 
 def require_role(*roles: str):
-    """Dependency that checks if the authenticated user has one of the specified roles.
+    """FastAPI dependency that checks if the authenticated user has one of the specified roles.
 
     Uses get_current_user (session/api-key based auth) to find the user,
     then checks their role. Returns 403 if the role does not match.
 
     This is separate from require_admin (JWT-based admin auth) and can be
     used alongside it on the same endpoint when needed.
+    Use with ``Depends()``: ``_=require_role("admin")``
     """
     async def _check(request: Request) -> Dict[str, Any]:
         user = await get_current_user(request)
@@ -224,7 +235,7 @@ def require_role(*roles: str):
                 detail=f"权限不足 - 需要角色: {', '.join(roles)}",
             )
         return user
-    return _check
+    return Depends(_check)
 
 
 # ==================== 主代理路由 ====================
@@ -1226,14 +1237,166 @@ async def auth_me(request: Request) -> JSONResponse:
     return JSONResponse(safe_user)
 
 
+# ==================== OAuth / SSO Routes (Enterprise) ====================
+
+
+@app.get("/auth/oauth/login/{provider}")
+@limiter.limit("10/minute")
+async def oauth_login(provider: str, request: Request,
+                      _=require_tier("enterprise")) -> Response:
+    """Initiate OAuth login with the given provider.
+
+    Generates a state parameter for CSRF protection, stores it in a cookie,
+    and redirects the user to the provider's OAuth authorization page.
+    Enterprise tier required.
+    """
+
+    provider = provider.lower()
+    if provider not in SUPPORTED_PROVIDERS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported provider: {provider}. Supported: {', '.join(sorted(SUPPORTED_PROVIDERS))}",
+        )
+
+    if not oauth_config.is_provider_configured(provider):
+        raise HTTPException(
+            status_code=503,
+            detail=f"OAuth provider '{provider}' is not configured. Set environment variables.",
+        )
+
+    state = generate_state()
+    auth_url = get_oauth_url(provider, state)
+
+    response = RedirectResponse(url=auth_url, status_code=302)
+    # Set state cookie for CSRF verification on callback
+    response.set_cookie(
+        key="oauth_state",
+        value=state,
+        httponly=True,
+        samesite="lax",
+        max_age=600,  # 10 minutes
+        secure=request.url.scheme == "https",
+    )
+    logger.info("OAuth login initiated: provider=%s", provider)
+    return response
+
+
+@app.get("/auth/oauth/callback/{provider}")
+@limiter.limit("10/minute")
+async def oauth_callback(
+    provider: str,
+    request: Request,
+    _=require_tier("enterprise"),
+    code: Optional[str] = None,
+    state: Optional[str] = None,
+) -> Response:
+    """Handle OAuth callback from the provider.
+
+    Verifies the state parameter for CSRF protection, exchanges the
+    authorization code for user info, creates or finds a user in the
+    license team, creates a session, and redirects to the admin panel
+    with a JWT token.
+    """
+
+    provider = provider.lower()
+    if provider not in SUPPORTED_PROVIDERS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported provider: {provider}",
+        )
+
+    # Verify state for CSRF protection
+    stored_state = request.cookies.get("oauth_state")
+    if not stored_state or not state or stored_state != state:
+        logger.warning(
+            "OAuth state mismatch (CSRF detected): provider=%s", provider
+        )
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid OAuth state. This may be a CSRF attack or the session expired.",
+        )
+
+    if not code:
+        # Check for error in query params
+        error = request.query_params.get("error", "access_denied")
+        error_desc = request.query_params.get("error_description", "User denied authorization")
+        logger.warning("OAuth callback error: provider=%s, error=%s", provider, error)
+        raise HTTPException(status_code=400, detail=f"OAuth authorization failed: {error_desc}")
+
+    # Exchange code for user info
+    try:
+        user_info = await exchange_code(provider, code)
+    except OAuthError as e:
+        logger.error("OAuth code exchange failed: %s", str(e))
+        raise HTTPException(status_code=502, detail=f"OAuth exchange failed: {str(e)}")
+
+    # Get team_id for the OAuth user (use the license team)
+    team_id = config.license_team_id
+    if not team_id:
+        raise HTTPException(
+            status_code=400,
+            detail="No license team configured. Activate an Enterprise license first.",
+        )
+
+    # Find or create the user in the team
+    try:
+        user = find_or_create_oauth_user(
+            team_id=team_id,
+            email=user_info["email"],
+            name=user_info["name"],
+            provider=user_info["provider"],
+            provider_id=user_info["provider_id"],
+        )
+    except TeamError as e:
+        logger.error("Failed to find/create OAuth user: %s", str(e))
+        raise HTTPException(status_code=500, detail=f"User management error: {str(e)}")
+
+    # Create session and JWT token for admin access
+    session_token = create_session(user["id"])
+    jwt_token = create_jwt_token()
+
+    db.log_audit(None, "oauth_login", {
+        "provider": provider,
+        "user_id": user["id"],
+        "email": user_info.get("email", ""),
+    })
+
+    logger.info(
+        "OAuth login successful: provider=%s, email=%s",
+        provider, user_info.get("email", ""),
+    )
+
+    # Redirect to admin panel with JWT token
+    redirect_url = f"/admin/static/admin.html?token={jwt_token}"
+    response = RedirectResponse(url=redirect_url, status_code=302)
+    response.set_cookie(
+        key="session_token",
+        value=jwt_token,
+        httponly=True,
+        samesite="strict",
+        max_age=86400,
+        secure=request.url.scheme == "https",
+    )
+    response.set_cookie(
+        key="user_session",
+        value=session_token,
+        httponly=True,
+        samesite="strict",
+        max_age=86400,
+        secure=request.url.scheme == "https",
+    )
+    # Clear the oauth state cookie
+    response.delete_cookie(key="oauth_state")
+    return response
+
+
 # ==================== Statistics Reports API ====================
 
 @app.get("/admin/reports/daily")
 @limiter.limit("10/minute")
-async def admin_reports_daily(request: Request, date: Optional[str] = None) -> JSONResponse:
+async def admin_reports_daily(request: Request, date: Optional[str] = None, _=require_tier("pro")) -> JSONResponse:
     """Get daily statistics report."""
     await require_admin(request)
-    await require_tier("pro")
     team_id = config.license_team_id
     report = get_daily_report(team_id, date)
     return JSONResponse(report)
@@ -1241,10 +1404,9 @@ async def admin_reports_daily(request: Request, date: Optional[str] = None) -> J
 
 @app.get("/admin/reports/weekly")
 @limiter.limit("10/minute")
-async def admin_reports_weekly(request: Request, end_date: Optional[str] = None) -> JSONResponse:
+async def admin_reports_weekly(request: Request, end_date: Optional[str] = None, _=require_tier("pro")) -> JSONResponse:
     """Get weekly statistics report (daily breakdown for 7 days)."""
     await require_admin(request)
-    await require_tier("pro")
     team_id = config.license_team_id
     report = get_weekly_report(team_id, end_date)
     return JSONResponse({"days": report, "count": len(report)})
@@ -1252,10 +1414,9 @@ async def admin_reports_weekly(request: Request, end_date: Optional[str] = None)
 
 @app.get("/admin/reports/monthly")
 @limiter.limit("10/minute")
-async def admin_reports_monthly(request: Request, year: Optional[int] = None, month: Optional[int] = None) -> JSONResponse:
+async def admin_reports_monthly(request: Request, year: Optional[int] = None, month: Optional[int] = None, _=require_tier("pro")) -> JSONResponse:
     """Get monthly statistics report."""
     await require_admin(request)
-    await require_tier("pro")
     team_id = config.license_team_id
     report = get_monthly_report(team_id, year, month)
     return JSONResponse({"days": report, "count": len(report)})
@@ -1263,10 +1424,9 @@ async def admin_reports_monthly(request: Request, year: Optional[int] = None, mo
 
 @app.get("/admin/reports/summary")
 @limiter.limit("10/minute")
-async def admin_reports_summary(request: Request, days: int = 30) -> JSONResponse:
+async def admin_reports_summary(request: Request, days: int = 30, _=require_tier("pro")) -> JSONResponse:
     """Get aggregated summary stats for the last N days."""
     await require_admin(request)
-    await require_tier("pro")
     team_id = config.license_team_id
     stats = get_summary_stats(team_id, days)
     return JSONResponse(stats)
@@ -1276,12 +1436,12 @@ async def admin_reports_summary(request: Request, days: int = 30) -> JSONRespons
 @limiter.limit("5/minute")
 async def admin_reports_export(
     request: Request,
+    _=require_tier("pro"),
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
 ) -> Response:
     """Export stats as CSV."""
     await require_admin(request)
-    await require_tier("pro")
     team_id = config.license_team_id
     csv_data = export_report_csv(team_id, start_date, end_date)
     return Response(
@@ -1295,10 +1455,9 @@ async def admin_reports_export(
 
 @app.get("/admin/alerts/status")
 @limiter.limit("10/minute")
-async def admin_alerts_status(request: Request) -> JSONResponse:
+async def admin_alerts_status(request: Request, _=require_tier("enterprise")) -> JSONResponse:
     """Get alert engine status."""
     await require_admin(request)
-    await require_tier("enterprise")
     engine = get_alert_engine()
     return JSONResponse({
         "rules_count": len(engine.rules),
@@ -1308,10 +1467,9 @@ async def admin_alerts_status(request: Request) -> JSONResponse:
 
 @app.post("/admin/alerts/test")
 @limiter.limit("5/minute")
-async def admin_alerts_test(request: Request) -> JSONResponse:
+async def admin_alerts_test(request: Request, _=require_tier("enterprise")) -> JSONResponse:
     """Test alert notifications by triggering a sample alert."""
     await require_admin(request)
-    await require_tier("enterprise")
     engine = get_alert_engine()
     context = {
         "stats": {"5min": 15000},
@@ -1364,10 +1522,9 @@ async def admin_team(request: Request) -> JSONResponse:
 
 @app.post("/admin/team/members")
 @limiter.limit("10/minute")
-async def admin_team_add_member(request: Request) -> JSONResponse:
+async def admin_team_add_member(request: Request, _=require_tier("pro")) -> JSONResponse:
     """Add a new team member (admin only)."""
     await require_admin(request)
-    await require_tier("pro")
     body = await request.json()
     username = body.get("username", "").strip()
     password = body.get("password", "")
@@ -1389,10 +1546,9 @@ async def admin_team_add_member(request: Request) -> JSONResponse:
 
 @app.delete("/admin/team/members/{user_id}")
 @limiter.limit("10/minute")
-async def admin_team_remove_member(user_id: str, request: Request) -> JSONResponse:
+async def admin_team_remove_member(user_id: str, request: Request, _=require_tier("pro")) -> JSONResponse:
     """Remove a team member (admin only)."""
     await require_admin(request)
-    await require_tier("pro")
     team_id = config.license_team_id
     if not team_id:
         raise HTTPException(status_code=400, detail="No team configured")
@@ -1404,10 +1560,9 @@ async def admin_team_remove_member(user_id: str, request: Request) -> JSONRespon
 
 @app.put("/admin/team/members/{user_id}/role")
 @limiter.limit("10/minute")
-async def admin_team_update_role(user_id: str, request: Request) -> JSONResponse:
+async def admin_team_update_role(user_id: str, request: Request, _=require_tier("pro")) -> JSONResponse:
     """Update a member role (admin only)."""
     await require_admin(request)
-    await require_tier("pro")
     body = await request.json()
     role = body.get("role", "").strip()
     if role not in VALID_ROLES:
