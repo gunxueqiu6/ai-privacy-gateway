@@ -212,7 +212,7 @@ class TestIntegrationChatCompletion:
 
     def test_chat_completion_proxy(self, client):
         """测试 Chat Completion 代理"""
-        with patch('main.get_gateway_core') as mock_gateway:
+        with patch('routers.proxy.get_gateway_core') as mock_gateway:
             mock_core = Mock()
             mock_core.mask_request.return_value = (
                 {"model": "gpt-3.5-turbo", "messages": [{"role": "user", "content": "手机号[PII_PHONE_00000001]"}]},

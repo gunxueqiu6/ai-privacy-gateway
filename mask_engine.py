@@ -101,30 +101,72 @@ class RegexMaskEngine(MaskEngineInterface):
         if HAS_NER:
             self._ner_engine = get_ner_engine()
 
+    @staticmethod
+    def _to_alpha_id(n: int) -> str:
+        """将正整数转为纯字母 ID（A, B, ..., Z, AA, AB, ...）。
+
+        避免占位符中出现数字，防止 NER/内置规则误匹配占位符内的数字序列。
+        """
+        result = []
+        while n > 0:
+            n -= 1
+            result.append(chr(ord('A') + (n % 26)))
+            n //= 26
+        return ''.join(reversed(result))
+
     @classmethod
     def _get_next_sequence(cls) -> str:
         import threading
         with threading.Lock():
             cls._sequence_counter += 1
-            return f"{cls._sequence_counter:08d}"
+            return cls._to_alpha_id(cls._sequence_counter)
 
     def _create_placeholder(self, entity_type: str, value: str) -> str:
         sequence = self._get_next_sequence()
         return f"[PII_{entity_type.upper()}_{sequence}]"
 
+    def _apply_rule(self, result: str, rule_key: str,
+                    mappings: Dict[str, str], stats: Dict[str, int],
+                    filter_fn=None) -> str:
+        """Apply a single built-in regex rule to the text.
+
+        For each match found, creates a placeholder, updates mappings and stats.
+        The optional filter_fn(match) should return True to skip the match.
+        """
+        for match in self.BUILTIN_RULES[rule_key].findall(result):
+            if filter_fn and filter_fn(match):
+                continue
+            placeholder = self._create_placeholder(rule_key, match)
+            result = result.replace(match, placeholder)
+            mappings[placeholder] = match
+            stats[rule_key] += 1
+        return result
+
     def mask(self, text: str) -> Tuple[str, Dict[str, str], Dict[str, int]]:
-        """正则脱敏处理 - 支持 13 种实体类型"""
+        """正则脱敏处理 - 支持 13 种实体类型
+
+        处理顺序：自定义关键词优先，确保用户定义的关键词不会被
+        NER/内置规则的子串匹配破坏。
+        """
         result = text
-        mappings = {}
-        stats = {
+        mappings: Dict[str, str] = {}
+        stats: Dict[str, int] = {
             "phone": 0, "email": 0, "idcard": 0, "bankcard": 0,
             "plate": 0, "ip": 0, "url": 0, "date": 0, "amount": 0, "postcode": 0,
             "person": 0, "location": 0, "organization": 0, "custom": 0
         }
 
-        # 1. 使用 NER 引擎检测人名、地名、机构名
+        # 1. 自定义关键词优先处理
+        for keyword in sorted(self.custom_keywords, key=len, reverse=True):
+            if keyword in result:
+                placeholder = self._create_placeholder("custom", keyword)
+                result = result.replace(keyword, placeholder)
+                mappings[placeholder] = keyword
+                stats["custom"] += 1
+
+        # 2. NER 引擎检测人名、地名、机构名
         if self._ner_engine:
-            entities = self._ner_engine.detect(text)
+            entities = self._ner_engine.detect(result)
             for entity in entities:
                 entity_type = entity.entity_type.value.lower()
                 if entity_type in stats:
@@ -133,85 +175,12 @@ class RegexMaskEngine(MaskEngineInterface):
                     mappings[placeholder] = entity.value
                     stats[entity_type] += 1
 
-        # 2. 手机号
-        for match in self.BUILTIN_RULES["phone"].findall(result):
-            placeholder = self._create_placeholder("phone", match)
-            result = result.replace(match, placeholder)
-            mappings[placeholder] = match
-            stats["phone"] += 1
-
-        # 3. 邮箱
-        for match in self.BUILTIN_RULES["email"].findall(result):
-            placeholder = self._create_placeholder("email", match)
-            result = result.replace(match, placeholder)
-            mappings[placeholder] = match
-            stats["email"] += 1
-
-        # 4. 身份证
-        for match in self.BUILTIN_RULES["idcard"].findall(result):
-            placeholder = self._create_placeholder("idcard", match)
-            result = result.replace(match, placeholder)
-            mappings[placeholder] = match
-            stats["idcard"] += 1
-
-        # 5. 银行卡
-        for match in self.BUILTIN_RULES["bankcard"].findall(result):
-            if len(match) == 11 and match.startswith('1'):
-                continue
-            placeholder = self._create_placeholder("bankcard", match)
-            result = result.replace(match, placeholder)
-            mappings[placeholder] = match
-            stats["bankcard"] += 1
-
-        # 6. 车牌号
-        for match in self.BUILTIN_RULES["plate"].findall(result):
-            placeholder = self._create_placeholder("plate", match)
-            result = result.replace(match, placeholder)
-            mappings[placeholder] = match
-            stats["plate"] += 1
-
-        # 7. IP 地址
-        for match in self.BUILTIN_RULES["ip"].findall(result):
-            placeholder = self._create_placeholder("ip", match)
-            result = result.replace(match, placeholder)
-            mappings[placeholder] = match
-            stats["ip"] += 1
-
-        # 8. URL
-        for match in self.BUILTIN_RULES["url"].findall(result):
-            placeholder = self._create_placeholder("url", match)
-            result = result.replace(match, placeholder)
-            mappings[placeholder] = match
-            stats["url"] += 1
-
-        # 9. 日期
-        for match in self.BUILTIN_RULES["date"].findall(result):
-            placeholder = self._create_placeholder("date", match)
-            result = result.replace(match, placeholder)
-            mappings[placeholder] = match
-            stats["date"] += 1
-
-        # 10. 金额
-        for match in self.BUILTIN_RULES["amount"].findall(result):
-            placeholder = self._create_placeholder("amount", match)
-            result = result.replace(match, placeholder)
-            mappings[placeholder] = match
-            stats["amount"] += 1
-
-        # 11. 邮编
-        for match in self.BUILTIN_RULES["postcode"].findall(result):
-            placeholder = self._create_placeholder("postcode", match)
-            result = result.replace(match, placeholder)
-            mappings[placeholder] = match
-            stats["postcode"] += 1
-
-        # 12. 自定义关键词
-        for keyword in self.custom_keywords:
-            if keyword in result:
-                placeholder = self._create_placeholder("custom", keyword)
-                result = result.replace(keyword, placeholder)
-                mappings[placeholder] = keyword
-                stats["custom"] += 1
+        # 3. 内置规则（银行卡需跳过11位手机号误匹配）
+        _not_bankcard = lambda m: len(m) == 11 and m.startswith('1')
+        for rule_key in ("phone", "email", "idcard", "bankcard", "plate",
+                          "ip", "url", "date", "amount", "postcode"):
+            filter_fn = _not_bankcard if rule_key == "bankcard" else None
+            result = self._apply_rule(result, rule_key, mappings, stats, filter_fn)
 
         return result, mappings, stats
 

@@ -5,8 +5,8 @@ import Footer from '../components/Footer.astro';
 ---
 
 <Layout
-  title="下载 AI Privacy Gateway — Docker / Windows / macOS"
-  description="下载 AI Privacy Gateway 客户端。支持 Docker 镜像、Windows .exe、macOS .dmg。30 秒部署，保护你发给 AI 的敏感数据。"
+  title="下载 AI Privacy Gateway — Docker / Windows / macOS / 浏览器扩展"
+  description="下载 AI Privacy Gateway 客户端和浏览器扩展。支持 Docker 镜像、Windows .exe、macOS 便携版、Chrome/Edge 扩展。30 秒部署，保护你发给 AI 的敏感数据。"
   canonicalURL="https://privacygw.pages.dev/download">
   <Nav />
 
@@ -15,14 +15,14 @@ import Footer from '../components/Footer.astro';
     <div class="container hero-content">
       <div class="hero-badge">
         <span class="badge-dot"></span>
-        <span>v1.1.0 最新版本</span>
+        <span>v1.1.0</span>
       </div>
       <h1 class="hero-title">
         下载 <span class="gradient-text">Privacy Gateway</span>
       </h1>
       <p class="hero-description">
         选择适合你平台的版本。Docker 一键部署，Windows/macOS 便携版双击即用。<br/>
-        Lite 版 MIT 许可证开源免费，Pro/Enterprise 版购买后 License Key 激活。
+        MIT 许可证开源免费，下载即用。
       </p>
     </div>
   </section>
@@ -77,6 +77,21 @@ import Footer from '../components/Footer.astro';
           </div>
           <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-outline btn-block">GitHub</a>
         </div>
+
+        <div class="download-card glass">
+          <div class="download-icon-wrap">
+            <span class="download-icon">&#127760;</span>
+          </div>
+          <h2>浏览器扩展</h2>
+          <p>Chrome / Edge 插件，自动脱敏 AI 对话</p>
+          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/releases/download/v1.1.0/ai-privacy-gateway-extension-v1.1.0.zip" class="btn btn-primary btn-block">
+            下载 v1.1.0
+          </a>
+          <p style="margin-top:0.5rem;font-size:0.8rem;color:var(--text-muted);line-height:1.5;">
+            下载后解压 → Chrome 打开 <code>chrome://extensions</code> → 开启"开发者模式" → "加载已解压的扩展"
+          </p>
+          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/tree/master/sdk/browser-extension" class="btn btn-outline btn-block" style="margin-top:0.5rem;">查看源码</a>
+        </div>
       </div>
 
       <!-- Quick Start -->
@@ -117,55 +132,7 @@ import Footer from '../components/Footer.astro';
         </div>
       </div>
 
-      <!-- License Activation -->
-      <div class="license-section glass">
-        <h3>License 激活</h3>
-        <div class="license-info-row">
-          <div class="license-item">
-            <h4>Lite 版（免费）</h4>
-            <p>MIT 开源许可证，下载即用，无需激活，可自由用于个人和商业项目</p>
-          </div>
-          <div class="license-item">
-            <h4>Pro 版</h4>
-            <p>购买后 License Key 自动发送至邮箱，下载 Pro 对应镜像后激活即可</p>
-          </div>
-          <div class="license-item">
-            <h4>Enterprise 版</h4>
-            <p>购买后 License Key 自动发送至邮箱，下载 Enterprise 对应镜像后激活</p>
-          </div>
-        </div>
-        <div class="license-howto">
-          <h4>激活步骤</h4>
-          <ol>
-            <li>下载对应版本的二进制文件或 Docker 镜像</li>
-            <li>运行服务时传入 License Key：<code>--license-key YOUR_KEY</code></li>
-            <li>或在管理后台"授权管理"页面输入 License Key 完成激活</li>
-          </ol>
-        </div>
-        <div class="license-links">
-          <a href="/pricing" class="btn btn-primary">购买 Pro / Enterprise</a>
-          <a href="/docs" class="btn btn-ghost" style="margin-left:0.5rem;">文档中心</a>
-        </div>
-      </div>
-
-      <!-- Release Notes -->
-      <div class="release-notes glass">
-        <h3>v1.1.0 更新日志</h3>
-        <ul>
-          <li>bcrypt 密码哈希 + JWT 会话管理 + 登录暴力破解防护</li>
-          <li>全 14 种实体类型默认启用（机构、车牌、IP、URL、日期、金额、邮编）</li>
-          <li>NER 命名实体识别引擎（人名、地名、机构名）</li>
-          <li>审计日志（元数据记录，不含原始文本）</li>
-          <li>管理面板实体开关 + 统计仪表盘</li>
-          <li>Android / Flutter / JS SDK 测试与构建修复</li>
-          <li>浏览器插件 CSP 合规 + Chrome Web Store 上架准备</li>
-          <li>CI Lint 严格模式，不再跳过代码质量检查</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <Footer />
+    <Footer />
 </Layout>
 
 <style>
@@ -253,49 +220,11 @@ import Footer from '../components/Footer.astro';
   }
   .release-notes li { color: var(--text-secondary); font-size: 0.9rem; padding: 0.4rem 0; }
 
-  /* License Activation */
-  .license-section { padding: 2rem; margin-bottom: 3rem; }
-  .license-section h3 { margin-bottom: 1.5rem; color: var(--primary); }
-  .license-info-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-  }
-  .license-item {
-    padding: 1rem;
-    background: var(--bg-deep);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-  }
-  .license-item h4 { margin-bottom: 0.5rem; font-size: 1rem; color: var(--primary); }
-  .license-item p { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.6; }
-  .license-howto { margin-bottom: 1.5rem; }
-  .license-howto h4 { margin-bottom: 0.75rem; color: var(--text-primary); }
-  .license-howto ol {
-    padding-left: 1.25rem;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    line-height: 2;
-  }
-  .license-howto code {
-    background: var(--bg-deep);
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.85rem;
-    color: var(--primary);
-    font-family: 'Fira Code', monospace;
-  }
-  .license-links { display: flex; align-items: center; }
-
-  @media (max-width: 768px) {
+    @media (max-width: 768px) {
     .hero-title { font-size: 2.25rem; }
     .download-grid { grid-template-columns: 1fr; }
     .steps { flex-direction: column; }
     .step-connector { transform: rotate(90deg); }
     .release-notes ul { grid-template-columns: 1fr; }
-    .license-info-row { grid-template-columns: 1fr; }
-    .license-links { flex-direction: column; gap: 0.5rem; align-items: stretch; }
-    .license-links .btn-ghost { margin-left: 0 !important; }
   }
 </style>

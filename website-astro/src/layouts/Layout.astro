@@ -73,6 +73,7 @@ const {
   })} />
 </head>
 <body>
+  <div id="scroll-progress"></div>
   <div class="gradient-orb gradient-orb-1"></div>
   <div class="gradient-orb gradient-orb-2"></div>
   <slot />
@@ -82,3 +83,61 @@ const {
 <style is:global>
   @import '../styles/global.css';
 </style>
+
+<script is:inline>
+  (function() {
+    // Scroll progress bar
+    function updateProgress() {
+      var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+      var scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      var progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+      var bar = document.getElementById('scroll-progress');
+      if (bar) bar.style.width = progress + '%';
+    }
+
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    window.addEventListener('resize', updateProgress);
+    document.addEventListener('DOMContentLoaded', updateProgress);
+
+    // Intersection Observer for scroll reveal
+    var revealObserver = new IntersectionObserver(
+      function(entries) {
+        for (var i = 0; i < entries.length; i++) {
+          var entry = entries[i];
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            // Animate stat values inside revealed elements
+            var statValues = entry.target.querySelectorAll('.stat-value-animated');
+            for (var j = 0; j < statValues.length; j++) {
+              statValues[j].classList.add('visible');
+            }
+          }
+        }
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    function observeReveals() {
+      var reveals = document.querySelectorAll('.reveal');
+      for (var i = 0; i < reveals.length; i++) {
+        revealObserver.observe(reveals[i]);
+      }
+      var stats = document.querySelectorAll('.stat-value-animated');
+      for (var i = 0; i < stats.length; i++) {
+        revealObserver.observe(stats[i]);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', observeReveals);
+
+    // Watch for dynamically added reveal elements
+    var mutationObserver = new MutationObserver(function() {
+      var newReveals = document.querySelectorAll('.reveal:not([data-ob])');
+      for (var i = 0; i < newReveals.length; i++) {
+        newReveals[i].setAttribute('data-ob', '1');
+        revealObserver.observe(newReveals[i]);
+      }
+    });
+    mutationObserver.observe(document.documentElement, { childList: true, subtree: true });
+  })();
+</script>

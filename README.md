@@ -2,6 +2,8 @@
 
 > Your AI data is exposed. Install a firewall in 30 seconds.
 
+**v1.1.0** — Open-source AI API privacy gateway. Masks sensitive data before it leaves your machine.
+
 A high-performance reverse proxy that automatically masks sensitive data (phone numbers, ID cards, emails, bank cards, names, locations, etc.) in AI API requests/responses, supporting all OpenAI-compatible services including DeepSeek, Claude, ChatGPT, and Cursor.
 
 [简体中文](README_CN.md) | [English](README.md)
@@ -101,7 +103,8 @@ server {
 | `TARGET_LLM` | https://api.openai.com | Target AI API endpoint |
 | `LISTEN_PORT` | 9999 | Gateway listen port |
 | `DB_PATH` | ./vault_data/privacy_vault.db | SQLite database path |
-| `ADMIN_PASSWORD` | admin123 | Admin dashboard password |
+| `ADMIN_PASSWORD` | (auto-generated) | Admin dashboard password |
+| `JWT_SECRET` | (required) | JWT signing secret (64-char hex) |
 
 ## Supported Entity Types
 
@@ -121,10 +124,6 @@ server {
 | Amount | Currency values | ¥999.99 |
 | Postcode | 6 digits | 100080 |
 | Custom | User-defined | API keys, passwords |
-
-## Enterprise & Team
-
-This is the free **Lite** edition. For team collaboration, RBAC, AC automaton engine, audit logging, SSO, and dedicated support, please visit **[privacygw.pages.dev](https://privacygw.pages.dev)** for Pro and Enterprise editions.
 
 ## How It Works
 
@@ -152,9 +151,10 @@ This is the free **Lite** edition. For team collaboration, RBAC, AC automaton en
 
 Open `http://localhost:9999` and login with your admin password to:
 
-- View interception statistics
-- Manage custom sensitive words
-- Check system health
+- View real-time interception statistics and trend charts
+- Manage custom sensitive words (add, test, delete)
+- Check system health and version information
+- Browse supported entity types
 
 ## API Usage
 
@@ -185,8 +185,13 @@ ai-privacy-gateway/
 ├── stream_buffer.py       # Streaming buffer
 ├── gateway_core.py        # Proxy core
 ├── database.py            # SQLite storage
-├── main.py                # FastAPI entry
-├── static/                # Admin dashboard
+├── main.py                # FastAPI entry point
+├── routers/               # Route modules
+│   ├── proxy.py           # Core proxy routes
+│   ├── api.py             # Mask/restore API
+│   ├── admin.py           # Admin dashboard
+│   └── auth.py            # Auth status
+├── static/                # Admin dashboard UI
 ├── tests/                 # Test cases
 └── website-astro/         # Website (Astro)
 ```

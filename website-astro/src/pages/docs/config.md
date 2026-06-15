@@ -9,7 +9,7 @@ canonicalURL: https://privacygw.pages.dev/docs/config
 
 完整环境变量说明。
 
-## 环境变量
+## 基础环境变量
 
 | 变量 | 默认值 | 说明 |
 |------|--------|------|

@@ -13,7 +13,6 @@ cryptography>=43.0
 # 可选依赖
 # jieba — NER 引擎分词支持
 # onnxruntime — NER 模型推理
-# redis — 缓存加速（可选）
-redis>=5.0
+# redis>=5.0  # Pro/Enterprise 缓存加速
 # pystray — Windows 托盘图标
 # Pillow — 托盘图标生成

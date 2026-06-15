@@ -5,8 +5,8 @@ import Footer from '../components/Footer.astro';
 ---
 
 <Layout
-  title="定价 — AI Privacy Gateway | Lite 免费 · Pro ¥99/月 · Enterprise 定制"
-  description="AI Privacy Gateway 提供三个版本：Lite 个人免费版（开源）、Pro 团队版 ¥99/月（20 人）、Enterprise 企业版（定制年费）。选择适合你的版本。"
+  title="AI Privacy Gateway — 永久免费开源"
+  description="AI Privacy Gateway 基于 MIT 许可证永久免费开源。个人和商业项目均可自由使用。"
   canonicalURL="https://privacygw.pages.dev/pricing">
   <Nav />
 
@@ -15,152 +15,51 @@ import Footer from '../components/Footer.astro';
     <div class="container hero-content">
       <div class="hero-badge">
         <span class="badge-dot"></span>
-        <span>透明定价，无隐藏费用</span>
+        <span>永久免费 · MIT 开源</span>
       </div>
       <h1 class="hero-title">
-        选择适合你的
-        <span class="gradient-text">版本</span>
+        完全<span class="gradient-text">免费</span>
       </h1>
       <p class="hero-description">
-        从个人开发者到大型企业，每个版本都为不同规模精心设计。<br/>
-        Lite 版永久免费开源，Pro 版 7 天无理由退款。
+        AI Privacy Gateway 基于 MIT 许可证开源，永久免费。<br/>
+        个人和商业项目均可自由使用，无需激活。
       </p>
+      <div class="hero-actions">
+        <a href="/download" class="btn btn-primary">立即下载</a>
+        <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-ghost">GitHub</a>
+      </div>
     </div>
   </section>
 
-  <!-- Pricing Cards -->
-  <section class="pricing-section">
-    <div class="container pricing-grid">
-      <!-- Lite -->
-      <div class="pricing-card glass">
-        <div class="tier-label">免费版</div>
-        <h2>Lite</h2>
-        <div class="pricing-price">
-          <span class="price">免费</span>
+  <!-- Features included -->
+  <section class="features-section">
+    <div class="container">
+      <h2 class="section-title">Lite 版包含全部核心功能</h2>
+      <div class="feature-grid">
+        <div class="feature-card glass">
+          <h3>智能脱敏引擎</h3>
+          <p>正则 + NER 双引擎，14 类敏感实体自动识别</p>
         </div>
-        <p class="pricing-desc">个人开发者永久免费</p>
-        <ul class="pricing-features">
-          <li class="feature-item">
-            <span class="check">✓</span>
-            <span>正则脱敏（手机号/邮箱/身份证/银行卡）</span>
-          </li>
-          <li class="feature-item">
-            <span class="check">✓</span>
-            <span>流式代理 + 缓冲区管理</span>
-          </li>
-          <li class="feature-item">
-            <span class="check">✓</span>
-            <span>自定义敏感词</span>
-          </li>
-          <li class="feature-item">
-            <span class="check">✓</span>
-            <span>基础管理后台</span>
-          </li>
-          <li class="feature-item disabled">
-            <span class="cross">✗</span>
-            <span>多人并发支持</span>
-          </li>
-          <li class="feature-item disabled">
-            <span class="cross">✗</span>
-            <span>团队看板</span>
-          </li>
-          <li class="feature-item disabled">
-            <span class="cross">✗</span>
-            <span>云端规则自动更新</span>
-          </li>
-        </ul>
-        <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-outline btn-block">GitHub 下载</a>
-      </div>
-
-      <!-- Pro -->
-      <div class="pricing-card popular" id="pro-card">
-        <div class="popular-badge">最受欢迎</div>
-        <div class="tier-label">团队版</div>
-        <h2>Pro</h2>
-        <div class="pricing-price">
-          <span class="price">$99</span>
-          <span class="period">/年</span>
+        <div class="feature-card glass">
+          <h3>流式 SSE 代理</h3>
+          <p>完美代理流式响应，实时脱敏/还原，零延迟感知</p>
         </div>
-        <p class="pricing-desc">适合 20 人以下团队</p>
-        <ul class="pricing-features">
-          <li class="feature-item">
-            <span class="check">✓</span>
-            <span>全部 Lite 功能</span>
-          </li>
-          <li class="feature-item">
-            <span class="check">✓</span>
-            <span>多人并发（20 人）</span>
-          </li>
-          <li class="feature-item">
-            <span class="check">✓</span>
-            <span>SQLite WAL 模式</span>
-          </li>
-          <li class="feature-item">
-            <span class="check">✓</span>
-            <span>团队看板 + 会话查询</span>
-          </li>
-          <li class="feature-item">
-            <span class="check">✓</span>
-            <span>云端规则自动更新</span>
-          </li>
-          <li class="feature-item">
-            <span class="check">✓</span>
-            <span>日/周/月统计报告</span>
-          </li>
-          <li class="feature-item">
-            <span class="check">✓</span>
-            <span>邮件技术支持</span>
-          </li>
-        </ul>
-        <button class="btn btn-primary btn-block btn-pay" data-tier="pro" id="btn-pro">
-          <span class="btn-pay-icon">$</span>
-          立即购买
-        </button>
-      </div>
-
-      <!-- Enterprise -->
-      <div class="pricing-card glass" id="enterprise-card">
-        <div class="tier-label">企业版</div>
-        <h2>Enterprise</h2>
-        <div class="pricing-price">
-          <span class="price">$999</span>
-          <span class="period">/年</span>
+        <div class="feature-card glass">
+          <h3>本地加密存储</h3>
+          <p>SQLite 本地存储，映射数据永不离开你的机器</p>
         </div>
-        <p class="pricing-desc">适合大型企业部署</p>
-        <ul class="pricing-features">
-          <li class="feature-item">
-            <span class="check">✓</span>
-            <span>全部 Pro 功能</span>
-          </li>
-          <li class="feature-item">
-            <span class="check">✓</span>
-            <span>100+ 人高并发</span>
-          </li>
-          <li class="feature-item">
-            <span class="check">✓</span>
-            <span>Redis 集群存储</span>
-          </li>
-          <li class="feature-item">
-            <span class="check">✓</span>
-            <span>AC 自动机（万级词库）</span>
-          </li>
-          <li class="feature-item">
-            <span class="check">✓</span>
-            <span>审计日志 + 告警通知</span>
-          </li>
-          <li class="feature-item">
-            <span class="check">✓</span>
-            <span>权限控制 (RBAC)</span>
-          </li>
-          <li class="feature-item">
-            <span class="check">✓</span>
-            <span>驻场支持 + SLA 保障</span>
-          </li>
-        </ul>
-        <button class="btn btn-primary btn-block btn-pay" data-tier="enterprise" id="btn-enterprise">
-          <span class="btn-pay-icon">$</span>
-          立即购买
-        </button>
+        <div class="feature-card glass">
+          <h3>自定义敏感词</h3>
+          <p>支持正则 + 关键词自定义脱敏规则</p>
+        </div>
+        <div class="feature-card glass">
+          <h3>管理后台</h3>
+          <p>实时统计面板，查看脱敏次数、实体分布、映射记录</p>
+        </div>
+        <div class="feature-card glass">
+          <h3>全平台覆盖</h3>
+          <p>Docker / Windows / macOS / pip / 浏览器扩展</p>
+        </div>
       </div>
     </div>
   </section>
@@ -171,203 +70,29 @@ import Footer from '../components/Footer.astro';
       <h2 class="section-title">常见问题</h2>
       <div class="faq-grid">
         <div class="faq-card glass">
-          <h3>如何获取 Pro 或 Enterprise 版？</h3>
-          <p>点击对应版本的"立即购买"按钮，输入邮箱后通过 PayPal 在线支付。支付成功后 License Key 自动发送到您的邮箱，下载 Pro 版后激活即可使用。</p>
+          <h3>Lite 版真的完全免费吗？</h3>
+          <p>是的，基于 MIT 许可证开源，永久免费。没有隐藏费用，不需要激活。</p>
         </div>
         <div class="faq-card glass">
-          <h3>支持退款吗？</h3>
-          <p>支持 7 天无理由退款。如有问题请通过 Telegram 或 QQ 联系我们。</p>
+          <h3>可以商用吗？</h3>
+          <p>可以。MIT 许可证允许自由用于个人和商业项目，包括闭源商业产品。</p>
         </div>
         <div class="faq-card glass">
-          <h3>Lite 版可以商用吗？</h3>
-          <p>Lite 版基于 MIT 许可证，可自由用于个人和商业项目。如需团队协作和高级功能，请考虑 Pro 版。</p>
+          <h3>数据安全吗？</h3>
+          <p>所有数据存储在本地 SQLite 数据库中，不会上传到任何第三方服务器。网关运行在你自己的机器上，完全由你掌控。</p>
         </div>
         <div class="faq-card glass">
-          <h3>如何升级到 Enterprise 版？</h3>
-          <p>点击 Enterprise 版"立即购买"按钮，在线完成 PayPal 支付后 License Key 将自动发送到您的邮箱。如需定制方案也可联系 <a href="https://t.me/chirstmas_7">Telegram @chirstmas_7</a>。</p>
+          <h3>如何获取支持？</h3>
+          <p>通过 <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/issues">GitHub Issues</a> 提交问题，或查阅 <a href="/docs">文档</a>。</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Email Modal -->
-  <div class="modal-overlay" id="email-modal">
-    <div class="modal glass">
-      <h3>输入邮箱接收 License</h3>
-      <p class="modal-desc">支付完成后 License Key 将发送到此邮箱</p>
-      <input type="email" id="email-input" class="modal-input" placeholder="your@email.com" required />
-      <span class="modal-error" id="email-error"></span>
-      <div class="modal-actions">
-        <button class="btn btn-secondary" onclick="closeEmailModal()">取消</button>
-        <button class="btn btn-primary" id="btn-confirm-email">确认并支付</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Result Modal -->
-  <div class="modal-overlay" id="result-modal">
-    <div class="modal glass">
-      <h3 id="result-title">支付成功</h3>
-      <div id="result-body"></div>
-      <div class="modal-actions">
-        <button class="btn btn-primary" onclick="closeResultModal()">确定</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- PayPal container (hidden, SDK renders here) -->
-  <div id="paypal-button-container" style="display:none;"></div>
-
   <Footer />
-
-  <script>
-    // Pass build-time env to inline script
-    window.__PAYMENT_API_BASE__ = import.meta.env.PUBLIC_API_BASE || '';
-  </script>
-
-  <script is:inline>
-    var API_BASE = window.__PAYMENT_API_BASE__;
-    let paypalLoaded = false;
-    let currentTier = '';
-    let currentEmail = '';
-    let paypalButtonsRendered = false;
-
-    function $(id) { return document.getElementById(id); }
-
-    // --- Email Modal ---
-    function showEmailModal(tier) {
-      currentTier = tier;
-      $('email-input').value = '';
-      $('email-error').textContent = '';
-      $('email-modal').classList.add('active');
-    }
-
-    function closeEmailModal() {
-      $('email-modal').classList.remove('active');
-    }
-
-    // --- Result Modal ---
-    function showResult(title, bodyHtml) {
-      $('result-title').textContent = title;
-      $('result-body').innerHTML = bodyHtml;
-      $('result-modal').classList.add('active');
-    }
-
-    function closeResultModal() {
-      $('result-modal').classList.remove('active');
-    }
-
-    // --- Load PayPal SDK ---
-    async function loadPayPalSDK() {
-      if (paypalLoaded) return;
-      try {
-        const resp = await fetch(`${API_BASE}/api/payment/paypal-config`);
-        const config = await resp.json();
-        const script = document.createElement('script');
-        script.src = `https://www.paypal.com/sdk/js?client-id=${config.client_id}&currency=USD`;
-        $('paypal-button-container').appendChild(script);
-        await new Promise((resolve) => { script.onload = resolve; });
-        paypalLoaded = true;
-      } catch (e) {
-        console.error('Failed to load PayPal SDK:', e);
-        showResult('加载失败', '<p>无法连接支付服务，请稍后重试。</p>');
-      }
-    }
-
-    // --- Render PayPal Buttons ---
-    function renderPayPalButtons() {
-      if (paypalButtonsRendered) return;
-      paypalButtonsRendered = true;
-
-      paypal.Buttons({
-        createOrder: async () => {
-          const resp = await fetch(`${API_BASE}/api/payment/create-order`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tier: currentTier, email: currentEmail })
-          });
-          const data = await resp.json();
-          if (!resp.ok) throw new Error('创建订单失败');
-          return data.id;
-        },
-        onApprove: async (data) => {
-          $('paypal-button-container').style.display = 'none';
-          showResult('支付处理中...', '<div class="spinner"></div><p>正在生成 License，请稍候...</p>');
-
-          try {
-            const resp = await fetch(`${API_BASE}/api/payment/capture-order`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                order_id: data.orderID,
-                email: currentEmail,
-                tier: currentTier
-              })
-            });
-            const result = await resp.json();
-
-            if (result.status === 'completed') {
-              showResult('支付成功!',
-                `<div class="license-box">
-                  <p>您的 License Key:</p>
-                  <code class="license-key">${result.license_key}</code>
-                  <p class="license-info">版本: ${result.tier_name}</p>
-                  <p class="license-info">团队 ID: ${result.team_id}</p>
-                  <p class="license-info">有效期至: ${result.expires_at}</p>
-                  <p class="license-info">License 已发送至 ${currentEmail}</p>
-                </div>`
-              );
-            } else {
-              showResult('支付异常', '<p>支付验证失败，请联系客服。</p>');
-            }
-          } catch (e) {
-            console.error('Payment complete error:', e);
-            showResult('处理失败', '<p>支付确认失败，请联系客服并提供您的 PayPal 订单号。</p>');
-          }
-        },
-        onCancel: () => {
-          showResult('支付取消', '<p>您取消了支付。如需购买，可随时重试。</p>');
-        },
-        onError: (err) => {
-          console.error('PayPal error:', err);
-          showResult('支付错误', '<p>支付过程中发生错误，请稍后重试。</p>');
-        }
-      }).render('#paypal-button-container');
-    }
-
-    // --- Purchase Flow ---
-    $('btn-confirm-email').addEventListener('click', async () => {
-      const email = $('email-input').value.trim();
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        $('email-error').textContent = '请输入有效的邮箱地址';
-        return;
-      }
-      currentEmail = email;
-      closeEmailModal();
-
-      $('paypal-button-container').style.display = 'block';
-      await loadPayPalSDK();
-      renderPayPalButtons();
-      // Scroll to the PayPal button
-      $('paypal-button-container').scrollIntoView({ behavior: 'smooth' });
-    });
-
-    // Wire up buy buttons
-    document.querySelectorAll('.btn-pay').forEach(btn => {
-      btn.addEventListener('click', () => {
-        showEmailModal(btn.dataset.tier);
-      });
-    });
-
-    // Enter key in email input
-    $('email-input').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') $('btn-confirm-email').click();
-    });
-  </script>
 </Layout>
 
 <style>
-  /* Hero */
   .hero {
     padding: 10rem 0 4rem;
     position: relative;
@@ -423,175 +148,40 @@ import Footer from '../components/Footer.astro';
     color: var(--text-secondary);
     line-height: 1.8;
     max-width: 560px;
-    margin: 0 auto;
+    margin: 0 auto 2rem;
   }
 
-  /* Pricing */
-  .pricing-section {
-    padding: 4rem 0 6rem;
-  }
-
-  .pricing-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
-    max-width: 1200px;
-  }
-
-  .pricing-card {
-    padding: 2.5rem;
-    position: relative;
+  .hero-actions {
     display: flex;
-    flex-direction: column;
-  }
-
-  .pricing-card.popular {
-    border-color: var(--primary);
-    box-shadow: 0 0 60px var(--primary-glow);
-    transform: scale(1.03);
-    background: rgba(134, 239, 172, 0.03);
-    backdrop-filter: blur(24px);
-    z-index: 1;
-  }
-
-  .popular-badge {
-    position: absolute;
-    top: -14px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: linear-gradient(135deg, var(--primary-dim), var(--primary));
-    color: var(--bg-deep);
-    padding: 0.35rem 1.25rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    white-space: nowrap;
-  }
-
-  .tier-label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-muted);
-    margin-bottom: 0.5rem;
-  }
-
-  .pricing-card h2 {
-    font-size: 1.75rem;
-    margin-bottom: 1.25rem;
-  }
-
-  .pricing-price {
-    margin-bottom: 0.5rem;
-  }
-
-  .pricing-price .price {
-    font-size: 3rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, var(--primary), var(--accent));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .pricing-price .period {
-    font-size: 1rem;
-    color: var(--text-muted);
-    margin-left: 0.25rem;
-  }
-
-  .pricing-desc {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .pricing-features {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 2rem;
-    flex: 1;
-  }
-
-  .feature-item {
-    display: flex;
-    align-items: center;
-    padding: 0.65rem 0;
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    gap: 0.75rem;
-  }
-
-  .feature-item.disabled {
-    opacity: 0.4;
-    text-decoration: line-through;
-  }
-
-  .check {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
+    gap: 1rem;
     justify-content: center;
-    font-size: 0.65rem;
-    font-weight: 700;
-    background: rgba(134, 239, 172, 0.12);
-    color: var(--primary);
-    flex-shrink: 0;
   }
 
-  .cross {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.65rem;
-    font-weight: 700;
-    background: rgba(248, 113, 113, 0.1);
-    color: var(--danger);
-    flex-shrink: 0;
-  }
-
-  .btn-outline {
+  .btn-ghost {
     background: transparent;
-    color: var(--text-primary);
+    color: var(--text-secondary);
     border: 1px solid var(--border);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
     padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
   }
 
-  .btn-outline:hover {
+  .btn-ghost:hover {
     border-color: var(--primary);
     color: var(--primary);
+    background: rgba(134, 239, 172, 0.05);
   }
 
-  .btn-block {
-    width: 100%;
-  }
-
-  .contact-info {
-    display: flex;
-    justify-content: center;
-    gap: 1.5rem;
-    padding: 0.75rem 0;
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-  }
-
-  .contact-info a {
-    color: var(--primary);
-  }
-
-  .contact-info a:hover {
-    opacity: 0.8;
-  }
-
-  /* FAQ */
-  .faq-section {
-    padding: 6rem 0;
+  .features-section {
+    padding: 4rem 0;
   }
 
   .section-title {
@@ -599,6 +189,33 @@ import Footer from '../components/Footer.astro';
     font-weight: 600;
     text-align: center;
     margin-bottom: 3rem;
+  }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .feature-card {
+    padding: 1.75rem;
+  }
+
+  .feature-card h3 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .feature-card p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  .faq-section {
+    padding: 4rem 0 6rem;
   }
 
   .faq-grid {
@@ -625,142 +242,13 @@ import Footer from '../components/Footer.astro';
     line-height: 1.7;
   }
 
-  /* Payment buttons */
-  .btn-pay {
-    margin-top: auto;
-    font-size: 1rem;
-    font-weight: 600;
-    padding: 0.85rem 1.5rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-  }
-
-  .btn-pay-icon {
-    font-size: 1.1rem;
-    font-weight: 700;
-    opacity: 0.8;
-  }
-
-  .btn-pay:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 32px rgba(134, 239, 172, 0.25);
-  }
-
-  /* Modals */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.6);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(4px);
-  }
-
-  .modal-overlay.active {
-    display: flex;
-  }
-
-  .modal {
-    width: 100%;
-    max-width: 440px;
-    padding: 2rem;
-    margin: 1rem;
-    z-index: 1001;
-  }
-
-  .modal h3 {
-    margin-bottom: 0.5rem;
-    font-size: 1.25rem;
-  }
-
-  .modal-desc {
-    color: var(--text-secondary);
-    font-size: 0.88rem;
-    margin-bottom: 1.25rem;
-  }
-
-  .modal-input {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--bg-deep);
-    color: var(--text-primary);
-    font-size: 0.95rem;
-    outline: none;
-    transition: border-color 0.3s;
-  }
-
-  .modal-input:focus {
-    border-color: var(--primary);
-  }
-
-  .modal-error {
-    display: block;
-    color: var(--danger);
-    font-size: 0.8rem;
-    margin-top: 0.4rem;
-    min-height: 1.2em;
-  }
-
-  .modal-actions {
-    display: flex;
-    gap: 0.75rem;
-    margin-top: 1.25rem;
-  }
-
-  .modal-actions .btn {
-    flex: 1;
-  }
-
-  /* License result */
-  .license-box {
-    text-align: center;
-    padding: 1rem 0;
-  }
-
-  .license-key {
-    display: inline-block;
-    background: var(--bg-deep);
+  .faq-card a {
     color: var(--primary);
-    font-family: 'Fira Code', monospace;
-    font-size: 1.3rem;
-    font-weight: 700;
-    padding: 0.75rem 1.25rem;
-    border-radius: 8px;
-    border: 1px dashed var(--primary);
-    margin: 0.75rem 0;
-    letter-spacing: 0.05em;
-    word-break: break-all;
-  }
-
-  .license-info {
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-    margin: 0.25rem 0;
-  }
-
-  #paypal-button-container {
-    max-width: 400px;
-    margin: 2rem auto;
-  }
-
-  @media (max-width: 1024px) {
-    .pricing-grid { grid-template-columns: repeat(2, 1fr); }
-    .pricing-card.popular { transform: none; }
   }
 
   @media (max-width: 768px) {
     .hero-title { font-size: 2.25rem; }
-    .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
-    .pricing-card.popular { transform: none; }
+    .feature-grid { grid-template-columns: 1fr; max-width: 400px; }
     .faq-grid { grid-template-columns: 1fr; }
-
   }
 </style>

@@ -2,6 +2,8 @@
 
 > 你的 AI 数据正在裸奔。30 秒装上防火墙。
 
+**v1.1.0** — 开源 AI API 隐私网关。在数据离开你机器之前自动脱敏。
+
 高性能反向代理，自动脱敏 AI API 请求/响应中的敏感数据（手机号、身份证、邮箱、银行卡、人名、地名等），支持所有 OpenAI 兼容服务，包括 DeepSeek、Claude、ChatGPT 和 Cursor。
 
 [English](README.md) | [简体中文](README_CN.md)
@@ -101,7 +103,8 @@ server {
 | `TARGET_LLM` | https://api.openai.com | 目标 AI API 地址 |
 | `LISTEN_PORT` | 9999 | 网关监听端口 |
 | `DB_PATH` | ./vault_data/privacy_vault.db | SQLite 数据库路径 |
-| `ADMIN_PASSWORD` | admin123 | 管理后台密码 |
+| `ADMIN_PASSWORD` | （自动生成） | 管理后台密码 |
+| `JWT_SECRET` | （必填） | JWT 签名密钥（64 位十六进制） |
 
 ## 支持的数据类型
 
@@ -121,10 +124,6 @@ server {
 | 金额 | 货币金额 | ¥999.99 |
 | 邮编 | 6位数字 | 100080 |
 | 自定义 | 用户定义 | API密钥、密码 |
-
-## 企业与团队
-
-此为免费 **Lite** 版。如需团队协作、RBAC 权限管理、AC 自动机引擎、审计日志、SSO 单点登录、专属技术支持等高级功能，请访问 **[privacygw.pages.dev](https://privacygw.pages.dev)** 了解 Pro 和 Enterprise 版本。
 
 ## 工作原理
 
@@ -152,9 +151,10 @@ server {
 
 打开 `http://localhost:9999`，用管理员密码登录后可以：
 
-- 查看拦截统计
-- 管理自定义敏感词
-- 检查系统健康状态
+- 查看实时拦截统计与趋势图表
+- 管理自定义敏感词（添加、测试、删除）
+- 检查系统健康与版本信息
+- 浏览支持的实体类型
 
 ## API 使用
 
@@ -186,9 +186,14 @@ ai-privacy-gateway/
 ├── gateway_core.py        # 代理核心
 ├── database.py            # SQLite 存储
 ├── main.py                # FastAPI 入口
+├── routers/               # 路由模块
+│   ├── proxy.py           # 核心代理路由
+│   ├── api.py             # 脱敏/还原 API
+│   ├── admin.py           # 管理后台
+│   └── auth.py            # 认证状态
 ├── static/                # 管理后台前端
-├── tests/                # 测试用例
-└── website-astro/        # 官网 (Astro)
+├── tests/                 # 测试用例
+└── website-astro/         # 官网 (Astro)
 ```
 
 ## 开发

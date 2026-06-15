@@ -21,6 +21,8 @@ GET /health
 
 ## 统计
 
+### 基础统计
+
 ```bash
 GET /admin/stats
 ```
@@ -44,6 +46,8 @@ GET /admin/stats
 }
 ```
 
+
+
 ## 版本信息
 
 ```bash
@@ -52,9 +56,16 @@ GET /admin/version
 
 ```json
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "edition": "lite",
-  "rust_integrity": false
+  "features": {
+    "ac_automaton": false,
+    "sso": false,
+    "rbac": false,
+    "audit_hash_chain": false,
+    "alerts": false,
+    "redis_cache": false
+  }
 }
 ```
 

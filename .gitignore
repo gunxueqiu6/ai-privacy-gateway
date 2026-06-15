@@ -60,6 +60,13 @@ test_imports.py
 bandit_results.json
 pytest_output.txt
 
+# Claude Code 内部文件
+.claude/
+
+# 项目计划文档
+docs/reports/
+docs/*-plan.md
+
 # JS 测试覆盖率
 sdk/js/coverage/
 

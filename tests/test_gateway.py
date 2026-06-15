@@ -391,6 +391,7 @@ class TestDatabase:
                 CREATE TABLE stats (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     date TEXT UNIQUE NOT NULL,
+                    team_id TEXT DEFAULT 'default',
                     phone_count INTEGER DEFAULT 0,
                     email_count INTEGER DEFAULT 0,
                     idcard_count INTEGER DEFAULT 0,

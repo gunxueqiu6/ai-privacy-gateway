@@ -265,7 +265,196 @@ pre, code {
   overflow-x: auto;
 }
 
-/* 动画 */
+/* ===========================================
+   Scroll Progress Bar
+   =========================================== */
+#scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--primary-dim), var(--primary), var(--accent));
+  z-index: 1000;
+  transition: width 0.1s linear;
+  box-shadow: 0 0 8px var(--primary-glow);
+}
+
+/* ===========================================
+   Scroll Reveal Animations
+   =========================================== */
+.reveal {
+  opacity: 0;
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0) translateX(0) !important;
+}
+
+.reveal-up {
+  transform: translateY(40px);
+}
+
+.reveal-left {
+  transform: translateX(-30px);
+}
+
+.reveal-right {
+  transform: translateX(30px);
+}
+
+.reveal-scale {
+  transform: scale(0.92);
+}
+
+.reveal.visible.reveal-scale {
+  transform: scale(1);
+}
+
+/* Stagger delays for child reveals */
+.reveal-stagger > .reveal:nth-child(1) { transition-delay: 0ms; }
+.reveal-stagger > .reveal:nth-child(2) { transition-delay: 100ms; }
+.reveal-stagger > .reveal:nth-child(3) { transition-delay: 200ms; }
+.reveal-stagger > .reveal:nth-child(4) { transition-delay: 300ms; }
+.reveal-stagger > .reveal:nth-child(5) { transition-delay: 400ms; }
+.reveal-stagger > .reveal:nth-child(6) { transition-delay: 500ms; }
+.reveal-stagger > .reveal:nth-child(7) { transition-delay: 600ms; }
+.reveal-stagger > .reveal:nth-child(8) { transition-delay: 700ms; }
+
+/* ===========================================
+   Card Hover Glow Effect
+   =========================================== */
+.glass.glow-hover {
+  transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.5s ease;
+}
+
+.glass.glow-hover:hover {
+  border-color: var(--primary);
+  transform: translateY(-4px);
+  box-shadow: 0 0 30px rgba(134, 239, 172, 0.12), 0 0 60px rgba(134, 239, 172, 0.06);
+}
+
+/* ===========================================
+   Code Block Glow Border
+   =========================================== */
+.code-block-glow {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.code-block-glow:hover {
+  border-color: rgba(134, 239, 172, 0.3);
+  box-shadow: 0 0 20px rgba(134, 239, 172, 0.08), inset 0 0 20px rgba(134, 239, 172, 0.03);
+}
+
+/* ===========================================
+   Hero Code Rain Background
+   =========================================== */
+.hero-code-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  mask-image: radial-gradient(ellipse 80% 50% at 50% 40%, black 30%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 50% at 50% 40%, black 30%, transparent 70%);
+}
+
+.hero-code-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 38px,
+      rgba(134, 239, 172, 0.025) 38px,
+      rgba(134, 239, 172, 0.025) 39px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 20px,
+      rgba(134, 239, 172, 0.02) 20px,
+      rgba(134, 239, 172, 0.02) 21px
+    );
+  animation: grid-scroll 30s linear infinite;
+}
+
+@keyframes grid-scroll {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(38px, 20px); }
+}
+
+/* ===========================================
+   Count-Up Animation
+   =========================================== */
+.stat-value-animated {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.stat-value-animated.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ===========================================
+   Enhanced Orb Animations
+   =========================================== */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-20px) scale(1.05); }
+}
+
+@keyframes float-slower {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-30px) scale(1.08); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.3; filter: blur(100px); }
+  50% { opacity: 0.6; filter: blur(80px); }
+}
+
+.orb-enhanced {
+  animation: float-slow 12s ease-in-out infinite, glow-pulse 8s ease-in-out infinite;
+}
+
+.orb-enhanced-2 {
+  animation: float-slower 16s ease-in-out infinite 2s, glow-pulse 10s ease-in-out infinite 1s;
+}
+
+
+/* ===========================================
+   Bentoo Tall + Wide Card Variants
+   =========================================== */
+.bento-tall {
+  grid-column: span 1;
+  grid-row: span 2;
+}
+
+.bento-wide {
+  grid-column: span 2;
+  grid-row: span 1;
+}
+
+/* Ensure content fills tall cards */
+.bento-tall .bento-card-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* ===========================================
+   Animation: fadeIn (preserved)
+   =========================================== */
 @keyframes fadeIn {
   from {
     opacity: 0;

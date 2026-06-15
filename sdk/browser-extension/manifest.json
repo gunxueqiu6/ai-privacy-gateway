@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AI Privacy Gateway",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "保护您的 AI 对话数据隐私 - 自动脱敏敏感信息",
   "permissions": [
     "storage",
