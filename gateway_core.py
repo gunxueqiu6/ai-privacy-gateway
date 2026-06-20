@@ -145,9 +145,9 @@ class GatewayCore:
         headers: Dict[str, str],
         mappings: Dict[str, str],
         used_placeholders: Optional[Set[str]] = None
-    ) -> AsyncGenerator[str, None]:
+    ) -> AsyncGenerator[Dict[str, str], None]:
         """
-        流式代理转发
+        流式代理转发 — 产出 SSE dict，由 EventSourceResponse 编码。
         """
         target_url = f"{self.target_url}/v1/chat/completions"
 
@@ -170,20 +170,20 @@ class GatewayCore:
                         if line.startswith("data: "):
                             data = line[6:]
                             if data == "[DONE]":
-                                yield "data: [DONE]\n\n"
+                                yield {"data": "[DONE]"}
                                 break
 
                             unmasked_data = self.unmask_response(data, mappings, used_placeholders=used_placeholders)
-                            yield f"data: {unmasked_data}\n\n"
+                            yield {"data": unmasked_data}
                         else:
-                            yield f"{line}\n"
+                            yield {"data": line}
 
             except httpx.TimeoutException:
                 logger.error(f"[流式错误] 请求超时")
-                yield 'data: {"error": "Gateway Timeout"}\n\n'
+                yield {"data": json.dumps({"error": "Gateway Timeout"})}
             except httpx.RequestError as e:
                 logger.error(f"[流式错误] 请求失败: {e}")
-                yield f"data: {json.dumps({'error': 'Upstream service unavailable'})}\n\n"
+                yield {"data": json.dumps({"error": "Upstream service unavailable"})}
 
     async def proxy_generic_request(
         self,
