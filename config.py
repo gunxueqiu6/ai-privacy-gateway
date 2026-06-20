@@ -1,6 +1,7 @@
 """
-配置模块 - 环境变量管理
+配置模块 - 环境变量管理 + 密钥持久化。
 """
+import json
 import logging
 import secrets
 import os
@@ -8,6 +9,8 @@ from pathlib import Path
 from typing import Optional
 
 import bcrypt
+
+logger = logging.getLogger(__name__)
 
 
 def _load_dotenv() -> None:
@@ -27,6 +30,34 @@ def _load_dotenv() -> None:
                 value = value[1:-1]
             if key not in os.environ:
                 os.environ[key] = value
+
+
+def _secrets_file() -> Path:
+    """Path to the persisted secrets file (alongside the database)."""
+    vault_dir = os.environ.get("VAULT_DIR", "./vault_data")
+    return Path(vault_dir) / ".secrets.json"
+
+
+def _load_persisted_secrets() -> dict:
+    """Load secrets from disk. Returns empty dict if none saved."""
+    sf = _secrets_file()
+    if sf.exists():
+        try:
+            with sf.open(encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            logger.warning("Failed to read persisted secrets, will regenerate")
+    return {}
+
+
+def _save_persisted_secrets(secrets_dict: dict) -> None:
+    """Save secrets to disk atomically."""
+    sf = _secrets_file()
+    sf.parent.mkdir(parents=True, exist_ok=True)
+    tmp = sf.with_suffix(".tmp")
+    with tmp.open("w", encoding="utf-8") as f:
+        json.dump(secrets_dict, f)
+    tmp.replace(sf)
 
 
 _load_dotenv()
@@ -63,31 +94,45 @@ class Config:
     tier: str = "lite"
 
     def __init__(self) -> None:
-        """Initialize config and auto-generate required secrets."""
+        """Initialize config — prefer env vars, then persisted secrets, then auto-generate."""
+        persisted = _load_persisted_secrets()
+
+        # JWT secret
         if not self.JWT_SECRET:
-            self.JWT_SECRET = secrets.token_hex(32)
-            logging.getLogger(__name__).warning(
-                "JWT_SECRET not set — auto-generated random key"
-            )
+            if persisted.get("jwt_secret"):
+                self.JWT_SECRET = persisted["jwt_secret"]
+            else:
+                self.JWT_SECRET = secrets.token_hex(32)
+                persisted["jwt_secret"] = self.JWT_SECRET
+                logger.warning("JWT_SECRET not set — auto-generated and persisted")
 
+        # Vault encryption key
         if not self.VAULT_ENCRYPT_KEY:
-            logging.getLogger(__name__).warning(
-                "VAULT_ENCRYPT_KEY not set — vault encryption is disabled"
-            )
+            if persisted.get("vault_encrypt_key"):
+                self.VAULT_ENCRYPT_KEY = persisted["vault_encrypt_key"]
+        if not self.VAULT_ENCRYPT_KEY:
+            logger.warning("VAULT_ENCRYPT_KEY not set — vault encryption is disabled")
 
+        # Admin password
         if not self.ADMIN_PASSWORD_HASH and self.ADMIN_PASSWORD:
-            # 如果没有哈希但有明文密码，自动生成哈希
             salt = bcrypt.gensalt()
             self.ADMIN_PASSWORD_HASH = bcrypt.hashpw(self.ADMIN_PASSWORD.encode(), salt).decode()
 
         if not self.ADMIN_PASSWORD_HASH:
-            random_pw = secrets.token_urlsafe(12)
-            self.ADMIN_PASSWORD = random_pw
-            salt = bcrypt.gensalt()
-            self.ADMIN_PASSWORD_HASH = bcrypt.hashpw(random_pw.encode(), salt).decode()
-            logging.getLogger(__name__).warning(
-                "ADMIN_PASSWORD not set — auto-generated: %s", random_pw
-            )
+            if persisted.get("admin_password_hash"):
+                self.ADMIN_PASSWORD_HASH = persisted["admin_password_hash"]
+                self.ADMIN_PASSWORD = persisted.get("admin_password", "")
+            else:
+                random_pw = secrets.token_urlsafe(12)
+                self.ADMIN_PASSWORD = random_pw
+                salt = bcrypt.gensalt()
+                self.ADMIN_PASSWORD_HASH = bcrypt.hashpw(random_pw.encode(), salt).decode()
+                persisted["admin_password_hash"] = self.ADMIN_PASSWORD_HASH
+                persisted["admin_password"] = random_pw
+                logger.warning("ADMIN_PASSWORD not set — auto-generated: %s", random_pw)
+
+        # Persist any new secrets
+        _save_persisted_secrets(persisted)
 
 # 全局配置实例
 config = Config()
