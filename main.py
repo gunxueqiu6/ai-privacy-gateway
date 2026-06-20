@@ -3,6 +3,8 @@ AI隐私网关 - FastAPI 入口 + 路由注册 + 管理后台
 """
 import asyncio
 import logging
+import os
+import sys
 from contextlib import asynccontextmanager
 from datetime import datetime
 
@@ -17,6 +19,12 @@ from config import config
 from database import db
 from routers import register_routers
 from routers.dependencies import limiter
+
+# PyInstaller bundle: resolve paths relative to the extracted bundle or CWD
+if getattr(sys, 'frozen', False):
+    _app_dir = sys._MEIPASS
+else:
+    _app_dir = os.path.dirname(os.path.abspath(__file__))
 
 # 配置日志
 logging.basicConfig(
@@ -58,7 +66,7 @@ app = FastAPI(
 )
 
 # 挂载静态文件 - 管理面板
-app.mount("/admin/static", StaticFiles(directory="static"), name="admin_static")
+app.mount("/admin/static", StaticFiles(directory=os.path.join(_app_dir, "static")), name="admin_static")
 
 # 速率限制
 app.state.limiter = limiter

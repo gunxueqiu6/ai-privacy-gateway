@@ -5,6 +5,7 @@ import json
 import logging
 import secrets
 import os
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -15,7 +16,12 @@ logger = logging.getLogger(__name__)
 
 def _load_dotenv() -> None:
     """Load .env file into os.environ if it exists (no extra dependency)."""
-    env_path = Path(__file__).resolve().parent / ".env"
+    # When frozen by PyInstaller, .env lives next to the exe (CWD).
+    # When running from source, .env lives in the project root.
+    if getattr(sys, 'frozen', False):
+        env_path = Path.cwd() / ".env"
+    else:
+        env_path = Path(__file__).resolve().parent / ".env"
     if not env_path.exists():
         return
     with env_path.open(encoding="utf-8") as f:
