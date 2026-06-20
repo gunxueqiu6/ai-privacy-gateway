@@ -18,9 +18,10 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 复制源码
-COPY config.py mask_engine.py stream_buffer.py gateway_core.py database.py main.py ./
+COPY config.py mask_engine.py ner_engine.py stream_buffer.py gateway_core.py database.py main.py ./
 
-# 复制静态文件
+# 复制路由模块和静态文件
+COPY routers ./routers
 COPY static ./static
 
 # ============================================================
@@ -41,6 +42,7 @@ COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/pytho
 COPY --from=builder /usr/local/bin /usr/local/bin
 COPY --from=builder /app/*.py ./
 COPY --from=builder /app/static ./static
+COPY --from=builder /app/routers ./routers
 
 # 创建数据目录
 RUN mkdir -p /app/vault_data

@@ -4,7 +4,12 @@
       <span class="brand-icon">🔒</span>
       <span class="brand-text">Privacy Gateway</span>
     </div>
-    <div class="nav-links">
+    <button class="hamburger" id="hamburger-btn" aria-label="菜单" aria-expanded="false">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <div class="nav-links" id="nav-links">
       <a href="/#features" class="nav-link">功能</a>
       <a href="/#how-it-works" class="nav-link">原理</a>
       <a href="/docs" class="nav-link">文档</a>
@@ -57,8 +62,15 @@
     transition: color 0.3s ease;
   }
 
-  .nav-link:hover {
-    color: var(--primary);
+  @media (hover: hover) {
+    .nav-link:hover {
+      color: var(--primary);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
   }
 
   .btn-secondary {
@@ -74,8 +86,97 @@
     transition: all 0.3s ease;
   }
 
-  .btn-secondary:hover {
-    border-color: var(--primary);
-    color: var(--primary);
+  /* ===========================================
+     Hamburger Menu
+     =========================================== */
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px;
+    z-index: 200;
+  }
+
+  .hamburger span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--text-primary);
+    border-radius: 2px;
+    transition: all 0.3s ease;
+  }
+
+  .hamburger.active span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+  }
+
+  .hamburger.active span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .hamburger.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+  }
+
+  @media (max-width: 768px) {
+    .hamburger {
+      display: flex;
+    }
+
+    .nav-links {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(6, 6, 12, 0.97);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 2.5rem;
+      z-index: 199;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+    }
+
+    .nav-links.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .nav-links .nav-link {
+      font-size: 1.25rem;
+    }
+
+    .nav-links .btn-secondary {
+      font-size: 1.125rem;
+      padding: 0.75rem 2rem;
+    }
+
+    .nav-container {
+      position: relative;
+      z-index: 200;
+    }
   }
 </style>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('hamburger-btn');
+    var navLinks = document.getElementById('nav-links');
+    if (btn && navLinks) {
+      btn.addEventListener('click', function() {
+        var isOpen = navLinks.classList.toggle('active');
+        btn.classList.toggle('active');
+        btn.setAttribute('aria-expanded', isOpen);
+        document.body.style.overflow = isOpen ? 'hidden' : '';
+      });
+    }
+  });
+</script>

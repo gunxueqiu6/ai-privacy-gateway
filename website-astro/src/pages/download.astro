@@ -21,8 +21,8 @@ import Footer from '../components/Footer.astro';
         下载 <span class="gradient-text">Privacy Gateway</span>
       </h1>
       <p class="hero-description">
-        选择适合你平台的版本。Docker 一键部署，Windows/macOS 便携版双击即用。<br/>
-        MIT 许可证开源免费，下载即用。
+        一条命令部署，双击即用。无需配置，自动生成密钥。<br/>
+        MIT 许可证开源免费。
       </p>
     </div>
   </section>
@@ -33,25 +33,18 @@ import Footer from '../components/Footer.astro';
       <div class="download-grid">
         <div class="download-card glass">
           <div class="download-icon-wrap">
-            <span class="download-icon">&#9635;</span>
-          </div>
-          <h2>Docker</h2>
-          <p>一键部署，适合服务器环境</p>
-          <div class="code-block">
-            <pre><code>docker run -d --name ai-privacy-gw -p 9999:9999 -v ./vault_data:/app/vault_data -e TARGET_LLM=https://api.openai.com ghcr.io/gunxueqiu6/ai-privacy-gateway:lite</code></pre>
-          </div>
-          <p style="text-align:center;font-size:0.8rem;color:var(--text-muted);margin-bottom:1rem;">或 docker-compose up -d</p>
-          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway#docker" class="btn btn-outline btn-block">查看文档</a>
-        </div>
-
-        <div class="download-card glass">
-          <div class="download-icon-wrap">
             <span class="download-icon">⊞</span>
           </div>
           <h2>Windows</h2>
-          <p>便携版 .exe，双击运行</p>
-          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/releases/download/v1.1.0/PrivacyGateway.exe" class="btn btn-primary btn-block">
-            下载 v1.1.0
+          <p>下载源码 → 双击 start.bat → 完成</p>
+          <div class="code-block">
+            <pre><code>git clone https://github.com/gunxueqiu6/ai-privacy-gateway
+cd ai-privacy-gateway
+start.bat</code></pre>
+          </div>
+          <p class="download-hint">也支持下载 ZIP 后解压，双击 <code>start.bat</code></p>
+          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/archive/refs/heads/master.zip" class="btn btn-primary btn-block">
+            下载 ZIP
           </a>
         </div>
 
@@ -59,22 +52,43 @@ import Footer from '../components/Footer.astro';
           <div class="download-icon-wrap">
             <span class="download-icon">&#8984;</span>
           </div>
-          <h2>macOS</h2>
-          <p>便携版，直接运行</p>
-          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/releases/download/v1.1.0/PrivacyGateway" class="btn btn-primary btn-block">
-            下载 v1.1.0
+          <h2>macOS / Linux</h2>
+          <p>下载源码 → 运行 start.sh → 完成</p>
+          <div class="code-block">
+            <pre><code>git clone https://github.com/gunxueqiu6/ai-privacy-gateway
+cd ai-privacy-gateway
+bash start.sh</code></pre>
+          </div>
+          <p class="download-hint">也可 <code>chmod +x start.sh && ./start.sh</code></p>
+          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/archive/refs/heads/master.zip" class="btn btn-primary btn-block">
+            下载 ZIP
           </a>
+        </div>
+
+        <div class="download-card glass">
+          <div class="download-icon-wrap">
+            <span class="download-icon">&#9635;</span>
+          </div>
+          <h2>Docker</h2>
+          <p>服务器部署，一条命令</p>
+          <div class="code-block">
+            <pre><code>docker run -d --name ai-privacy-gw -p 9999:9999 -v ./vault_data:/app/vault_data ghcr.io/gunxueqiu6/ai-privacy-gateway:lite</code></pre>
+          </div>
+          <p class="download-hint">也支持 docker-compose up -d</p>
+          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway#docker" class="btn btn-outline btn-block">查看文档</a>
         </div>
 
         <div class="download-card glass">
           <div class="download-icon-wrap">
             <span class="download-icon">&lt;/&gt;</span>
           </div>
-          <h2>源代码</h2>
-          <p>开源免费，欢迎贡献</p>
+          <h2>pip 安装</h2>
+          <p>Python 开发者，一条 pip 命令</p>
           <div class="code-block">
-            <pre><code>git clone https://github.com/gunxueqiu6/ai-privacy-gateway</code></pre>
+            <pre><code>pip install -r requirements.txt
+python start.py --auto</code></pre>
           </div>
+          <p class="download-hint">需要 Python 3.8+</p>
           <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-outline btn-block">GitHub</a>
         </div>
 
@@ -83,14 +97,13 @@ import Footer from '../components/Footer.astro';
             <span class="download-icon">&#127760;</span>
           </div>
           <h2>浏览器扩展</h2>
-          <p>Chrome / Edge 插件，自动脱敏 AI 对话</p>
+          <p>Chrome / Edge 插件</p>
           <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/releases/download/v1.1.0/ai-privacy-gateway-extension-v1.1.0.zip" class="btn btn-primary btn-block">
             下载 v1.1.0
           </a>
-          <p style="margin-top:0.5rem;font-size:0.8rem;color:var(--text-muted);line-height:1.5;">
-            下载后解压 → Chrome 打开 <code>chrome://extensions</code> → 开启"开发者模式" → "加载已解压的扩展"
+          <p class="download-hint" style="margin-top:0.5rem;">
+            解压 → Chrome 打开 <code>chrome://extensions</code> → 开发者模式 → 加载已解压
           </p>
-          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/tree/master/sdk/browser-extension" class="btn btn-outline btn-block" style="margin-top:0.5rem;">查看源码</a>
         </div>
       </div>
 
@@ -172,6 +185,8 @@ import Footer from '../components/Footer.astro';
   .download-icon { font-size: 1.5rem; color: var(--primary); font-weight: 700; }
   .download-card h2 { margin-bottom: 0.5rem; }
   .download-card p { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem; }
+  .download-hint { font-size: 0.8rem; color: var(--text-tertiary, #888); margin-top: 0.5rem; }
+  .download-hint code { background: var(--bg-deep); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.75rem; color: var(--primary); font-family: 'Fira Code', monospace; }
 
   .code-block {
     background: var(--bg-deep); border: 1px solid var(--border);
@@ -184,7 +199,9 @@ import Footer from '../components/Footer.astro';
     background: transparent; color: var(--text-primary);
     border: 1px solid var(--border); padding: 0.75rem 1.5rem;
   }
-  .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+  @media (hover: hover) {
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+  }
   .btn-block { width: 100%; }
 
   .quick-start { padding: 2.5rem; margin-bottom: 3rem; text-align: center; }
@@ -212,19 +229,32 @@ import Footer from '../components/Footer.astro';
   }
   .step-connector svg { width: 20px; height: 20px; }
 
-  .release-notes { padding: 2rem; }
-  .release-notes h3 { margin-bottom: 1rem; color: var(--primary); }
-  .release-notes ul {
-    list-style: none; padding: 0;
-    display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;
+  @media (max-width: 1024px) {
+    .download-section { max-width: 100%; padding: 3rem 0 5rem; }
   }
-  .release-notes li { color: var(--text-secondary); font-size: 0.9rem; padding: 0.4rem 0; }
 
-    @media (max-width: 768px) {
+  @media (max-width: 768px) {
     .hero-title { font-size: 2.25rem; }
+    .hero-description { font-size: 1rem; }
     .download-grid { grid-template-columns: 1fr; }
     .steps { flex-direction: column; }
     .step-connector { transform: rotate(90deg); }
-    .release-notes ul { grid-template-columns: 1fr; }
+    .code-block pre { font-size: 0.75rem; }
+    .quick-start { padding: 1.5rem; }
+  }
+
+  @media (max-width: 639px) {
+    .hero { padding: 6rem 0 3rem; }
+    .hero-title { font-size: 2rem; }
+    .download-section { padding: 2rem 0 4rem; }
+    .step { min-width: auto; }
+    .step-connector { transform: rotate(90deg); }
+    .code-block pre { font-size: 0.65rem; }
+    .steps { gap: 1rem; }
+  }
+
+  @media (max-width: 375px) {
+    .hero-title { font-size: 1.75rem; }
+    .download-card { padding: 1.5rem 1rem; }
   }
 </style>

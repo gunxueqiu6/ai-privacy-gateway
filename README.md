@@ -10,6 +10,30 @@ A high-performance reverse proxy that automatically masks sensitive data (phone 
 
 ## Quick Start
 
+### One-Click Start (New users start here)
+
+No manual configuration needed. The script guides you through setup interactively.
+
+```bash
+# Windows: double-click start.bat, or:
+python start.py
+
+# macOS / Linux:
+./start.sh
+# or:
+python3 start.py
+```
+
+What the wizard does:
+- Detects your environment and dependencies
+- Walks you through AI provider selection (OpenAI / DeepSeek / Custom)
+- Generates secure JWT and encryption keys automatically
+- Writes configuration to `.env`
+- Installs dependencies if needed
+- Starts the gateway on `http://localhost:9999`
+
+> Non-interactive mode for CI/CD: `python start.py --non-interactive`
+
 ### Docker (Recommended)
 
 ```bash
@@ -27,9 +51,14 @@ docker run -d \
 docker-compose up -d
 ```
 
-### Python
+### Python (Manual)
 
 ```bash
+# 1. Set up environment variables
+export JWT_SECRET=$(python3 -c "import secrets; print(secrets.token_hex(32))")
+export TARGET_LLM=https://api.openai.com
+
+# 2. Install dependencies & start
 pip install -r requirements.txt
 python main.py
 ```

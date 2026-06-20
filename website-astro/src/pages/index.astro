@@ -231,17 +231,17 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
           <p>实时统计面板，查看脱敏次数、实体分布、映射记录</p>
         </div>
         <div class="bento-card glass glow-hover bento-wide">
-          <div class="bento-card-inner" style="display:flex;flex-direction:row;gap:2rem;align-items:center;">
-            <div style="flex-shrink:0;">
+          <div class="bento-card-inner bento-perf-layout">
+            <div class="bento-perf-icon">
               <div class="bento-icon-large">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="bento-perf-svg">
                   <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
                 </svg>
               </div>
             </div>
-            <div style="flex:1;">
+            <div class="bento-perf-content">
               <h3 class="bento-title-large">性能指标</h3>
-              <p class="bento-desc" style="margin-bottom:0.5rem;">P99 延迟 2ms，单机吞吐 10,000+ QPS，零数据上传至第三方</p>
+              <p class="bento-desc bento-perf-desc">P99 延迟 2ms，单机吞吐 10,000+ QPS，零数据上传至第三方</p>
               <div class="perf-bar-group">
                 <div class="perf-bar-item">
                   <span class="perf-bar-label">正则匹配</span>
@@ -517,10 +517,12 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
     text-decoration: none;
   }
 
-  .btn-ghost:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-    background: rgba(134, 239, 172, 0.05);
+  @media (hover: hover) {
+    .btn-ghost:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: rgba(134, 239, 172, 0.05);
+    }
   }
 
   .hero-stats {
@@ -628,9 +630,11 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
     transition: border-color 0.3s, transform 0.3s;
   }
 
-  .problem-card:hover .problem-icon-wrap {
-    border-color: var(--border-hover);
-    transform: scale(1.05);
+  @media (hover: hover) {
+    .problem-card:hover .problem-icon-wrap {
+      border-color: var(--border-hover);
+      transform: scale(1.05);
+    }
   }
 
   .problem-svg {
@@ -879,6 +883,30 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
     text-align: right;
   }
 
+  .bento-perf-layout {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .bento-perf-icon {
+    flex-shrink: 0;
+  }
+
+  .bento-perf-svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .bento-perf-content {
+    flex: 1;
+  }
+
+  .bento-perf-desc {
+    margin-bottom: 0.5rem;
+  }
+
   /* ===========================================
      How It Works
      =========================================== */
@@ -1084,9 +1112,11 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
     color: var(--text-secondary);
   }
 
-  .btn-ghost-light:hover {
-    color: var(--text-primary);
-    border-color: var(--border-hover);
+  @media (hover: hover) {
+    .btn-ghost-light:hover {
+      color: var(--text-primary);
+      border-color: var(--border-hover);
+    }
   }
 
   /* ===========================================
@@ -1199,111 +1229,157 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
   }
 
   /* ===========================================
-     Responsive
+     Responsive — Comprehensive Breakpoints
      =========================================== */
-  @media (max-width: 1024px) {
-    .hero-content {
-      grid-template-columns: 1fr;
-      gap: 4rem;
-    }
 
-    .hero-title {
-      font-size: 3.5rem;
-    }
-
-    .bento-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    .bento-feature {
-      grid-column: span 2;
-    }
-
-    .bento-tall {
-      grid-row: span 1;
-    }
-
-    .bento-wide {
-      grid-column: span 2;
-    }
-
-    .platforms-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    .steps-container {
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .step-connector {
-      flex: 0 0 48px;
-      flex-direction: column;
-      padding-top: 0;
-    }
-
-    .connector-line {
-      width: 1px;
-      height: 32px;
-      background: linear-gradient(180deg, var(--border), var(--primary-dim), var(--border));
-    }
+  /* 4K and ultra-wide */
+  @media (min-width: 1920px) {
+    .hero-title { font-size: 5.5rem; }
+    .hero { padding: 12rem 0 10rem; }
+    .cta-title { font-size: 4rem; }
+    .section-title { font-size: 3.25rem; }
   }
 
-  @media (max-width: 768px) {
-    .hero {
-      padding: 6rem 0 4rem;
-    }
+  /* Large desktop */
+  @media (min-width: 1440px) and (max-width: 1919px) {
+    .hero-title { font-size: 4.5rem; }
+  }
 
-    .hero-title {
-      font-size: 2.5rem;
-    }
+  /* Standard desktop */
+  @media (min-width: 1280px) and (max-width: 1439px) {
+    .hero-title { font-size: 4rem; }
+    .hero { padding: 8rem 0 6rem; }
+  }
 
-    .section-title {
-      font-size: 2rem;
-    }
+  /* Small laptop */
+  @media (min-width: 1024px) and (max-width: 1279px) {
+    .hero-content { grid-template-columns: 1fr; gap: 3.5rem; }
+    .hero-title { font-size: 3.5rem; }
+    .hero-description { max-width: 100%; }
+    .bento-grid { grid-template-columns: repeat(3, 1fr); }
+    .bento-feature { grid-column: span 3; }
+    .bento-tall { grid-row: span 1; }
+    .bento-wide { grid-column: span 3; }
+    .platforms-grid { grid-template-columns: repeat(2, 1fr); }
+    .steps-container { flex-direction: column; align-items: center; gap: 1rem; }
+    .step-connector { flex: 0 0 48px; flex-direction: column; padding-top: 0; }
+    .connector-line { width: 1px; height: 32px; background: linear-gradient(180deg, var(--border), var(--primary-dim), var(--border)); }
+    .hero-orb { width: 500px; height: 500px; top: -100px; right: -100px; }
+    .hero-orb-secondary { width: 400px; height: 400px; bottom: -100px; left: -100px; }
+  }
 
-    .problem-grid {
-      grid-template-columns: 1fr;
-    }
+  /* Tablet */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .hero { padding: 6rem 0 4rem; }
+    .hero-content { grid-template-columns: 1fr; gap: 3rem; }
+    .hero-title { font-size: 3rem; }
+    .hero-description { max-width: 100%; }
+    .hero-orb { width: 400px; height: 400px; top: -50px; right: -50px; }
+    .hero-orb-secondary { width: 300px; height: 300px; bottom: -50px; left: -50px; }
+    .section-title { font-size: 2.25rem; margin-bottom: 2.5rem; }
+    .problem-grid { grid-template-columns: repeat(2, 1fr); }
+    .bento-grid { grid-template-columns: repeat(2, 1fr); }
+    .bento-feature { grid-column: span 2; }
+    .bento-tall { grid-row: span 1; }
+    .bento-wide { grid-column: span 2; }
+    .platforms-grid { grid-template-columns: repeat(2, 1fr); }
+    .steps-container { flex-direction: column; align-items: center; gap: 1rem; }
+    .step-connector { flex: 0 0 48px; flex-direction: column; padding-top: 0; }
+    .connector-line { width: 1px; height: 32px; background: linear-gradient(180deg, var(--border), var(--primary-dim), var(--border)); }
+    .hero-stats { gap: 1.5rem; }
+    .cta-title { font-size: 2.75rem; }
+    .cta { padding: 7rem 0; }
+  }
 
-    .bento-grid {
-      grid-template-columns: 1fr;
-    }
+  /* Large phone */
+  @media (min-width: 640px) and (max-width: 767px) {
+    .hero { padding: 5rem 0 3rem; }
+    .hero-content { grid-template-columns: 1fr; gap: 2.5rem; }
+    .hero-title { font-size: 2.5rem; }
+    .hero-description { max-width: 100%; font-size: 1rem; }
+    .hero-actions { flex-direction: column; }
+    .hero-stats { gap: 1rem; flex-wrap: wrap; }
+    .stat-value { font-size: 1.5rem; }
+    .hero-orb { width: 300px; height: 300px; top: 0; right: -50px; opacity: 0.3; }
+    .hero-orb-secondary { width: 250px; height: 250px; bottom: 0; left: -50px; opacity: 0.3; }
+    .section-title { font-size: 2rem; margin-bottom: 2rem; }
+    .problem-grid { grid-template-columns: 1fr; }
+    .bento-grid { grid-template-columns: 1fr; }
+    .bento-feature { grid-column: span 1; grid-row: auto; padding: 1.75rem; }
+    .bento-tall { grid-column: span 1; grid-row: auto; }
+    .bento-wide { grid-column: span 1; }
+    .bento-perf-layout { flex-direction: column; gap: 1rem; }
+    .bento-stats { gap: 1rem; }
+    .platforms-grid { grid-template-columns: 1fr; }
+    .steps-container { flex-direction: column; align-items: center; gap: 1rem; }
+    .step-connector { flex: 0 0 48px; flex-direction: column; padding-top: 0; }
+    .connector-line { width: 1px; height: 32px; }
+    .hero-code { max-width: 100%; }
+    .code-content { font-size: 0.75rem; }
+    .cta-title { font-size: 2rem; }
+    .cta-description { font-size: 1rem; }
+    .cta-actions { flex-direction: column; align-items: center; }
+    .cta { padding: 5rem 0; }
+  }
 
-    .bento-feature {
-      grid-column: span 1;
-      grid-row: auto;
-    }
+  /* Mobile phone */
+  @media (max-width: 639px) {
+    .hero { padding: 5rem 0 3rem; }
+    .hero-content { grid-template-columns: 1fr; gap: 2rem; }
+    .hero-title { font-size: 2rem; }
+    .hero-badge { margin-bottom: 1.5rem; }
+    .hero-description { max-width: 100%; font-size: 0.95rem; margin-bottom: 1.5rem; }
+    .hero-actions { flex-direction: column; gap: 0.75rem; }
+    .hero-actions .btn { width: 100%; }
+    .hero-stats { gap: 0.75rem; flex-wrap: wrap; padding-top: 1.5rem; }
+    .stat-item { flex: 1; min-width: 80px; }
+    .stat-value { font-size: 1.25rem; }
+    .stat-label { font-size: 0.75rem; }
+    .stat-divider { display: none; }
+    .hero-orb { width: 250px; height: 250px; top: 50px; right: -80px; opacity: 0.25; }
+    .hero-orb-secondary { width: 200px; height: 200px; bottom: 50px; left: -80px; opacity: 0.25; }
+    .section-title { font-size: 1.75rem; margin-bottom: 1.75rem; }
+    .problem-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .problem-card { padding: 1.75rem 1.25rem; }
+    .bento-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .bento-feature { grid-column: span 1; grid-row: auto; padding: 1.5rem; }
+    .bento-tall { grid-column: span 1; grid-row: auto; }
+    .bento-wide { grid-column: span 1; }
+    .bento-perf-layout { flex-direction: column; gap: 1rem; }
+    .bento-card { padding: 1.25rem; }
+    .bento-title-large { font-size: 1.25rem; }
+    .bento-desc { font-size: 0.85rem; }
+    .bento-stats { gap: 0.75rem; padding-top: 1rem; }
+    .bento-stat-num { font-size: 1rem; }
+    .platforms-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .platform-card { padding: 1.25rem; }
+    .steps-container { flex-direction: column; align-items: center; gap: 0.75rem; }
+    .step-number { font-size: 3.5rem; }
+    .step-card { padding: 1.25rem; }
+    .step-connector { flex: 0 0 40px; flex-direction: column; padding-top: 0; }
+    .connector-line { width: 1px; height: 24px; }
+    .hero-code { max-width: 100%; }
+    .code-content { font-size: 0.7rem; padding: 1rem 1rem 0.75rem; }
+    .cta-title { font-size: 1.75rem; }
+    .cta-description { font-size: 0.95rem; margin-bottom: 2rem; }
+    .cta-actions { flex-direction: column; align-items: center; gap: 0.75rem; }
+    .cta-actions .btn { width: 100%; }
+    .cta { padding: 5rem 0; }
+    .cta-orb { width: 500px; height: 500px; }
+    .cta-orb-secondary { width: 300px; height: 300px; }
+    .cta-tertiary-orb { width: 250px; height: 250px; }
+  }
 
-    .bento-tall {
-      grid-column: span 1;
-      grid-row: auto;
+  /* Touch device hover alternatives */
+  @media (hover: none) {
+    .btn-ghost:active {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: rgba(134, 239, 172, 0.05);
     }
-
-    .bento-wide {
-      grid-column: span 1;
-    }
-
-    .bento-wide .bento-card-inner {
-      flex-direction: column !important;
-      gap: 1rem !important;
-    }
-
-    .platforms-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .hero-stats {
-      gap: 1.25rem;
-    }
-
-    .stat-value {
-      font-size: 1.25rem;
-    }
-
-    .cta-title {
-      font-size: 2.25rem;
+    .btn-ghost-light:active {
+      color: var(--text-primary);
+      border-color: var(--border-hover);
     }
   }
 </style>

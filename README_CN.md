@@ -10,6 +10,30 @@
 
 ## 快速开始
 
+### 一键启动（新手从这里开始）
+
+无需手动配置环境变量，交互式向导自动完成所有设置。
+
+```bash
+# Windows: 双击 start.bat，或：
+python start.py
+
+# macOS / Linux:
+./start.sh
+# 或：
+python3 start.py
+```
+
+启动向导会完成以下步骤：
+- 检测 Python 环境和依赖
+- 引导选择 AI 服务提供商（OpenAI / DeepSeek / 自定义）
+- 自动生成安全的 JWT 和加密密钥
+- 写入 `.env` 配置文件
+- 自动安装缺失的依赖
+- 启动网关服务 `http://localhost:9999`
+
+> 非交互模式（用于 CI/CD）：`python start.py --non-interactive`
+
 ### Docker（推荐）
 
 ```bash
@@ -27,9 +51,14 @@ docker run -d \
 docker-compose up -d
 ```
 
-### Python
+### Python（手动）
 
 ```bash
+# 1. 设置环境变量
+export JWT_SECRET=$(python3 -c "import secrets; print(secrets.token_hex(32))")
+export TARGET_LLM=https://api.openai.com
+
+# 2. 安装依赖并启动
 pip install -r requirements.txt
 python main.py
 ```

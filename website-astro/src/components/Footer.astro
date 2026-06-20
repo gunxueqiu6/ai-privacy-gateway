@@ -49,8 +49,14 @@
     transition: color 0.3s ease;
   }
 
-  .footer-links a:hover {
-    color: var(--primary);
+  @media (hover: hover) {
+    .footer-links a:hover {
+      color: var(--primary);
+    }
+
+    .contact-link:hover {
+      opacity: 0.8;
+    }
   }
 
   .footer-copyright {
@@ -76,15 +82,31 @@
     transition: opacity 0.3s ease;
   }
 
-  .contact-link:hover {
-    opacity: 0.8;
-  }
-
   .contact-text {
     color: var(--text-muted);
   }
 
   .contact-sep {
     color: var(--border);
+  }
+
+  @media (max-width: 640px) {
+    .footer {
+      padding: 3rem 0;
+    }
+    .footer-content {
+      gap: 1rem;
+    }
+    .footer-contact {
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .contact-sep {
+      display: none;
+    }
+    .footer-links {
+      gap: 1.5rem;
+    }
   }
 </style>

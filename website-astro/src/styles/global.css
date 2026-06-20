@@ -47,6 +47,16 @@
   --space-2xl: 8rem;
 }
 
+/* ================================================
+   Responsive Container System
+   ================================================ */
+@media (min-width: 1280px) and (max-width: 1439px) {
+  .container { max-width: 1100px; }
+}
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .container { max-width: 1000px; }
+}
+
 /* 基础重置 */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -129,9 +139,15 @@ body::before {
   transition: border-color 0.3s ease, transform 0.3s ease;
 }
 
-.glass:hover {
-  border-color: var(--border-hover);
-  transform: translateY(-2px);
+@media (hover: hover) {
+  .glass:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+  }
+
+  a:hover {
+    color: var(--primary-dim);
+  }
 }
 
 /* 链接 */
@@ -139,10 +155,6 @@ a {
   color: var(--primary);
   text-decoration: none;
   transition: color 0.3s ease;
-}
-
-a:hover {
-  color: var(--primary-dim);
 }
 
 /* 按钮 */
@@ -167,9 +179,16 @@ a:hover {
   box-shadow: 0 0 20px var(--primary-glow);
 }
 
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 0 30px var(--primary-glow);
+@media (hover: hover) {
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px var(--primary-glow);
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
 }
 
 .btn-secondary {
@@ -177,11 +196,6 @@ a:hover {
   color: var(--text-primary);
   border: 1px solid var(--border-hover);
   backdrop-filter: var(--glass-blur);
-}
-
-.btn-secondary:hover {
-  border-color: var(--primary);
-  color: var(--primary);
 }
 
 /* 容器 */
@@ -238,15 +252,7 @@ section {
   grid-template-columns: repeat(4, 1fr);
 }
 
-@media (max-width: 768px) {
-  h1 {
-    font-size: 2.5rem;
-  }
-
-  h2 {
-    font-size: 2rem;
-  }
-
+@media (max-width: 640px) {
   .grid-2, .grid-3, .grid-4 {
     grid-template-columns: 1fr;
   }
@@ -330,25 +336,17 @@ pre, code {
   transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.5s ease;
 }
 
-.glass.glow-hover:hover {
-  border-color: var(--primary);
-  transform: translateY(-4px);
-  box-shadow: 0 0 30px rgba(134, 239, 172, 0.12), 0 0 60px rgba(134, 239, 172, 0.06);
-}
+@media (hover: hover) {
+  .glass.glow-hover:hover {
+    border-color: var(--primary);
+    transform: translateY(-4px);
+    box-shadow: 0 0 30px rgba(134, 239, 172, 0.12), 0 0 60px rgba(134, 239, 172, 0.06);
+  }
 
-/* ===========================================
-   Code Block Glow Border
-   =========================================== */
-.code-block-glow {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  overflow: hidden;
-  transition: border-color 0.4s ease, box-shadow 0.4s ease;
-}
-
-.code-block-glow:hover {
-  border-color: rgba(134, 239, 172, 0.3);
-  box-shadow: 0 0 20px rgba(134, 239, 172, 0.08), inset 0 0 20px rgba(134, 239, 172, 0.03);
+  .code-block-glow:hover {
+    border-color: rgba(134, 239, 172, 0.3);
+    box-shadow: 0 0 20px rgba(134, 239, 172, 0.08), inset 0 0 20px rgba(134, 239, 172, 0.03);
+  }
 }
 
 /* ===========================================
@@ -487,4 +485,102 @@ pre, code {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
+}
+
+/* ===========================================
+   Touch Device Alternative States
+   =========================================== */
+@media (hover: none) {
+  .glass:active,
+  .glass.glow-hover:active {
+    border-color: var(--border-hover);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:active {
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary:active {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+}
+
+/* ===========================================
+   Expanded Responsive Breakpoints
+   =========================================== */
+
+/* 4K and ultra-wide: larger spacing */
+@media (min-width: 1920px) {
+  section {
+    padding: 10rem 0;
+  }
+}
+
+/* Small laptop: reduced spacing */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .container {
+    padding: 0 1.5rem;
+  }
+}
+
+/* Tablet: moderate spacing */
+@media (min-width: 768px) and (max-width: 1023px) {
+  section {
+    padding: 5rem 0;
+  }
+
+  h1 {
+    font-size: 2.75rem;
+  }
+
+  h2 {
+    font-size: 2.25rem;
+  }
+}
+
+/* Large phone / small tablet */
+@media (min-width: 640px) and (max-width: 767px) {
+  section {
+    padding: 4rem 0;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+  }
+
+  h2 {
+    font-size: 2rem;
+  }
+}
+
+/* Mobile phones */
+@media (max-width: 639px) {
+  section {
+    padding: 3rem 0;
+  }
+
+  .container {
+    padding: 0 1rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.75rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 375px) {
+  section {
+    padding: 2.5rem 0;
+  }
 }
