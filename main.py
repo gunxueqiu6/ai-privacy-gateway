@@ -8,6 +8,7 @@ from datetime import datetime
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -72,9 +73,6 @@ app.add_middleware(
     allow_headers=["Content-Type", "Authorization"],
 )
 
-# 注册所有路由模块
-register_routers(app)
-
 
 @app.get("/")
 async def root() -> dict:
@@ -93,15 +91,44 @@ async def health() -> dict:
     return {"status": "healthy", "timestamp": datetime.now().isoformat()}
 
 
+@app.get("/admin")
+async def admin_panel():
+    """Redirect to admin panel."""
+    return RedirectResponse(url="/admin/static/index.html")
+
+
+@app.get("/admin/")
+async def admin_panel_slash():
+    """Redirect to admin panel."""
+    return RedirectResponse(url="/admin/static/index.html")
+
+
+# 注册所有路由模块（必须在 /admin 之后，否则 /admin/* API 路由优先）
+register_routers(app)
+
+
 # ==================== 启动入口 ====================
 
 if __name__ == "__main__":
+    import sys
     import uvicorn
 
-    logger.info("AI隐私网关启动")
-    logger.info(f"监听端口: {config.LISTEN_PORT}")
-    logger.info(f"目标AI服务: {config.TARGET_LLM}")
-    logger.info(f"数据库: {config.DB_PATH}")
+    banner = [
+        "=" * 56,
+        "  AI Privacy Gateway  v1.1.0",
+        "  Your AI Data Privacy Firewall",
+        "=" * 56,
+        f"  API:          http://localhost:{config.LISTEN_PORT}/v1",
+        f"  Admin:        http://localhost:{config.LISTEN_PORT}/admin",
+        f"  Target:       {config.TARGET_LLM}",
+        f"  Admin PW:     {config.ADMIN_PASSWORD}",
+        "-" * 56,
+        "  [!] Save the admin password above immediately!",
+        "  Configure your AI client to use the API URL above.",
+        "=" * 56,
+    ]
+    sys.stdout.write("\n".join(banner) + "\n")
+    sys.stdout.flush()
 
     uvicorn.run(
         app,

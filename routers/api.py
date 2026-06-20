@@ -5,6 +5,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
 from mask_engine import get_mask_engine, HAS_NER
+from .dependencies import safe_json, BAD_ENCODING_RESPONSE
 
 api_router = APIRouter(tags=["api"])
 
@@ -26,7 +27,9 @@ def _entity_type_from_placeholder(placeholder: str) -> str:
 @api_router.post("/api/mask")
 async def api_mask(request: Request):
     """独立脱敏 API"""
-    body = await request.json()
+    body, ok = await safe_json(request)
+    if not ok:
+        return BAD_ENCODING_RESPONSE
     text = body.get("text", "")
 
     if not text:
@@ -52,7 +55,9 @@ async def api_mask(request: Request):
 @api_router.post("/api/restore")
 async def api_restore(request: Request):
     """独立还原 API"""
-    body = await request.json()
+    body, ok = await safe_json(request)
+    if not ok:
+        return BAD_ENCODING_RESPONSE
     masked_text = body.get("text", "")
     mappings = body.get("mappings", {})
 
@@ -69,7 +74,9 @@ async def api_restore(request: Request):
 @api_router.post("/api/mask/batch")
 async def api_mask_batch(request: Request):
     """批量脱敏 API"""
-    body = await request.json()
+    body, ok = await safe_json(request)
+    if not ok:
+        return BAD_ENCODING_RESPONSE
     texts = body.get("texts", [])
 
     if not isinstance(texts, list) or len(texts) == 0:

@@ -7,7 +7,7 @@ import logging
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 
-from routers.dependencies import filter_proxy_headers, ALLOWED_PROXY_HEADERS
+from routers.dependencies import BAD_ENCODING_RESPONSE, filter_proxy_headers, safe_json
 from gateway_core import get_gateway_core
 from database import db
 from config import config
@@ -33,7 +33,9 @@ def _resolve_auth_and_headers(request: Request):
 async def chat_completions(request: Request) -> Response:
     """聊天完成接口 - 核心脱敏代理"""
     gateway = get_gateway_core()
-    body = await request.json()
+    body, ok = await safe_json(request)
+    if not ok:
+        return BAD_ENCODING_RESPONSE
 
     headers = _resolve_auth_and_headers(request)
     if headers is None:

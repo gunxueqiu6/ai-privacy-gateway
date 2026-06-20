@@ -667,6 +667,12 @@ def main() -> None:
                 "UPSTREAM_API_KEY": os.environ.get("UPSTREAM_API_KEY", ""),
                 "DB_PATH": os.environ.get("DB_PATH", "./vault_data/privacy_vault.db"),
             }
+            # 显示已有密码，方便用户找回
+            if config["ADMIN_PASSWORD"]:
+                println()
+                println(c("  管理员密码: ", "dim") + c(config["ADMIN_PASSWORD"], "yellow", "bold"))
+                println(c("  (从 .env 中读取，如已遗忘可删除 .env 后重新运行生成)", "dim"))
+                println()
         else:
             println(c("正在自动配置...", "dim"))
             config = gen_config_auto(args)

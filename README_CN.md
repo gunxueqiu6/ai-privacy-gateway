@@ -43,25 +43,33 @@ docker run -d \
   -v ./vault_data:/app/vault_data \
   -e TARGET_LLM=https://api.openai.com \
   ghcr.io/gunxueqiu6/ai-privacy-gateway:lite
+
+# 查看自动生成的管理员密码：
+docker logs ai-privacy-gw
 ```
 
 ### Docker Compose
 
 ```bash
 docker-compose up -d
+
+# 查看自动生成的管理员密码：
+docker logs ai-privacy-vault
 ```
 
 ### Python（手动）
 
 ```bash
-# 1. 设置环境变量
-export JWT_SECRET=$(python3 -c "import secrets; print(secrets.token_hex(32))")
-export TARGET_LLM=https://api.openai.com
-
-# 2. 安装依赖并启动
+# 1. 安装依赖
 pip install -r requirements.txt
+
+# 2. 启动（首次运行自动生成密钥）
 python main.py
 ```
+
+首次启动时，管理员密码会自动生成并显示在控制台横幅中。请立即保存，用于访问管理后台 `http://localhost:9999/admin`。
+
+如需自定义配置，创建 `.env` 文件或运行 `python start.py` 进入引导式设置。
 
 ### Windows 可执行文件
 
@@ -133,7 +141,8 @@ server {
 | `LISTEN_PORT` | 9999 | 网关监听端口 |
 | `DB_PATH` | ./vault_data/privacy_vault.db | SQLite 数据库路径 |
 | `ADMIN_PASSWORD` | （自动生成） | 管理后台密码 |
-| `JWT_SECRET` | （必填） | JWT 签名密钥（64 位十六进制） |
+| `JWT_SECRET` | （自动生成） | JWT 签名密钥 |
+| `VAULT_ENCRYPT_KEY` | （自动生成） | Vault 加密密钥 |
 
 ## 支持的数据类型
 

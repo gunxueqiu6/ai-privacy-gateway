@@ -5,10 +5,31 @@ from datetime import UTC, datetime, timedelta
 from typing import Any, Dict, Optional, Set
 
 from fastapi import Depends, HTTPException, Request
+from fastapi.responses import JSONResponse
 from jose import JWTError, jwt
 from slowapi import Limiter
 
 from config import config
+
+
+# ==================== Encoding Error Handler ====================
+
+BAD_ENCODING_RESPONSE = JSONResponse(
+    status_code=400,
+    content={
+        "error": "请求体编码错误",
+        "detail": "请使用 UTF-8 编码发送 JSON 数据",
+        "hint": "curl -X POST ... -H 'Content-Type: application/json; charset=utf-8' --data-binary @file.json",
+    },
+)
+
+
+async def safe_json(request: Request):
+    """Parse JSON body with proper error handling for non-UTF-8 encoding."""
+    try:
+        return await request.json(), True
+    except Exception:
+        return None, False
 
 
 # ==================== Rate Limiter ====================

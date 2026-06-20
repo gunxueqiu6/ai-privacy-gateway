@@ -43,25 +43,33 @@ docker run -d \
   -v ./vault_data:/app/vault_data \
   -e TARGET_LLM=https://api.openai.com \
   ghcr.io/gunxueqiu6/ai-privacy-gateway:lite
+
+# Check the auto-generated admin password:
+docker logs ai-privacy-gw
 ```
 
 ### Docker Compose
 
 ```bash
 docker-compose up -d
+
+# Check the auto-generated admin password:
+docker logs ai-privacy-vault
 ```
 
 ### Python (Manual)
 
 ```bash
-# 1. Set up environment variables
-export JWT_SECRET=$(python3 -c "import secrets; print(secrets.token_hex(32))")
-export TARGET_LLM=https://api.openai.com
-
-# 2. Install dependencies & start
+# 1. Install dependencies
 pip install -r requirements.txt
+
+# 2. Start (secrets auto-generated on first run)
 python main.py
 ```
+
+On first start, an admin password is auto-generated and displayed in the console banner. Save it immediately to access the admin dashboard at `http://localhost:9999/admin`.
+
+To customize settings, create a `.env` file or run `python start.py` for guided setup.
 
 ### Windows Executable
 
@@ -133,7 +141,8 @@ server {
 | `LISTEN_PORT` | 9999 | Gateway listen port |
 | `DB_PATH` | ./vault_data/privacy_vault.db | SQLite database path |
 | `ADMIN_PASSWORD` | (auto-generated) | Admin dashboard password |
-| `JWT_SECRET` | (required) | JWT signing secret (64-char hex) |
+| `JWT_SECRET` | (auto-generated) | JWT signing secret |
+| `VAULT_ENCRYPT_KEY` | (auto-generated) | Vault encryption key |
 
 ## Supported Entity Types
 

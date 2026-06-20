@@ -1,15 +1,15 @@
 # -*- mode: python ; coding: utf-8 -*-
 
-block_cipher = pyi_crypto.PyiBlockCipher(key='ai_privacy_gateway_2024')
-
 a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
     datas=[
         ('static', 'static'),
+        ('routers', 'routers'),
         ('config.py', '.'),
         ('mask_engine.py', '.'),
+        ('ner_engine.py', '.'),
         ('stream_buffer.py', '.'),
         ('gateway_core.py', '.'),
         ('database.py', '.'),
@@ -34,14 +34,23 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=['tkinter', 'matplotlib', 'numpy', 'pandas'],
+    excludes=[
+        'tkinter', 'matplotlib', 'numpy', 'pandas',
+        'torch', 'torchvision', 'tensorflow', 'onnxruntime',
+        'scipy', 'scikit-learn', 'sklearn', 'skimage', 'pyarrow',
+        'moviepy', 'imageio', 'imageio_ffmpeg', 'opencv2', 'cv2',
+        'jieba', 'langchain', 'transformers', 'nltk', 'sympy',
+        'numba', 'llvmlite', 'yt_dlp', 'PyQt5', 'IPython',
+        'zmq', 'orjson', 'gevent', 'grpc', 'lxml',
+        'nbformat', 'jsonschema', 'pycparser',
+        'wmi', 'pythoncom', 'pywintypes', 'win32com',
+    ],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
-    cipher=block_cipher,
     noarchive=False,
 )
 
-pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+pyz = PYZ(a.pure, a.zipped_data)
 
 exe = EXE(
     pyz,
@@ -57,11 +66,10 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=False,  # 无控制台窗口
+    console=True,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='static/icon.ico',  # 托盘图标
 )

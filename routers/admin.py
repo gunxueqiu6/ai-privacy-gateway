@@ -7,11 +7,13 @@ from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 
 from .dependencies import (
+    BAD_ENCODING_RESPONSE,
     _token_blacklist,
     create_jwt_token,
     get_current_user_token,
     limiter,
     require_admin,
+    safe_json,
 )
 from config import config
 from database import db
@@ -37,7 +39,9 @@ async def admin_login(request: Request) -> JSONResponse:
     if is_locked:
         raise HTTPException(status_code=429, detail="登录尝试次数过多，请稍后再试")
 
-    body = await request.json()
+    body, ok = await safe_json(request)
+    if not ok:
+        return BAD_ENCODING_RESPONSE
     password = body.get("password", "")
 
     try:
@@ -111,7 +115,9 @@ async def add_keyword(request: Request):
     """添加自定义敏感词 - 需要认证"""
     await require_admin(request)
 
-    body = await request.json()
+    body, ok = await safe_json(request)
+    if not ok:
+        return BAD_ENCODING_RESPONSE
     keyword = body.get("keyword", "").strip()
 
     if not keyword:
@@ -137,7 +143,9 @@ async def delete_keyword(request: Request):
     """删除自定义敏感词 - 需要认证"""
     await require_admin(request)
 
-    body = await request.json()
+    body, ok = await safe_json(request)
+    if not ok:
+        return BAD_ENCODING_RESPONSE
     keyword = body.get("keyword", "").strip()
 
     if not keyword:
@@ -158,7 +166,7 @@ async def get_version(request: Request) -> dict:
     await require_admin(request)
 
     return {
-        "version": "2.0",
+        "version": "1.1.0",
         "tier": config.tier,
         "target_llm": config.TARGET_LLM,
     }
