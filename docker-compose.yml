@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   privacy-gateway:
     build:
@@ -10,8 +8,6 @@ services:
       - "9999:9999"
     volumes:
       - ./vault_data:/app/vault_data
-    env_file:
-      - .env
     environment:
       - TARGET_LLM=https://api.openai.com
       - LISTEN_PORT=9999

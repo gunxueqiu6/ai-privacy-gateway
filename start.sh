@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# AI Privacy Gateway - 交互式启动脚本 (macOS/Linux)
+# AI Privacy Gateway - 一键启动脚本 (macOS/Linux)
 set -e
 
 # 颜色
@@ -36,8 +36,12 @@ if [ "$PY_MAJOR" -lt 3 ] || { [ "$PY_MAJOR" -eq 3 ] && [ "$PY_MINOR" -lt 8 ]; };
 fi
 
 echo -e "${CYAN}============================================${RESET}"
-echo -e "${CYAN}  AI Privacy Gateway - 交互式启动向导${RESET}"
+echo -e "${CYAN}  AI Privacy Gateway - 一键启动${RESET}"
 echo -e "${CYAN}============================================${RESET}"
 echo ""
 
-exec "$PYTHON" start.py --auto
+if [ $# -eq 0 ]; then
+    exec "$PYTHON" start.py --auto
+else
+    exec "$PYTHON" start.py "$@"
+fi
