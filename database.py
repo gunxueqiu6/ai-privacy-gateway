@@ -376,7 +376,7 @@ class Database:
             sql = f"""
                 INSERT INTO stats (date, team_id, {', '.join([f"{f}_count" for f in old_fields + new_fields])}, total_count)
                 VALUES (?, ?, {', '.join(['?'] * (len(old_fields + new_fields) + 1))})
-                ON CONFLICT(date) DO UPDATE SET
+                ON CONFLICT(date, team_id) DO UPDATE SET
                 {', '.join(set_clauses)},
                 total_count = total_count + ?
             """

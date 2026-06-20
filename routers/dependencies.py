@@ -49,7 +49,7 @@ ALLOWED_PROXY_HEADERS = {"content-type", "authorization"}
 
 
 def filter_proxy_headers(headers: Any) -> Dict[str, str]:
-    return {k: v for k, v in headers.items() if k.lower() in ALLOWED_PROXY_HEADERS}
+    return {k.lower(): v for k, v in headers.items() if k.lower() in ALLOWED_PROXY_HEADERS}
 
 
 ALLOWED_V1_PROXY_PATHS = {"models", "embeddings", "moderations"}

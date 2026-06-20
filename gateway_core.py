@@ -72,7 +72,7 @@ class GatewayCore:
         })
 
         # 提取实际出现在脱敏文本中的占位符
-        pii_pattern = re.compile(r'\[PII_\w+_\d{8}\]')
+        pii_pattern = re.compile(r'\[PII_\w+_[A-Z]+\]')
         used_placeholders: Set[str] = set()
         for msg in messages:
             content = msg.get("content", "")
@@ -116,7 +116,7 @@ class GatewayCore:
                     json=body,
                     headers={
                         "Content-Type": "application/json",
-                        "Authorization": headers.get("Authorization", "")
+                        "Authorization": headers.get("authorization", "")
                     }
                 )
 
@@ -133,11 +133,11 @@ class GatewayCore:
             except httpx.TimeoutException:
                 logger.error(f"[网关错误] 请求超时")
                 db.log_audit(session_id, "proxy_error", {"error": "Timeout"})
-                return 504, {"error": "Gateway Timeout"}, {}
+                return 504, b'{"error": "Gateway Timeout"}', {}
             except httpx.RequestError as e:
                 logger.error(f"[网关错误] 请求失败: {e}")
                 db.log_audit(session_id, "proxy_error", {"error": str(e)})
-                return 502, {"error": "Upstream service unavailable"}, {}
+                return 502, b'{"error": "Upstream service unavailable"}', {}
 
     async def proxy_stream_request(
         self,
@@ -159,7 +159,7 @@ class GatewayCore:
                     json=body,
                     headers={
                         "Content-Type": "application/json",
-                        "Authorization": headers.get("Authorization", "")
+                        "Authorization": headers.get("authorization", "")
                     }
                 ) as response:
 
@@ -210,7 +210,7 @@ class GatewayCore:
 
             except httpx.RequestError as e:
                 logger.error(f"[代理错误] {e}")
-                return 502, {"error": "Upstream service unavailable"}, {}
+                return 502, b'{"error": "Upstream service unavailable"}', {}
 
 
 # 全局网关核心实例
