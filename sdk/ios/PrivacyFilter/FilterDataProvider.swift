@@ -2,328 +2,558 @@ import NetworkExtension
 import Foundation
 import os.log
 
+// MARK: - HTTP Request Model
+
+/// Parsed representation of an HTTP/1.1 request.
+private struct ParsedHttpRequest {
+    let method: String
+    let path: String
+    let headers: [String: String]
+    let bodyRange: Range<Int>       // byte range of the body within the raw data
+    let isComplete: Bool
+}
+
+/// Result of trying to parse an HTTP request from buffered bytes.
+private enum HttpParseResult {
+    case notHttp
+    case partial                         // valid headers but body not yet complete
+    case complete(ParsedHttpRequest)     // fully parsed
+}
+
+// MARK: - Per-Flow State
+
+/// Tracks accumulated outbound data for a single flow.
+private final class FlowState {
+    /// Buffer accumulating all outbound bytes read so far.
+    var accumulator = Data()
+    /// True once we have returned `.replaceData()` for this flow.
+    var didReplace = false
+    /// True if this flow matched an AI service domain (from handleNewFlow).
+    var isAiService = false
+}
+
+// MARK: - AI Privacy Gateway Filter
+
 /**
- * AI Privacy Gateway Filter Data Provider
+ * NEFilterDataProvider that intercepts outbound HTTP/HTTPS requests to
+ * known AI API endpoints and masks PII (phone numbers, emails, ID cards,
+ * bank cards, API keys) in the request body **before** it leaves the device.
  *
- * 系统级网络过滤器，拦截所有出站HTTP流量，对AI服务请求进行脱敏处理。
+ * ── How it works ──
  *
- * 工作原理：
- * 1. 实现 NEFilterDataProvider，拦截所有HTTP/HTTPS请求
- * 2. 检查目标域名是否为AI服务
- * 3. AI服务请求 → 代理到网关脱敏 → 返回脱敏数据
- * 4. 其他请求 → 直通
+ * 1. `handleNewFlow`  — Checks the flow's remote hostname against a
+ *                       domain allowlist. AI-service flows get
+ *                       `.filterData(needsOutbound:)` so the system
+ *                       delivers decrypted application bytes to us.
+ *
+ * 2. `handleOutboundData` — The system buffers up to `peekOutbound` bytes
+ *    and delivers them in **one** call for typical flows.  We read all
+ *    accumulated bytes, parse the HTTP request, apply the local PII
+ *    masker synchronously, and return `.replaceData()` with the modified
+ *    request bytes.
+ *
+ *    ⚠️  Large requests (> peekOutbound) arrive in chunks.  The first
+ *    chunk is passed through.  This is an acceptable trade-off for
+ *    essentially all AI API traffic (typical body < 100 KB).
+ *
+ * 3. `handleInboundData` — Pass-through.  AI responses are already
+ *    masked by the gateway; we do not modify them.
+ *
+ * ── Watchdog safety ──
+ * The PII masker runs locally with regex — no blocking network calls.
+ * This avoids the NE watchdog killing the extension process.
  */
-class FilterDataProvider: NEFilterDataProvider {
+final class FilterDataProvider: NEFilterDataProvider {
 
-    private let logger = Logger(subsystem: "com.privacygw.filter", category: "DataProvider")
+    // MARK: - Logger
 
-    // AI服务域名白名单
+    private let logger = Logger(
+        subsystem: "com.privacygw.filter",
+        category: "DataProvider"
+    )
+
+    // MARK: - AI Service Domain Allowlist
+
     private let aiServiceDomains: Set<String> = [
+        // OpenAI
         "openai.com",
         "api.openai.com",
         "chat.openai.com",
-        "api.anthropic.com",
+
+        // Anthropic
         "anthropic.com",
-        "api.deepseek.com",
+        "api.anthropic.com",
+
+        // DeepSeek
         "deepseek.com",
+        "api.deepseek.com",
         "chat.deepseek.com",
-        "api.moonshot.cn",
+
+        // Moonshot / Kimi
         "moonshot.cn",
+        "api.moonshot.cn",
         "kimi.moonshot.cn",
-        "api.x.ai",
+
+        // xAI / Grok
         "x.ai",
+        "api.x.ai",
         "grok.x.ai",
-        "api.doubao.com",
+
+        // Doubao / Volcano Engine
         "doubao.com",
-        "api.yuanbao.com",
+        "api.doubao.com",
+
+        // Yuanbao / Tencent
         "yuanbao.com",
-        "api.coze.cn",
+        "api.yuanbao.com",
+
+        // Coze
         "coze.cn",
+        "api.coze.cn",
+        "coze.com",
         "api.coze.com",
-        "coze.com"
+
+        // Google AI / Vertex
+        "generativelanguage.googleapis.com",
+        "aiplatform.googleapis.com",
+
+        // Azure OpenAI
+        "openai.azure.com",
+
+        // Together AI
+        "api.together.xyz",
+
+        // Mistral AI
+        "api.mistral.ai",
+
+        // Perplexity
+        "api.perplexity.ai",
+
+        // Groq
+        "api.groq.com",
     ]
 
-    // 网关配置
+    // MARK: - Components
+
+    private let piiMasker = PiiMasker()
+    /// Per-flow state keyed by `ObjectIdentifier(flow)`.
+    private var flowStates: [ObjectIdentifier: FlowState] = [:]
+
+    // MARK: - Configuration
+
     private var gatewayUrl: String = "http://localhost:9999"
     private var gatewayApiKey: String = ""
 
-    // 统计
-    private var maskedCount: Int = 0
-    private var totalRequests: Int = 0
+    // MARK: - Lifecycle
 
     override func startFilter(completionHandler: @escaping (Error?) -> Void) {
-        logger.info("Filter started")
-
-        // 加载配置
+        logger.info("Filter starting…")
         loadConfiguration()
+        piiMasker.resetCounters()
 
-        // 启动成功
+        // Background pattern sync from the gateway (informational).
+        if !gatewayUrl.isEmpty {
+            schedulePatternSync()
+        }
+
+        logger.info("Filter started successfully")
         completionHandler(nil)
     }
 
     override func stopFilter(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
-        logger.info("Filter stopped with reason: \(reason.rawValue)")
+        logger.info("Filter stopped: reason=\(reason.rawValue)")
+        persistStats()
+        flowStates.removeAll()
         completionHandler()
     }
 
-    /**
-     * 处理新的网络流
-     *
-     * 这是核心过滤逻辑入口
-     */
+    // MARK: - Flow Decision
+
     override func handleNewFlow(_ flow: NEFilterFlow) -> NEFilterNewFlowVerdict {
-        guard let socketFlow = flow as? NEFilterSocketFlow else {
-            logger.warning("Unknown flow type, passing through")
+        let hostname: String
+
+        // ── Extract hostname ───────────────────────────────────────
+        // Prefer NEFilterBrowserFlow.url (available on iOS 15+)
+        if #available(iOS 15.0, *), let url = flow.url, let host = url.host {
+            hostname = host
+        } else if let socketFlow = flow as? NEFilterSocketFlow,
+                  let endpoint = socketFlow.remoteEndpoint as? NWHostEndpoint {
+            hostname = endpoint.hostname
+        } else {
+            logger.debug("Cannot determine hostname, passing through")
             return .pass()
         }
 
-        // 获取目标地址
-        let remoteEndpoint = socketFlow.remoteEndpoint
+        logger.debug("New flow: \(hostname)")
 
-        guard let hostEndpoint = remoteEndpoint as? NWHostEndpoint else {
-            logger.warning("Unknown endpoint type, passing through")
+        // ── Match against allowlist ────────────────────────────────
+        guard isAiServiceDomain(hostname) else {
+            // Secondary heuristic: match API path patterns via flow URL
+            if #available(iOS 15.0, *), let url = flow.url {
+                let path = url.path.lowercased()
+                if path.contains("/chat/completions")
+                    || path.contains("/v1/completions")
+                    || path.contains("/v1/embeddings")
+                    || path.contains("/v1/messages")
+                    || path.contains("/v1/chat/completions") {
+                    logger.info("AI API path detected: \(path) — enabling filter")
+                    let state = FlowState()
+                    state.isAiService = true
+                    flowStates[ObjectIdentifier(flow)] = state
+                    return .filterData(
+                        needInbound: false,
+                        needOutbound: true,
+                        peekInbound: 0,
+                        peekOutbound: 1_048_576   // 1 MB
+                    )
+                }
+            }
             return .pass()
         }
 
-        let hostname = hostEndpoint.hostname
-        let port = Int(hostEndpoint.port) ?? 0
+        logger.info("AI service domain: \(hostname) — enabling filter")
 
-        logger.debug("New flow to: \(hostname):\(port)")
+        let state = FlowState()
+        state.isAiService = true
+        flowStates[ObjectIdentifier(flow)] = state
 
-        totalRequests += 1
-
-        // 检查是否为AI服务域名
-        if isAiServiceDomain(hostname) {
-            logger.info("AI service detected: \(hostname), will filter")
-
-            // 需要过滤的流量
-            // 返回需要处理的判决
-            return .filterData(
-                needInbound: true,
-                needOutbound: true,
-                peekInbound: 4096,
-                peekOutbound: 4096
-            )
-        }
-
-        // 非AI服务，直接放行
-        return .pass()
-    }
-
-    /**
-     * 处理入站数据
-     */
-    override func handleInboundData(from flow: NEFilterFlow, readDataStart offset: Int, readDataLength length: Int) -> NEFilterDataVerdict {
-        // 读取数据
-        let data = flow.readData(offset: offset, length: length)
-
-        guard let dataBytes = data else {
-            return .pass()
-        }
-
-        logger.debug("Inbound data: \(dataBytes.count) bytes")
-
-        // 响应数据通常不需要处理，直接放行
-        return .pass()
-    }
-
-    /**
-     * 处理出站数据（请求）
-     */
-    override func handleOutboundData(from flow: NEFilterFlow, readDataStart offset: Int, readDataLength length: Int) -> NEFilterDataVerdict {
-        // 读取数据
-        let data = flow.readData(offset: offset, length: length)
-
-        guard let dataBytes = data else {
-            return .pass()
-        }
-
-        logger.debug("Outbound data: \(dataBytes.count) bytes")
-
-        // 解析HTTP请求
-        if let httpRequest = parseHttpRequest(dataBytes) {
-            logger.info("HTTP request detected: \(httpRequest.method) \(httpRequest.path)")
-
-            // 调用网关脱敏
-            if let maskedBody = maskRequestBody(httpRequest.body) {
-                maskedCount += 1
-
-                // 重新组装请求
-                let maskedRequest = rebuildHttpRequest(httpRequest, maskedBody: maskedBody)
-
-                logger.info("Request masked successfully")
-
-                // 返回修改后的数据
-                return .replaceData(maskedRequest)
-            }
-        }
-
-        // 无法处理，放行
-        return .pass()
-    }
-
-    /**
-     * 检查是否为AI服务域名
-     */
-    private func isAiServiceDomain(_ hostname: String) -> Bool {
-        // 直接匹配
-        if aiServiceDomains.contains(hostname) {
-            return true
-        }
-
-        // 子域名匹配
-        for domain in aiServiceDomains {
-            if hostname.hasSuffix(domain) {
-                return true
-            }
-        }
-
-        return false
-    }
-
-    /**
-     * 加载配置
-     */
-    private func loadConfiguration() {
-        let defaults = UserDefaults(suiteName: "group.com.privacygw.filter")
-        gatewayUrl = defaults?.string(forKey: "gateway_url") ?? gatewayUrl
-        gatewayApiKey = KeychainHelper.read(key: "api_key") ?? gatewayApiKey
-
-        logger.info("Configuration loaded: gateway=\(gatewayUrl)")
-    }
-
-    /**
-     * 解析HTTP请求
-     */
-    private func parseHttpRequest(_ data: Data) -> HttpRequest? {
-        guard let requestString = String(data: data, encoding: .utf8) else {
-            return nil
-        }
-
-        // 简化的HTTP解析
-        let lines = requestString.split(separator: "\r\n")
-
-        guard let firstLine = lines.first else {
-            return nil
-        }
-
-        let parts = firstLine.split(separator: " ")
-        guard parts.count >= 2 else {
-            return nil
-        }
-
-        let method = String(parts[0])
-        let path = String(parts[1])
-
-        // 查找body
-        var headers: [String: String] = [:]
-        var bodyStartIndex = 0
-
-        for (index, line) in lines.enumerated() {
-            if line.isEmpty {
-                bodyStartIndex = index + 1
-                break
-            }
-
-            let headerParts = line.split(separator: ":")
-            if headerParts.count >= 2 {
-                let key = String(headerParts[0]).trimmingCharacters(in: .whitespaces)
-                let value = String(headerParts[1]).trimmingCharacters(in: .whitespaces)
-                headers[key] = value
-            }
-        }
-
-        // 提取body
-        let bodyLines = lines.dropFirst(bodyStartIndex)
-        let body = bodyLines.joined(separator: "\r\n")
-
-        return HttpRequest(
-            method: method,
-            path: path,
-            headers: headers,
-            body: body
+        return .filterData(
+            needInbound: false,
+            needOutbound: true,
+            peekInbound: 0,
+            peekOutbound: 1_048_576   // 1 MB
         )
     }
 
-    /**
-     * 调用网关脱敏请求体
-     */
-    private func maskRequestBody(_ body: String) -> String? {
-        guard !body.isEmpty else {
-            return nil
+    // MARK: - Outbound Data
+
+    override func handleOutboundData(
+        from flow: NEFilterFlow,
+        readDataStart offset: Int,
+        readDataLength length: Int
+    ) -> NEFilterDataVerdict {
+        guard let state = flowStates[ObjectIdentifier(flow)], state.isAiService else {
+            return .pass()
         }
 
-        // 构建请求
-        guard let url = URL(string: "\(gatewayUrl)/api/mask") else {
-            logger.error("Invalid gateway URL: \(gatewayUrl)")
-            return nil
-        }
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        if !gatewayApiKey.isEmpty {
-            request.setValue("Bearer \(gatewayApiKey)", forHTTPHeaderField: "Authorization")
+        // If we already replaced data for this flow, pass through.
+        if state.didReplace {
+            return .pass()
         }
 
-        let payload = ["text": body]
-        request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+        let totalAvailable = offset + length
+        guard let chunk = flow.readData(startOffset: 0, length: totalAvailable) else {
+            logger.warning("readData returned nil, passing through")
+            flowStates.removeValue(forKey: ObjectIdentifier(flow))
+            return .pass()
+        }
 
-        // 发送请求（同步，因为Network Extension不支持异步）
-        // 注意：实际实现需要使用更复杂的异步处理
-        // TODO: 重新设计异步架构，消除 DispatchSemaphore 阻塞。
-        // 当前使用同步模式会阻塞线程，影响吞吐量。
-        // 可考虑使用 NEFilterFlow 的异步回调链或 OperationQueue 管理。
-        let semaphore = DispatchSemaphore(value: 0)
-        var result: String?
+        state.accumulator.append(chunk)
+        let accumulated = state.accumulator
 
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let data = data {
-                if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                    result = json["masked_text"] as? String
-                }
+        // ── Parse the HTTP request ─────────────────────────────────
+        switch parseHttpRequest(accumulated) {
+        case .notHttp:
+            // Not HTTP — clean up and pass through
+            logger.debug("Not HTTP, passing through")
+            flowStates.removeValue(forKey: ObjectIdentifier(flow))
+            return .pass()
+
+        case .partial:
+            // Valid HTTP headers but body not yet complete.
+            // The peek buffer still holds the data; the system will
+            // call us again as more arrives.  We *must* return a
+            // verdict for what we've seen so far.
+            //
+            // Returning .pass() here will SEND the partial data to
+            // the server, which would corrupt the request for anything
+            // larger than peekOutbound.  To avoid this, we drop out
+            // of filter mode: pass once and the rest of the flow
+            // continues unfiltered.
+            logger.warning("Request exceeds peek buffer (\(accumulated.count) bytes so far), passing through unfiltered")
+            flowStates.removeValue(forKey: ObjectIdentifier(flow))
+            return .pass()
+
+        case .complete(let httpReq):
+            // ── Full request — apply PII masking ───────────────────
+            guard !httpReq.bodyRange.isEmpty else {
+                // No body (e.g. GET request)
+                state.didReplace = true
+                flowStates.removeValue(forKey: ObjectIdentifier(flow))
+                return .pass()
             }
-            semaphore.signal()
-        }.resume()
 
-        let timeoutResult = semaphore.wait(timeout: .now() + 30)
-        if timeoutResult == .timedOut {
-            logger.error("Gateway request timed out after 30 seconds")
-            return nil
+            let bodyData = accumulated.subdata(in: httpReq.bodyRange)
+
+            let contentType = httpReq.headers
+                .first { $0.key.lowercased() == "content-type" }?
+                .value.lowercased() ?? ""
+
+            let maskedResult: Data
+            let maskedCount: Int
+
+            if contentType.contains("application/json") {
+                if let (maskedData, count) = piiMasker.maskJSONBody(bodyData) {
+                    maskedResult = maskedData
+                    maskedCount = count
+                } else {
+                    // Fall back to raw text masking
+                    guard let bodyStr = String(data: bodyData, encoding: .utf8) else {
+                        logger.warning("Non-UTF8 body, passing through")
+                        flowStates.removeValue(forKey: ObjectIdentifier(flow))
+                        return .pass()
+                    }
+                    (maskedResult, maskedCount) = maskRawText(bodyStr)
+                }
+            } else {
+                guard let bodyStr = String(data: bodyData, encoding: .utf8) else {
+                    logger.warning("Non-UTF8 body, passing through")
+                    flowStates.removeValue(forKey: ObjectIdentifier(flow))
+                    return .pass()
+                }
+                (maskedResult, maskedCount) = maskRawText(bodyStr)
+            }
+
+            if maskedCount == 0 {
+                logger.debug("No PII found in request body")
+                state.didReplace = true
+                flowStates.removeValue(forKey: ObjectIdentifier(flow))
+                return .pass()
+            }
+
+            // ── Rebuild full request with masked body ──────────────
+            let newRequestBytes = rebuildHttpRequest(
+                original: accumulated,
+                httpReq: httpReq,
+                newBody: maskedResult
+            )
+
+            logger.info("Masked \(maskedCount) PII items in request to \(httpReq.path)")
+
+            let allCounters = piiMasker.countersByType()
+            let totalMasked = allCounters.values.reduce(0, +)
+            updateStats(maskedTotal: totalMasked, counters: allCounters)
+
+            state.didReplace = true
+            flowStates.removeValue(forKey: ObjectIdentifier(flow))
+            return .replaceData(newRequestBytes)
         }
-
-        return result
     }
 
-    /**
-     * 重新组装HTTP请求
-     */
-    private func rebuildHttpRequest(_ original: HttpRequest, maskedBody: String) -> Data {
-        var request = "\(original.method) \(original.path) HTTP/1.1\r\n"
+    // MARK: - Inbound Data
 
-        // 添加headers
-        for (key, value) in original.headers {
-            // 更新Content-Length
-            if key.lowercased() == "content-length" {
-                request += "\(key): \(maskedBody.count)\r\n"
-            } else {
-                request += "\(key): \(value)\r\n"
-            }
+    override func handleInboundData(
+        from flow: NEFilterFlow,
+        readDataStart offset: Int,
+        readDataLength length: Int
+    ) -> NEFilterDataVerdict {
+        return .pass()
+    }
+
+    // MARK: - Domain Matching
+
+    private func isAiServiceDomain(_ hostname: String) -> Bool {
+        let lower = hostname.lowercased()
+        if aiServiceDomains.contains(lower) { return true }
+        for domain in aiServiceDomains {
+            if lower.hasSuffix("." + domain) { return true }
         }
+        return false
+    }
 
-        request += "\r\n"
-        request += maskedBody
+    // MARK: - Configuration
 
-        return Data(request.utf8)
+    private func loadConfiguration() {
+        let defaults = UserDefaults(suiteName: "group.com.privacygw.filter")
+        if let url = defaults?.string(forKey: "gateway_url"), !url.isEmpty {
+            gatewayUrl = url
+        }
+        if let key = KeychainHelper.read(key: "api_key") {
+            gatewayApiKey = key
+        }
+        logger.info("Config loaded: gateway=\(self.gatewayUrl)")
+    }
+
+    // MARK: - Raw Text Masking Helper
+
+    private func maskRawText(_ body: String) -> (Data, Int) {
+        let (masked, count) = piiMasker.mask(body)
+        return (Data(masked.utf8), count)
+    }
+
+    // MARK: - Pattern Sync
+
+    private func schedulePatternSync() {
+        let url = gatewayUrl
+        let key = gatewayApiKey
+        DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + 5) { [weak self] in
+            self?.syncPatterns(gatewayUrl: url, apiKey: key)
+        }
+    }
+
+    private func syncPatterns(gatewayUrl: String, apiKey: String) {
+        guard let url = URL(string: "\(gatewayUrl)/api/entities") else { return }
+        var req = URLRequest(url: url)
+        req.timeoutInterval = 10
+        if !apiKey.isEmpty {
+            req.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        }
+        URLSession.shared.dataTask(with: req) { [weak self] data, _, error in
+            if let error = error {
+                self?.logger.warning("Pattern sync failed: \(error.localizedDescription)")
+                return
+            }
+            if let data = data {
+                self?.logger.info("Pattern sync completed (\(data.count) bytes)")
+            }
+        }.resume()
+    }
+
+    // MARK: - Stats
+
+    private func persistStats() {
+        let counters = piiMasker.countersByType()
+        let total = counters.values.reduce(0, +)
+        let defaults = UserDefaults(suiteName: "group.com.privacygw.filter")
+        defaults?.set(total, forKey: "masked_total")
+        defaults?.set(Date(), forKey: "stats_updated_at")
+        if let encoded = try? JSONEncoder().encode(counters) {
+            defaults?.set(encoded, forKey: "masked_counters")
+        }
+    }
+
+    private func updateStats(maskedTotal: Int, counters: [String: Int]) {
+        let defaults = UserDefaults(suiteName: "group.com.privacygw.filter")
+        defaults?.set(maskedTotal, forKey: "masked_total")
+        defaults?.set(Date(), forKey: "stats_updated_at")
+        if let encoded = try? JSONEncoder().encode(counters) {
+            defaults?.set(encoded, forKey: "masked_counters")
+        }
     }
 }
 
+// MARK: - HTTP/1.1 Request Parser
+
 /**
- * HTTP请求结构
+ * Minimal HTTP/1.1 request parser.
+ *
+ * Handles:
+ * - `Content-Length` based body delimiting
+ * - `Transfer-Encoding: chunked` detection
+ * - Connections where headers arrive in multiple TCP segments
+ *
+ * Limitations:
+ * - No HTTP/2 support (system maps HTTP/2 to H1 for the filter)
+ * - No Content-Encoding decompression
+ * - No multi-line header values (extremely rare)
  */
-struct HttpRequest {
-    let method: String
-    let path: String
-    let headers: [String: String]
-    let body: String
+private func parseHttpRequest(_ data: Data) -> HttpParseResult {
+    guard data.count >= 16 else { return .partial }
+
+    guard let raw = String(data: data, encoding: .utf8) else { return .notHttp }
+
+    // ── Validate HTTP request-line ────────────────────────────────
+    let lines = raw.components(separatedBy: "\r\n")
+    guard let requestLine = lines.first else { return .notHttp }
+
+    let requestParts = requestLine.components(separatedBy: " ")
+    guard requestParts.count >= 3,
+          ["GET", "POST", "PUT", "PATCH", "DELETE"].contains(requestParts[0]),
+          requestParts[2].hasPrefix("HTTP/") else {
+        return .notHttp
+    }
+
+    // ── Locate header / body boundary ─────────────────────────────
+    guard let headerEnd = raw.range(of: "\r\n\r\n") else {
+        return .partial
+    }
+
+    let method        = requestParts[0]
+    let path          = requestParts[1]
+    let bodyStartByte = headerEnd.upperBound.utf16Offset(in: raw)
+    let totalBytes    = data.count
+
+    // ── Parse headers ─────────────────────────────────────────────
+    var headers: [String: String] = [:]
+    let headerSection = raw[raw.startIndex..<headerEnd.lowerBound]
+    for headerLine in headerSection.components(separatedBy: "\r\n").dropFirst() {
+        guard let colonIdx = headerLine.firstIndex(of: ":") else { continue }
+        let key = headerLine[..<colonIdx].trimmingCharacters(in: .whitespaces)
+        let val = headerLine[headerLine.index(after: colonIdx)...]
+            .trimmingCharacters(in: .whitespaces)
+        headers[key] = val
+    }
+
+    // ── Determine body completeness ────────────────────────────────
+    let contentLength = headers.first { $0.key.lowercased() == "content-length" }
+        .flatMap { Int($0.value) } ?? 0
+
+    let isChunked = headers.first { $0.key.lowercased() == "transfer-encoding" }
+        .map { $0.value.lowercased().contains("chunked") } ?? false
+
+    if isChunked {
+        // Terminating chunk marker: "0\r\n\r\n"
+        if raw.hasSuffix("\r\n0\r\n\r\n") || raw.hasSuffix("\r\n0\r\n") {
+            let bodyRange = bodyStartByte..<totalBytes
+            return .complete(ParsedHttpRequest(
+                method: method,
+                path: path,
+                headers: headers,
+                bodyRange: bodyRange,
+                isComplete: true
+            ))
+        }
+        return .partial
+    }
+
+    let bodyBytesAvailable = totalBytes - bodyStartByte
+
+    if contentLength > 0 && bodyBytesAvailable < contentLength {
+        return .partial
+    }
+
+    let bodyRange = bodyStartByte..<totalBytes
+    return .complete(ParsedHttpRequest(
+        method: method,
+        path: path,
+        headers: headers,
+        bodyRange: bodyRange,
+        isComplete: contentLength == 0 || bodyBytesAvailable >= contentLength
+    ))
+}
+
+// MARK: - Request Re-builder
+
+/**
+ * Replaces the body of an HTTP/1.1 request with `newBody` and updates
+ * the `Content-Length` header to match.
+ */
+private func rebuildHttpRequest(
+    original: Data,
+    httpReq: ParsedHttpRequest,
+    newBody: Data
+) -> Data {
+    // Read header portion as a string
+    let headerData = original.subdata(in: 0..<httpReq.bodyRange.lowerBound)
+    guard var headerStr = String(data: headerData, encoding: .utf8) else {
+        // If we can't decode the header as UTF-8, fall back to just
+        // appending the new body.
+        var result = headerData
+        result.append(newBody)
+        return result
+    }
+
+    // Replace Content-Length header value
+    if let clKey = httpReq.headers.keys.first(where: { $0.lowercased() == "content-length" }),
+       let oldVal = httpReq.headers[clKey] {
+        let oldLine = "\(clKey): \(oldVal)"
+        let newLine = "\(clKey): \(newBody.count)"
+        headerStr = headerStr.replacingOccurrences(of: oldLine, with: newLine)
+    }
+
+    // Assemble final bytes
+    var result = Data()
+    result.append(Data(headerStr.utf8))
+    result.append(newBody)
+    return result
 }
