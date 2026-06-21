@@ -41,7 +41,7 @@ Map<String, dynamic> _$MaskResultToJson(MaskResult instance) =>
     };
 
 Entity _$EntityFromJson(Map<String, dynamic> json) => Entity(
-      type: json['type'] as String,
+      type: json['type'] as String? ?? '',
       value: json['value'] as String,
       placeholder: json['placeholder'] as String,
       position: (json['position'] as num?)?.toInt() ?? 0,
@@ -58,7 +58,7 @@ Stats _$StatsFromJson(Map<String, dynamic> json) => Stats(
       phone: (json['phone'] as num?)?.toInt() ?? 0,
       email: (json['email'] as num?)?.toInt() ?? 0,
       idCard: (json['idcard'] as num?)?.toInt() ?? 0,
-      bank: (json['bank'] as num?)?.toInt() ?? 0,
+      bank: (json['bankcard'] as num?)?.toInt() ?? 0,
       person: (json['person'] as num?)?.toInt() ?? 0,
       location: (json['location'] as num?)?.toInt() ?? 0,
       organization: (json['organization'] as num?)?.toInt() ?? 0,
@@ -75,7 +75,7 @@ Map<String, dynamic> _$StatsToJson(Stats instance) => <String, dynamic>{
       'phone': instance.phone,
       'email': instance.email,
       'idcard': instance.idCard,
-      'bank': instance.bank,
+      'bankcard': instance.bank,
       'person': instance.person,
       'location': instance.location,
       'organization': instance.organization,
@@ -136,6 +136,7 @@ EntitiesResponse _$EntitiesResponseFromJson(Map<String, dynamic> json) =>
           .toList(),
       total: (json['total'] as num).toInt(),
       version: json['version'] as String,
+      nerAvailable: json['ner_available'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$EntitiesResponseToJson(EntitiesResponse instance) =>
@@ -143,6 +144,7 @@ Map<String, dynamic> _$EntitiesResponseToJson(EntitiesResponse instance) =>
       'entities': instance.entities,
       'total': instance.total,
       'version': instance.version,
+      'ner_available': instance.nerAvailable,
     };
 
 EntityInfo _$EntityInfoFromJson(Map<String, dynamic> json) => EntityInfo(
@@ -150,6 +152,7 @@ EntityInfo _$EntityInfoFromJson(Map<String, dynamic> json) => EntityInfo(
       name: json['name'] as String,
       description: json['description'] as String,
       enabled: json['enabled'] as bool,
+      engine: json['engine'] as String? ?? '',
     );
 
 Map<String, dynamic> _$EntityInfoToJson(EntityInfo instance) =>
@@ -158,4 +161,5 @@ Map<String, dynamic> _$EntityInfoToJson(EntityInfo instance) =>
       'name': instance.name,
       'description': instance.description,
       'enabled': instance.enabled,
+      'engine': instance.engine,
     };
