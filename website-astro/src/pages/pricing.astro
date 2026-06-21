@@ -5,250 +5,710 @@ import Footer from '../components/Footer.astro';
 ---
 
 <Layout
-  title="AI Privacy Gateway — 永久免费开源"
-  description="AI Privacy Gateway 基于 MIT 许可证永久免费开源。个人和商业项目均可自由使用。"
+  title="AI Privacy Gateway — Free Forever. MIT Licensed."
+  description="AI Privacy Gateway is free forever under the MIT license. No hidden costs, no subscriptions, no data collection. Personal and commercial use allowed."
   canonicalURL="https://privacygw.pages.dev/pricing">
   <Nav />
 
   <!-- Hero -->
   <section class="hero">
+    <div class="hero-orb-1"></div>
+    <div class="hero-orb-2"></div>
     <div class="container hero-content">
       <div class="hero-badge">
-        <span class="badge-dot"></span>
-        <span>永久免费 · MIT 开源</span>
+        <span class="pulse-dot"></span>
+        <span>Free Forever &middot; MIT Licensed</span>
       </div>
       <h1 class="hero-title">
-        完全<span class="gradient-text">免费</span>
+        No subscriptions.<br/>
+        <span class="gradient-text">Just privacy.</span>
       </h1>
-      <p class="hero-description">
-        AI Privacy Gateway 基于 MIT 许可证开源，永久免费。<br/>
-        个人和商业项目均可自由使用，无需激活。
+      <p class="hero-desc">
+        AI Privacy Gateway is open source and free. Always. No credit card, no account,
+        no data collection. You run it on your own machine.
       </p>
-      <div class="hero-actions">
-        <a href="/download" class="btn btn-primary">立即下载</a>
-        <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-ghost">GitHub</a>
+    </div>
+  </section>
+
+  <!-- Pricing cards -->
+  <section class="pricing">
+    <div class="container">
+      <div class="pricing-grid">
+        <!-- Lite / OSS Card -->
+        <div class="pricing-card pricing-featured glass glow-hover">
+          <div class="pricing-glow"></div>
+          <div class="pricing-badge">Free Forever</div>
+          <div class="pricing-header">
+            <h2 class="pricing-name">Lite Edition</h2>
+            <div class="pricing-amount">
+              <span class="pricing-currency">$</span>
+              <span class="pricing-value">0</span>
+            </div>
+            <p class="pricing-period">MIT License &middot; No restrictions</p>
+          </div>
+
+          <ul class="pricing-features">
+            <li class="pricing-feat">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Intelligent masking engine (14 entity types)
+            </li>
+            <li class="pricing-feat">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Regex + NER dual-engine detection
+            </li>
+            <li class="pricing-feat">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              SSE streaming proxy with real-time masking
+            </li>
+            <li class="pricing-feat">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Local SQLite encrypted vault
+            </li>
+            <li class="pricing-feat">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Custom regex &amp; keyword rules
+            </li>
+            <li class="pricing-feat">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Real-time admin dashboard
+            </li>
+            <li class="pricing-feat">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Docker / pip / binary / browser extension
+            </li>
+            <li class="pricing-feat">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Commercial use allowed
+            </li>
+          </ul>
+
+          <a href="/download" class="btn btn-primary pricing-cta">
+            Get Started Free
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </a>
+
+          <p class="pricing-footnote">
+            No registration. No email. Just download and run.
+          </p>
+        </div>
+
+        <!-- Pro — Coming Soon -->
+        <div class="pricing-card glass">
+          <div class="pricing-badge pricing-badge-soon">Coming Soon</div>
+          <div class="pricing-header">
+            <h2 class="pricing-name">Pro Edition</h2>
+            <div class="pricing-amount">
+              <span class="pricing-currency">$</span>
+              <span class="pricing-value">19</span>
+              <span class="pricing-unit">/mo</span>
+            </div>
+            <p class="pricing-period">Per instance &middot; For teams</p>
+          </div>
+
+          <ul class="pricing-features">
+            <li class="pricing-feat">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Everything in Lite, plus:
+            </li>
+            <li class="pricing-feat">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Team management &amp; audit logs
+            </li>
+            <li class="pricing-feat">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Advanced policy engine (context-aware masking)
+            </li>
+            <li class="pricing-feat">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Role-based access control
+            </li>
+            <li class="pricing-feat">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Prometheus metrics integration
+            </li>
+            <li class="pricing-feat">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Priority GitHub issues &amp; support
+            </li>
+          </ul>
+
+          <div class="pricing-cta pricing-cta-disabled">
+            <span>Coming Q3 2026</span>
+          </div>
+          <p class="pricing-footnote">Lite users get a discount on launch.</p>
+        </div>
+
+        <!-- Enterprise -->
+        <div class="pricing-card glass">
+          <div class="pricing-badge pricing-badge-soon">On Request</div>
+          <div class="pricing-header">
+            <h2 class="pricing-name">Enterprise</h2>
+            <div class="pricing-amount">
+              <span class="pricing-currency">$</span>
+              <span class="pricing-value">Custom</span>
+            </div>
+            <p class="pricing-period">Self-hosted or managed</p>
+          </div>
+
+          <ul class="pricing-features">
+            <li class="pricing-feat">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Everything in Pro, plus:
+            </li>
+            <li class="pricing-feat">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              On-premise or VPC deployment
+            </li>
+            <li class="pricing-feat">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              SLA-backed support
+            </li>
+            <li class="pricing-feat">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              SSO / SAML integration
+            </li>
+            <li class="pricing-feat">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Custom compliance reporting
+            </li>
+            <li class="pricing-feat">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Dedicated support engineer
+            </li>
+          </ul>
+
+          <a href="https://t.me/chirstmas_7" class="btn btn-ghost pricing-cta">
+            Contact Us
+          </a>
+          <p class="pricing-footnote">Tailored pricing for your organization.</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Features included -->
-  <section class="features-section">
+  <!-- Feature comparison -->
+  <section class="comparison">
     <div class="container">
-      <h2 class="section-title">Lite 版包含全部核心功能</h2>
-      <div class="feature-grid">
-        <div class="feature-card glass">
-          <h3>智能脱敏引擎</h3>
-          <p>正则 + NER 双引擎，14 类敏感实体自动识别</p>
+      <h2 class="section-title">Feature comparison</h2>
+      <p class="section-subtitle">Every core feature is free and open source. Pro and Enterprise add team capabilities.</p>
+
+      <div class="comparison-table-wrap glass">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th class="comp-feat-th">Feature</th>
+              <th class="comp-tier-th comp-lite">Lite</th>
+              <th class="comp-tier-th comp-pro">Pro</th>
+              <th class="comp-tier-th comp-ent">Enterprise</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="comp-feat">14 entity type detection</td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+            </tr>
+            <tr>
+              <td class="comp-feat">SSE streaming proxy</td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+            </tr>
+            <tr>
+              <td class="comp-feat">Local SQLite vault</td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+            </tr>
+            <tr>
+              <td class="comp-feat">Custom regex/keyword rules</td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+            </tr>
+            <tr>
+              <td class="comp-feat">Admin dashboard</td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+            </tr>
+            <tr>
+              <td class="comp-feat">Docker / pip / binary</td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+            </tr>
+            <tr>
+              <td class="comp-feat">MIT License</td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+              <td class="comp-cell"><span class="cross">&ndash;</span></td>
+              <td class="comp-cell"><span class="cross">&ndash;</span></td>
+            </tr>
+            <tr>
+              <td class="comp-feat">Team management</td>
+              <td class="comp-cell"><span class="cross">&ndash;</span></td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+            </tr>
+            <tr>
+              <td class="comp-feat">Audit logs</td>
+              <td class="comp-cell"><span class="cross">&ndash;</span></td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+            </tr>
+            <tr>
+              <td class="comp-feat">Advanced policy engine</td>
+              <td class="comp-cell"><span class="cross">&ndash;</span></td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+            </tr>
+            <tr>
+              <td class="comp-feat">SSO / SAML</td>
+              <td class="comp-cell"><span class="cross">&ndash;</span></td>
+              <td class="comp-cell"><span class="cross">&ndash;</span></td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+            </tr>
+            <tr>
+              <td class="comp-feat">SLA support</td>
+              <td class="comp-cell"><span class="cross">&ndash;</span></td>
+              <td class="comp-cell"><span class="cross">&ndash;</span></td>
+              <td class="comp-cell"><span class="check">&#10003;</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trust / Open Source Callout -->
+  <section class="trust">
+    <div class="container">
+      <div class="trust-card glass">
+        <div class="trust-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
         </div>
-        <div class="feature-card glass">
-          <h3>流式 SSE 代理</h3>
-          <p>完美代理流式响应，实时脱敏/还原，零延迟感知</p>
-        </div>
-        <div class="feature-card glass">
-          <h3>本地加密存储</h3>
-          <p>SQLite 本地存储，映射数据永不离开你的机器</p>
-        </div>
-        <div class="feature-card glass">
-          <h3>自定义敏感词</h3>
-          <p>支持正则 + 关键词自定义脱敏规则</p>
-        </div>
-        <div class="feature-card glass">
-          <h3>管理后台</h3>
-          <p>实时统计面板，查看脱敏次数、实体分布、映射记录</p>
-        </div>
-        <div class="feature-card glass">
-          <h3>全平台覆盖</h3>
-          <p>Docker / Windows / macOS / pip / 浏览器扩展</p>
+        <h3>Open Source. Auditable. Trustable.</h3>
+        <p>
+          Every line of code is on GitHub. No telemetry, no phone-home, no hidden data collection.
+          If you don't trust the binary, build from source.
+        </p>
+        <div class="trust-buttons">
+          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+            View Source
+          </a>
+          <a href="/download" class="btn btn-ghost">Download Lite</a>
         </div>
       </div>
     </div>
   </section>
 
   <!-- FAQ -->
-  <section class="faq-section">
+  <section class="faq">
     <div class="container">
-      <h2 class="section-title">常见问题</h2>
+      <h2 class="section-title">Frequently asked questions</h2>
       <div class="faq-grid">
-        <div class="faq-card glass">
-          <h3>Lite 版真的完全免费吗？</h3>
-          <p>是的，基于 MIT 许可证开源，永久免费。没有隐藏费用，不需要激活。</p>
+        <div class="faq-item glass">
+          <h3>Is Lite really free forever?</h3>
+          <p>Yes. MIT licensed, no strings attached. No hidden costs, no upsells, no data collection. Free for personal and commercial use.</p>
         </div>
-        <div class="faq-card glass">
-          <h3>可以商用吗？</h3>
-          <p>可以。MIT 许可证允许自由用于个人和商业项目，包括闭源商业产品。</p>
+        <div class="faq-item glass">
+          <h3>Can I use it in a commercial product?</h3>
+          <p>Absolutely. MIT license permits use in closed-source commercial products. No attribution required.</p>
         </div>
-        <div class="faq-card glass">
-          <h3>数据安全吗？</h3>
-          <p>所有数据存储在本地 SQLite 数据库中，不会上传到任何第三方服务器。网关运行在你自己的机器上，完全由你掌控。</p>
+        <div class="faq-item glass">
+          <h3>Where is my data stored?</h3>
+          <p>Entirely on your machine. The gateway uses a local SQLite database. No data is ever uploaded to any third-party server.</p>
         </div>
-        <div class="faq-card glass">
-          <h3>如何获取支持？</h3>
-          <p>通过 <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/issues">GitHub Issues</a> 提交问题，或查阅 <a href="/docs">文档</a>。</p>
+        <div class="faq-item glass">
+          <h3>Does it work with Cursor / DeepSeek / Kimi?</h3>
+          <p>Yes. Any tool that uses an OpenAI-compatible API can point to the gateway. Just change the <code>base_url</code>.</p>
+        </div>
+        <div class="faq-item glass">
+          <h3>What if I need help?</h3>
+          <p>Open an issue on <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/issues">GitHub Issues</a>, check the <a href="/docs">docs</a>, or reach out via <a href="https://t.me/chirstmas_7">Telegram</a>.</p>
+        </div>
+        <div class="faq-item glass">
+          <h3>Why would I pay for Pro if Lite is free?</h3>
+          <p>Pro adds team features: audit logs, RBAC, advanced policies, and metrics. For individual developers, Lite is all you need.</p>
         </div>
       </div>
     </div>
   </section>
 
   <Footer />
+
+  <style>
+    /* --- Hero --- */
+    .hero {
+      padding: 10rem 0 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-orb-1 {
+      position: absolute; top: -200px; right: -100px;
+      width: 650px; height: 650px;
+      background: radial-gradient(circle, var(--primary-glow) 0%, rgba(134, 239, 172, 0.05) 40%, transparent 60%);
+      border-radius: 50%; filter: blur(100px);
+      animation: orb-f 18s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .hero-orb-2 {
+      position: absolute; bottom: -150px; left: -100px;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, var(--accent-glow) 0%, rgba(167, 139, 250, 0.05) 40%, transparent 60%);
+      border-radius: 50%; filter: blur(80px);
+      animation: orb-f 22s ease-in-out infinite -7s;
+      pointer-events: none;
+    }
+
+    @keyframes orb-f {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-20px) scale(1.05); }
+    }
+
+    .hero-content { text-align: center; position: relative; z-index: 1; }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: var(--glass-bg); backdrop-filter: var(--glass-blur);
+      padding: 0.5rem 1rem; border-radius: 20px;
+      font-size: 0.85rem; color: var(--primary); margin-bottom: 1.5rem;
+      border: 1px solid var(--border);
+    }
+
+    .hero-title {
+      font-size: 3.5rem; font-weight: 700; letter-spacing: -0.04em;
+      margin-bottom: 1.25rem; line-height: 1.15;
+    }
+
+    .hero-desc {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 540px; margin: 0 auto; line-height: 1.8;
+    }
+
+    /* --- Pricing Cards --- */
+    .pricing { padding: 4rem 0; position: relative; z-index: 1; }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+      align-items: start;
+    }
+
+    .pricing-card {
+      padding: 2.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pricing-featured {
+      position: relative;
+      border-color: rgba(134, 239, 172, 0.2);
+    }
+
+    .pricing-glow {
+      position: absolute;
+      top: -50%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(134, 239, 172, 0.08), transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .pricing-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 6px;
+      background: rgba(74, 222, 128, 0.12);
+      color: #4ade80;
+      margin-bottom: 1.5rem;
+      align-self: flex-start;
+    }
+
+    .pricing-badge-soon {
+      background: rgba(148, 163, 184, 0.1);
+      color: var(--text-muted);
+    }
+
+    .pricing-header { margin-bottom: 2rem; }
+
+    .pricing-name {
+      font-size: 1.15rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .pricing-amount {
+      display: flex;
+      align-items: baseline;
+      gap: 0.15rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .pricing-currency {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .pricing-value {
+      font-size: 3rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1;
+    }
+
+    .pricing-featured .pricing-value {
+      background: linear-gradient(135deg, var(--primary), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .pricing-unit {
+      font-size: 1rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .pricing-period {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .pricing-features {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 2rem;
+      flex: 1;
+    }
+
+    .pricing-feat {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.5rem 0;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+    }
+
+    .pricing-feat svg {
+      flex-shrink: 0;
+      color: var(--primary);
+    }
+
+    .pricing-cta {
+      width: 100%;
+      padding: 0.85rem;
+      font-size: 1rem;
+      text-align: center;
+      box-sizing: border-box;
+    }
+
+    .pricing-cta-disabled {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.85rem;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .pricing-footnote {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 0.75rem;
+    }
+
+    /* --- Comparison Table --- */
+    .comparison { padding: 4rem 0 6rem; position: relative; z-index: 1; }
+
+    .comparison-table-wrap {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      padding: 0.85rem 1rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .comp-feat-th {
+      text-align: left;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .comp-tier-th {
+      font-weight: 700;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    .comp-lite { color: #4ade80; }
+    .comp-pro { color: var(--accent); }
+    .comp-ent { color: var(--warning); }
+
+    .comp-feat {
+      text-align: left;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+
+    .comp-cell {
+      color: var(--text-primary);
+      font-size: 0.88rem;
+    }
+
+    .check { color: var(--primary); font-weight: 700; }
+    .cross { color: var(--text-dim); }
+
+    /* --- Trust --- */
+    .trust { padding: 2rem 0 6rem; position: relative; z-index: 1; }
+
+    .trust-card {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 3rem 2.5rem;
+      text-align: center;
+    }
+
+    .trust-icon {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+      color: var(--primary);
+    }
+
+    .trust-card h3 {
+      font-size: 1.3rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .trust-card p {
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+    }
+
+    .trust-buttons {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    /* --- FAQ --- */
+    .faq { padding: 0 0 6rem; position: relative; z-index: 1; }
+
+    .faq-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .faq-item {
+      padding: 1.5rem;
+    }
+
+    .faq-item h3 {
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .faq-item p {
+      color: var(--text-secondary);
+      font-size: 0.88rem;
+      line-height: 1.7;
+    }
+
+    .faq-item code {
+      background: var(--bg-deep);
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.82rem;
+      color: var(--primary);
+    }
+
+    .faq-item a { color: var(--primary); }
+
+    /* --- Responsive --- */
+    @media (min-width: 1440px) and (max-width: 1919px) {
+      .hero-title { font-size: 4rem; }
+    }
+
+    @media (min-width: 1024px) and (max-width: 1279px) {
+      .hero-title { font-size: 3rem; }
+    }
+
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .hero { padding: 8rem 0 3rem; }
+      .hero-title { font-size: 2.75rem; }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 450px; }
+      .faq-grid { grid-template-columns: 1fr; max-width: 550px; }
+    }
+
+    @media (max-width: 767px) {
+      .hero { padding: 7rem 0 3rem; }
+      .hero-title { font-size: 2.25rem; }
+      .hero-desc { font-size: 1rem; }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
+      .pricing-card { padding: 2rem 1.5rem; }
+      .faq-grid { grid-template-columns: 1fr; }
+      .trust-card { padding: 2rem 1.5rem; }
+      .trust-buttons { flex-direction: column; }
+      .comparison-table { font-size: 0.78rem; }
+      .comparison-table th,
+      .comparison-table td { padding: 0.65rem 0.5rem; }
+      .hero-orb-1 { width: 350px; height: 350px; top: -50px; right: -80px; opacity: 0.3; }
+      .hero-orb-2 { width: 300px; height: 300px; opacity: 0.3; }
+    }
+
+    @media (max-width: 639px) {
+      .hero-title { font-size: 2rem; }
+      .pricing-grid { max-width: 100%; }
+    }
+  </style>
 </Layout>
-
-<style>
-  .hero {
-    padding: 10rem 0 4rem;
-    position: relative;
-  }
-
-  .hero-content {
-    text-align: center;
-  }
-
-  .hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: var(--bg-surface);
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--primary);
-    margin-bottom: 1.5rem;
-  }
-
-  .badge-dot {
-    width: 8px;
-    height: 8px;
-    background: var(--primary);
-    border-radius: 50%;
-    animation: pulse 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-  }
-
-  .hero-title {
-    font-size: 3.5rem;
-    font-weight: 700;
-    letter-spacing: -0.04em;
-    margin-bottom: 1.5rem;
-    line-height: 1.15;
-  }
-
-  .gradient-text {
-    background: linear-gradient(135deg, var(--primary), var(--accent));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .hero-description {
-    font-size: 1.125rem;
-    color: var(--text-secondary);
-    line-height: 1.8;
-    max-width: 560px;
-    margin: 0 auto 2rem;
-  }
-
-  .hero-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-  }
-
-  .btn-ghost {
-    background: transparent;
-    color: var(--text-secondary);
-    border: 1px solid var(--border);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-decoration: none;
-  }
-
-  .btn-ghost:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-    background: rgba(134, 239, 172, 0.05);
-  }
-
-  .features-section {
-    padding: 4rem 0;
-  }
-
-  .section-title {
-    font-size: 2.5rem;
-    font-weight: 600;
-    text-align: center;
-    margin-bottom: 3rem;
-  }
-
-  .feature-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.25rem;
-    max-width: 960px;
-    margin: 0 auto;
-  }
-
-  .feature-card {
-    padding: 1.75rem;
-  }
-
-  .feature-card h3 {
-    font-size: 1rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .feature-card p {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    line-height: 1.6;
-  }
-
-  .faq-section {
-    padding: 4rem 0 6rem;
-  }
-
-  .faq-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
-    max-width: 900px;
-    margin: 0 auto;
-  }
-
-  .faq-card {
-    padding: 1.5rem;
-  }
-
-  .faq-card h3 {
-    color: var(--primary);
-    margin-bottom: 0.5rem;
-    font-size: 1rem;
-  }
-
-  .faq-card p {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    line-height: 1.7;
-  }
-
-  .faq-card a {
-    color: var(--primary);
-  }
-
-  @media (max-width: 768px) {
-    .hero-title { font-size: 2.25rem; }
-    .feature-grid { grid-template-columns: 1fr; max-width: 400px; }
-    .faq-grid { grid-template-columns: 1fr; }
-  }
-</style>

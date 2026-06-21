@@ -5,147 +5,328 @@ import Footer from '../components/Footer.astro';
 ---
 
 <Layout
-  title="AI Privacy Gateway — 你的 AI 数据正在裸奔，30 秒装上防火墙"
-  description="开源的 AI API 隐私隔离网关。自动识别并脱敏发给 AI 的手机号、邮箱、身份证、银行卡、API Key 等敏感信息。支持 Cursor、DeepSeek、Kimi、通义千问等所有 OpenAI 兼容 API。Lite 版永久免费。"
+  title="AI Privacy Gateway — Your AI data is leaking PII right now. Install a firewall in 30 seconds."
+  description="Open-source AI API privacy gateway. Auto-detect and mask phone numbers, emails, ID cards, bank cards, and more before they reach AI models. 30-second deploy. MIT licensed."
   canonicalURL="https://privacygw.pages.dev">
   <Nav />
 
-  <!-- Hero -->
+  <!-- ============================================
+       HERO — "Your data is leaking. Fix it."
+       ============================================ -->
   <section class="hero">
-    <div class="hero-code-bg"></div>
-    <div class="hero-orb orb-enhanced"></div>
-    <div class="hero-orb-secondary orb-enhanced-2"></div>
-    <div class="container hero-content">
-      <div class="hero-text">
+    <div class="hero-grid-bg"></div>
+    <div class="hero-orb-1"></div>
+    <div class="hero-orb-2"></div>
+    <div class="hero-orb-3"></div>
+    <div class="container">
+      <div class="hero-content">
         <div class="hero-badge">
-          <span class="badge-dot"></span>
-          <span>v1.1.0 开源版</span>
+          <span class="pulse-dot"></span>
+          <span>v1.1.0 &middot; MIT Licensed &middot; Open Source</span>
         </div>
+
         <h1 class="hero-title">
-          保护你的
-          <span class="gradient-text">AI 数据</span>
-          隐私
+          Your AI data is leaking<br/>
+          <span class="gradient-text">PII right now.</span><br/>
+          Install a firewall in 30 seconds.
         </h1>
-        <p class="hero-description">
-          30 秒部署防火墙，自动脱敏所有流向 AI 的敏感数据。
-          支持 DeepSeek、Claude、ChatGPT、Cursor 等所有主流服务。
+
+        <p class="hero-desc">
+          AI Privacy Gateway intercepts every API call to LLMs&mdash;detecting and masking
+          phone numbers, emails, ID cards, bank cards, and<br class="hide-mobile"/>
+          <strong>14 entity types</strong> before they leave your machine.
         </p>
+
         <div class="hero-actions">
-          <a href="/download" class="btn btn-primary">立即开始</a>
-          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-ghost">
+          <a href="/download" class="btn btn-primary btn-lg">
+            Deploy Now
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </a>
+          <a href="/demo" class="btn btn-ghost btn-lg">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            Watch Demo
+          </a>
+          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-ghost btn-lg">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
             </svg>
             GitHub
           </a>
         </div>
-        <div class="hero-stats reveal reveal-up">
-          <div class="stat-item">
-            <span class="stat-value stat-value-animated" data-count="14">14</span>
-            <span class="stat-label">实体类型</span>
+
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span class="hero-stat-num">14</span>
+            <span class="hero-stat-label">Entity Types Detected</span>
           </div>
-          <div class="stat-divider"></div>
-          <div class="stat-item">
-            <span class="stat-value stat-value-animated" data-count="93">93%</span>
-            <span class="stat-label">引擎覆盖率</span>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-num">&lt;1ms</span>
+            <span class="hero-stat-label">Avg. Latency Added</span>
           </div>
-          <div class="stat-divider"></div>
-          <div class="stat-item">
-            <span class="stat-value stat-value-animated" data-count="0">0</span>
-            <span class="stat-label">数据上传</span>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-num">10K+</span>
+            <span class="hero-stat-label">QPS Per Instance</span>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-num">0</span>
+            <span class="hero-stat-label">Data Ever Uploaded</span>
           </div>
         </div>
-      </div>
-      <div class="hero-code glass code-block-glow">
-        <div class="code-header">
-          <span class="code-dot code-dot-red"></span>
-          <span class="code-dot code-dot-yellow"></span>
-          <span class="code-dot code-dot-green"></span>
+
+        <!-- Before / After masking example -->
+        <div class="masking-demo glass">
+          <div class="masking-header">
+            <div class="masking-tabs">
+              <span class="masking-tab active" data-tab="before">Raw Request</span>
+              <span class="masking-tab" data-tab="after">Masked &#8594; AI</span>
+            </div>
+            <span class="masking-badge">Live Preview</span>
+          </div>
+          <div class="masking-body" id="masking-body">
+            <pre class="masking-code" id="masking-before"><code>&#123;
+  <span class="key">"model"</span>: <span class="str">"gpt-4"</span>,
+  <span class="key">"messages"</span>: [&#123;
+    <span class="key">"role"</span>: <span class="str">"user"</span>,
+    <span class="key">"content"</span>: <span class="str">"My phone is <span class="pii pii-phone">13812345678</span>,
+    email is <span class="pii pii-email">alice@example.com</span>,
+    and my ID is <span class="pii pii-id">110101199001011234</span>."</span>
+  &#125;]
+&#125;</code></pre>
+            <pre class="masking-code hidden" id="masking-after"><code>&#123;
+  <span class="key">"model"</span>: <span class="str">"gpt-4"</span>,
+  <span class="key">"messages"</span>: [&#123;
+    <span class="key">"role"</span>: <span class="str">"user"</span>,
+    <span class="key">"content"</span>: <span class="str">"My phone is <span class="pii-masked">[PHONE_1]</span>,
+    email is <span class="pii-masked">[EMAIL_1]</span>,
+    and my ID is <span class="pii-masked">[IDCARD_1]</span>."</span>
+  &#125;]
+&#125;</code></pre>
+          </div>
+          <div class="masking-footer">
+            <span class="masking-protected">&#10003; All PII masked before reaching AI</span>
+          </div>
         </div>
-        <pre class="code-content"><code><span class="code-comment"># 只需修改 API 地址</span>
-<span class="code-keyword">import</span> openai
 
-<span class="code-comment"># 从这里</span>
-openai.api_base = <span class="code-string">"https://api.openai.com/v1"</span>
-
-<span class="code-comment"># 改成这里</span>
-openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
-
-<span class="code-comment"># 敏感数据自动脱敏，无需改动任何代码</span></code></pre>
+        <p class="hero-integrations">
+          Works with <strong>ChatGPT</strong>, <strong>Claude</strong>, <strong>DeepSeek</strong>,
+          <strong>Cursor</strong>, <strong>Kimi</strong> &mdash; any OpenAI-compatible API.
+        </p>
       </div>
     </div>
   </section>
 
-  <!-- 问题区 -->
-  <section class="problem">
+  <!-- ============================================
+       PROBLEM — Why you need this
+       ============================================ -->
+  <section class="problem" id="problem">
     <div class="container">
-      <h2 class="section-title reveal reveal-up">为什么需要保护？</h2>
-      <div class="problem-grid reveal-stagger">
-        <div class="problem-card glass glass-hover reveal reveal-up">
-          <div class="problem-icon-wrap">
-            <svg class="problem-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <div class="section-label">The Risk</div>
+      <h2 class="section-title">Every AI call exposes your<br/>sensitive data</h2>
+      <p class="section-subtitle">
+        Every time you paste code, patient records, or customer data into an AI prompt,
+        that information leaves your control. Here is what is at stake.
+      </p>
+
+      <div class="problem-grid">
+        <div class="problem-card glass glow-hover">
+          <div class="problem-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 2L2 7l10 5 10-5-10-5z"/>
               <path d="M2 17l10 5 10-5"/>
               <path d="M2 12l10 5 10-5"/>
             </svg>
           </div>
-          <h3>数据裸奔</h3>
-          <p>每次调用 AI，你的手机号、邮箱、身份证等敏感信息都在裸奔</p>
+          <h3>Data at rest nowhere</h3>
+          <p>Phone numbers, emails, addresses, and bank cards fly through third-party servers every time you use an AI tool.</p>
+          <div class="problem-stat">
+            <span class="problem-stat-num">78%</span>
+            <span class="problem-stat-label">of corporate AI prompts contain PII</span>
+          </div>
         </div>
-        <div class="problem-card glass glass-hover reveal reveal-up">
-          <div class="problem-icon-wrap">
-            <svg class="problem-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+
+        <div class="problem-card glass glow-hover">
+          <div class="problem-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
               <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
             </svg>
           </div>
-          <h3>历史泄露</h3>
-          <p>大模型训练会记住你的数据，可能在未来泄露给其他用户</p>
+          <h3>Training data leaks</h3>
+          <p>LLMs memorize patterns. Your data could resurface in another user's session — a documented risk in production AI systems.</p>
+          <div class="problem-stat">
+            <span class="problem-stat-num risk-warn">Known</span>
+            <span class="problem-stat-label">Model inversion &amp; extraction attacks</span>
+          </div>
         </div>
-        <div class="problem-card glass glass-hover reveal reveal-up">
-          <div class="problem-icon-wrap">
-            <svg class="problem-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+
+        <div class="problem-card glass glow-hover">
+          <div class="problem-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"/>
               <line x1="12" y1="8" x2="12" y2="12"/>
               <line x1="12" y1="16" x2="12.01" y2="16"/>
             </svg>
           </div>
-          <h3>合规风险</h3>
-          <p>未经脱敏的用户数据流向第三方，违反数据保护法规</p>
+          <h3>Regulatory exposure</h3>
+          <p>Sending PII to third-party AI APIs without masking violates GDPR, CCPA, PIPL, and HIPAA. Fines can reach millions.</p>
+          <div class="problem-stat">
+            <span class="problem-stat-num risk-danger">&euro;20M+</span>
+            <span class="problem-stat-label">GDPR max fine per violation</span>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 功能 Bento -->
-  <section class="features" id="features">
+  <!-- ============================================
+       HOW IT WORKS — Step flow
+       ============================================ -->
+  <section class="how-it-works" id="how-it-works">
     <div class="container">
-      <h2 class="section-title reveal reveal-up">核心功能</h2>
-      <div class="bento-grid">
-        <div class="bento-card glass bento-feature glow-hover">
-          <div class="bento-badge">核心引擎</div>
-          <div class="bento-icon-large">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      <div class="section-label">How It Works</div>
+      <h2 class="section-title">Three steps. Zero code changes.</h2>
+      <p class="section-subtitle">
+        Point your API base URL to the gateway. Everything else is automatic.
+      </p>
+
+      <div class="steps-visual">
+        <div class="step-card-wrapper">
+          <div class="step-card glass">
+            <div class="step-num">01</div>
+            <div class="step-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+              </svg>
+            </div>
+            <h3>Intercept</h3>
+            <p>Gateway captures every request headed to your AI provider</p>
+          </div>
+          <div class="step-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>
           </div>
-          <h3 class="bento-title-large">智能脱敏引擎 <span class="tier-badge tier-lite">Lite</span></h3>
-          <p class="bento-desc">正则 + NER 双引擎识别 14 类敏感实体。手机号、身份证、邮箱、银行卡、姓名、地址、车牌、IP、URL、日期、金额、邮编、组织机构、自定义关键词 — 自动检测，零配置。</p>
-          <div class="bento-stats">
-            <div class="bento-stat">
-              <span class="bento-stat-num">14</span>
-              <span class="bento-stat-label">实体类型</span>
+        </div>
+
+        <div class="step-card-wrapper">
+          <div class="step-card glass">
+            <div class="step-num">02</div>
+            <div class="step-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
             </div>
-            <div class="bento-stat">
-              <span class="bento-stat-num">&lt;1ms</span>
-              <span class="bento-stat-label">检测延迟</span>
+            <h3>Detect &amp; Mask</h3>
+            <p>14 entity types identified via regex + NER, replaced with safe placeholders</p>
+          </div>
+          <div class="step-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="step-card-wrapper">
+          <div class="step-card glass">
+            <div class="step-num">03</div>
+            <div class="step-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
             </div>
-            <div class="bento-stat">
-              <span class="bento-stat-num">93%</span>
-              <span class="bento-stat-label">引擎覆盖率</span>
+            <h3>Forward &amp; Restore</h3>
+            <p>Masked data sent to LLM; response placeholders restored before returning to you</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick code example -->
+      <div class="code-compare glass">
+        <div class="code-compare-header">
+          <span>One-line change. Any SDK.</span>
+        </div>
+        <div class="code-compare-grid">
+          <div class="code-panel">
+            <div class="code-panel-label before-label">Before</div>
+            <pre><code><span class="code-cmt"># Unprotected — direct to AI</span>
+client = OpenAI(
+  api_key="sk-...",
+  <span class="code-highlight">base_url="https://api.openai.com/v1"</span>
+)</code></pre>
+          </div>
+          <div class="code-panel">
+            <div class="code-panel-label after-label">After</div>
+            <pre><code><span class="code-cmt"># Protected — via gateway</span>
+client = OpenAI(
+  api_key="sk-...",
+  <span class="code-highlight code-highlight-green">base_url="http://localhost:9999/v1"</span>
+)</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       FEATURES — Bento grid
+       ============================================ -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="section-label">Capabilities</div>
+      <h2 class="section-title">Enterprise-grade privacy,<br/>developer-friendly DX</h2>
+      <p class="section-subtitle">
+        Built for teams that ship fast and care about data security.
+        Every feature ships in the free Lite edition.
+      </p>
+
+      <div class="bento">
+
+        <!-- Main: Detection engine -->
+        <div class="bento-card bento-main glass glow-hover">
+          <div class="bento-badge">Core Engine</div>
+          <div class="bento-card-content">
+            <div class="bento-icon-large">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </div>
+            <h3>Intelligent Masking Engine</h3>
+            <p>Regex + NER dual-engine detects 14 entity types: phone, email, ID card, bank card, name, address, license plate, IP, URL, date, amount, postal code, organization, and custom keywords. Zero configuration.</p>
+            <div class="entity-chips">
+              <span class="chip chip-phone">Phone</span>
+              <span class="chip chip-email">Email</span>
+              <span class="chip chip-id">ID Card</span>
+              <span class="chip chip-bank">Bank Card</span>
+              <span class="chip chip-name">Name</span>
+              <span class="chip chip-loc">Address</span>
+              <span class="chip chip-org">Org</span>
+              <span class="chip chip-more">+7 more</span>
+            </div>
+          </div>
+          <div class="bento-metrics">
+            <div class="bento-metric">
+              <span class="bento-metric-num">14</span>
+              <span class="bento-metric-label">Entity Types</span>
+            </div>
+            <div class="bento-metric">
+              <span class="bento-metric-num">&lt;1ms</span>
+              <span class="bento-metric-label">Detection Latency</span>
+            </div>
+            <div class="bento-metric">
+              <span class="bento-metric-num">93%</span>
+              <span class="bento-metric-label">Coverage Rate</span>
             </div>
           </div>
         </div>
+
+        <!-- Streaming -->
         <div class="bento-card glass glow-hover">
           <div class="bento-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -153,52 +334,22 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
               <line x1="12" y1="19" x2="20" y2="19"/>
             </svg>
           </div>
-          <h3>流式支持 <span class="tier-badge tier-lite">Lite</span></h3>
-          <p>完美代理 SSE 流式响应，实时脱敏/还原，零延迟感知</p>
+          <h3>SSE Streaming</h3>
+          <p>Full SSE proxy with real-time masking and unmasking. Zero added perceptible latency.</p>
         </div>
-        <div class="bento-card glass glow-hover bento-tall">
-          <div class="bento-card-inner">
-            <div class="bento-badge">架构</div>
-            <div class="bento-icon-large">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="3"/>
-                <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
-              </svg>
-            </div>
-            <h3 class="bento-title-large">数据流架构</h3>
-            <p class="bento-desc">请求进入网关后经正则匹配、NER 识别、映射替换三层处理，脱敏后转发 AI。响应返回时逆向还原，全程低于 1ms 附加延迟。</p>
-            <div class="flow-diagram">
-              <div class="flow-node">
-                <span class="flow-dot"></span>
-                <span>Client</span>
-              </div>
-              <div class="flow-arrow">&rarr;</div>
-              <div class="flow-node flow-node-accent">
-                <span class="flow-dot"></span>
-                <span>Gateway</span>
-              </div>
-              <div class="flow-arrow">&rarr;</div>
-              <div class="flow-node">
-                <span class="flow-dot"></span>
-                <span>LLM</span>
-              </div>
-            </div>
-            <div class="flow-sub">
-              <span class="flow-tag">正则匹配</span>
-              <span class="flow-tag">NER 识别</span>
-              <span class="flow-tag">映射替换</span>
-            </div>
-          </div>
-        </div>
+
+        <!-- Local storage -->
         <div class="bento-card glass glow-hover">
           <div class="bento-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
             </svg>
           </div>
-          <h3>本地存储 <span class="tier-badge tier-lite">Lite</span></h3>
-          <p>SQLite 本地加密存储，映射数据永不离开你的机器</p>
+          <h3>Local SQLite Vault</h3>
+          <p>Encrypted local storage. Mapping data never leaves your machine.</p>
         </div>
+
+        <!-- 30s deploy -->
         <div class="bento-card glass glow-hover">
           <div class="bento-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -206,9 +357,33 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
               <polyline points="12 6 12 12 16 14"/>
             </svg>
           </div>
-          <h3>30 秒部署 <span class="tier-badge tier-lite">Lite</span></h3>
-          <p>单二进制文件，下载即用。Docker / pip / 手动运行皆可</p>
+          <h3>30-Second Deploy</h3>
+          <p>Single binary, Docker, or pip. Download and run. No dependencies.</p>
         </div>
+
+        <!-- Architecture -->
+        <div class="bento-card bento-arch glass glow-hover">
+          <div class="bento-badge">Architecture</div>
+          <div class="bento-card-content">
+            <h3>Data Flow Pipeline</h3>
+            <p>Request enters gateway &rarr; regex scan &rarr; NER inference &rarr; placeholder replacement &rarr; forward to LLM. Response reverses the pipeline. End-to-end under 1ms overhead.</p>
+            <div class="flow-pipeline">
+              <div class="pipeline-node">Client</div>
+              <span class="pipeline-arrow">&rarr;</span>
+              <div class="pipeline-node pipeline-accent">Gateway</div>
+              <span class="pipeline-arrow">&rarr;</span>
+              <div class="pipeline-node">LLM</div>
+            </div>
+            <div class="pipeline-tags">
+              <span class="pipeline-tag">Regex Match</span>
+              <span class="pipeline-tag">NER Detect</span>
+              <span class="pipeline-tag">Map &amp; Replace</span>
+              <span class="pipeline-tag">Reverse on Response</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Custom rules -->
         <div class="bento-card glass glow-hover">
           <div class="bento-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -216,9 +391,11 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
               <line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
           </div>
-          <h3>自定义规则 <span class="tier-badge tier-lite">Lite</span></h3>
-          <p>支持正则 + 关键词自定义脱敏规则，灵活适配业务需求</p>
+          <h3>Custom Rules</h3>
+          <p>Regex + keyword patterns for domain-specific PII. Flexible and extensible.</p>
         </div>
+
+        <!-- Admin dashboard -->
         <div class="bento-card glass glow-hover">
           <div class="bento-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -227,171 +404,144 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
               <line x1="12" y1="17" x2="12" y2="21"/>
             </svg>
           </div>
-          <h3>管理后台 <span class="tier-badge tier-lite">Lite</span></h3>
-          <p>实时统计面板，查看脱敏次数、实体分布、映射记录</p>
+          <h3>Admin Dashboard</h3>
+          <p>Real-time stats: masking count, entity distribution, mapping records, and throughput.</p>
         </div>
-        <div class="bento-card glass glow-hover bento-wide">
-          <div class="bento-card-inner bento-perf-layout">
+
+        <!-- Open source -->
+        <div class="bento-card glass glow-hover">
+          <div class="bento-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5"/>
+              <path d="M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <h3>MIT Licensed</h3>
+          <p>Free forever. Personal use, commercial use, self-hosted. No restrictions.</p>
+        </div>
+
+        <!-- Performance -->
+        <div class="bento-card bento-perf glass glow-hover">
+          <div class="bento-card-inner">
             <div class="bento-perf-icon">
-              <div class="bento-icon-large">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="bento-perf-svg">
-                  <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-                </svg>
-              </div>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+              </svg>
             </div>
             <div class="bento-perf-content">
-              <h3 class="bento-title-large">性能指标</h3>
-              <p class="bento-desc bento-perf-desc">P99 延迟 2ms，单机吞吐 10,000+ QPS，零数据上传至第三方</p>
-              <div class="perf-bar-group">
-                <div class="perf-bar-item">
-                  <span class="perf-bar-label">正则匹配</span>
+              <h3>Performance Benchmarks</h3>
+              <p>P99 latency under 2ms. Single instance handles 10,000+ QPS. Zero data leaves your network.</p>
+              <div class="perf-bars">
+                <div class="perf-bar">
+                  <span class="perf-bar-label">Regex Matching</span>
                   <div class="perf-bar-track">
-                    <div class="perf-bar-fill" style="width:95%;"></div>
+                    <div class="perf-bar-fill" style="width:95%"></div>
                   </div>
-                  <span class="perf-bar-value">0.3ms</span>
+                  <span class="perf-bar-val">0.3ms</span>
                 </div>
-                <div class="perf-bar-item">
-                  <span class="perf-bar-label">NER 识别</span>
+                <div class="perf-bar">
+                  <span class="perf-bar-label">NER Inference</span>
                   <div class="perf-bar-track">
-                    <div class="perf-bar-fill perf-bar-accent" style="width:88%;"></div>
+                    <div class="perf-bar-fill perf-fill-accent" style="width:88%"></div>
                   </div>
-                  <span class="perf-bar-value">0.8ms</span>
+                  <span class="perf-bar-val">0.8ms</span>
                 </div>
-                <div class="perf-bar-item">
-                  <span class="perf-bar-label">映射还原</span>
+                <div class="perf-bar">
+                  <span class="perf-bar-label">Map Restore</span>
                   <div class="perf-bar-track">
-                    <div class="perf-bar-fill perf-bar-green" style="width:98%;"></div>
+                    <div class="perf-bar-fill perf-fill-green" style="width:98%"></div>
                   </div>
-                  <span class="perf-bar-value">0.1ms</span>
+                  <span class="perf-bar-val">0.1ms</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </section>
 
-  <!-- 工作原理 -->
-  <section class="how-it-works" id="how-it-works">
+  <!-- ============================================
+       COMPATIBILITY — Platform cards
+       ============================================ -->
+  <section class="compat">
     <div class="container">
-      <h2 class="section-title reveal reveal-up">工作原理</h2>
-      <div class="steps-container reveal reveal-up">
-        <div class="step-item">
-          <div class="step-number">01</div>
-          <div class="step-card glass">
-            <h3>请求拦截</h3>
-            <p>网关拦截所有发往 AI 的请求，识别其中的敏感数据</p>
+      <div class="section-label">Compatibility</div>
+      <h2 class="section-title">Works with everything</h2>
+      <p class="section-subtitle">
+        Drop-in proxy for any OpenAI-compatible API. No SDK changes, no vendor lock-in.
+      </p>
+
+      <div class="compat-grid">
+        <div class="compat-card glass">
+          <div class="compat-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.4 2.4C18.3 4.5 20.5 8.2 20.5 12c0 3.8-2.2 7.5-5.1 9.6-.3.2-.6.4-.9.6l-.6-1.2c.3-.2.6-.4.8-.6 2.4-1.8 4.1-5.3 4.1-8.4s-1.7-6.6-4.1-8.4c-.3-.2-.5-.4-.8-.6l.6-1.2c.3.2.6.4.9.6zM8.6 2.4c.3.2.6.4.9.6l.6 1.2c-.3.2-.6.4-.8.6C6.9 6.6 5.6 10.1 5.6 12s1.3 5.4 3.7 7.2c.3.2.5.4.8.6l-.6 1.2c-.3-.2-.6-.4-.9-.6C5.7 18.4 3.5 14.7 3.5 12s2.2-6.4 5.1-9.6zM12 2c1.1 0 2 .9 2 2v16c0 1.1-.9 2-2 2s-2-.9-2-2V4c0-1.1.9-2 2-2z"/></svg>
           </div>
+          <span class="compat-name">Python SDK</span>
         </div>
-        <div class="step-connector">
-          <div class="connector-line"></div>
-          <div class="connector-dot"></div>
-        </div>
-        <div class="step-item">
-          <div class="step-number">02</div>
-          <div class="step-card glass">
-            <h3>自动脱敏</h3>
-            <p>将敏感数据替换为唯一占位符，映射关系存储在本地数据库</p>
+        <div class="compat-card glass">
+          <div class="compat-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
           </div>
+          <span class="compat-name">JavaScript SDK</span>
         </div>
-        <div class="step-connector">
-          <div class="connector-line"></div>
-          <div class="connector-dot"></div>
-        </div>
-        <div class="step-item">
-          <div class="step-number">03</div>
-          <div class="step-card glass">
-            <h3>响应还原</h3>
-            <p>接收 AI 响应，将占位符还原为原始数据后返回给客户端</p>
+        <div class="compat-card glass">
+          <div class="compat-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 2h-11C5.1 2 4 3.1 4 4.5v15C4 20.9 5.1 22 6.5 22h11c1.4 0 2.5-1.1 2.5-2.5v-15C20 3.1 18.9 2 17.5 2zM12 20c-.8 0-1.5-.7-1.5-1.5S11.2 17 12 17s1.5.7 1.5 1.5S12.8 20 12 20zm5-4H7V5h10v11z"/></svg>
           </div>
+          <span class="compat-name">Flutter SDK</span>
+        </div>
+        <div class="compat-card glass">
+          <div class="compat-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18c0 .6.4 1 1 1h2c.6 0 1-.4 1-1v-2H6v2zM14 18c0 .6.4 1 1 1h2c.6 0 1-.4 1-1v-2h-4v2zM4 8v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8H4zm16-2V4c0-1.1-.9-2-2-2H6C4.9 2 4 2.9 4 4v2h16z"/></svg>
+          </div>
+          <span class="compat-name">Android SDK</span>
+        </div>
+        <div class="compat-card glass">
+          <div class="compat-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.7 1.3c-.4-.4-1-.4-1.4 0l-2 2c-.4.4-.4 1 0 1.4.4.4 1 .4 1.4 0l2-2c.4-.4.4-1 0-1.4zM3.9 3.9c-.4.4-.4 1 0 1.4l2 2c.4.4 1 .4 1.4 0 .4-.4.4-1 0-1.4l-2-2c-.4-.4-1-.4-1.4 0zm11.3 2.8L8.9 13c-.4.4-.4 1 0 1.4.4.4 1 .4 1.4 0l6.3-6.3c.4-.4.4-1 0-1.4-.4-.4-1-.4-1.4 0zM20 12c-.6 0-1 .4-1 1v6H5V5h6c.6 0 1-.4 1-1s-.4-1-1-1H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-8c0-.6-.4-1-1-1z"/></svg>
+          </div>
+          <span class="compat-name">iOS SDK</span>
+        </div>
+        <div class="compat-card glass">
+          <div class="compat-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+          </div>
+          <span class="compat-name">Browser Ext.</span>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 全平台覆盖 -->
-  <section class="platforms">
-    <div class="container">
-      <h2 class="section-title reveal reveal-up">全平台覆盖</h2>
-      <p class="platforms-subtitle">一套网关，所有平台 SDK 开箱即用</p>
-      <div class="platforms-grid reveal-stagger">
-        <div class="platform-card glass glass-hover reveal reveal-up">
-          <div class="platform-icon-wrap">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M15.4 2.4C18.3 4.5 20.5 8.2 20.5 12c0 3.8-2.2 7.5-5.1 9.6-.3.2-.6.4-.9.6l-.6-1.2c.3-.2.6-.4.8-.6 2.4-1.8 4.1-5.3 4.1-8.4s-1.7-6.6-4.1-8.4c-.3-.2-.5-.4-.8-.6l.6-1.2c.3.2.6.4.9.6zM8.6 2.4c.3.2.6.4.9.6l.6 1.2c-.3.2-.6.4-.8.6C6.9 6.6 5.6 10.1 5.6 12s1.3 5.4 3.7 7.2c.3.2.5.4.8.6l-.6 1.2c-.3-.2-.6-.4-.9-.6C5.7 18.4 3.5 14.7 3.5 12s2.2-6.4 5.1-9.6zM12 2c1.1 0 2 .9 2 2v16c0 1.1-.9 2-2 2s-2-.9-2-2V4c0-1.1.9-2 2-2z"/>
-            </svg>
-          </div>
-          <h3>Python SDK</h3>
-          <p>pip install，一行代码接入</p>
-        </div>
-        <div class="platform-card glass glass-hover reveal reveal-up">
-          <div class="platform-icon-wrap">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
-            </svg>
-          </div>
-          <h3>JavaScript SDK</h3>
-          <p>npm install，前端/Node 通用</p>
-        </div>
-        <div class="platform-card glass glass-hover reveal reveal-up">
-          <div class="platform-icon-wrap">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M17.5 2h-11C5.1 2 4 3.1 4 4.5v15C4 20.9 5.1 22 6.5 22h11c1.4 0 2.5-1.1 2.5-2.5v-15C20 3.1 18.9 2 17.5 2zM12 20c-.8 0-1.5-.7-1.5-1.5S11.2 17 12 17s1.5.7 1.5 1.5S12.8 20 12 20zm5-4H7V5h10v11z"/>
-            </svg>
-          </div>
-          <h3>Flutter SDK</h3>
-          <p>跨平台移动端原生集成</p>
-        </div>
-        <div class="platform-card glass glass-hover reveal reveal-up">
-          <div class="platform-icon-wrap">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M6 18c0 .6.4 1 1 1h2c.6 0 1-.4 1-1v-2H6v2zM14 18c0 .6.4 1 1 1h2c.6 0 1-.4 1-1v-2h-4v2zM4 8v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8H4zm16-2V4c0-1.1-.9-2-2-2H6C4.9 2 4 2.9 4 4v2h16z"/>
-              <rect x="8" y="10" width="3" height="4" rx="0.5"/>
-              <rect x="13" y="10" width="3" height="4" rx="0.5"/>
-            </svg>
-          </div>
-          <h3>Android SDK</h3>
-          <p>原生 Kotlin，Gradle 一键引入</p>
-        </div>
-        <div class="platform-card glass glass-hover reveal reveal-up">
-          <div class="platform-icon-wrap">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M18.7 1.3c-.4-.4-1-.4-1.4 0l-2 2c-.4.4-.4 1 0 1.4.4.4 1 .4 1.4 0l2-2c.4-.4.4-1 0-1.4zM3.9 3.9c-.4.4-.4 1 0 1.4l2 2c.4.4 1 .4 1.4 0 .4-.4.4-1 0-1.4l-2-2c-.4-.4-1-.4-1.4 0zm11.3 2.8L8.9 13c-.4.4-.4 1 0 1.4.4.4 1 .4 1.4 0l6.3-6.3c.4-.4.4-1 0-1.4-.4-.4-1-.4-1.4 0zM20 12c-.6 0-1 .4-1 1v6H5V5h6c.6 0 1-.4 1-1s-.4-1-1-1H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-8c0-.6-.4-1-1-1z"/>
-            </svg>
-          </div>
-          <h3>iOS SDK</h3>
-          <p>原生 Swift，SPM 一键集成</p>
-        </div>
-        <div class="platform-card glass glass-hover reveal reveal-up">
-          <div class="platform-icon-wrap">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
-            </svg>
-          </div>
-          <h3>浏览器扩展</h3>
-          <p>Chrome / Edge 一键安装，网页端即装即用</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA -->
+  <!-- ============================================
+       CTA
+       ============================================ -->
   <section class="cta">
-    <div class="cta-orb orb-enhanced"></div>
-    <div class="cta-orb-secondary orb-enhanced-2"></div>
-    <div class="cta-tertiary-orb"></div>
-    <div class="container cta-content">
+    <div class="cta-orb-1"></div>
+    <div class="cta-orb-2"></div>
+    <div class="container cta-inner">
       <h2 class="cta-title">
-        现在开始保护你的
-        <span class="gradient-text">AI 数据隐私</span>
+        Your data should not be<br/>
+        <span class="gradient-text">nobody else's training set.</span>
       </h2>
-      <p class="cta-description">
-        无需复杂配置，只需修改 API 地址即可启用
+      <p class="cta-desc">
+        Deploy in 30 seconds. No credit card. No account. No data ever leaves your machine.
       </p>
       <div class="cta-actions">
-        <a href="/download" class="btn btn-primary">立即下载</a>
-        <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-ghost btn-ghost-light">GitHub</a>
+        <a href="/download" class="btn btn-primary btn-lg">
+          Get Started Free
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </a>
+        <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-ghost btn-lg">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          </svg>
+          Star on GitHub
+        </a>
       </div>
     </div>
   </section>
@@ -400,44 +550,74 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
 </Layout>
 
 <style>
-  /* ===========================================
-     Hero
-     =========================================== */
+  /* =============================================
+     HERO
+     ============================================= */
   .hero {
-    padding: 10rem 0 8rem;
+    padding: 12rem 0 8rem;
     position: relative;
     overflow: hidden;
+    text-align: center;
   }
 
-  .hero-orb {
+  .hero-grid-bg {
     position: absolute;
-    top: -300px;
-    right: -200px;
-    width: 900px;
-    height: 900px;
-    background: radial-gradient(circle, var(--primary-glow) 0%, rgba(134, 239, 172, 0.1) 30%, transparent 60%);
-    border-radius: 50%;
-    filter: blur(120px);
+    inset: 0;
+    pointer-events: none;
+    mask-image: radial-gradient(ellipse 70% 50% at 50% 40%, black 25%, transparent 70%);
+    -webkit-mask-image: radial-gradient(ellipse 70% 50% at 50% 40%, black 25%, transparent 70%);
+  }
+
+  .hero-grid-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(134, 239, 172, 0.02) 40px, rgba(134, 239, 172, 0.02) 41px),
+      repeating-linear-gradient(0deg, transparent, transparent 22px, rgba(134, 239, 172, 0.015) 22px, rgba(134, 239, 172, 0.015) 23px);
+    animation: grid-scroll 35s linear infinite;
+  }
+
+  @keyframes grid-scroll {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(40px, 22px); }
+  }
+
+  .hero-orb-1 {
+    position: absolute; top: -250px; right: -150px;
+    width: 800px; height: 800px;
+    background: radial-gradient(circle, var(--primary-glow) 0%, rgba(134, 239, 172, 0.06) 30%, transparent 60%);
+    border-radius: 50%; filter: blur(120px);
+    animation: float-slow 16s ease-in-out infinite;
     pointer-events: none;
   }
 
-  .hero-orb-secondary {
-    position: absolute;
-    bottom: -200px;
-    left: -200px;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, var(--accent-glow) 0%, rgba(167, 139, 250, 0.08) 30%, transparent 60%);
-    border-radius: 50%;
-    filter: blur(100px);
+  .hero-orb-2 {
+    position: absolute; bottom: -200px; left: -200px;
+    width: 650px; height: 650px;
+    background: radial-gradient(circle, var(--accent-glow) 0%, rgba(167, 139, 250, 0.05) 30%, transparent 60%);
+    border-radius: 50%; filter: blur(100px);
+    animation: float-slow 20s ease-in-out infinite -5s;
     pointer-events: none;
+  }
+
+  .hero-orb-3 {
+    position: absolute; top: 20%; left: 10%;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, var(--cyan-glow) 0%, rgba(34, 211, 238, 0.04) 40%, transparent 70%);
+    border-radius: 50%; filter: blur(80px);
+    animation: float-slow 14s ease-in-out infinite -10s;
+    pointer-events: none;
+  }
+
+  @keyframes float-slow {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-25px) scale(1.05); }
   }
 
   .hero-content {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: 6rem;
-    align-items: center;
+    max-width: 900px;
+    margin: 0 auto;
     position: relative;
     z-index: 1;
   }
@@ -445,226 +625,399 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
   .hero-badge {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
+    gap: 0.6rem;
     padding: 0.5rem 1rem;
     border-radius: 20px;
-    font-size: 0.875rem;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--border);
+    font-size: 0.82rem;
     font-weight: 500;
     color: var(--primary);
-    margin-bottom: 2rem;
-    border: 1px solid var(--border);
-  }
-
-  .badge-dot {
-    width: 8px;
-    height: 8px;
-    background: var(--primary);
-    border-radius: 50%;
-    animation: pulse 2s ease-in-out infinite;
-    box-shadow: 0 0 8px var(--primary-glow);
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
+    margin-bottom: 2.5rem;
   }
 
   .hero-title {
-    font-size: 4.5rem;
-    font-weight: 700;
+    font-size: 4rem;
+    font-weight: 800;
     letter-spacing: -0.04em;
+    line-height: 1.1;
     margin-bottom: 1.5rem;
-    line-height: 1.05;
   }
 
-  .gradient-text {
-    background: linear-gradient(135deg, var(--primary), var(--accent));
-    -webkit-background-clip: text;
+  .hero-title .gradient-text {
     -webkit-text-fill-color: transparent;
-    background-clip: text;
   }
 
-  .hero-description {
-    font-size: 1.125rem;
+  .hero-desc {
+    font-size: 1.15rem;
     color: var(--text-secondary);
     line-height: 1.8;
-    margin-bottom: 2rem;
-    max-width: 480px;
+    max-width: 650px;
+    margin: 0 auto 2.5rem;
+  }
+
+  .hero-desc strong {
+    color: var(--primary);
   }
 
   .hero-actions {
     display: flex;
     gap: 1rem;
-    margin-bottom: 3.5rem;
-  }
-
-  .btn-ghost {
-    background: transparent;
-    color: var(--text-secondary);
-    border: 1px solid var(--border);
-    display: inline-flex;
-    align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-decoration: none;
+    margin-bottom: 3.5rem;
+    flex-wrap: wrap;
   }
 
-  @media (hover: hover) {
-    .btn-ghost:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-      background: rgba(134, 239, 172, 0.05);
-    }
+  .btn-lg {
+    padding: 0.875rem 2rem;
+    font-size: 1.05rem;
   }
 
   .hero-stats {
     display: flex;
     align-items: center;
-    gap: 2rem;
-    padding-top: 2rem;
+    justify-content: center;
+    gap: 2.5rem;
+    padding: 2rem 0;
+    margin-bottom: 3rem;
     border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
   }
 
-  .stat-item {
+  .hero-stat {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.15rem;
+    align-items: center;
   }
 
-  .stat-value {
+  .hero-stat-num {
     font-size: 1.75rem;
     font-weight: 700;
     color: var(--primary);
     letter-spacing: -0.02em;
   }
 
-  .stat-label {
-    font-size: 0.875rem;
+  .hero-stat-label {
+    font-size: 0.8rem;
     color: var(--text-muted);
+    white-space: nowrap;
   }
 
-  .stat-divider {
+  .hero-stat-divider {
     width: 1px;
-    height: 40px;
+    height: 36px;
     background: var(--border);
   }
 
-  /* Terminal code block */
-  .hero-code {
-    position: relative;
+  /* ---------- Before/After Masking Demo ---------- */
+  .masking-demo {
+    max-width: 680px;
+    margin: 0 auto 2.5rem;
     overflow: hidden;
+    text-align: left;
   }
 
-  .code-header {
+  .masking-header {
     display: flex;
-    gap: 8px;
-    padding: 0.75rem 1rem;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.25rem;
     background: rgba(0, 0, 0, 0.3);
     border-bottom: 1px solid var(--border);
   }
 
-  .code-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
+  .masking-tabs {
+    display: flex;
+    gap: 0.25rem;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 8px;
+    padding: 2px;
   }
 
-  .code-dot-red { background: #ff5f56; }
-  .code-dot-yellow { background: #ffbd2e; }
-  .code-dot-green { background: #27c93f; }
-
-  .code-content {
-    padding: 1.25rem 1.25rem 1rem;
-    font-size: 0.8125rem;
-    line-height: 1.7;
+  .masking-tab {
+    padding: 0.35rem 0.85rem;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.25s ease;
   }
 
-  .code-comment { color: var(--text-muted); }
-  .code-keyword { color: var(--accent); }
-  .code-string { color: var(--primary); }
-
-  /* ===========================================
-     Problem Section
-     =========================================== */
-  .problem {
-    padding: 6rem 0;
+  .masking-tab.active {
+    background: rgba(134, 239, 172, 0.12);
+    color: var(--primary);
   }
 
-  .section-title {
-    font-size: 2.75rem;
+  @media (hover: hover) {
+    .masking-tab:hover:not(.active) {
+      color: var(--text-secondary);
+    }
+  }
+
+  .masking-badge {
+    font-size: 0.7rem;
     font-weight: 600;
-    text-align: center;
-    margin-bottom: 3.5rem;
-    letter-spacing: -0.03em;
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    background: rgba(34, 211, 238, 0.1);
+    color: var(--cyan);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
+
+  .masking-body {
+    padding: 0;
+  }
+
+  .masking-code {
+    padding: 1.25rem 1.25rem 1rem;
+    font-size: 0.8rem;
+    line-height: 1.8;
+    margin: 0;
+    overflow-x: auto;
+  }
+
+  .masking-code .key { color: var(--accent); }
+  .masking-code .str { color: var(--text-primary); }
+  .masking-code .pii { color: var(--warning); font-weight: 600; text-decoration: underline; text-decoration-style: wavy; text-decoration-color: var(--danger); }
+  .masking-code .pii-masked { color: var(--primary); font-weight: 600; }
+
+  .hidden { display: none; }
+
+  .masking-footer {
+    padding: 0.6rem 1.25rem;
+    border-top: 1px solid var(--border);
+    background: rgba(0, 0, 0, 0.15);
+  }
+
+  .masking-protected {
+    font-size: 0.78rem;
+    color: var(--primary);
+    font-weight: 500;
+  }
+
+  .hero-integrations {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .hero-integrations strong {
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  /* =============================================
+     PROBLEM
+     ============================================= */
+  .problem { padding: 6rem 0; }
 
   .problem-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
+    max-width: 1100px;
+    margin: 0 auto;
   }
 
   .problem-card {
     padding: 2.5rem 2rem;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
   }
 
-  .problem-icon-wrap {
-    width: 56px;
-    height: 56px;
-    margin: 0 auto 1.25rem;
+  .problem-icon {
+    width: 48px;
+    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, rgba(134, 239, 172, 0.1), rgba(167, 139, 250, 0.1));
-    border-radius: 14px;
+    border-radius: 12px;
+    background: rgba(134, 239, 172, 0.06);
     border: 1px solid var(--border);
-    transition: border-color 0.3s, transform 0.3s;
+    margin-bottom: 1.25rem;
   }
 
-  @media (hover: hover) {
-    .problem-card:hover .problem-icon-wrap {
-      border-color: var(--border-hover);
-      transform: scale(1.05);
-    }
-  }
-
-  .problem-svg {
-    width: 24px;
-    height: 24px;
-    color: var(--primary);
-  }
+  .problem-icon svg { width: 22px; height: 22px; color: var(--primary); }
 
   .problem-card h3 {
+    font-size: 1.1rem;
     margin-bottom: 0.75rem;
-    font-size: 1.125rem;
   }
 
   .problem-card p {
     color: var(--text-secondary);
     font-size: 0.9rem;
     line-height: 1.7;
+    margin-bottom: 1.5rem;
+    flex: 1;
   }
 
-  /* ===========================================
-     Features Bento Grid
-     =========================================== */
-  .features {
-    padding: 6rem 0;
+  .problem-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
   }
 
-  .bento-grid {
+  .problem-stat-num {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .risk-warn { color: var(--warning) !important; }
+  .risk-danger { color: var(--danger) !important; }
+
+  .problem-stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  /* =============================================
+     HOW IT WORKS
+     ============================================= */
+  .how-it-works { padding: 6rem 0; }
+
+  .steps-visual {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+
+  .step-card-wrapper {
+    flex: 1;
+    max-width: 320px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .step-card {
+    padding: 2rem 1.75rem;
+    text-align: center;
+    flex: 1;
+  }
+
+  .step-num {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    margin-bottom: 0.75rem;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .step-card-icon {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+
+  .step-card-icon svg {
+    width: 28px;
+    height: 28px;
+    color: var(--primary);
+  }
+
+  .step-card h3 {
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+  }
+
+  .step-card p {
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    line-height: 1.6;
+  }
+
+  .step-arrow {
+    flex-shrink: 0;
+    color: var(--primary);
+    opacity: 0.5;
+  }
+
+  .step-arrow svg { width: 22px; height: 22px; }
+
+  /* Code comparison */
+  .code-compare {
+    max-width: 760px;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+
+  .code-compare-header {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--primary);
+    border-bottom: 1px solid var(--border);
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .code-compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .code-panel {
+    padding: 1.25rem;
+    border-right: 1px solid var(--border);
+  }
+
+  .code-panel:last-child { border-right: none; }
+
+  .code-panel-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    display: inline-block;
+  }
+
+  .before-label {
+    background: rgba(248, 113, 113, 0.12);
+    color: var(--danger);
+  }
+
+  .after-label {
+    background: rgba(74, 222, 128, 0.12);
+    color: #4ade80;
+  }
+
+  .code-panel pre {
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.7;
+  }
+
+  .code-panel code { color: var(--text-secondary); }
+  .code-cmt { color: var(--text-muted); font-style: italic; }
+  .code-highlight { color: var(--danger); font-weight: 600; }
+  .code-highlight-green { color: #4ade80; font-weight: 600; }
+
+  /* =============================================
+     FEATURES — Bento
+     ============================================= */
+  .features { padding: 6rem 0; }
+
+  .bento {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-auto-rows: auto;
     gap: 1.25rem;
   }
 
@@ -674,7 +1027,7 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
     flex-direction: column;
   }
 
-  .bento-feature {
+  .bento-main {
     grid-column: span 2;
     grid-row: span 2;
     padding: 2.25rem;
@@ -682,21 +1035,21 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
     overflow: hidden;
   }
 
-  .bento-feature::after {
+  .bento-main::after {
     content: '';
     position: absolute;
     top: -50%;
     right: -50%;
     width: 300px;
     height: 300px;
-    background: radial-gradient(circle, rgba(134, 239, 172, 0.06) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(134, 239, 172, 0.05), transparent 70%);
     border-radius: 50%;
     pointer-events: none;
   }
 
   .bento-badge {
     display: inline-block;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 600;
     color: var(--primary);
     text-transform: uppercase;
@@ -705,125 +1058,125 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
   }
 
   .bento-icon-large {
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
   }
 
   .bento-icon-large svg {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     color: var(--primary);
   }
 
-  .bento-title-large {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    letter-spacing: -0.02em;
+  .bento-card-content { flex: 1; }
+  .bento-card-content h3 { font-size: 1.3rem; margin-bottom: 0.75rem; }
+  .bento-card-content p { color: var(--text-secondary); font-size: 0.88rem; line-height: 1.7; }
+
+  .entity-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 1.25rem;
   }
 
-  .bento-desc {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    line-height: 1.75;
-    margin-bottom: 1.75rem;
-    flex: 1;
+  .chip {
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
   }
 
-  .bento-stats {
+  .chip-phone { background: rgba(251, 191, 36, 0.12); color: #fbbf24; }
+  .chip-email { background: rgba(96, 165, 250, 0.12); color: #60a5fa; }
+  .chip-id { background: rgba(134, 239, 172, 0.12); color: var(--primary); }
+  .chip-bank { background: rgba(244, 114, 182, 0.12); color: #f472b6; }
+  .chip-name { background: rgba(167, 139, 250, 0.12); color: var(--accent); }
+  .chip-loc { background: rgba(252, 165, 165, 0.12); color: #fca5a5; }
+  .chip-org { background: rgba(148, 163, 184, 0.12); color: #94a3b8; }
+  .chip-more { background: rgba(255, 255, 255, 0.04); color: var(--text-muted); }
+
+  .bento-metrics {
     display: flex;
     gap: 2rem;
     padding-top: 1.5rem;
+    margin-top: 1.5rem;
     border-top: 1px solid var(--border);
   }
 
-  .bento-stat {
+  .bento-metric {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
   }
 
-  .bento-stat-num {
-    font-size: 1.25rem;
+  .bento-metric-num {
+    font-size: 1.2rem;
     font-weight: 700;
     color: var(--primary);
   }
 
-  .bento-stat-label {
-    font-size: 0.75rem;
+  .bento-metric-label {
+    font-size: 0.72rem;
     color: var(--text-muted);
   }
 
-  .bento-icon {
-    margin-bottom: 1rem;
-  }
+  .bento-icon { margin-bottom: 0.75rem; }
+  .bento-icon svg { width: 24px; height: 24px; color: var(--primary); }
 
-  .bento-icon svg {
-    width: 28px;
-    height: 28px;
-    color: var(--primary);
-  }
-
-  .bento-grid .bento-card:not(.bento-feature):not(.bento-tall):not(.bento-wide) h3 {
+  .bento-card:not(.bento-main):not(.bento-arch):not(.bento-perf) h3 {
     font-size: 1rem;
     margin-bottom: 0.5rem;
   }
 
-  .bento-grid .bento-card:not(.bento-feature):not(.bento-tall):not(.bento-wide) p {
+  .bento-card:not(.bento-main):not(.bento-arch):not(.bento-perf) p {
     color: var(--text-secondary);
     font-size: 0.85rem;
     line-height: 1.6;
+    flex: 1;
   }
 
-  /* Bentoo Tall Card - Data Flow */
-  .flow-diagram {
+  /* Architecture card */
+  .bento-arch {
+    grid-column: span 2;
+    grid-row: span 1;
+  }
+
+  .pipeline-flow { margin: 0.75rem 0 0.5rem; }
+
+  .flow-pipeline {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     justify-content: center;
-    margin-bottom: 0.75rem;
+    margin: 1rem 0;
     padding: 0.75rem;
     background: rgba(0, 0, 0, 0.2);
     border-radius: 10px;
     border: 1px solid var(--border);
   }
 
-  .flow-node {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
+  .pipeline-node {
+    padding: 0.3rem 0.75rem;
     font-size: 0.75rem;
     font-weight: 600;
     color: var(--primary);
-    padding: 0.3rem 0.6rem;
     background: rgba(134, 239, 172, 0.06);
     border-radius: 6px;
   }
 
-  .flow-node-accent {
+  .pipeline-accent {
     color: var(--accent);
     background: rgba(167, 139, 250, 0.06);
   }
 
-  .flow-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: currentColor;
-  }
+  .pipeline-arrow { color: var(--text-muted); font-size: 0.9rem; }
 
-  .flow-arrow {
-    color: var(--text-muted);
-    font-size: 0.85rem;
-  }
-
-  .flow-sub {
+  .pipeline-tags {
     display: flex;
-    gap: 0.4rem;
     flex-wrap: wrap;
+    gap: 0.4rem;
     justify-content: center;
   }
 
-  .flow-tag {
+  .pipeline-tag {
     font-size: 0.65rem;
     color: var(--text-muted);
     background: rgba(255, 255, 255, 0.03);
@@ -832,23 +1185,39 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
     border: 1px solid var(--border);
   }
 
-  /* Bentoo Wide Card - Performance */
-  .perf-bar-group {
+  /* Performance card */
+  .bento-perf { grid-column: span 2; grid-row: span 1; }
+  .bento-perf .bento-card-inner {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .bento-perf-icon svg {
+    width: 36px;
+    height: 36px;
+    color: var(--primary);
+  }
+
+  .bento-perf-content h3 { margin-bottom: 0.5rem; font-size: 1.15rem; }
+  .bento-perf-content p { color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 1rem; }
+
+  .perf-bars {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
   }
 
-  .perf-bar-item {
+  .perf-bar {
     display: flex;
     align-items: center;
     gap: 0.75rem;
   }
 
   .perf-bar-label {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     color: var(--text-secondary);
-    min-width: 5rem;
+    min-width: 5.5rem;
     flex-shrink: 0;
   }
 
@@ -867,221 +1236,90 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
     transition: width 1s ease;
   }
 
-  .perf-bar-accent {
-    background: linear-gradient(90deg, rgba(167, 139, 250, 0.6), var(--accent));
-  }
+  .perf-fill-accent { background: linear-gradient(90deg, rgba(167, 139, 250, 0.6), var(--accent)); }
+  .perf-fill-green { background: linear-gradient(90deg, var(--primary-dim), #4ade80); }
 
-  .perf-bar-green {
-    background: linear-gradient(90deg, var(--primary-dim), #4ade80);
-  }
-
-  .perf-bar-value {
-    font-size: 0.75rem;
+  .perf-bar-val {
+    font-size: 0.72rem;
     color: var(--text-muted);
-    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-family: 'JetBrains Mono', monospace;
     min-width: 3rem;
     text-align: right;
   }
 
-  .bento-perf-layout {
-    display: flex;
-    flex-direction: row;
-    gap: 2rem;
-    align-items: center;
-  }
+  /* =============================================
+     COMPATIBILITY
+     ============================================= */
+  .compat { padding: 6rem 0; }
 
-  .bento-perf-icon {
-    flex-shrink: 0;
-  }
-
-  .bento-perf-svg {
-    width: 32px;
-    height: 32px;
-  }
-
-  .bento-perf-content {
-    flex: 1;
-  }
-
-  .bento-perf-desc {
-    margin-bottom: 0.5rem;
-  }
-
-  /* ===========================================
-     How It Works
-     =========================================== */
-  .how-it-works {
-    padding: 6rem 0;
-  }
-
-  .steps-container {
-    display: flex;
-    align-items: flex-start;
-    gap: 0;
-    max-width: 960px;
+  .compat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    max-width: 700px;
     margin: 0 auto;
   }
 
-  .step-item {
-    flex: 1;
-    min-width: 0;
-    position: relative;
-  }
-
-  .step-number {
-    font-size: 5rem;
-    font-weight: 800;
-    letter-spacing: -0.04em;
-    background: linear-gradient(180deg, var(--primary) 0%, var(--accent) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    line-height: 1;
-    margin-bottom: 0.5rem;
-  }
-
-  .step-card {
-    padding: 1.75rem;
-  }
-
-  .step-card h3 {
-    margin-bottom: 0.5rem;
-    font-size: 1.125rem;
-  }
-
-  .step-card p {
-    color: var(--text-secondary);
-    font-size: 0.875rem;
-    line-height: 1.6;
-  }
-
-  .step-connector {
-    flex: 0 0 80px;
+  .compat-card {
+    padding: 1.25rem;
     display: flex;
     align-items: center;
-    padding-top: 3.5rem;
+    gap: 0.75rem;
   }
 
-  .connector-line {
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(90deg, var(--border), var(--primary-dim), var(--border));
-  }
-
-  .connector-dot {
-    width: 6px;
-    height: 6px;
-    background: var(--primary);
-    border-radius: 50%;
-    flex-shrink: 0;
-    box-shadow: 0 0 10px var(--primary-glow);
-  }
-
-  /* ===========================================
-     Platforms
-     =========================================== */
-  .platforms {
-    padding: 6rem 0;
-  }
-
-  .platforms-subtitle {
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 1.05rem;
-    margin-top: -2rem;
-    margin-bottom: 3rem;
-  }
-
-  .platforms-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.25rem;
-  }
-
-  .platform-card {
-    padding: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .platform-icon-wrap {
-    width: 44px;
-    height: 44px;
-    flex-shrink: 0;
+  .compat-icon {
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, rgba(134, 239, 172, 0.08), rgba(167, 139, 250, 0.08));
     border-radius: 10px;
+    background: rgba(134, 239, 172, 0.06);
     border: 1px solid var(--border);
+    flex-shrink: 0;
   }
 
-  .platform-icon-wrap svg {
-    width: 22px;
-    height: 22px;
-    color: var(--primary);
-  }
+  .compat-icon svg { width: 20px; height: 20px; color: var(--primary); }
+  .compat-name { font-size: 0.9rem; font-weight: 500; }
 
-  .platform-card h3 {
-    font-size: 0.95rem;
-    margin-bottom: 0.15rem;
-  }
-
-  .platform-card p {
-    color: var(--text-muted);
-    font-size: 0.8rem;
-  }
-
-  /* ===========================================
+  /* =============================================
      CTA
-     =========================================== */
+     ============================================= */
   .cta {
     padding: 10rem 0;
     position: relative;
     overflow: hidden;
+    text-align: center;
   }
 
-  .cta-orb {
+  .cta-orb-1 {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 900px;
-    height: 900px;
-    background: radial-gradient(circle, rgba(134, 239, 172, 0.18) 0%, rgba(167, 139, 250, 0.08) 40%, transparent 65%);
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle, rgba(134, 239, 172, 0.15) 0%, rgba(167, 139, 250, 0.06) 40%, transparent 65%);
     border-radius: 50%;
     filter: blur(100px);
     pointer-events: none;
+    animation: orb-float 18s ease-in-out infinite;
   }
 
-  .cta-orb-secondary {
-    position: absolute;
-    top: 30%;
-    left: 20%;
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, rgba(167, 139, 250, 0.12) 0%, transparent 60%);
-    border-radius: 50%;
-    filter: blur(80px);
-    pointer-events: none;
-  }
-
-  .cta-tertiary-orb {
+  .cta-orb-2 {
     position: absolute;
     bottom: 10%;
     right: 15%;
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(134, 239, 172, 0.08) 0%, transparent 60%);
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(34, 211, 238, 0.08) 0%, transparent 60%);
     border-radius: 50%;
     filter: blur(60px);
-    animation: float-slow 14s ease-in-out infinite 3s;
+    animation: orb-float 14s ease-in-out infinite -5s;
     pointer-events: none;
   }
 
-  .cta-content {
-    text-align: center;
+  .cta-inner {
     position: relative;
     z-index: 1;
   }
@@ -1089,17 +1327,17 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
   .cta-title {
     font-size: 3.25rem;
     font-weight: 700;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
     letter-spacing: -0.03em;
+    line-height: 1.2;
   }
 
-  .cta-description {
-    font-size: 1.125rem;
+  .cta-desc {
+    font-size: 1.1rem;
     color: var(--text-secondary);
-    margin-bottom: 2.5rem;
-    max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
+    max-width: 520px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.7;
   }
 
   .cta-actions {
@@ -1108,136 +1346,15 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
     justify-content: center;
   }
 
-  .btn-ghost-light {
-    color: var(--text-secondary);
-  }
+  /* =============================================
+     RESPONSIVE
+     ============================================= */
 
-  @media (hover: hover) {
-    .btn-ghost-light:hover {
-      color: var(--text-primary);
-      border-color: var(--border-hover);
-    }
-  }
-
-  /* ===========================================
-     Tier Badges
-     =========================================== */
-  .tier-badge {
-    display: inline-block;
-    font-size: 0.6rem;
-    font-weight: 700;
-    padding: 2px 7px;
-    border-radius: 4px;
-    margin-left: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    vertical-align: middle;
-    line-height: 1.3;
-  }
-  .tier-lite {
-    background: rgba(74, 222, 128, 0.15);
-    color: #4ade80;
-  }
-  .tier-pro {
-    background: rgba(167, 139, 250, 0.15);
-    color: #a78bfa;
-  }
-  .tier-ent {
-    background: rgba(251, 191, 36, 0.15);
-    color: #fbbf24;
-  }
-  .bento-title-large .tier-badge {
-    font-size: 0.7rem;
-    padding: 3px 10px;
-  }
-
-  /* ===========================================
-     Tier Comparison
-     =========================================== */
-  .comparison {
-    padding: 6rem 0;
-  }
-  .comparison-subtitle {
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 1.05rem;
-    margin-top: -2rem;
-    margin-bottom: 3rem;
-  }
-  .comparison-wrapper {
-    padding: 0;
-    overflow: hidden;
-    max-width: 900px;
-    margin: 0 auto;
-  }
-  .comparison-scroll {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  .comparison-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.9rem;
-  }
-  .comparison-table th,
-  .comparison-table td {
-    padding: 0.85rem 1rem;
-    text-align: center;
-    border-bottom: 1px solid var(--border);
-  }
-  .comparison-feature-th {
-    text-align: left;
-    color: var(--text-secondary);
-    font-weight: 600;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-  }
-  .comparison-tier-th {
-    font-weight: 700;
-    font-size: 0.85rem;
-    white-space: nowrap;
-  }
-  .tier-col-lite { color: #4ade80; }
-  .tier-col-pro { color: #a78bfa; }
-  .tier-col-ent { color: #fbbf24; }
-  .comparison-feature {
-    text-align: left;
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-  }
-  .comparison-cell {
-    color: var(--text-primary);
-    font-size: 0.85rem;
-  }
-  .check-icon {
-    color: var(--primary);
-    font-weight: 700;
-    font-size: 1rem;
-  }
-  .cross-icon {
-    color: var(--danger);
-    font-weight: 700;
-    font-size: 1rem;
-  }
-  .text-muted {
-    color: var(--text-muted) !important;
-  }
-  .comparison-cta {
-    text-align: center;
-    margin-top: 2rem;
-  }
-
-  /* ===========================================
-     Responsive — Comprehensive Breakpoints
-     =========================================== */
-
-  /* 4K and ultra-wide */
+  /* 4K+ */
   @media (min-width: 1920px) {
-    .hero-title { font-size: 5.5rem; }
-    .hero { padding: 12rem 0 10rem; }
+    .hero-title { font-size: 5rem; }
+    .hero { padding: 14rem 0 10rem; }
     .cta-title { font-size: 4rem; }
-    .section-title { font-size: 3.25rem; }
   }
 
   /* Large desktop */
@@ -1245,141 +1362,165 @@ openai.api_base = <span class="code-string">"http://localhost:9999/v1"</span>
     .hero-title { font-size: 4.5rem; }
   }
 
-  /* Standard desktop */
-  @media (min-width: 1280px) and (max-width: 1439px) {
-    .hero-title { font-size: 4rem; }
-    .hero { padding: 8rem 0 6rem; }
-  }
-
   /* Small laptop */
   @media (min-width: 1024px) and (max-width: 1279px) {
-    .hero-content { grid-template-columns: 1fr; gap: 3.5rem; }
+    .hero { padding: 10rem 0 6rem; }
     .hero-title { font-size: 3.5rem; }
-    .hero-description { max-width: 100%; }
-    .bento-grid { grid-template-columns: repeat(3, 1fr); }
-    .bento-feature { grid-column: span 3; }
-    .bento-tall { grid-row: span 1; }
-    .bento-wide { grid-column: span 3; }
-    .platforms-grid { grid-template-columns: repeat(2, 1fr); }
-    .steps-container { flex-direction: column; align-items: center; gap: 1rem; }
-    .step-connector { flex: 0 0 48px; flex-direction: column; padding-top: 0; }
-    .connector-line { width: 1px; height: 32px; background: linear-gradient(180deg, var(--border), var(--primary-dim), var(--border)); }
-    .hero-orb { width: 500px; height: 500px; top: -100px; right: -100px; }
-    .hero-orb-secondary { width: 400px; height: 400px; bottom: -100px; left: -100px; }
+    .bento { grid-template-columns: repeat(3, 1fr); }
+    .bento-main { grid-column: span 3; grid-row: span 1; }
+    .bento-arch { grid-column: span 3; }
+    .bento-perf { grid-column: span 3; }
+    .steps-visual { flex-direction: column; align-items: center; }
+    .step-card-wrapper { max-width: 400px; }
+    .step-arrow { transform: rotate(90deg); }
+    .hero-orb-1 { width: 500px; height: 500px; top: -100px; right: -100px; }
+    .hero-orb-2 { width: 400px; height: 400px; }
+    .hide-mobile { display: none; }
   }
 
   /* Tablet */
   @media (min-width: 768px) and (max-width: 1023px) {
-    .hero { padding: 6rem 0 4rem; }
-    .hero-content { grid-template-columns: 1fr; gap: 3rem; }
+    .hero { padding: 8rem 0 5rem; }
     .hero-title { font-size: 3rem; }
-    .hero-description { max-width: 100%; }
-    .hero-orb { width: 400px; height: 400px; top: -50px; right: -50px; }
-    .hero-orb-secondary { width: 300px; height: 300px; bottom: -50px; left: -50px; }
-    .section-title { font-size: 2.25rem; margin-bottom: 2.5rem; }
-    .problem-grid { grid-template-columns: repeat(2, 1fr); }
-    .bento-grid { grid-template-columns: repeat(2, 1fr); }
-    .bento-feature { grid-column: span 2; }
-    .bento-tall { grid-row: span 1; }
-    .bento-wide { grid-column: span 2; }
-    .platforms-grid { grid-template-columns: repeat(2, 1fr); }
-    .steps-container { flex-direction: column; align-items: center; gap: 1rem; }
-    .step-connector { flex: 0 0 48px; flex-direction: column; padding-top: 0; }
-    .connector-line { width: 1px; height: 32px; background: linear-gradient(180deg, var(--border), var(--primary-dim), var(--border)); }
+    .hero-orb-1 { width: 400px; height: 400px; }
+    .hero-orb-2 { width: 300px; height: 300px; }
+    .problem-grid { grid-template-columns: 1fr; max-width: 500px; }
+    .bento { grid-template-columns: 1fr 1fr; }
+    .bento-main { grid-column: span 2; grid-row: span 1; }
+    .bento-arch { grid-column: span 2; }
+    .bento-perf { grid-column: span 2; }
+    .compat-grid { grid-template-columns: repeat(2, 1fr); }
+    .steps-visual { flex-direction: column; align-items: center; }
+    .step-card-wrapper { max-width: 360px; }
+    .step-arrow { transform: rotate(90deg); }
+    .code-compare-grid { grid-template-columns: 1fr; }
+    .code-panel:first-child { border-right: none; border-bottom: 1px solid var(--border); }
     .hero-stats { gap: 1.5rem; }
     .cta-title { font-size: 2.75rem; }
     .cta { padding: 7rem 0; }
+    .hide-mobile { display: none; }
   }
 
   /* Large phone */
   @media (min-width: 640px) and (max-width: 767px) {
-    .hero { padding: 5rem 0 3rem; }
-    .hero-content { grid-template-columns: 1fr; gap: 2.5rem; }
+    .hero { padding: 7rem 0 4rem; }
     .hero-title { font-size: 2.5rem; }
-    .hero-description { max-width: 100%; font-size: 1rem; }
-    .hero-actions { flex-direction: column; }
-    .hero-stats { gap: 1rem; flex-wrap: wrap; }
-    .stat-value { font-size: 1.5rem; }
-    .hero-orb { width: 300px; height: 300px; top: 0; right: -50px; opacity: 0.3; }
-    .hero-orb-secondary { width: 250px; height: 250px; bottom: 0; left: -50px; opacity: 0.3; }
-    .section-title { font-size: 2rem; margin-bottom: 2rem; }
+    .hero-desc { font-size: 1rem; }
+    .hero-actions { flex-direction: column; align-items: center; }
+    .hero-stats { gap: 1rem; }
+    .hero-stat-num { font-size: 1.4rem; }
+    .hero-stat-divider { display: none; }
     .problem-grid { grid-template-columns: 1fr; }
-    .bento-grid { grid-template-columns: 1fr; }
-    .bento-feature { grid-column: span 1; grid-row: auto; padding: 1.75rem; }
-    .bento-tall { grid-column: span 1; grid-row: auto; }
-    .bento-wide { grid-column: span 1; }
-    .bento-perf-layout { flex-direction: column; gap: 1rem; }
-    .bento-stats { gap: 1rem; }
-    .platforms-grid { grid-template-columns: 1fr; }
-    .steps-container { flex-direction: column; align-items: center; gap: 1rem; }
-    .step-connector { flex: 0 0 48px; flex-direction: column; padding-top: 0; }
-    .connector-line { width: 1px; height: 32px; }
-    .hero-code { max-width: 100%; }
-    .code-content { font-size: 0.75rem; }
+    .bento { grid-template-columns: 1fr; }
+    .bento-main { grid-column: span 1; grid-row: auto; padding: 1.5rem; }
+    .bento-arch { grid-column: span 1; }
+    .bento-perf { grid-column: span 1; }
+    .bento-perf .bento-card-inner { flex-direction: column; gap: 1rem; }
+    .compat-grid { grid-template-columns: repeat(2, 1fr); }
+    .steps-visual { flex-direction: column; align-items: center; }
+    .step-arrow { transform: rotate(90deg); }
+    .code-compare-grid { grid-template-columns: 1fr; }
+    .code-panel:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+    .hero-orb-1 { width: 300px; height: 300px; top: 0; right: -80px; opacity: 0.3; }
+    .hero-orb-2 { width: 250px; height: 250px; opacity: 0.3; }
     .cta-title { font-size: 2rem; }
-    .cta-description { font-size: 1rem; }
     .cta-actions { flex-direction: column; align-items: center; }
     .cta { padding: 5rem 0; }
+    .section-title { font-size: 2rem; }
+    .hide-mobile { display: none; }
   }
 
-  /* Mobile phone */
+  /* Mobile */
   @media (max-width: 639px) {
-    .hero { padding: 5rem 0 3rem; }
-    .hero-content { grid-template-columns: 1fr; gap: 2rem; }
+    .hero { padding: 6rem 0 3rem; }
     .hero-title { font-size: 2rem; }
-    .hero-badge { margin-bottom: 1.5rem; }
-    .hero-description { max-width: 100%; font-size: 0.95rem; margin-bottom: 1.5rem; }
-    .hero-actions { flex-direction: column; gap: 0.75rem; }
+    .hero-badge { font-size: 0.75rem; margin-bottom: 1.5rem; }
+    .hero-desc { font-size: 0.95rem; margin-bottom: 1.5rem; }
+    .hero-actions { flex-direction: column; align-items: stretch; }
     .hero-actions .btn { width: 100%; }
-    .hero-stats { gap: 0.75rem; flex-wrap: wrap; padding-top: 1.5rem; }
-    .stat-item { flex: 1; min-width: 80px; }
-    .stat-value { font-size: 1.25rem; }
-    .stat-label { font-size: 0.75rem; }
-    .stat-divider { display: none; }
-    .hero-orb { width: 250px; height: 250px; top: 50px; right: -80px; opacity: 0.25; }
-    .hero-orb-secondary { width: 200px; height: 200px; bottom: 50px; left: -80px; opacity: 0.25; }
-    .section-title { font-size: 1.75rem; margin-bottom: 1.75rem; }
-    .problem-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .hero-stats { gap: 0.5rem; padding: 1.25rem 0; }
+    .hero-stat { flex: 1; min-width: 70px; }
+    .hero-stat-num { font-size: 1.15rem; }
+    .hero-stat-label { font-size: 0.65rem; }
+    .hero-stat-divider { display: none; }
+    .hero-orb-1 { width: 200px; height: 200px; top: 50px; right: -60px; opacity: 0.2; }
+    .hero-orb-2 { width: 180px; height: 180px; opacity: 0.2; }
+    .problem-grid { grid-template-columns: 1fr; }
     .problem-card { padding: 1.75rem 1.25rem; }
-    .bento-grid { grid-template-columns: 1fr; gap: 1rem; }
-    .bento-feature { grid-column: span 1; grid-row: auto; padding: 1.5rem; }
-    .bento-tall { grid-column: span 1; grid-row: auto; }
-    .bento-wide { grid-column: span 1; }
-    .bento-perf-layout { flex-direction: column; gap: 1rem; }
-    .bento-card { padding: 1.25rem; }
-    .bento-title-large { font-size: 1.25rem; }
-    .bento-desc { font-size: 0.85rem; }
-    .bento-stats { gap: 0.75rem; padding-top: 1rem; }
-    .bento-stat-num { font-size: 1rem; }
-    .platforms-grid { grid-template-columns: 1fr; gap: 1rem; }
-    .platform-card { padding: 1.25rem; }
-    .steps-container { flex-direction: column; align-items: center; gap: 0.75rem; }
-    .step-number { font-size: 3.5rem; }
-    .step-card { padding: 1.25rem; }
-    .step-connector { flex: 0 0 40px; flex-direction: column; padding-top: 0; }
-    .connector-line { width: 1px; height: 24px; }
-    .hero-code { max-width: 100%; }
-    .code-content { font-size: 0.7rem; padding: 1rem 1rem 0.75rem; }
+    .bento { grid-template-columns: 1fr; gap: 1rem; }
+    .bento-main { grid-column: span 1; grid-row: auto; padding: 1.5rem; }
+    .bento-arch { grid-column: span 1; }
+    .bento-perf { grid-column: span 1; }
+    .bento-perf .bento-card-inner { flex-direction: column; gap: 1rem; }
+    .bento-metrics { gap: 1rem; }
+    .bento-metric-num { font-size: 1rem; }
+    .compat-grid { grid-template-columns: repeat(2, 1fr); }
+    .compat-card { padding: 1rem; }
+    .compat-name { font-size: 0.82rem; }
+    .steps-visual { flex-direction: column; align-items: center; }
+    .step-card { padding: 1.5rem 1.25rem; }
+    .step-card-wrapper { max-width: 100%; }
+    .step-arrow { transform: rotate(90deg); }
+    .step-num { font-size: 2rem; }
+    .code-compare-grid { grid-template-columns: 1fr; }
+    .code-panel:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+    .code-panel { padding: 1rem; }
+    .code-panel pre { font-size: 0.7rem; }
+    .masking-code { font-size: 0.7rem; padding: 1rem; }
     .cta-title { font-size: 1.75rem; }
-    .cta-description { font-size: 0.95rem; margin-bottom: 2rem; }
-    .cta-actions { flex-direction: column; align-items: center; gap: 0.75rem; }
+    .cta-desc { font-size: 0.95rem; }
+    .cta-actions { flex-direction: column; align-items: stretch; }
     .cta-actions .btn { width: 100%; }
     .cta { padding: 5rem 0; }
-    .cta-orb { width: 500px; height: 500px; }
-    .cta-orb-secondary { width: 300px; height: 300px; }
-    .cta-tertiary-orb { width: 250px; height: 250px; }
+    .section-title { font-size: 1.75rem; }
+    .section-subtitle { font-size: 0.95rem; }
   }
 
-  /* Touch device hover alternatives */
+  /* Touch hover fallback */
   @media (hover: none) {
-    .btn-ghost:active {
-      border-color: var(--primary);
-      color: var(--primary);
-      background: rgba(134, 239, 172, 0.05);
-    }
-    .btn-ghost-light:active {
-      color: var(--text-primary);
-      border-color: var(--border-hover);
-    }
+    .masking-tab:active { background: rgba(134, 239, 172, 0.12); color: var(--primary); }
   }
 </style>
+
+<script is:inline>
+  (function() {
+    // Masking demo tab toggle
+    var tabs = document.querySelectorAll('.masking-tab');
+    var beforePane = document.getElementById('masking-before');
+    var afterPane = document.getElementById('masking-after');
+
+    if (tabs.length && beforePane && afterPane) {
+      tabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+          tabs.forEach(function(t) { t.classList.remove('active'); });
+          tab.classList.add('active');
+          if (tab.dataset.tab === 'before') {
+            beforePane.classList.remove('hidden');
+            afterPane.classList.add('hidden');
+          } else {
+            beforePane.classList.add('hidden');
+            afterPane.classList.remove('hidden');
+          }
+        });
+      });
+
+      // Auto-switch to "after" after 3s to demonstrate the effect
+      setTimeout(function() {
+        var afterTab = document.querySelector('.masking-tab[data-tab="after"]');
+        if (afterTab) afterTab.click();
+      }, 3000);
+
+      // Switch back after 6s
+      setTimeout(function() {
+        var beforeTab = document.querySelector('.masking-tab[data-tab="before"]');
+        if (beforeTab) beforeTab.click();
+      }, 6000);
+
+      // Cycle again
+      setTimeout(function() {
+        var afterTab = document.querySelector('.masking-tab[data-tab="after"]');
+        if (afterTab) afterTab.click();
+      }, 9000);
+    }
+  })();
+</script>
