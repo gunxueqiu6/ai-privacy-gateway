@@ -6,12 +6,12 @@ public class PrivacyGateway {
     private let timeout: TimeInterval
     private let headers: [String: String]
     
-    private var urlSession: URLSession {
+    private lazy var urlSession: URLSession = {
         let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = timeout
         configuration.timeoutIntervalForResource = timeout
         return URLSession(configuration: configuration)
-    }
+    }()
     
     private init(baseUrl: String, timeout: TimeInterval, headers: [String: String]) {
         self.baseUrl = baseUrl.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
@@ -94,18 +94,24 @@ public class PrivacyGateway {
     }
     
     // MARK: - Shared Instance
-    
-    private static var shared: PrivacyGateway?
-    
+
+    private static let lock = NSLock()
+    private static var _shared: PrivacyGateway?
+
     public static func initialize(config: GatewayConfig) {
+        lock.lock()
         let headers = buildHeaders(config: config)
-        shared = PrivacyGateway(baseUrl: config.baseUrl, timeout: config.timeout, headers: headers)
+        _shared = PrivacyGateway(baseUrl: config.baseUrl, timeout: config.timeout, headers: headers)
+        lock.unlock()
     }
-    
+
     public static func getInstance() throws -> PrivacyGateway {
-        guard let instance = shared else {
+        lock.lock()
+        guard let instance = _shared else {
+            lock.unlock()
             throw PrivacyGatewayError.notInitialized
         }
+        lock.unlock()
         return instance
     }
     

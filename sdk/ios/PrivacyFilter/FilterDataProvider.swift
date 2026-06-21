@@ -185,15 +185,9 @@ class FilterDataProvider: NEFilterDataProvider {
      * 加载配置
      */
     private func loadConfiguration() {
-        // TODO: Migrate to Keychain for secure storage (C-10).
-        // UserDefaults stores data in plaintext on disk — API keys and tokens
-        // must be stored in the Keychain instead.
-        // Use a Keychain wrapper (e.g. SwiftKeychainWrapper or SecItem API):
-        //   let keychain = KeychainWrapper.standard
-        //   gatewayApiKey = keychain.string(forKey: "api_key") ?? gatewayApiKey
         let defaults = UserDefaults(suiteName: "group.com.privacygw.filter")
         gatewayUrl = defaults?.string(forKey: "gateway_url") ?? gatewayUrl
-        gatewayApiKey = defaults?.string(forKey: "api_key") ?? gatewayApiKey
+        gatewayApiKey = KeychainHelper.read(key: "api_key") ?? gatewayApiKey
 
         logger.info("Configuration loaded: gateway=\(gatewayUrl)")
     }
@@ -292,7 +286,11 @@ class FilterDataProvider: NEFilterDataProvider {
             semaphore.signal()
         }.resume()
 
-        _ = semaphore.wait(timeout: .now() + 30)
+        let timeoutResult = semaphore.wait(timeout: .now() + 30)
+        if timeoutResult == .timedOut {
+            logger.error("Gateway request timed out after 30 seconds")
+            return nil
+        }
 
         return result
     }

@@ -13,10 +13,10 @@ public struct MaskResult: Codable {
 }
 
 public struct Entity: Codable {
-    public let type: String
+    public var type: String?
     public let value: String
     public let placeholder: String
-    public let position: Int
+    public var position: Int?
 }
 
 public struct Stats: Codable {

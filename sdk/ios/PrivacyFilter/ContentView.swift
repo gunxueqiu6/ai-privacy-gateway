@@ -21,6 +21,15 @@ struct ContentView: View {
                     .font(.title)
                     .fontWeight(.bold)
                     .foregroundColor(Color(red: 0.29, green: 0.87, blue: 0.51))
+
+                Text("ALPHA")
+                    .font(.caption2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.orange)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 2)
+                    .background(.orange.opacity(0.2))
+                    .cornerRadius(4)
             }
 
             // VPN开关

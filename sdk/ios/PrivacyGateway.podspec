@@ -19,9 +19,6 @@ Pod::Spec.new do |spec|
 
   spec.requires_arc = true
 
-  # Dependencies
-  spec.dependency "Alamofire", "~> 5.8"  # Optional, can use URLSession instead
-
   # Test specs
   spec.test_spec 'Tests' do |test_spec|
     test_spec.source_files = 'Tests/**/*.swift'

@@ -85,10 +85,9 @@ final class PrivacyGatewayTests: XCTestCase {
         XCTAssertNil(config.apiKey)
     }
 
-    func testPrivacyGatewayException() {
-        let error = PrivacyGatewayException("Not found", 404)
-        XCTAssertEqual(error.message, "Not found")
-        XCTAssertEqual(error.statusCode, 404)
+    func testPrivacyGatewayError() {
+        let error = PrivacyGatewayError.serverError(404)
+        XCTAssertEqual(error.errorDescription, "Server returned error code 404")
     }
 
     func testBatchMaskResponseDecoding() throws {
