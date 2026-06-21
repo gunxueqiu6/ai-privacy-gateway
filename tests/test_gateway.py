@@ -390,7 +390,7 @@ class TestDatabase:
             conn.execute("""
                 CREATE TABLE stats (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    date TEXT UNIQUE NOT NULL,
+                    date TEXT NOT NULL,
                     team_id TEXT DEFAULT 'default',
                     phone_count INTEGER DEFAULT 0,
                     email_count INTEGER DEFAULT 0,
@@ -406,7 +406,8 @@ class TestDatabase:
                     date_count INTEGER DEFAULT 0,
                     amount_count INTEGER DEFAULT 0,
                     postcode_count INTEGER DEFAULT 0,
-                    total_count INTEGER DEFAULT 0
+                    total_count INTEGER DEFAULT 0,
+                    UNIQUE(date, team_id)
                 )
             """)
         stats = {"phone": 2, "email": 1}

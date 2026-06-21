@@ -36,7 +36,9 @@ class PacketProcessor(
     private val vpnFd: FileDescriptor,
     private val gatewayUrl: String,
     private val gatewayApiKey: String,
-    private val onStatsChanged: (() -> Unit)?
+    private val onStatsChanged: (() -> Unit)?,
+    /** Port where the local MITM proxy is listening. 0 = HTTPS interception disabled. */
+    private val proxyPort: Int = 0
 ) {
 
     companion object {
@@ -149,12 +151,19 @@ class PacketProcessor(
         }
 
         if (tcpHeader.flags.syn && !tcpHeader.flags.ack) {
-            handleSyn(clientKey, dstIp, dstPort, ipHeader, tcpHeader)
-            // Only skip passthrough if the SYN was actually intercepted
-            // (handleSyn creates a connection entry for HTTP ports only)
-            val wasIntercepted = connectionManager.get(clientKey) != null
-            if (wasIntercepted) return
-            // Fall through to passthrough for non-HTTP SYN packets
+            if (dstPort == HTTPS_PORT && proxyPort > 0) {
+                // Intercept HTTPS — route through local MITM proxy
+                handleHttpsSyn(clientKey, dstIp, dstPort, ipHeader, tcpHeader)
+                if (connectionManager.get(clientKey) == null) {
+                    buffer.reset(); writePassthrough(buffer)
+                }
+                return
+            } else if (dstPort in HTTP_PORTS) {
+                handleSyn(clientKey, dstIp, dstPort, ipHeader, tcpHeader)
+                val wasIntercepted = connectionManager.get(clientKey) != null
+                if (wasIntercepted) return
+            }
+            // Non-intercepted SYN -> passthrough
             buffer.reset(); writePassthrough(buffer)
             return
         }
@@ -162,19 +171,22 @@ class PacketProcessor(
         // Check for existing intercepted connection
         val conn = connectionManager.get(clientKey)
         if (conn != null) {
-            handleInterceptedData(conn, payload, ipHeader, tcpHeader)
+            if (conn.isHttps) {
+                handleHttpsData(conn, payload, ipHeader, tcpHeader)
+            } else {
+                handleInterceptedData(conn, payload, ipHeader, tcpHeader)
+            }
             return
         }
 
-        // HTTPS SNI detection on data packets
+        // HTTPS SNI detection on non-intercepted data packets (stats only)
         if (dstPort == HTTPS_PORT && payload.isNotEmpty() &&
             payload[0].toInt() == 22 /* TLS handshake */
         ) {
             val sniResult = TlsParser.extractSni(payload)
             if (sniResult != null && TlsParser.isAiServiceHost(sniResult.sni)) {
-                Log.i(TAG, "HTTPS AI connection: ${sniResult.sni}")
+                Log.i(TAG, "HTTPS AI connection (passthrough): ${sniResult.sni}")
                 httpsConnectionsSeen++
-                connectionManager.getOrCreate(clientKey, sniResult.sni, true)
             }
         }
 

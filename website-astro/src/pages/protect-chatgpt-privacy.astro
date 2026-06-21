@@ -1,0 +1,243 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Layout
+  title="ChatGPT Privacy Protection: How to Mask PII Before Sending to OpenAI"
+  description="Protect your privacy when using ChatGPT. Learn how to mask phone numbers, emails, and personal data before they reach OpenAI's servers. Set up a local privacy proxy in 30 seconds."
+  keywords="ChatGPT隐私保护,防止ChatGPT数据泄露,OpenAI数据安全,PII脱敏ChatGPT,聊天数据隐私保护"
+  canonicalURL="https://privacygw.pages.dev/protect-chatgpt-privacy"
+  ogType="article">
+  <Nav />
+
+  <section class="seo-page">
+    <div class="container">
+      <div class="seo-header">
+        <div class="seo-badge">ChatGPT Privacy Guide</div>
+        <h1>ChatGPT Privacy Protection: Mask PII Before Sending to OpenAI</h1>
+        <p class="seo-subtitle">
+          Every time you paste customer data, personal information, or business documents into
+          ChatGPT, that data is processed on OpenAI's servers. Here is how to use AI Privacy Gateway
+          to automatically mask sensitive information before it ever reaches ChatGPT.
+        </p>
+      </div>
+
+      <div class="seo-tldr glass">
+        <strong>TL;DR:</strong> Set up AI Privacy Gateway as a local proxy and configure any
+        OpenAI-compatible client app to route through it. ChatGPT desktop, API clients, and
+        third-party apps all get PII-protected. Takes 30 seconds.
+      </div>
+
+      <h2>Why ChatGPT Needs Privacy Protection</h2>
+      <p>
+        ChatGPT processes billions of conversations daily. While OpenAI has privacy and data usage
+        controls, the fundamental architecture means your data is processed on their servers.
+        Consider these risks:
+      </p>
+      <ul>
+        <li><strong>Training data leakage:</strong> Data you share could be used for model training unless you opt out</li>
+        <li><strong>Data breach surface:</strong> Your prompts travel across the internet to OpenAI's servers</li>
+        <li><strong>Inadvertent sharing:</strong> Easy to accidentally paste PII or confidential data in a prompt</li>
+        <li><strong>Team/enterprise settings:</strong> Even in enterprise, your data transits through OpenAI's infrastructure</li>
+      </ul>
+      <p>
+        A local privacy proxy is the most effective way to ensure sensitive data never reaches
+        OpenAI's servers in readable form.
+      </p>
+
+      <h2>How AI Privacy Gateway Protects ChatGPT</h2>
+      <p>
+        The gateway acts as a transparent proxy between your ChatGPT client and OpenAI's API.
+        It intercepts every API call, scans for PII patterns, and replaces sensitive data with
+        safe placeholders before forwarding to OpenAI.
+      </p>
+
+      <div class="diagram-flow glass">
+        <div class="diagram-row">
+          <div class="diagram-node">ChatGPT Client</div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-node diagram-accent">Privacy Gateway</div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-node diagram-alt">OpenAI API</div>
+        </div>
+        <div class="diagram-note">PII is masked by the gateway before reaching OpenAI</div>
+      </div>
+
+      <h2>Setup Guide: Privacy-Protect Your ChatGPT Usage</h2>
+
+      <h3>Step 1: Install the Gateway</h3>
+
+      <div class="code-block glass">
+        <div class="code-block-title">Docker (recommended)</div>
+        <pre><code>docker run -d \
+  --name ai-privacy-gw \
+  -p 9999:9999 \
+  -v ./vault_data:/app/vault_data \
+  -e TARGET_LLM=https://api.openai.com \
+  ghcr.io/gunxueqiu6/ai-privacy-gateway:lite</code></pre>
+      </div>
+
+      <h3>Step 2: Route Your API Calls Through the Gateway</h3>
+      <p>If you use ChatGPT via API (OpenAI SDK, LangChain, or any library):</p>
+
+      <div class="code-block glass">
+        <div class="code-block-title">Python OpenAI SDK</div>
+        <pre><code>from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://localhost:9999/v1",  # Route through privacy gateway
+    api_key="sk-..."                       # Your original key still works
+)
+
+# All PII in your prompts is now automatically masked
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[&#123;"role": "user", "content": "My phone is 13812345678 and email is alice@example.com"&#125;]
+)</code></pre>
+      </div>
+
+      <h3>Step 3: Use the ChatGPT Privacy Browser</h3>
+      <p>
+        For web-based ChatGPT usage, use the <strong>AI Privacy Gateway browser extension</strong>
+        that intercepts requests from chat.openai.com and routes them through your local gateway.
+        Download it from the <a href="/download">download page</a>.
+      </p>
+
+      <h2>What PII Gets Masked in ChatGPT</h2>
+      <div class="entity-grid">
+        <div class="entity-item"><span class="entity-chip chip-phone">Phone</span> +86 13812345678 → [PHONE_1]</div>
+        <div class="entity-item"><span class="entity-chip chip-email">Email</span> alice@example.com → [EMAIL_1]</div>
+        <div class="entity-item"><span class="entity-chip chip-id">ID Card</span> 110101199001011234 → [IDCARD_1]</div>
+        <div class="entity-item"><span class="entity-chip chip-bank">Bank</span> 6222021234567890 → [BANKCARD_1]</div>
+        <div class="entity-item"><span class="entity-chip chip-name">Name</span> 张三 → [PER_1]</div>
+        <div class="entity-item"><span class="entity-chip chip-loc">Address</span> 北京市海淀区 → [LOC_1]</div>
+        <div class="entity-item"><span class="entity-chip chip-org">Company</span> 科技有限公司 → [ORG_1]</div>
+        <div class="entity-item"><span class="entity-chip chip-secret">Custom</span> API keys, passwords → user-defined</div>
+      </div>
+
+      <!-- FAQ -->
+      <div class="seo-faq glass" id="faq">
+        <h2>Frequently Asked Questions</h2>
+
+        <div class="faq-item">
+          <h3>Does this work with ChatGPT Plus or Team plans?</h3>
+          <p>Yes. The gateway works with any OpenAI plan. It intercepts API calls regardless of your subscription tier.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Can I use it with ChatGPT's web interface?</h3>
+          <p>Yes, using the browser extension. The extension intercepts requests from chat.openai.com and routes them through your local gateway. Download it from the download page.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Does the gateway store my data?</h3>
+          <p>No. The gateway does not store your prompts or responses. The masking mapping is stored locally in an encrypted SQLite vault that never leaves your machine.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Will it affect ChatGPT's response quality?</h3>
+          <p>No. ChatGPT responds to the masked content with placeholders. The gateway then restores the original values in the response before returning it to you. You see the complete, unmasked response.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Is this better than just being careful about what I paste?</h3>
+          <p>Yes. Human error is the biggest privacy risk. The gateway catches sensitive data you might not notice — like embedded phone numbers in code samples, email addresses in configuration files, or ID numbers in test data.</p>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="seo-cta">
+        <h2>Protect Your ChatGPT Conversations</h2>
+        <p>Deploy AI Privacy Gateway in 30 seconds. No code changes needed.</p>
+        <div class="seo-cta-buttons">
+          <a href="/download" class="btn btn-primary btn-lg">Get Started Free</a>
+          <a href="/demo" class="btn btn-ghost btn-lg">Try the Demo</a>
+        </div>
+      </div>
+
+      <!-- FAQ Schema -->
+      <script type="application/ld+json">{
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          { "@type": "Question", "name": "Does this work with ChatGPT Plus or Team plans?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Works with any OpenAI plan." } },
+          { "@type": "Question", "name": "Does the gateway store my data?", "acceptedAnswer": { "@type": "Answer", "text": "No. The gateway does not store prompts or responses. Mapping data stays local." } },
+          { "@type": "Question", "name": "Will it affect ChatGPT's response quality?", "acceptedAnswer": { "@type": "Answer", "text": "No. ChatGPT sees masked placeholders; the gateway restores original values in responses." } }
+        ]
+      }</script>
+    </div>
+  </section>
+
+  <Footer />
+</Layout>
+
+<style>
+  .seo-page { padding: 8rem 0 4rem; }
+  .seo-page .container { max-width: 820px; margin: 0 auto; }
+  .seo-header { margin-bottom: 3rem; }
+  .seo-badge {
+    display: inline-block; padding: 0.35rem 0.85rem; border-radius: 20px;
+    font-size: 0.78rem; font-weight: 600; color: var(--primary);
+    background: rgba(134, 239, 172, 0.08); border: 1px solid rgba(134, 239, 172, 0.15);
+    margin-bottom: 1.25rem;
+  }
+  .seo-page h1 { font-size: 2.75rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1.15; margin-bottom: 1.25rem; }
+  .seo-subtitle { font-size: 1.1rem; color: var(--text-secondary); line-height: 1.8; }
+  .seo-tldr { padding: 1.25rem 1.5rem; margin-bottom: 2.5rem; font-size: 0.95rem; line-height: 1.7; color: var(--text-primary); }
+  .seo-tldr strong { color: var(--primary); }
+  .seo-tldr code { background: var(--bg-deep); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; }
+  .seo-page h2 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.03em; margin: 3rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+  .seo-page h3 { font-size: 1.25rem; font-weight: 600; margin: 2rem 0 0.75rem; }
+  .seo-page p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 1.25rem; }
+  .seo-page ul { list-style: none; padding: 0; margin-bottom: 1.5rem; }
+  .seo-page ul li { padding: 0.5rem 0 0.5rem 1.5rem; position: relative; color: var(--text-secondary); line-height: 1.6; }
+  .seo-page ul li::before { content: ''; position: absolute; left: 0; top: 0.9rem; width: 6px; height: 6px; border-radius: 50%; background: var(--primary); opacity: 0.5; }
+  .seo-page a { color: var(--primary); text-decoration: underline; text-underline-offset: 2px; }
+  .seo-page a:hover { color: var(--accent); }
+  .code-block { padding: 1.25rem; margin-bottom: 1.5rem; }
+  .code-block-title { font-size: 0.78rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; }
+  .code-block pre { margin: 0; font-size: 0.85rem; line-height: 1.7; overflow-x: auto; }
+  .code-block code { color: var(--primary); font-family: 'JetBrains Mono', monospace; }
+  .diagram-flow { padding: 1.5rem; margin-bottom: 2.5rem; }
+  .diagram-row { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+  .diagram-node { padding: 0.6rem 1.25rem; border-radius: 10px; font-size: 0.85rem; font-weight: 600; background: rgba(134, 239, 172, 0.06); border: 1px solid var(--border); color: var(--primary); }
+  .diagram-accent { color: var(--accent); background: rgba(167, 139, 250, 0.06); }
+  .diagram-alt { color: var(--warning); background: rgba(251, 191, 36, 0.06); }
+  .diagram-arrow { font-size: 1.25rem; color: var(--text-muted); }
+  .diagram-note { text-align: center; font-size: 0.82rem; color: var(--text-muted); font-style: italic; }
+  .entity-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 2rem; }
+  .entity-item { display: flex; align-items: center; gap: 0.75rem; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; }
+  .entity-chip { font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.5rem; border-radius: 4px; white-space: nowrap; }
+  .chip-secret { background: rgba(248, 113, 113, 0.12); color: #f87171; }
+  .chip-phone { background: rgba(251, 191, 36, 0.12); color: #fbbf24; }
+  .chip-email { background: rgba(96, 165, 250, 0.12); color: #60a5fa; }
+  .chip-id { background: rgba(134, 239, 172, 0.12); color: #86efac; }
+  .chip-bank { background: rgba(244, 114, 182, 0.12); color: #f472b6; }
+  .chip-name { background: rgba(167, 139, 250, 0.12); color: #a78bfa; }
+  .chip-loc { background: rgba(252, 165, 165, 0.12); color: #fca5a5; }
+  .chip-org { background: rgba(148, 163, 184, 0.12); color: #94a3b8; }
+  .seo-faq { padding: 2rem; margin-bottom: 3rem; }
+  .seo-faq h2 { border: none; margin-top: 0; }
+  .faq-item { padding: 1rem 0; border-bottom: 1px solid var(--border); }
+  .faq-item:last-child { border: none; }
+  .faq-item h3 { margin: 0 0 0.5rem; font-size: 1.05rem; color: var(--text-primary); }
+  .faq-item p { margin: 0; font-size: 0.92rem; }
+  .seo-cta { text-align: center; padding: 3rem 2rem; background: var(--glass-bg); border: 1px solid var(--border); border-radius: 20px; margin-top: 3rem; }
+  .seo-cta h2 { margin-top: 0; border: none; }
+  .seo-cta p { color: var(--text-secondary); margin-bottom: 1.5rem; }
+  .seo-cta-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  @media (max-width: 768px) {
+    .seo-page { padding: 6rem 0 3rem; }
+    .seo-page h1 { font-size: 2rem; }
+    .seo-page h2 { font-size: 1.4rem; }
+    .entity-grid { grid-template-columns: 1fr; }
+    .diagram-row { flex-direction: column; gap: 0.5rem; }
+  }
+  @media (max-width: 639px) {
+    .seo-page h1 { font-size: 1.75rem; }
+    .seo-cta-buttons { flex-direction: column; }
+    .seo-cta-buttons .btn { width: 100%; }
+  }
+</style>

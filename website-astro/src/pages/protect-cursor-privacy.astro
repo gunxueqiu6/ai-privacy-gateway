@@ -1,0 +1,431 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Layout
+  title="How to Protect Your Privacy When Using Cursor AI — Stop Source Code and PII Leaks"
+  description="Learn how to stop Cursor AI from leaking your source code, API keys, and sensitive data. Install AI Privacy Gateway as a local proxy in 30 seconds — no code changes required."
+  keywords="Cursor隐私保护,Cursor代码上传安全,Cursor AI数据防护,IDE隐私代理,AI编辑器源代码保护"
+  canonicalURL="https://privacygw.pages.dev/protect-cursor-privacy"
+  ogType="article">
+  <Nav />
+
+  <section class="seo-page">
+    <div class="container">
+      <div class="seo-header">
+        <div class="seo-badge">Cursor AI Privacy Guide</div>
+        <h1>How to Protect Your Privacy When Using Cursor AI</h1>
+        <p class="seo-subtitle">
+          Cursor sends your code to AI APIs like OpenAI and Claude every time you ask for help.
+          Without a privacy proxy, every snippet, API key, and database credential in your codebase
+          could leave your machine. Here is how to stop it.
+        </p>
+      </div>
+
+      <div class="seo-tldr glass">
+        <strong>TL;DR:</strong> Change one setting in Cursor's API configuration. Set Base URL to
+        <code>http://localhost:9999/v1</code>, run the gateway locally, and all sensitive data is
+        automatically masked before it leaves your machine. Takes 30 seconds.
+      </div>
+
+      <h2>Why Cursor AI Is a Privacy Risk</h2>
+      <p>
+        Cursor is a powerful AI-assisted code editor, but every time you use its AI features —
+        inline editing, chat, code generation, or debugging — your code is sent to third-party AI
+        APIs. This includes:
+      </p>
+      <ul>
+        <li><strong>Source code</strong> from your current file and open tabs</li>
+        <li><strong>API keys, tokens, and secrets</strong> that happen to be in your code</li>
+        <li><strong>Database connection strings</strong> containing credentials</li>
+        <li><strong>Internal business logic</strong> and proprietary algorithms</li>
+        <li><strong>Customer data</strong> referenced in your codebase</li>
+      </ul>
+      <p>
+        While <a href="https://docs.cursor.com/privacy" rel="nofollow">Cursor's privacy policy</a>
+        states they do not train on your code by default, your data still passes through third-party
+        AI providers. A local privacy proxy is the only way to ensure your sensitive data stays
+        under your control.
+      </p>
+
+      <h2>How AI Privacy Gateway Protects Cursor AI</h2>
+      <p>
+        AI Privacy Gateway acts as a local reverse proxy that sits between Cursor and the AI API.
+        Every request passes through the gateway where it is scanned for sensitive patterns before
+        being forwarded:
+      </p>
+
+      <div class="code-compare glass">
+        <div class="code-compare-header">Protecting Cursor AI API Calls</div>
+        <div class="flow-diagram">
+          <div class="flow-node">Cursor</div>
+          <span class="flow-arrow">&rarr;</span>
+          <div class="flow-node flow-accent">Privacy Gateway</div>
+          <span class="flow-arrow">&rarr;</span>
+          <div class="flow-node flow-danger">OpenAI / Claude API</div>
+        </div>
+        <div class="flow-note">The gateway masks API keys, secrets, database credentials, and PII before they reach the AI API</div>
+      </div>
+
+      <h2>Setup: Protect Cursor in 30 Seconds</h2>
+
+      <h3>Step 1: Install the Gateway</h3>
+      <p>Choose your preferred method:</p>
+
+      <div class="code-block glass">
+        <div class="code-block-title">Docker (recommended)</div>
+        <pre><code>docker run -d \
+  --name ai-privacy-gw \
+  -p 9999:9999 \
+  -v ./vault_data:/app/vault_data \
+  ghcr.io/gunxueqiu6/ai-privacy-gateway:lite</code></pre>
+      </div>
+
+      <div class="code-block glass">
+        <div class="code-block-title">Python (no Docker needed)</div>
+        <pre><code>git clone https://github.com/gunxueqiu6/ai-privacy-gateway
+cd ai-privacy-gateway
+pip install -r requirements.txt
+python main.py</code></pre>
+      </div>
+
+      <h3>Step 2: Configure Cursor</h3>
+      <p>
+        In Cursor, go to <strong>Settings &rarr; API Key &rarr; Overwrite OpenAI Base URL</strong>
+        and set it to:
+      </p>
+      <div class="code-block glass">
+        <pre><code>http://localhost:9999/v1</code></pre>
+      </div>
+      <p>Keep your original API key in the API Key field. The gateway forwards it automatically.</p>
+
+      <h3>Step 3: Verify</h3>
+      <p>
+        Open Cursor's AI chat and send a test message containing sensitive data like an API key or
+        phone number. Check the gateway's admin dashboard at
+        <a href="http://localhost:9999/admin">http://localhost:9999/admin</a> to see detected and
+        masked entities in real time.
+      </p>
+
+      <h2>What Cursor Users Are Protecting</h2>
+      <p>With AI Privacy Gateway, Cursor users automatically mask:</p>
+      <div class="entity-grid">
+        <div class="entity-item"><span class="entity-chip chip-secret">API Keys</span> sk-*, AKIA*, gh* tokens masked before leaving</div>
+        <div class="entity-item"><span class="entity-chip chip-phone">Phone</span> User phone numbers in code comments</div>
+        <div class="entity-item"><span class="entity-chip chip-email">Email</span> Test emails, user emails in code</div>
+        <div class="entity-item"><span class="entity-chip chip-id">ID Card</span> Chinese ID numbers in test data</div>
+        <div class="entity-item"><span class="entity-chip chip-bank">Bank Card</span> Payment test data, credit card numbers</div>
+        <div class="entity-item"><span class="entity-chip chip-name">Name</span> User names, employee names in code</div>
+        <div class="entity-item"><span class="entity-chip chip-loc">Address</span> Customer addresses in data samples</div>
+        <div class="entity-item"><span class="entity-chip chip-org">Secrets</span> Database URLs, connection strings, passwords</div>
+      </div>
+
+      <h2>Why Not Just Use Cursor's Privacy Mode?</h2>
+      <p>
+        Cursor offers a privacy mode that avoids code storage, but it does <strong>not</strong>
+        prevent your code from being sent to AI API providers. A local proxy like AI Privacy Gateway
+        is the <strong>only</strong> way to ensure your sensitive data never reaches third-party
+        servers in plain text.
+      </p>
+
+      <!-- FAQ -->
+      <div class="seo-faq glass" id="faq">
+        <h2>Frequently Asked Questions</h2>
+
+        <div class="faq-item">
+          <h3>Does AI Privacy Gateway slow down Cursor?</h3>
+          <p>No. The gateway adds under 1ms of latency per request on average. P99 latency stays under 2ms. You will not notice any difference in Cursor's response speed.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Can I use it with Cursor's built-in API key?</h3>
+          <p>Yes. Just change the base URL setting in Cursor's API configuration. Keep using your existing API key — the gateway forwards it.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Does this work with Cursor Tab?</h3>
+          <p>Yes. All Cursor AI features that go through the API — inline editing, chat, code generation, and debugging — are protected by the gateway.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>What if I use Cursor with a custom API endpoint?</h3>
+          <p>AI Privacy Gateway supports any OpenAI-compatible API. Set Cursor's base URL to <code>http://localhost:9999/v1</code> and configure the gateway's <code>TARGET_LLM</code> environment variable to point to your custom endpoint.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Is it free?</h3>
+          <p>Yes. AI Privacy Gateway is open source under the MIT license. Free for personal and commercial use. No account or credit card needed.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Can I use it on a team?</h3>
+          <p>Yes. The Docker image can be deployed on a shared server, and multiple team members can route their Cursor traffic through it. Each user's vault data stays isolated.</p>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="seo-cta">
+        <h2>Stop Leaking Code Through Cursor AI</h2>
+        <p>Deploy AI Privacy Gateway in 30 seconds. No code changes needed.</p>
+        <div class="seo-cta-buttons">
+          <a href="/download" class="btn btn-primary btn-lg">Get Started Free</a>
+          <a href="/demo" class="btn btn-ghost btn-lg">Try the Demo</a>
+        </div>
+      </div>
+
+      <!-- Breadcrumb list for this page -->
+      <script type="application/ld+json">{
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://privacygw.pages.dev" },
+          { "@type": "ListItem", "position": 2, "name": "Protect Cursor Privacy", "item": "https://privacygw.pages.dev/protect-cursor-privacy" }
+        ]
+      }</script>
+
+      <!-- FAQ Schema -->
+      <script type="application/ld+json">{
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          { "@type": "Question", "name": "Does AI Privacy Gateway slow down Cursor?", "acceptedAnswer": { "@type": "Answer", "text": "No. The gateway adds under 1ms of latency per request. P99 stays under 2ms." } },
+          { "@type": "Question", "name": "Can I use it with Cursor's built-in API key?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Just change the base URL setting. Keep using your existing API key." } },
+          { "@type": "Question", "name": "Does this work with Cursor Tab?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. All Cursor AI features that go through the API are protected." } }
+        ]
+      }</script>
+    </div>
+  </section>
+
+  <Footer />
+</Layout>
+
+<style>
+  .seo-page { padding: 8rem 0 4rem; }
+  .seo-page .container { max-width: 820px; margin: 0 auto; }
+
+  .seo-header { margin-bottom: 3rem; }
+
+  .seo-badge {
+    display: inline-block;
+    padding: 0.35rem 0.85rem;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--primary);
+    background: rgba(134, 239, 172, 0.08);
+    border: 1px solid rgba(134, 239, 172, 0.15);
+    margin-bottom: 1.25rem;
+  }
+
+  .seo-page h1 {
+    font-size: 2.75rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1.15;
+    margin-bottom: 1.25rem;
+  }
+
+  .seo-subtitle {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+  }
+
+  .seo-tldr {
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2.5rem;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--text-primary);
+  }
+
+  .seo-tldr strong { color: var(--primary); }
+  .seo-tldr code {
+    background: var(--bg-deep);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .seo-page h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin: 3rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .seo-page h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 2rem 0 0.75rem;
+  }
+
+  .seo-page p {
+    color: var(--text-secondary);
+    line-height: 1.8;
+    margin-bottom: 1.25rem;
+  }
+
+  .seo-page ul {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1.5rem;
+  }
+
+  .seo-page ul li {
+    padding: 0.5rem 0 0.5rem 1.5rem;
+    position: relative;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .seo-page ul li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.9rem;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--primary);
+    opacity: 0.5;
+  }
+
+  .seo-page a { color: var(--primary); text-decoration: underline; text-underline-offset: 2px; }
+  .seo-page a:hover { color: var(--accent); }
+
+  /* Code blocks */
+  .code-block {
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .code-block-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .code-block pre {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    overflow-x: auto;
+  }
+
+  .code-block code { color: var(--primary); font-family: 'JetBrains Mono', monospace; }
+
+  /* Flow diagram */
+  .code-compare { margin-bottom: 2.5rem; padding: 1.5rem; }
+  .code-compare-header { font-weight: 600; margin-bottom: 1rem; color: var(--text-primary); }
+
+  .flow-diagram {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .flow-node {
+    padding: 0.6rem 1.25rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: rgba(134, 239, 172, 0.06);
+    border: 1px solid var(--border);
+    color: var(--primary);
+  }
+
+  .flow-accent { color: var(--accent); background: rgba(167, 139, 250, 0.06); }
+  .flow-danger { color: var(--danger); background: rgba(248, 113, 113, 0.06); }
+
+  .flow-arrow { font-size: 1.25rem; color: var(--text-muted); }
+
+  .flow-note {
+    text-align: center;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  /* Entity grid */
+  .entity-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .entity-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .entity-chip {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .chip-secret { background: rgba(248, 113, 113, 0.12); color: #f87171; }
+  .chip-phone { background: rgba(251, 191, 36, 0.12); color: #fbbf24; }
+  .chip-email { background: rgba(96, 165, 250, 0.12); color: #60a5fa; }
+  .chip-id { background: rgba(134, 239, 172, 0.12); color: #86efac; }
+  .chip-bank { background: rgba(244, 114, 182, 0.12); color: #f472b6; }
+  .chip-name { background: rgba(167, 139, 250, 0.12); color: #a78bfa; }
+  .chip-loc { background: rgba(252, 165, 165, 0.12); color: #fca5a5; }
+  .chip-org { background: rgba(148, 163, 184, 0.12); color: #94a3b8; }
+
+  /* FAQ */
+  .seo-faq { padding: 2rem; margin-bottom: 3rem; }
+  .seo-faq h2 { border: none; margin-top: 0; }
+  .faq-item { padding: 1rem 0; border-bottom: 1px solid var(--border); }
+  .faq-item:last-child { border: none; }
+  .faq-item h3 { margin: 0 0 0.5rem; font-size: 1.05rem; color: var(--text-primary); }
+  .faq-item p { margin: 0; font-size: 0.92rem; }
+
+  /* CTA */
+  .seo-cta {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    margin-top: 3rem;
+  }
+  .seo-cta h2 { margin-top: 0; border: none; }
+  .seo-cta p { color: var(--text-secondary); margin-bottom: 1.5rem; }
+  .seo-cta-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .seo-page { padding: 6rem 0 3rem; }
+    .seo-page h1 { font-size: 2rem; }
+    .seo-page h2 { font-size: 1.4rem; }
+    .entity-grid { grid-template-columns: 1fr; }
+    .flow-diagram { flex-direction: column; gap: 0.5rem; }
+    .code-block pre { font-size: 0.75rem; }
+  }
+
+  @media (max-width: 639px) {
+    .seo-page h1 { font-size: 1.75rem; }
+    .seo-cta-buttons { flex-direction: column; }
+    .seo-cta-buttons .btn { width: 100%; }
+    .seo-tldr { font-size: 0.88rem; }
+  }
+</style>

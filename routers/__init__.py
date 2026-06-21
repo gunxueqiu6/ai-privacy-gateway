@@ -4,6 +4,7 @@ from .proxy import proxy_router
 from .api import api_router
 from .auth import auth_router
 from .admin import router as admin_router
+from .setup import router as setup_router
 
 
 def register_routers(app):
@@ -12,3 +13,4 @@ def register_routers(app):
     app.include_router(api_router)
     app.include_router(auth_router)
     app.include_router(admin_router)
+    app.include_router(setup_router)

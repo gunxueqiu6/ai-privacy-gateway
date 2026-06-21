@@ -2,15 +2,21 @@
 interface Props {
   title: string;
   description?: string;
+  keywords?: string;
   ogImage?: string;
   canonicalURL?: string;
+  ogType?: string;
+  hreflang?: { lang: string; url: string }[];
 }
 
 const {
   title,
   description = 'AI Privacy Gateway — 你的 AI 数据正在裸奔，30 秒装上防火墙。开源 AI API 隐私隔离网关，自动脱敏手机号/邮箱/身份证/银行卡，支持 Cursor/DeepSeek/Kimi。',
+  keywords = 'AI隐私,数据脱敏,隐私网关,LLM安全,Cursor隐私,DeepSeek代理,API隐私隔离,PII检测,数据掩码,开源',
   ogImage = 'https://privacygw.pages.dev/og-image.png',
   canonicalURL = 'https://privacygw.pages.dev',
+  ogType = 'website',
+  hreflang = [],
 } = Astro.props;
 ---
 
@@ -23,7 +29,8 @@ const {
   <!-- Primary Meta -->
   <title>{title}</title>
   <meta name="description" content={description}>
-  <meta name="keywords" content="AI隐私,数据脱敏,隐私网关,LLM安全,Cursor隐私,DeepSeek代理,API隐私隔离,PII检测,数据掩码,开源">
+  <meta name="keywords" content={keywords}>
+{hreflang.map(h => <link rel="alternate" hreflang={h.lang} href={h.url}>)}
   <meta name="author" content="AI Privacy Gateway">
   <meta name="robots" content="index, follow">
   {import.meta.env.PUBLIC_BAIDU_VERIFICATION && <meta name="baidu-site-verification" content={import.meta.env.PUBLIC_BAIDU_VERIFICATION}>}
@@ -38,25 +45,42 @@ const {
   <!-- Open Graph -->
   <meta property="og:title" content={title}>
   <meta property="og:description" content={description}>
-  <meta property="og:type" content="website">
+  <meta property="og:type" content={ogType}>
   <meta property="og:url" content={canonicalURL}>
   <meta property="og:image" content={ogImage}>
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="zh_CN">
   <meta property="og:site_name" content="AI Privacy Gateway">
+  <meta property="og:determiner" content="auto">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content={title}>
   <meta name="twitter:description" content={description}>
   <meta name="twitter:image" content={ogImage}>
+  <meta name="twitter:site" content="@privacygw">
+  <meta name="twitter:creator" content="@privacygw">
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="apple-touch-icon" href="/favicon.svg">
 
   <!-- JSON-LD Structured Data -->
+  <!-- Organization schema (site-wide) -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'AI Privacy Gateway',
+    url: 'https://privacygw.pages.dev',
+    logo: 'https://privacygw.pages.dev/favicon.svg',
+    description: 'Open-source AI API privacy gateway that auto-detects and masks PII before it reaches LLMs.',
+    sameAs: [
+      'https://github.com/gunxueqiu6/ai-privacy-gateway'
+    ]
+  })} />
+
+  <!-- SoftwareApplication schema (landing pages) -->
   <script type="application/ld+json" set:html={JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
@@ -70,11 +94,23 @@ const {
       description: 'Lite 版 — 永久免费开源'
     },
     description: description,
-    url: 'https://privacygw.pages.dev',
+    url: canonicalURL,
     author: {
       '@type': 'Organization',
       name: 'AI Privacy Gateway'
     }
+  })} />
+
+  <!-- BreadcrumbList schema -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [{
+      '@type': 'ListItem',
+      position: 1,
+      name: 'Home',
+      item: 'https://privacygw.pages.dev'
+    }]
   })} />
 </head>
 <body>

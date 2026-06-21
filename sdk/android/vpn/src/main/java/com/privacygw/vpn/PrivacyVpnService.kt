@@ -40,9 +40,7 @@ class PrivacyVpnService : VpnService() {
 
         const val EXTRA_GATEWAY_URL = "gateway_url"
         const val EXTRA_API_KEY = "api_key"
-
-        // DNS服务器地址（TODO: 改为可配置，应从配置界面/远程设置读取）
-        val DNS_SERVERS = listOf("8.8.8.8", "8.8.4.4")
+        const val EXTRA_DNS_SERVERS = "dns_servers"
 
         // AI服务域名白名单（用于通知显示，实际过滤在 PacketProcessor 和 HttpParser 中）
         val AI_SERVICE_DOMAINS = setOf(
@@ -97,7 +95,8 @@ class PrivacyVpnService : VpnService() {
         val mtu: Int = 1500,
         val address: String = "10.0.0.2",
         val prefixLength: Int = 24,
-        val sessionName: String = "AI Privacy Gateway"
+        val sessionName: String = "AI Privacy Gateway",
+        val dnsServers: List<String> = listOf("8.8.8.8", "8.8.4.4")
     )
 
     override fun onCreate() {
@@ -113,6 +112,9 @@ class PrivacyVpnService : VpnService() {
             ACTION_START -> {
                 gatewayUrl = intent.getStringExtra(EXTRA_GATEWAY_URL) ?: gatewayUrl
                 gatewayApiKey = intent.getStringExtra(EXTRA_API_KEY) ?: gatewayApiKey
+                intent.getStringArrayListExtra(EXTRA_DNS_SERVERS)?.let {
+                    config = config.copy(dnsServers = it)
+                }
                 startVpn()
             }
             ACTION_STOP -> {
@@ -150,6 +152,16 @@ class PrivacyVpnService : VpnService() {
 
         // 已授权，启动VPN
         try {
+            // 初始化 PrivacyGateway SDK
+            PrivacyGateway.initialize(
+                GatewayConfig(
+                    baseUrl = gatewayUrl,
+                    apiKey = gatewayApiKey.ifBlank { null },
+                    timeout = 15000L
+                )
+            )
+            Log.i(TAG, "PrivacyGateway SDK initialized: $gatewayUrl")
+
             establishVpn()
             startForeground(NOTIFICATION_ID, createNotification())
             isRunning = true
@@ -178,8 +190,8 @@ class PrivacyVpnService : VpnService() {
             builder.addDisallowedApplication(packageName)
         }
 
-        // DNS配置（TODO: 改成可配置，目前硬编码为Google DNS）
-        DNS_SERVERS.forEach { builder.addDnsServer(it) }
+        // DNS配置（可通过 Intent extra 或 VpnConfig 自定义）
+        config.dnsServers.forEach { builder.addDnsServer(it) }
 
         vpnInterface = builder.establish()
         Log.i(TAG, "VPN interface established: ${vpnInterface != null}")

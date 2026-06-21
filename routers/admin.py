@@ -1,10 +1,13 @@
-"""Admin panel routes — login, stats, keywords, version, integrity checks."""
+"""Admin panel routes — login, stats, keywords, version, integrity checks, audit stream."""
 
+import asyncio
+import json
 import logging
+import re
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Request, Response
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 
 from .dependencies import (
     BAD_ENCODING_RESPONSE,
@@ -17,7 +20,8 @@ from .dependencies import (
 )
 from config import config
 from database import db
-from mask_engine import get_mask_engine
+from gateway_core import get_gateway_core
+from mask_engine import get_mask_engine, KNOWN_ENTITY_TYPES
 
 import bcrypt
 
@@ -159,6 +163,20 @@ async def delete_keyword(request: Request):
     return JSONResponse(status_code=404, content={"error": "关键词不存在"})
 
 
+@router.get("/admin/upstreams")
+@limiter.limit("10/minute")
+async def get_upstreams(request: Request) -> dict:
+    """获取上游节点健康状态 - 需要认证"""
+    await require_admin(request)
+
+    core = get_gateway_core()
+    stats = core.load_balancer.get_stats()
+    return {
+        "strategy": config.UPSTREAM_LB_STRATEGY,
+        "nodes": stats,
+    }
+
+
 @router.get("/admin/version")
 @limiter.limit("10/minute")
 async def get_version(request: Request) -> dict:
@@ -209,3 +227,131 @@ async def clear_mappings(request: Request) -> dict:
 
     db.clear_all_mappings()
     return {"status": "ok", "message": "所有映射记录已清除"}
+
+
+@router.get("/admin/audit/stream")
+async def audit_stream():
+    """实时审计事件流 (SSE)"""
+    from audit import audit_bus
+
+    async def event_generator():
+        q = audit_bus.subscribe()
+        try:
+            while True:
+                event = await q.get()
+                yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+        except asyncio.CancelledError:
+            pass
+        finally:
+            audit_bus.unsubscribe(q)
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        }
+    )
+
+
+# ==================== Admin Custom Regex Rules ====================
+
+
+@router.get("/admin/regex-rules")
+@limiter.limit("10/minute")
+async def admin_list_regex_rules(request: Request) -> dict:
+    """获取所有自定义正则规则 - 需要认证"""
+    await require_admin(request)
+
+    rules = db.get_custom_regex_rules()
+    return {"rules": rules, "total": len(rules)}
+
+
+@router.post("/admin/regex-rules")
+@limiter.limit("10/minute")
+async def admin_add_regex_rule(request: Request):
+    """添加自定义正则规则 - 需要认证"""
+    await require_admin(request)
+
+    body, ok = await safe_json(request)
+    if not ok:
+        return BAD_ENCODING_RESPONSE
+
+    name = (body.get("name") or "").strip()
+    pattern = (body.get("pattern") or "").strip()
+    entity_type = (body.get("entity_type") or "").strip().lower()
+
+    if not name:
+        return JSONResponse(status_code=400, content={"error": "规则名称不能为空"})
+    if len(name) > 100:
+        return JSONResponse(status_code=400, content={"error": "规则名称不能超过 100 个字符"})
+    if not pattern:
+        return JSONResponse(status_code=400, content={"error": "正则表达式不能为空"})
+    if entity_type not in KNOWN_ENTITY_TYPES:
+        return JSONResponse(status_code=400, content={"error": f"未知实体类型: {entity_type}，支持的实体类型: {', '.join(sorted(KNOWN_ENTITY_TYPES))}"})
+
+    try:
+        re.compile(pattern)
+    except re.error as e:
+        return JSONResponse(status_code=400, content={"error": f"无效的正则表达式: {e}"})
+
+    rule_id = db.add_custom_regex_rule(name, pattern, entity_type)
+    if rule_id == -1:
+        return JSONResponse(status_code=409, content={"error": f"规则名称 '{name}' 已存在"})
+
+    engine = get_mask_engine()
+    try:
+        engine.add_custom_regex_rule(name, pattern, entity_type)
+    except (ValueError, re.error) as e:
+        db.delete_custom_regex_rule(rule_id)
+        return JSONResponse(status_code=500, content={"error": f"引擎添加规则失败: {e}"})
+
+    logger.info(f"管理员添加自定义正则规则: {name} (type={entity_type})")
+    return {"status": "ok", "id": rule_id, "message": f"规则 '{name}' 已添加"}
+
+
+@router.delete("/admin/regex-rules/{rule_id}")
+@limiter.limit("10/minute")
+async def admin_delete_regex_rule(request: Request, rule_id: int):
+    """删除自定义正则规则 - 需要认证"""
+    await require_admin(request)
+
+    rules = db.get_custom_regex_rules()
+    target = next((r for r in rules if r["id"] == rule_id), None)
+    if target is None:
+        return JSONResponse(status_code=404, content={"error": f"规则 ID {rule_id} 不存在"})
+
+    if not db.delete_custom_regex_rule(rule_id):
+        return JSONResponse(status_code=500, content={"error": "数据库删除失败"})
+
+    engine = get_mask_engine()
+    engine.remove_custom_regex_rule(target["name"])
+
+    logger.info(f"管理员删除自定义正则规则: {target['name']} (id={rule_id})")
+    return {"status": "ok", "message": f"规则 '{target['name']}' 已删除"}
+
+
+@router.put("/admin/regex-rules/{rule_id}/toggle")
+@limiter.limit("10/minute")
+async def admin_toggle_regex_rule(request: Request, rule_id: int):
+    """启用/禁用自定义正则规则 - 需要认证"""
+    await require_admin(request)
+
+    rules = db.get_custom_regex_rules()
+    target = next((r for r in rules if r["id"] == rule_id), None)
+    if target is None:
+        return JSONResponse(status_code=404, content={"error": f"规则 ID {rule_id} 不存在"})
+
+    new_enabled = not target["enabled"]
+
+    if not db.toggle_custom_regex_rule(rule_id, new_enabled):
+        return JSONResponse(status_code=500, content={"error": "数据库更新失败"})
+
+    engine = get_mask_engine()
+    engine.toggle_custom_regex_rule(target["name"], new_enabled)
+
+    status_text = "启用" if new_enabled else "禁用"
+    logger.info(f"管理员{status_text}自定义正则规则: {target['name']} (id={rule_id})")
+    return {"status": "ok", "id": rule_id, "enabled": new_enabled, "message": f"规则 '{target['name']}' 已{status_text}"}

@@ -1,0 +1,157 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+import BlogCard from '../../components/BlogCard.astro';
+
+const allPosts = await getCollection('blog');
+const posts = allPosts
+  .filter(p => !p.data.draft)
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+
+const allTags = [...new Set(posts.flatMap(p => p.data.tags))].sort();
+
+const selectedTag = Astro.url.searchParams.get('tag');
+const filteredPosts = selectedTag
+  ? posts.filter(p => p.data.tags.includes(selectedTag))
+  : posts;
+---
+
+<Layout
+  title="AI Privacy Blog — Guides, Tutorials & Best Practices for LLM Data Security"
+  description="Expert guides on AI data privacy, PII masking, LLM compliance, and open-source security tools. Protect your data when using ChatGPT, Claude, Cursor, and DeepSeek."
+  canonicalURL="https://privacygw.pages.dev/blog"
+  ogType="website">
+  <Nav />
+
+  <section class="blog-page">
+    <div class="container">
+      <div class="blog-header">
+        <h1 class="blog-title">
+          AI Privacy <span class="gradient-text">Blog</span>
+        </h1>
+        <p class="blog-subtitle">
+          Guides, tutorials, and best practices for keeping your data safe when using AI tools.
+        </p>
+      </div>
+
+      {allTags.length > 0 && (
+        <div class="tag-filter">
+          <a href="/blog" class={`tag-chip ${!selectedTag ? 'active' : ''}`}>All</a>
+          {allTags.map(tag => (
+            <a
+              href={`/blog?tag=${encodeURIComponent(tag)}`}
+              class={`tag-chip ${selectedTag === tag ? 'active' : ''}`}
+            >
+              {tag}
+            </a>
+          ))}
+        </div>
+      )}
+
+      {filteredPosts.length === 0 ? (
+        <div class="empty-state">
+          <p>No articles found{selectedTag ? ` for tag "${selectedTag}"` : ''}.</p>
+        </div>
+      ) : (
+        <div class="blog-grid">
+          {filteredPosts.map(post => (
+            <BlogCard
+              title={post.data.title}
+              description={post.data.description}
+              pubDate={post.data.pubDate}
+              tags={post.data.tags}
+              slug={post.slug}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+
+  <Footer />
+</Layout>
+
+<style>
+  .blog-page {
+    padding: 6rem 0 var(--space-2xl);
+    position: relative;
+    z-index: 1;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+  }
+
+  .blog-header {
+    text-align: center;
+    margin-bottom: var(--space-xl);
+  }
+
+  .blog-title {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: var(--space-md);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .blog-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.15rem;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  .tag-filter {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: var(--space-xl);
+  }
+
+  .tag-chip {
+    padding: 6px 18px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--text-secondary);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+
+  .tag-chip:hover {
+    border-color: var(--border-hover);
+    color: var(--text-primary);
+  }
+
+  .tag-chip.active {
+    background: var(--primary-deep);
+    color: var(--bg-deep);
+    border-color: var(--primary-deep);
+    font-weight: 600;
+  }
+
+  .blog-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: var(--space-xl);
+    color: var(--text-muted);
+  }
+</style>

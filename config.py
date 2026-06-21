@@ -77,6 +77,11 @@ class Config:
     TARGET_LLM: str = os.environ.get("TARGET_LLM", "https://api.openai.com")
     UPSTREAM_API_KEY: str = os.environ.get("UPSTREAM_API_KEY", "")
 
+    # 多上游 LLM 负载均衡配置
+    UPSTREAM_LLM_URLS: str = os.environ.get("UPSTREAM_LLM_URLS", "")
+    UPSTREAM_LB_STRATEGY: str = os.environ.get("UPSTREAM_LB_STRATEGY", "round_robin")
+    UPSTREAM_HEALTH_CHECK_INTERVAL: int = int(os.environ.get("UPSTREAM_HEALTH_CHECK_INTERVAL", "30"))
+
     # 数据库配置
     DB_PATH: str = os.environ.get("DB_PATH", "./vault_data/privacy_vault.db")
     DB_TYPE: str = os.environ.get("DB_TYPE", "sqlite")
@@ -95,6 +100,11 @@ class Config:
 
     # Vault 加密密钥（为空时加密功能禁用）
     VAULT_ENCRYPT_KEY: str = os.environ.get("VAULT_ENCRYPT_KEY", "")
+
+    # 映射 TTL 秒数（0 = 请求完成即删除，默认 259200 = 72h）
+    MAPPING_TTL: int = int(os.environ.get("MAPPING_TTL", "259200"))
+    # 无状态模式（纯内存，不落盘）
+    STATELESS_MODE: bool = os.environ.get("STATELESS_MODE", "0") == "1"
 
     # Runtime tier (always "lite" in open-source version)
     tier: str = "lite"
@@ -139,6 +149,62 @@ class Config:
 
         # Persist any new secrets
         _save_persisted_secrets(persisted)
+
+        self._validate()
+
+    def _validate(self) -> None:
+        """启动配置校验"""
+        has_error = False
+
+        # 多上游 URL 校验（如果配置了 UPSTREAM_LLM_URLS）
+        if self.UPSTREAM_LLM_URLS:
+            urls = [u.strip() for u in self.UPSTREAM_LLM_URLS.split(",") if u.strip()]
+            for url in urls:
+                if not (url.startswith("http://") or url.startswith("https://")):
+                    print(f"[配置错误] UPSTREAM_LLM_URLS 中的 URL 格式无效: {url}，必须以 http:// 或 https:// 开头")
+                    has_error = True
+            strategy = self.UPSTREAM_LB_STRATEGY
+            if strategy not in ("round_robin", "random", "least_connections"):
+                print(f"[配置错误] UPSTREAM_LB_STRATEGY 无效: {strategy}，仅支持 round_robin/random/least_connections")
+                has_error = True
+
+        # TARGET_LLM URL 格式校验（仅当未配置 UPSTREAM_LLM_URLS 时）
+        if not self.UPSTREAM_LLM_URLS:
+            if not (self.TARGET_LLM.startswith("http://") or self.TARGET_LLM.startswith("https://")):
+                print(f"[配置错误] TARGET_LLM URL 格式无效: {self.TARGET_LLM}，必须以 http:// 或 https:// 开头")
+                has_error = True
+
+        # LISTEN_PORT 端口号校验
+        if not 1 <= self.LISTEN_PORT <= 65535:
+            print(f"[配置错误] LISTEN_PORT 端口号超出范围: {self.LISTEN_PORT}，有效范围 1-65535")
+            has_error = True
+
+        # DB_TYPE 校验
+        if self.DB_TYPE and self.DB_TYPE not in ("sqlite", "postgresql"):
+            print(f"[配置错误] DB_TYPE 不支持: {self.DB_TYPE}，仅支持 sqlite 或 postgresql")
+            has_error = True
+
+        # MASK_ENGINE_TYPE 校验
+        if self.MASK_ENGINE_TYPE != "regex":
+            print(f"[配置错误] MASK_ENGINE_TYPE 不支持: {self.MASK_ENGINE_TYPE}，目前仅支持 regex")
+            has_error = True
+
+        # 警告项
+        if not self.UPSTREAM_API_KEY:
+            print("[配置警告] 未配置上游API密钥，代理请求可能失败")
+
+        if len(self.JWT_SECRET) < 32:
+            print(f"[配置警告] JWT_SECRET 长度不足 32: 当前 {len(self.JWT_SECRET)} 位")
+
+        # MAPPING_TTL 校验
+        if self.MAPPING_TTL < 0:
+            print(f"[配置警告] MAPPING_TTL 不能为负数: {self.MAPPING_TTL}，使用 0")
+            self.MAPPING_TTL = 0
+
+        if has_error:
+            sys.exit(1)
+        else:
+            print("配置校验通过")
 
 # 全局配置实例
 config = Config()

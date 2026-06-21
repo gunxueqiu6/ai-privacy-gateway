@@ -39,6 +39,9 @@ ssl/
 # 调试脚本
 scripts/
 
+# 内容发布（文章 + 自动化脚本，不提交到仓库）
+publishing/
+
 # Rust编译产物
 rust_src/**/target/
 

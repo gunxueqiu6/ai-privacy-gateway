@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Privacy Gateway - Setup Wizard</title>
+<style>
+  /* ================================================================
+     CSS Variables & Reset
+     ================================================================ */
+  :root {
+    --bg-base: #07070d;
+    --bg-surface: rgba(255, 255, 255, 0.03);
+    --bg-card: rgba(255, 255, 255, 0.04);
+    --bg-input: rgba(255, 255, 255, 0.06);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(255, 255, 255, 0.15);
+    --text: #f0f0f5;
+    --text-secondary: #8b8fa3;
+    --text-muted: #5c5f73;
+    --accent-green: #00ff88;
+    --accent-green-dim: #00cc6a;
+    --accent-purple: #7c3aed;
+    --accent-purple-light: #a78bfa;
+    --danger: #ef4444;
+    --success: #00ff88;
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --shadow-card: 0 8px 32px rgba(0,0,0,0.4);
+    --glow-green: 0 0 20px rgba(0,255,136,0.15);
+    --glow-purple: 0 0 20px rgba(124,58,237,0.15);
+    --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg-base);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(124,58,237,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 50%, rgba(0,255,136,0.06) 0%, transparent 60%);
+  }
+
+  /* ================================================================
+     Container
+     ================================================================ */
+  .setup-container {
+    width: 100%;
+    max-width: 640px;
+    position: relative;
+  }
+
+  /* ================================================================
+     Progress Bar
+     ================================================================ */
+  .progress-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 40px;
+    gap: 0;
+  }
+
+  .progress-step {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: 700;
+    border: 2px solid var(--border);
+    background: var(--bg-surface);
+    color: var(--text-muted);
+    transition: all var(--transition);
+    position: relative;
+    flex-shrink: 0;
+    z-index: 2;
+  }
+  .progress-step.active {
+    border-color: var(--accent-purple);
+    background: rgba(124,58,237,0.2);
+    color: var(--accent-purple-light);
+    box-shadow: var(--glow-purple);
+  }
+  .progress-step.done {
+    border-color: var(--accent-green);
+    background: rgba(0,255,136,0.15);
+    color: var(--accent-green);
+    box-shadow: var(--glow-green);
+  }
+
+  .progress-line {
+    flex: 1;
+    height: 2px;
+    background: var(--border);
+    position: relative;
+    margin: 0 4px;
+    max-width: 80px;
+  }
+  .progress-line::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent-purple), var(--accent-green));
+    transition: width var(--transition);
+    border-radius: 1px;
+  }
+  .progress-line.done::after { width: 100%; }
+
+  /* ================================================================
+     Steps
+     ================================================================ */
+  .step {
+    display: none;
+    animation: fadeIn 0.4s ease;
+  }
+  .step.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .step-card {
+    background: var(--bg-surface);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 40px 36px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .step-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .step-header .icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+    display: block;
+  }
+  .step-header h1 {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    background: linear-gradient(135deg, var(--accent-purple-light), var(--accent-green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .step-header p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+
+  /* ================================================================
+     Provider Cards
+     ================================================================ */
+  .provider-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .provider-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 20px 16px;
+    cursor: pointer;
+    transition: all var(--transition);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .provider-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity var(--transition);
+    background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(0,255,136,0.04));
+  }
+  .provider-card:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+  }
+  .provider-card:hover::before { opacity: 1; }
+
+  .provider-card.selected {
+    border-color: var(--accent-purple);
+    box-shadow: var(--glow-purple);
+    background: rgba(124,58,237,0.08);
+  }
+  .provider-card.selected::before { opacity: 1; }
+
+  .provider-card .emoji {
+    font-size: 32px;
+    display: block;
+    margin-bottom: 8px;
+    position: relative;
+  }
+  .provider-card .name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    position: relative;
+  }
+  .provider-card .desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    position: relative;
+  }
+  .provider-card .check {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    transition: all var(--transition);
+    color: transparent;
+  }
+  .provider-card.selected .check {
+    border-color: var(--accent-purple);
+    background: var(--accent-purple);
+    color: #fff;
+  }
+
+  /* ================================================================
+     Form Controls
+     ================================================================ */
+  .form-group {
+    margin-bottom: 20px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+
+  .input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .input-wrap input {
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 15px;
+    transition: border-color var(--transition);
+    outline: none;
+  }
+  .input-wrap input:focus {
+    border-color: var(--accent-purple);
+    box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+  }
+  .input-wrap input::placeholder { color: var(--text-muted); }
+  .input-wrap input.error {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px rgba(239,68,68,0.1);
+  }
+
+  .input-toggle {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+    line-height: 1;
+  }
+  .input-toggle:hover { color: var(--text-secondary); }
+
+  .form-error {
+    font-size: 12px;
+    color: var(--danger);
+    margin-top: 6px;
+    display: none;
+  }
+  .form-error.show { display: block; }
+
+  .form-helper {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  /* Conditional fields (custom URL) */
+  .conditional-field {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: all var(--transition);
+  }
+  .conditional-field.open {
+    max-height: 120px;
+    opacity: 1;
+  }
+
+  /* ================================================================
+     Buttons
+     ================================================================ */
+  .btn-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 28px;
+    gap: 12px;
+  }
+  .btn-row.center { justify-content: center; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-purple-light));
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(124,58,237,0.3);
+  }
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(124,58,237,0.4);
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, var(--accent-green-dim), var(--accent-green));
+    color: #07070d;
+    box-shadow: 0 4px 16px rgba(0,255,136,0.25);
+  }
+  .btn-success:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(0,255,136,0.35);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    border-color: var(--border-hover);
+    color: var(--text);
+    background: var(--bg-card);
+  }
+
+  .btn-link {
+    background: transparent;
+    border: none;
+    color: var(--accent-purple-light);
+    font-weight: 600;
+    padding: 14px 0;
+  }
+  .btn-link:hover { color: var(--accent-green); }
+
+  .btn .spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ================================================================
+     Test Connection Result
+     ================================================================ */
+  .test-result {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 12px;
+  }
+  .test-result.show { display: flex; }
+  .test-result.success {
+    background: rgba(0,255,136,0.08);
+    border: 1px solid rgba(0,255,136,0.2);
+    color: var(--accent-green);
+  }
+  .test-result.fail {
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.2);
+    color: var(--danger);
+  }
+
+  /* ================================================================
+     Summary
+     ================================================================ */
+  .summary-grid {
+    display: grid;
+    gap: 12px;
+    margin: 24px 0;
+  }
+  .summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+  }
+  .summary-item .label {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .summary-item .value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    word-break: break-all;
+    text-align: right;
+    max-width: 60%;
+  }
+  .summary-item .value.masked {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    color: var(--accent-green);
+    letter-spacing: 1px;
+  }
+
+  /* ================================================================
+     Configuring overlay
+     ================================================================ */
+  .configuring-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: var(--bg-surface);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: var(--radius-lg);
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    flex-direction: column;
+    gap: 20px;
+    padding: 40px;
+    text-align: center;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-card);
+  }
+  .configuring-overlay.show { display: flex; }
+
+  .configuring-overlay .pulse-ring {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    border-top-color: var(--accent-purple);
+    border-right-color: var(--accent-green);
+    animation: spin 1s linear infinite;
+    position: relative;
+  }
+  .configuring-overlay .pulse-ring::after {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    border-bottom-color: var(--accent-purple-light);
+    animation: spin 0.7s linear infinite reverse;
+  }
+  .configuring-overlay h2 {
+    font-size: 20px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent-purple-light), var(--accent-green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .configuring-overlay p {
+    color: var(--text-secondary);
+    font-size: 14px;
+  }
+
+  /* ================================================================
+     Success State
+     ================================================================ */
+  .success-screen { display: none; }
+  .success-screen.show { display: block; }
+  .success-screen .icon {
+    font-size: 56px;
+    display: block;
+    margin-bottom: 12px;
+  }
+  .success-screen h1 {
+    font-size: 26px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent-green), var(--accent-purple-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .success-url {
+    margin: 20px 0;
+  }
+  .success-url .url-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+  }
+  .success-url .url-item .url-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .success-url .url-item .url-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-green);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    cursor: pointer;
+  }
+  .success-url .url-item .url-value:hover {
+    text-decoration: underline;
+  }
+  .success-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+  .success-actions .btn { flex: 1; min-width: 140px; }
+
+  /* ================================================================
+     Responsive
+     ================================================================ */
+  @media (max-width: 600px) {
+    body { padding: 12px; align-items: flex-start; padding-top: 24px; }
+    .step-card { padding: 28px 20px; border-radius: var(--radius-md); }
+    .provider-grid { grid-template-columns: 1fr; }
+    .step-header h1 { font-size: 20px; }
+    .btn-row { flex-direction: column; }
+    .btn-row .btn { width: 100%; }
+    .progress-line { max-width: 40px; }
+    .summary-item { flex-direction: column; align-items: flex-start; gap: 4px; }
+    .summary-item .value { text-align: left; max-width: 100%; }
+    .success-actions { flex-direction: column; }
+    .success-actions .btn { min-width: auto; }
+    .success-url .url-item { flex-direction: column; align-items: flex-start; gap: 4px; }
+  }
+
+  /* ================================================================
+     No-JS Fallback
+     ================================================================ */
+  .nojs-message {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .nojs-message .emoji { font-size: 40px; display: block; margin-bottom: 16px; }
+  .nojs-message h2 { font-size: 18px; margin-bottom: 8px; }
+  .nojs-message p { color: var(--text-secondary); font-size: 14px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="setup-container" id="app">
+  <!-- No-JS fallback -->
+  <noscript>
+    <div class="nojs-message">
+      <span class="emoji">⚙️</span>
+      <h2>JavaScript Required</h2>
+      <p>The setup wizard needs JavaScript enabled to walk you through configuration.<br>
+      Alternatively, configure your <code>.env</code> file manually —<br>
+      see the project README for details.</p>
+    </div>
+  </noscript>
+
+  <!-- Progress Bar -->
+  <div class="progress-bar" id="progressBar">
+    <div class="progress-step active" data-step="1">1</div>
+    <div class="progress-line" data-between="1"></div>
+    <div class="progress-step" data-step="2">2</div>
+    <div class="progress-line" data-between="2"></div>
+    <div class="progress-step" data-step="3">3</div>
+    <div class="progress-line" data-between="3"></div>
+    <div class="progress-step" data-step="4">4</div>
+    <div class="progress-line" data-between="4"></div>
+    <div class="progress-step" data-step="5">5</div>
+  </div>
+
+  <!-- ================================================================
+       Step 1 — Welcome
+       ================================================================ -->
+  <div class="step active" data-step="1">
+    <div class="step-card">
+      <div class="step-header">
+        <span class="icon">🛡️</span>
+        <h1>Welcome to AI Privacy Gateway</h1>
+        <p>Set up your AI data privacy layer in 30 seconds</p>
+      </div>
+      <div style="text-align:center;margin-bottom:28px;line-height:1.7;font-size:14px;color:var(--text-secondary)">
+        <p style="margin-bottom:12px">Your PII is masked <strong style="color:var(--text)">locally</strong> before any data leaves your machine.</p>
+        <p>Works with OpenAI, DeepSeek, Anthropic, Google, and any OpenAI-compatible API.</p>
+      </div>
+      <div class="btn-row center">
+        <button class="btn btn-primary" onclick="goToStep(2)">Get Started &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       Step 2 — Choose Your AI Provider
+       ================================================================ -->
+  <div class="step" data-step="2">
+    <div class="step-card">
+      <div class="step-header">
+        <span class="icon">🤖</span>
+        <h1>Choose Your AI Provider</h1>
+        <p>Select where your AI requests will be routed</p>
+      </div>
+
+      <div class="provider-grid" id="providerGrid">
+        <div class="provider-card" data-provider="openai" onclick="selectProvider('openai')">
+          <div class="check">&#10003;</div>
+          <span class="emoji">🧠</span>
+          <div class="name">OpenAI</div>
+          <div class="desc">ChatGPT, GPT-4, GPT-4o</div>
+        </div>
+        <div class="provider-card" data-provider="deepseek" onclick="selectProvider('deepseek')">
+          <div class="check">&#10003;</div>
+          <span class="emoji">🔍</span>
+          <div class="name">DeepSeek</div>
+          <div class="desc">DeepSeek-V2, DeepSeek-R1</div>
+        </div>
+        <div class="provider-card" data-provider="anthropic" onclick="selectProvider('anthropic')">
+          <div class="check">&#10003;</div>
+          <span class="emoji">🌿</span>
+          <div class="name">Anthropic</div>
+          <div class="desc">Claude 3.5, Claude 4</div>
+        </div>
+        <div class="provider-card" data-provider="google" onclick="selectProvider('google')">
+          <div class="check">&#10003;</div>
+          <span class="emoji">🔮</span>
+          <div class="name">Google</div>
+          <div class="desc">Gemini 1.5, Gemini 2.0</div>
+        </div>
+        <div class="provider-card" data-provider="custom" onclick="selectProvider('custom')" style="grid-column:1/-1">
+          <div class="check">&#10003;</div>
+          <span class="emoji">⚙️</span>
+          <div class="name">Custom / Other</div>
+          <div class="desc">Any OpenAI-compatible API endpoint</div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goToStep(1)">&larr; Back</button>
+        <button class="btn btn-primary" id="step2Continue" onclick="goToStep(3)" disabled>Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       Step 3 — API Key
+       ================================================================ -->
+  <div class="step" data-step="3">
+    <div class="step-card">
+      <div class="step-header">
+        <span class="icon">🔑</span>
+        <h1>Enter Your API Key</h1>
+        <p id="step3Subtitle">Your key is stored locally and never leaves this machine</p>
+      </div>
+
+      <div class="form-group">
+        <label for="apiKey">API Key</label>
+        <div class="input-wrap">
+          <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
+          <button class="input-toggle" id="apiKeyToggle" onclick="toggleApiKey()" type="button">&#128065;</button>
+        </div>
+        <div class="form-error" id="apiKeyError">Please enter a valid API key</div>
+        <div class="form-helper">Your API key is stored encrypted on this machine.</div>
+      </div>
+
+      <!-- Custom provider: show base URL input -->
+      <div class="conditional-field" id="customUrlField">
+        <div class="form-group">
+          <label for="baseUrl">API Base URL</label>
+          <div class="input-wrap">
+            <input type="url" id="baseUrl" placeholder="https://api.example.com" autocomplete="off">
+          </div>
+          <div class="form-error" id="baseUrlError">Please enter a valid URL starting with https://</div>
+          <div class="form-helper">The root URL of your API provider (without /v1).</div>
+        </div>
+      </div>
+
+      <!-- Test connection -->
+      <div style="margin-top:8px">
+        <button class="btn btn-ghost" id="testBtn" onclick="testConnection()" style="width:100%;justify-content:center;padding:12px">
+          &#9889; Test Connection
+        </button>
+        <div class="test-result" id="testResult"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goToStep(2)">&larr; Back</button>
+        <button class="btn btn-primary" id="step3Continue" onclick="goToStep(4)" disabled>Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       Step 4 — Admin Password (Optional)
+       ================================================================ -->
+  <div class="step" data-step="4">
+    <div class="step-card">
+      <div class="step-header">
+        <span class="icon">🔐</span>
+        <h1>Protect Your Admin Panel</h1>
+        <p>Set a password to secure the admin dashboard</p>
+      </div>
+
+      <div class="form-group">
+        <label for="adminPass">Admin Password</label>
+        <div class="input-wrap">
+          <input type="password" id="adminPass" placeholder="Leave blank for auto-generated" autocomplete="new-password">
+          <button class="input-toggle" onclick="toggleField('adminPass','adminPassToggle')" type="button" id="adminPassToggle">&#128065;</button>
+        </div>
+        <div class="form-error" id="adminPassError">Password must be at least 6 characters</div>
+        <div class="form-helper">If you skip this, a random password will be auto-generated and shown on the next screen.</div>
+      </div>
+
+      <div class="form-group">
+        <label for="adminPassConfirm">Confirm Password</label>
+        <div class="input-wrap">
+          <input type="password" id="adminPassConfirm" placeholder="Re-enter password" autocomplete="new-password">
+          <button class="input-toggle" onclick="toggleField('adminPassConfirm','adminPassConfirmToggle')" type="button" id="adminPassConfirmToggle">&#128065;</button>
+        </div>
+        <div class="form-error" id="adminPassConfirmError">Passwords do not match</div>
+      </div>
+
+      <div class="form-group">
+        <label for="listenPort">Listen Port</label>
+        <div class="input-wrap">
+          <input type="number" id="listenPort" placeholder="9999" min="1" max="65535" autocomplete="off">
+        </div>
+        <div class="form-error" id="portError">Port must be between 1 and 65535</div>
+        <div class="form-helper">Default is 9999. Change if the port is already in use.</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goToStep(3)">&larr; Back</button>
+        <button class="btn btn-link" onclick="goToStep(5)">Skip &rarr;</button>
+        <button class="btn btn-primary" id="step4Continue" onclick="goToStep(5)">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       Step 5 — Ready!
+       ================================================================ -->
+  <div class="step" data-step="5">
+    <div class="step-card" style="position:relative;overflow:hidden;min-height:200px">
+      <!-- Normal content -->
+      <div id="step5Content">
+        <div class="step-header">
+          <span class="icon">🚀</span>
+          <h1>Ready to Go</h1>
+          <p>Review your configuration below</p>
+        </div>
+
+        <div class="summary-grid" id="summaryGrid">
+          <div class="summary-item">
+            <span class="label">AI Provider</span>
+            <span class="value" id="summaryProvider">—</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Endpoint</span>
+            <span class="value" id="summaryEndpoint">—</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">API Key</span>
+            <span class="value masked" id="summaryApiKey">••••••••</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Admin Password</span>
+            <span class="value" id="summaryPassword">Auto-generated</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Listen Port</span>
+            <span class="value" id="summaryPort">9999</span>
+          </div>
+        </div>
+
+        <div class="btn-row center">
+          <button class="btn btn-success" id="deployBtn" onclick="deployConfig()">
+            &#9889; Start Protecting My Data
+          </button>
+        </div>
+      </div>
+
+      <!-- Configuring overlay -->
+      <div class="configuring-overlay" id="configuringOverlay">
+        <div class="pulse-ring"></div>
+        <h2>Configuring Your Gateway&hellip;</h2>
+        <p>Writing settings and generating secure keys</p>
+      </div>
+
+      <!-- Success screen (shown inside the card after configuring) -->
+      <div class="success-screen" id="successScreen">
+        <div style="text-align:center;padding:20px 0">
+          <span class="icon">✅</span>
+          <h1>All Set!</h1>
+          <p style="color:var(--text-secondary);font-size:14px;margin-top:6px">
+            Your AI Privacy Gateway is ready to use.
+          </p>
+        </div>
+
+        <div class="success-url">
+          <div class="url-item">
+            <span class="url-label">Gateway API</span>
+            <span class="url-value" id="gatewayUrlDisplay" onclick="copyText(this)">http://localhost:9999/v1/chat/completions</span>
+          </div>
+          <div class="url-item">
+            <span class="url-label">Admin Panel</span>
+            <span class="url-value" id="adminUrlDisplay" onclick="copyText(this)">http://localhost:9999/admin</span>
+          </div>
+          <div style="margin-top:8px;text-align:center;font-size:12px;color:var(--text-muted)">
+            Click a URL to copy it to your clipboard.
+          </div>
+        </div>
+
+        <div class="success-actions">
+          <a class="btn btn-primary" id="adminLinkBtn" href="/admin/static/admin.html">Go to Admin Panel</a>
+          <button class="btn btn-ghost" onclick="window.location.href='/'">Health Check</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   State
+   ================================================================ */
+const STATE = {
+  currentStep: 1,
+  provider: null,         // 'openai' | 'deepseek' | 'anthropic' | 'google' | 'custom'
+  providerName: null,
+  apiKey: '',
+  baseUrl: '',
+  adminPassword: '',
+  listenPort: 9999,
+  configured: false,
+};
+
+/* ================================================================
+   Step Navigation
+   ================================================================ */
+function goToStep(n) {
+  if (n < 1 || n > 5) return;
+
+  // Validate before leaving current step
+  if (n < STATE.currentStep) {
+    // Going back — always allowed
+  } else if (STATE.currentStep === 2 && n > 2) {
+    if (!STATE.provider) return;
+  } else if (STATE.currentStep === 3 && n > 3) {
+    if (!validateStep3()) return;
+  } else if (STATE.currentStep === 4 && n > 4) {
+    if (!validateStep4()) return;
+  }
+
+  // Hide current step
+  document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+  document.querySelector(`.step[data-step="${n}"]`).classList.add('active');
+
+  // Update progress bar
+  document.querySelectorAll('.progress-step').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.progress-line').forEach(el => el.classList.remove('done'));
+  for (let i = 1; i <= 5; i++) {
+    const stepEl = document.querySelector(`.progress-step[data-step="${i}"]`);
+    if (i < n) { stepEl.classList.remove('active'); stepEl.classList.add('done'); }
+    else if (i === n) { stepEl.classList.remove('done'); stepEl.classList.add('active'); }
+    else { stepEl.classList.remove('active', 'done'); }
+  }
+  for (let i = 1; i < 5; i++) {
+    const lineEl = document.querySelector(`.progress-line[data-between="${i}"]`);
+    if (i < n) lineEl.classList.add('done');
+    else lineEl.classList.remove('done');
+  }
+
+  STATE.currentStep = n;
+
+  // Update step 3 subtitle to show provider name
+  if (n === 3) {
+    const sub = document.getElementById('step3Subtitle');
+    if (STATE.providerName) {
+      sub.textContent = 'Enter your ' + STATE.providerName + ' API key';
+    }
+  }
+
+  // Update summary on step 5
+  if (n === 5) {
+    updateSummary();
+  }
+
+  // Scroll to top of wizard
+  document.querySelector('.setup-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ================================================================
+   Step 2 — Provider Selection
+   ================================================================ */
+function selectProvider(provider) {
+  STATE.provider = provider;
+
+  document.querySelectorAll('.provider-card').forEach(el => {
+    el.classList.toggle('selected', el.dataset.provider === provider);
+  });
+
+  const names = { openai:'OpenAI', deepseek:'DeepSeek', anthropic:'Anthropic (Claude)', google:'Google (Gemini)', custom:'Custom / Other' };
+  STATE.providerName = names[provider] || provider;
+
+  // Show/hide custom URL field
+  const customField = document.getElementById('customUrlField');
+  customField.classList.toggle('open', provider === 'custom');
+
+  document.getElementById('step2Continue').disabled = false;
+}
+
+/* ================================================================
+   Step 3 — API Key
+   ================================================================ */
+document.getElementById('apiKey').addEventListener('input', validateStep3);
+document.getElementById('baseUrl').addEventListener('input', validateStep3);
+
+function validateStep3() {
+  const key = document.getElementById('apiKey').value.trim();
+  const keyInput = document.getElementById('apiKey');
+  const keyError = document.getElementById('apiKeyError');
+  const baseInput = document.getElementById('baseUrl');
+  const baseError = document.getElementById('baseUrlError');
+
+  let valid = true;
+
+  // API key validation
+  if (!key) {
+    keyInput.classList.add('error');
+    keyError.textContent = 'API key is required';
+    keyError.classList.add('show');
+    valid = false;
+  } else if (key.length < 8) {
+    keyInput.classList.add('error');
+    keyError.textContent = 'API key appears too short';
+    keyError.classList.add('show');
+    valid = false;
+  } else {
+    keyInput.classList.remove('error');
+    keyError.classList.remove('show');
+    STATE.apiKey = key;
+  }
+
+  // Base URL validation (custom only)
+  if (STATE.provider === 'custom') {
+    const url = baseInput.value.trim();
+    if (!url) {
+      baseInput.classList.add('error');
+      baseError.textContent = 'API Base URL is required';
+      baseError.classList.add('show');
+      valid = false;
+    } else if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      baseInput.classList.add('error');
+      baseError.textContent = 'URL must start with http:// or https://';
+      baseError.classList.add('show');
+      valid = false;
+    } else {
+      baseInput.classList.remove('error');
+      baseError.classList.remove('show');
+      STATE.baseUrl = url;
+    }
+  }
+
+  document.getElementById('step3Continue').disabled = !valid;
+  document.getElementById('testBtn').disabled = !key;
+  return valid;
+}
+
+/* ================================================================
+   Toggle API Key Visibility
+   ================================================================ */
+function toggleApiKey() {
+  const input = document.getElementById('apiKey');
+  const btn = document.getElementById('apiKeyToggle');
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.innerHTML = '&#128064;';
+  } else {
+    input.type = 'password';
+    btn.innerHTML = '&#128065;';
+  }
+}
+
+function toggleField(inputId, btnId) {
+  const input = document.getElementById(inputId);
+  const btn = document.getElementById(btnId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.innerHTML = '&#128064;';
+  } else {
+    input.type = 'password';
+    btn.innerHTML = '&#128065;';
+  }
+}
+
+/* ================================================================
+   Test Connection
+   ================================================================ */
+async function testConnection() {
+  const key = document.getElementById('apiKey').value.trim();
+  if (!key) return;
+
+  const btn = document.getElementById('testBtn');
+  const result = document.getElementById('testResult');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Testing...';
+  result.classList.remove('show', 'success', 'fail');
+
+  try {
+    const payload = {
+      provider: STATE.provider,
+      api_key: key,
+    };
+    if (STATE.provider === 'custom') {
+      payload.base_url = document.getElementById('baseUrl').value.trim();
+    }
+
+    const resp = await fetch('/api/setup/test-connection', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await resp.json();
+
+    if (data.success) {
+      result.className = 'test-result show success';
+      result.innerHTML = '&#10003; ' + (data.message || 'Connection successful');
+    } else {
+      result.className = 'test-result show fail';
+      result.innerHTML = '&#10007; ' + (data.error || 'Connection failed');
+    }
+  } catch (err) {
+    result.className = 'test-result show fail';
+    result.innerHTML = '&#10007; Connection failed: ' + (err.message || 'unknown error');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '&#9889; Test Connection';
+}
+
+/* ================================================================
+   Step 4 — Admin Password
+   ================================================================ */
+document.getElementById('adminPass').addEventListener('input', validateStep4);
+document.getElementById('adminPassConfirm').addEventListener('input', validateStep4);
+document.getElementById('listenPort').addEventListener('input', validateStep4);
+
+function validateStep4() {
+  const pass = document.getElementById('adminPass').value;
+  const confirm = document.getElementById('adminPassConfirm').value;
+  const port = document.getElementById('listenPort').value;
+  let valid = true;
+
+  // Validate password only if non-empty
+  const passError = document.getElementById('adminPassError');
+  const confirmError = document.getElementById('adminPassConfirmError');
+  if (pass && pass.length < 6) {
+    passError.classList.add('show');
+    valid = false;
+  } else {
+    passError.classList.remove('show');
+  }
+
+  if (pass && confirm && pass !== confirm) {
+    confirmError.classList.add('show');
+    valid = false;
+  } else {
+    confirmError.classList.remove('show');
+  }
+
+  // Port validation
+  const portError = document.getElementById('portError');
+  if (port) {
+    const p = parseInt(port, 10);
+    if (isNaN(p) || p < 1 || p > 65535) {
+      portError.classList.add('show');
+      valid = false;
+    } else {
+      portError.classList.remove('show');
+    }
+  } else {
+    portError.classList.remove('show');
+  }
+
+  return valid;
+}
+
+/* ================================================================
+   Summary
+   ================================================================ */
+function updateSummary() {
+  const names = { openai:'OpenAI', deepseek:'DeepSeek', anthropic:'Anthropic (Claude)', google:'Google (Gemini)', custom:'Custom / Other' };
+
+  document.getElementById('summaryProvider').textContent = STATE.providerName || '—';
+
+  // Endpoint
+  let endpoint = STATE.baseUrl;
+  if (STATE.provider && STATE.provider !== 'custom') {
+    const urls = { openai:'https://api.openai.com', deepseek:'https://api.deepseek.com', anthropic:'https://api.anthropic.com', google:'https://generativelanguage.googleapis.com' };
+    endpoint = urls[STATE.provider] || '';
+  }
+  document.getElementById('summaryEndpoint').textContent = endpoint || '—';
+
+  const key = document.getElementById('apiKey').value.trim();
+  document.getElementById('summaryApiKey').textContent = key ? key.substring(0, 8) + '••••••••••' : '—';
+
+  const pass = document.getElementById('adminPass').value;
+  const passEl = document.getElementById('summaryPassword');
+  if (pass) {
+    passEl.textContent = '&#10003; Set';
+    passEl.innerHTML = '&#10003; Set';
+  } else {
+    passEl.textContent = 'Auto-generated on start';
+  }
+
+  const port = document.getElementById('listenPort').value.trim();
+  STATE.listenPort = port ? parseInt(port, 10) : 9999;
+  document.getElementById('summaryPort').textContent = STATE.listenPort;
+
+  // Hide success screen
+  document.getElementById('successScreen').classList.remove('show');
+  document.getElementById('step5Content').style.display = 'block';
+}
+
+/* ================================================================
+   Deploy Configuration
+   ================================================================ */
+async function deployConfig() {
+  const overlay = document.getElementById('configuringOverlay');
+  overlay.classList.add('show');
+
+  try {
+    // Gather all values
+    const key = document.getElementById('apiKey').value.trim();
+    let baseUrl = STATE.baseUrl;
+    if (STATE.provider !== 'custom') {
+      const urls = { openai:'https://api.openai.com', deepseek:'https://api.deepseek.com', anthropic:'https://api.anthropic.com', google:'https://generativelanguage.googleapis.com' };
+      baseUrl = urls[STATE.provider] || '';
+    }
+    const pass = document.getElementById('adminPass').value;
+    const port = document.getElementById('listenPort').value.trim();
+
+    const payload = {
+      provider: STATE.provider,
+      api_key: key,
+      base_url: baseUrl,
+    };
+    if (pass) payload.admin_password = pass;
+    if (port) payload.port = parseInt(port, 10);
+
+    const resp = await fetch('/api/setup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await resp.json();
+
+    overlay.classList.remove('show');
+
+    if (resp.ok && data.success) {
+      // Show success
+      document.getElementById('step5Content').style.display = 'none';
+      document.getElementById('gatewayUrlDisplay').textContent = data.gateway_url || 'http://localhost:' + STATE.listenPort + '/v1/chat/completions';
+      document.getElementById('adminUrlDisplay').textContent = data.admin_url || 'http://localhost:' + STATE.listenPort + '/admin';
+      document.getElementById('adminLinkBtn').href = data.admin_url || '/admin/static/admin.html';
+      document.getElementById('successScreen').classList.add('show');
+      STATE.configured = true;
+    } else {
+      alert('Configuration failed: ' + (data.error || data.detail || 'Unknown error'));
+    }
+  } catch (err) {
+    overlay.classList.remove('show');
+    alert('Network error: ' + (err.message || 'Could not reach the gateway'));
+  }
+}
+
+/* ================================================================
+   Clipboard Helper
+   ================================================================ */
+function copyText(el) {
+  const text = el.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = el.textContent;
+    el.textContent = '&#10003; Copied!';
+    el.innerHTML = '&#10003; Copied!';
+    setTimeout(() => {
+      el.textContent = orig;
+    }, 1500);
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+}
+
+/* ================================================================
+   Check if already configured
+   ================================================================ */
+(async function checkConfig() {
+  try {
+    const resp = await fetch('/api/setup/status');
+    const data = await resp.json();
+    if (data.configured) {
+      // Already configured — show a subtle link to admin
+      const app = document.getElementById('app');
+      const notice = document.createElement('div');
+      notice.style.cssText = 'text-align:center;margin-bottom:20px;padding:12px;background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.15);border-radius:10px;font-size:13px;color:var(--accent-green)';
+      notice.innerHTML = '&#10003; Gateway is already configured. <a href="/admin/static/admin.html" style="color:var(--accent-purple-light);font-weight:600">Go to Admin Panel &rarr;</a>';
+      app.insertBefore(notice, app.firstChild);
+    }
+  } catch (e) {
+    // May not be running — ignore
+  }
+})();
+</script>
+</body>
+</html>

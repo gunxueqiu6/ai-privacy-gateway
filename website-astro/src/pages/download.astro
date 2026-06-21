@@ -7,6 +7,7 @@ import Footer from '../components/Footer.astro';
 <Layout
   title="下载 AI Privacy Gateway — Docker / Windows / macOS / 浏览器扩展"
   description="下载 AI Privacy Gateway 客户端和浏览器扩展。支持 Docker 镜像、Windows .exe、macOS 便携版、Chrome/Edge 扩展。30 秒部署，保护你发给 AI 的敏感数据。"
+  keywords="下载AI隐私网关,Docker部署隐私代理,Windows隐私保护工具,macOS数据脱敏,Chrome扩展隐私,浏览器隐私插件"
   canonicalURL="https://privacygw.pages.dev/download">
   <Nav />
 
@@ -27,42 +28,49 @@ import Footer from '../components/Footer.astro';
     </div>
   </section>
 
-  <!-- Download Cards -->
+  <!-- Primary Download — Windows Installer -->
   <section class="download-section">
     <div class="container">
-      <div class="download-grid">
-        <div class="download-card glass">
-          <div class="download-icon-wrap">
-            <span class="download-icon">⊞</span>
+
+      <!-- Windows Installer — recommended -->
+      <div class="primary-download glass">
+        <div class="primary-badge">Recommended</div>
+        <div class="primary-content">
+          <div class="primary-icon-wrap">
+            <span class="primary-icon">⊞</span>
           </div>
-          <h2>Windows</h2>
-          <p>下载源码 → 双击 start.bat → 完成</p>
-          <div class="code-block">
-            <pre><code>git clone https://github.com/gunxueqiu6/ai-privacy-gateway
-cd ai-privacy-gateway
-start.bat</code></pre>
+          <div class="primary-text">
+            <h2>Download for Windows</h2>
+            <p class="primary-desc">One-click installer. Everything included, ready to run.</p>
+            <div class="primary-meta">
+              <span>Windows 10 / 11</span>
+              <span>&middot;</span>
+              <span>64-bit</span>
+              <span>&middot;</span>
+              <span>Free &amp; Open Source</span>
+            </div>
           </div>
-          <p class="download-hint">也支持下载 ZIP 后解压，双击 <code>start.bat</code></p>
-          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/archive/refs/heads/master.zip" class="btn btn-primary btn-block">
-            下载 ZIP
+          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/releases/download/v1.1.0/AI-Privacy-Gateway-Setup-1.1.0.exe" class="btn btn-primary btn-large">
+            Download (.exe installer)
           </a>
         </div>
+      </div>
 
+      <!-- Other platforms -->
+      <div class="download-grid">
         <div class="download-card glass">
           <div class="download-icon-wrap">
             <span class="download-icon">&#8984;</span>
           </div>
-          <h2>macOS / Linux</h2>
-          <p>下载源码 → 运行 start.sh → 完成</p>
+          <h2>macOS (.dmg)</h2>
+          <p>Build from source on macOS</p>
           <div class="code-block">
             <pre><code>git clone https://github.com/gunxueqiu6/ai-privacy-gateway
 cd ai-privacy-gateway
-bash start.sh</code></pre>
+bash packaging/macos/build_dmg.sh</code></pre>
           </div>
-          <p class="download-hint">也可 <code>chmod +x start.sh && ./start.sh</code></p>
-          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/archive/refs/heads/master.zip" class="btn btn-primary btn-block">
-            下载 ZIP
-          </a>
+          <p class="download-hint">Requires macOS 10.15+. DMG output in <code>packaging/macos/output/</code></p>
+          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-outline btn-block">View on GitHub</a>
         </div>
 
         <div class="download-card glass">
@@ -70,25 +78,25 @@ bash start.sh</code></pre>
             <span class="download-icon">&#9635;</span>
           </div>
           <h2>Docker</h2>
-          <p>服务器部署，一条命令</p>
+          <p>Server deployment, one command</p>
           <div class="code-block">
             <pre><code>docker run -d --name ai-privacy-gw -p 9999:9999 -v ./vault_data:/app/vault_data ghcr.io/gunxueqiu6/ai-privacy-gateway:lite</code></pre>
           </div>
-          <p class="download-hint">也支持 docker-compose up -d</p>
-          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway#docker" class="btn btn-outline btn-block">查看文档</a>
+          <p class="download-hint">Also supports docker-compose up -d</p>
+          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway#docker" class="btn btn-outline btn-block">View Docs</a>
         </div>
 
         <div class="download-card glass">
           <div class="download-icon-wrap">
             <span class="download-icon">&lt;/&gt;</span>
           </div>
-          <h2>pip 安装</h2>
-          <p>Python 开发者，一条 pip 命令</p>
+          <h2>pip Install</h2>
+          <p>Python developers, one pip command</p>
           <div class="code-block">
             <pre><code>pip install -r requirements.txt
 python start.py --auto</code></pre>
           </div>
-          <p class="download-hint">需要 Python 3.8+</p>
+          <p class="download-hint">Requires Python 3.8+</p>
           <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-outline btn-block">GitHub</a>
         </div>
 
@@ -96,16 +104,47 @@ python start.py --auto</code></pre>
           <div class="download-icon-wrap">
             <span class="download-icon">&#127760;</span>
           </div>
-          <h2>浏览器扩展</h2>
-          <p>Chrome / Edge 插件</p>
+          <h2>Browser Extension</h2>
+          <p>Chrome / Edge plugin</p>
           <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/releases/download/v1.1.0/ai-privacy-gateway-extension-v1.1.0.zip" class="btn btn-primary btn-block">
-            下载 v1.1.0
+            Download v1.1.0
           </a>
           <p class="download-hint" style="margin-top:0.5rem;">
-            解压 → Chrome 打开 <code>chrome://extensions</code> → 开发者模式 → 加载已解压
+            Unzip &rarr; <code>chrome://extensions</code> &rarr; Developer mode &rarr; Load unpacked
           </p>
         </div>
       </div>
+
+      <!-- Advanced Options -->
+      <details class="advanced-section glass">
+        <summary class="advanced-summary">Advanced Options &mdash; Source code &amp; manual setup</summary>
+        <div class="advanced-content">
+          <div class="advanced-grid">
+            <div class="advanced-card">
+              <h3>Windows (ZIP / portable)</h3>
+              <p>No installer, just the executable.</p>
+              <div class="code-block">
+                <pre><code>git clone https://github.com/gunxueqiu6/ai-privacy-gateway
+cd ai-privacy-gateway
+start.bat</code></pre>
+              </div>
+              <p class="download-hint">Or download ZIP, extract, double-click <code>start.bat</code></p>
+              <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/archive/refs/heads/master.zip" class="btn btn-outline btn-block">Download ZIP</a>
+            </div>
+            <div class="advanced-card">
+              <h3>macOS / Linux (portable)</h3>
+              <p>From source, works on any Unix system.</p>
+              <div class="code-block">
+                <pre><code>git clone https://github.com/gunxueqiu6/ai-privacy-gateway
+cd ai-privacy-gateway
+bash start.sh</code></pre>
+              </div>
+              <p class="download-hint">Also <code>chmod +x start.sh && ./start.sh</code></p>
+              <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/archive/refs/heads/master.zip" class="btn btn-outline btn-block">Download ZIP</a>
+            </div>
+          </div>
+        </div>
+      </details>
 
       <!-- Quick Start -->
       <div class="quick-start glass">
@@ -170,12 +209,98 @@ python start.py --auto</code></pre>
 
   .download-section { padding: 4rem 0 6rem; max-width: 960px; margin: 0 auto; }
 
+  /* Primary Download Card */
+  .primary-download {
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(56, 189, 248, 0.2);
+  }
+  .primary-download::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .primary-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.3rem 0.75rem;
+    border-radius: 4px;
+    margin-bottom: 1.25rem;
+  }
+  .primary-content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .primary-icon-wrap {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: rgba(56, 189, 248, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .primary-icon {
+    font-size: 1.75rem;
+    color: var(--primary);
+    font-weight: 700;
+  }
+  .primary-text {
+    flex: 1;
+    min-width: 200px;
+  }
+  .primary-text h2 {
+    margin-bottom: 0.25rem;
+    font-size: 1.5rem;
+  }
+  .primary-desc {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+  }
+  .primary-meta {
+    color: var(--text-tertiary, #888);
+    font-size: 0.8rem;
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .btn-large {
+    padding: 0.85rem 2rem;
+    font-size: 1rem;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  @media (max-width: 768px) {
+    .primary-content { flex-direction: column; align-items: flex-start; }
+    .btn-large { width: 100%; text-align: center; }
+    .primary-text { min-width: auto; }
+  }
+
   .download-grid {
     display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;
     margin-bottom: 3rem;
   }
 
-  .download-card { padding: 2rem; text-align: center; }
+  .download-card { padding: 2rem; text-align: center; position: relative; }
+  .download-card h2 { margin-bottom: 0.5rem; }
+  .download-card p { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem; }
   .download-icon-wrap {
     width: 56px; height: 56px; border-radius: 14px;
     background: rgba(134, 239, 172, 0.08);
@@ -183,8 +308,19 @@ python start.py --auto</code></pre>
     margin: 0 auto 1rem;
   }
   .download-icon { font-size: 1.5rem; color: var(--primary); font-weight: 700; }
-  .download-card h2 { margin-bottom: 0.5rem; }
-  .download-card p { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem; }
+
+  .coming-soon-badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-tertiary, #888);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    cursor: default;
+  }
+
   .download-hint { font-size: 0.8rem; color: var(--text-tertiary, #888); margin-top: 0.5rem; }
   .download-hint code { background: var(--bg-deep); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.75rem; color: var(--primary); font-family: 'Fira Code', monospace; }
 
@@ -203,6 +339,43 @@ python start.py --auto</code></pre>
     .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
   }
   .btn-block { width: 100%; }
+
+  .advanced-section {
+    padding: 0;
+    margin-bottom: 3rem;
+    overflow: hidden;
+  }
+  .advanced-summary {
+    padding: 1.25rem 1.5rem;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    user-select: none;
+    list-style: none;
+  }
+  .advanced-summary::-webkit-details-marker { display: none; }
+  .advanced-summary::before {
+    content: '\25B6';
+    display: inline-block;
+    margin-right: 0.5rem;
+    transition: transform 0.2s ease;
+    font-size: 0.65rem;
+    color: var(--text-tertiary);
+  }
+  details[open] .advanced-summary::before {
+    transform: rotate(90deg);
+  }
+  .advanced-summary:hover { color: var(--primary); }
+  .advanced-content { padding: 0 1.5rem 1.5rem; }
+  .advanced-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+  .advanced-card { }
+  .advanced-card h3 { font-size: 0.95rem; margin-bottom: 0.5rem; }
+  .advanced-card > p { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.75rem; }
 
   .quick-start { padding: 2.5rem; margin-bottom: 3rem; text-align: center; }
   .quick-start h3 { margin-bottom: 2rem; }
@@ -241,6 +414,7 @@ python start.py --auto</code></pre>
     .step-connector { transform: rotate(90deg); }
     .code-block pre { font-size: 0.75rem; }
     .quick-start { padding: 1.5rem; }
+    .advanced-grid { grid-template-columns: 1fr; }
   }
 
   @media (max-width: 639px) {

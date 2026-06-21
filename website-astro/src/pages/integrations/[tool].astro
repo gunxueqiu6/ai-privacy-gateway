@@ -1,0 +1,186 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Layout from '../../layouts/Layout.astro';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+import integrations, { type Integration } from '../../data/integrations';
+
+export const getStaticPaths: GetStaticPaths = () => {
+  return integrations.map((i) => ({
+    params: { tool: i.slug },
+    props: { integration: i },
+  }));
+};
+
+const { integration } = Astro.props as { integration: Integration };
+const pageUrl = `https://privacygw.pages.dev/integrations/${integration.slug}`;
+---
+
+<Layout
+  title={`${integration.name} + AI Privacy Gateway — ${integration.primaryKeyword}`}
+  description={`${integration.tagline}. ${integration.description.slice(0, 120)}`}
+  keywords={`${integration.name}集成,${integration.primaryKeyword},AI数据隐私,AI API代理,PII脱敏,开发工具安全`}
+  canonicalURL={pageUrl}
+  ogType="article"
+  hreflang={[
+    { lang: 'zh-CN', url: pageUrl },
+    { lang: 'x-default', url: pageUrl },
+  ]}>
+  <Nav />
+
+  <section class="seo-page">
+    <div class="container">
+      <div class="seo-header">
+        <div class="seo-badge">Integration Guide</div>
+        <h1>{integration.name} + AI Privacy Gateway</h1>
+        <p class="seo-subtitle">{integration.tagline}</p>
+      </div>
+
+      <div class="seo-tldr glass">
+        <strong>TL;DR:</strong> {integration.description.slice(0, 200)}.
+        <br />Integration = one config change. No SDK changes needed.
+      </div>
+
+      <h2>Why Add PII Masking to {integration.name}?</h2>
+      <p>{integration.description}</p>
+
+      <h3>How It Works</h3>
+      <div class="diagram-flow glass">
+        <div class="diagram-row">
+          <div class="diagram-node">Your App + {integration.name}</div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-node diagram-accent">Privacy Gateway<br/>(masks PII locally)</div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-node diagram-alt">AI API<br/>(receives clean data)</div>
+        </div>
+        <div class="diagram-row-sub">
+          <span class="diagram-check">&#10003; PII masked before leaving your machine</span>
+          <span class="diagram-check">&#10003; Zero code changes in your {integration.name} integration</span>
+        </div>
+      </div>
+
+      <h3>Benefits</h3>
+      <div class="benefit-grid">
+        {integration.benefits.map((b) => (
+          <div class="benefit-card glass">
+            <div class="benefit-icon">&#10003;</div>
+            <div class="benefit-text">{b}</div>
+          </div>
+        ))}
+      </div>
+
+      <h2>Setup: Connect {integration.name} to AI Privacy Gateway</h2>
+      <div class="code-block glass">
+        <div class="code-block-title">Configuration — Change One Line</div>
+        <pre><code>{integration.setupCode}</code></pre>
+      </div>
+
+      <h3>Step-by-Step Setup</h3>
+      <ol class="setup-steps">
+        {integration.setupSteps.map((s, i) => (
+          <li class="setup-step">
+            <span class="step-num">{i + 1}</span>
+            <span>{s}</span>
+          </li>
+        ))}
+      </ol>
+
+      <!-- CTA -->
+      <div class="seo-cta">
+        <h2>Start Protecting Your {integration.name} Data</h2>
+        <p>Deploy AI Privacy Gateway in 30 seconds. Free and open source.</p>
+        <div class="seo-cta-buttons">
+          <a href="/download" class="btn btn-primary btn-lg">Get Started Free</a>
+          <a href="/docs/quickstart" class="btn btn-ghost btn-lg">View Docs</a>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div class="seo-faq glass">
+        <h2>Frequently Asked Questions</h2>
+        <div class="faq-item">
+          <h3>Does this work with the latest version of {integration.name}?</h3>
+          <p>Yes. AI Privacy Gateway works at the HTTP layer as a transparent proxy. It is compatible with any version of {integration.name} that makes HTTP API calls.</p>
+        </div>
+        <div class="faq-item">
+          <h3>Will this affect my {integration.name} performance?</h3>
+          <p>The gateway adds less than 1ms per request. The PII detection engine is written in Rust for maximum throughput, so your {integration.name} application performance will not be noticeably affected.</p>
+        </div>
+        <div class="faq-item">
+          <h3>Can I use this with multiple AI providers through {integration.name}?</h3>
+          <p>Yes. Route all your AI API calls through the same gateway. It works transparently with any OpenAI-compatible API — just change the base URL.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Footer />
+</Layout>
+
+<style>
+  .seo-page { padding: 8rem 0 4rem; }
+  .seo-page .container { max-width: 820px; margin: 0 auto; }
+  .seo-header { margin-bottom: 3rem; }
+  .seo-badge {
+    display: inline-block; padding: 0.35rem 0.85rem; border-radius: 20px;
+    font-size: 0.78rem; font-weight: 600; color: var(--primary);
+    background: rgba(134, 239, 172, 0.08); border: 1px solid rgba(134, 239, 172, 0.15);
+    margin-bottom: 1.25rem;
+  }
+  .seo-page h1 { font-size: 2.75rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1.15; margin-bottom: 1.25rem; }
+  .seo-subtitle { font-size: 1.1rem; color: var(--text-secondary); line-height: 1.8; }
+  .seo-tldr { padding: 1.25rem 1.5rem; margin-bottom: 2.5rem; font-size: 0.95rem; line-height: 1.7; color: var(--text-primary); }
+  .seo-tldr strong { color: var(--primary); }
+  .seo-page h2 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.03em; margin: 3rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+  .seo-page h3 { font-size: 1.25rem; font-weight: 600; margin: 2rem 0 0.75rem; }
+  .seo-page p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 1.25rem; }
+
+  .diagram-flow { padding: 1.5rem; margin-bottom: 2.5rem; }
+  .diagram-row { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1rem; }
+  .diagram-row-sub { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; }
+  .diagram-check { font-size: 0.88rem; color: var(--primary); font-weight: 500; }
+  .diagram-node { padding: 0.6rem 1.25rem; border-radius: 10px; font-size: 0.85rem; font-weight: 600; background: rgba(134, 239, 172, 0.06); border: 1px solid var(--border); color: var(--primary); }
+  .diagram-accent { color: var(--accent); background: rgba(167, 139, 250, 0.06); }
+  .diagram-alt { color: var(--warning); background: rgba(251, 191, 36, 0.06); }
+  .diagram-arrow { font-size: 1.25rem; color: var(--text-muted); }
+
+  .benefit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 2.5rem; }
+  .benefit-card { display: flex; align-items: flex-start; gap: 0.75rem; padding: 1rem 1.25rem; }
+  .benefit-icon { color: var(--primary); font-weight: 700; font-size: 1rem; flex-shrink: 0; margin-top: 0.1rem; }
+  .benefit-text { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+
+  .code-block { padding: 1.25rem; margin-bottom: 1.5rem; }
+  .code-block-title { font-size: 0.78rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; }
+  .code-block pre { margin: 0; font-size: 0.85rem; line-height: 1.7; overflow-x: auto; }
+  .code-block code { color: var(--primary); font-family: 'JetBrains Mono', monospace; }
+
+  .setup-steps { list-style: none; padding: 0; margin-bottom: 2.5rem; }
+  .setup-step { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid var(--border); color: var(--text-secondary); line-height: 1.6; }
+  .setup-step:last-child { border: none; }
+  .step-num { display: flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: 10px; background: rgba(134, 239, 172, 0.1); color: var(--primary); font-weight: 700; font-size: 0.88rem; flex-shrink: 0; }
+
+  .seo-faq { padding: 2rem; margin-bottom: 3rem; }
+  .seo-faq h2 { border: none; margin-top: 0; }
+  .faq-item { padding: 1rem 0; border-bottom: 1px solid var(--border); }
+  .faq-item:last-child { border: none; }
+  .faq-item h3 { margin: 0 0 0.5rem; font-size: 1.05rem; color: var(--text-primary); }
+  .faq-item p { margin: 0; font-size: 0.92rem; }
+
+  .seo-cta { text-align: center; padding: 3rem 2rem; background: var(--glass-bg); border: 1px solid var(--border); border-radius: 20px; margin-top: 3rem; }
+  .seo-cta h2 { margin-top: 0; border: none; }
+  .seo-cta p { color: var(--text-secondary); margin-bottom: 1.5rem; }
+  .seo-cta-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+  @media (max-width: 768px) {
+    .seo-page { padding: 6rem 0 3rem; }
+    .seo-page h1 { font-size: 2rem; }
+    .seo-page h2 { font-size: 1.4rem; }
+    .diagram-row { flex-direction: column; gap: 0.5rem; }
+    .benefit-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 639px) {
+    .seo-page h1 { font-size: 1.75rem; }
+    .seo-cta-buttons { flex-direction: column; }
+    .seo-cta-buttons .btn { width: 100%; }
+  }
+</style>

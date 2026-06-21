@@ -5,9 +5,14 @@ import Footer from '../components/Footer.astro';
 ---
 
 <Layout
-  title="AI Privacy Gateway — Your AI data is leaking PII right now. Install a firewall in 30 seconds."
-  description="Open-source AI API privacy gateway. Auto-detect and mask phone numbers, emails, ID cards, bank cards, and more before they reach AI models. 30-second deploy. MIT licensed."
-  canonicalURL="https://privacygw.pages.dev">
+  title="AI Privacy Gateway — Open Source PII Masking Proxy for ChatGPT, Claude, Cursor, DeepSeek"
+  description="Open-source AI API privacy gateway. Auto-detect and mask phone numbers, emails, ID cards, bank cards, and 14+ entity types before they reach AI models. 30-second deploy. Works with ChatGPT, Claude, Cursor, DeepSeek, any OpenAI-compatible API. MIT licensed."
+  keywords="AI隐私网关,数据脱敏代理,PII掩码,LLM安全代理,开源隐私网关,AI API隐私隔离,PII检测,数据隐私防火墙"
+  canonicalURL="https://privacygw.pages.dev"
+  hreflang={[
+    { lang: 'zh-CN', url: 'https://privacygw.pages.dev' },
+    { lang: 'x-default', url: 'https://privacygw.pages.dev' },
+  ]}>
   <Nav />
 
   <!-- ============================================
@@ -547,6 +552,92 @@ client = OpenAI(
   </section>
 
   <Footer />
+
+  <!-- FAQ Structured Data -->
+  <script is:inline type="application/ld+json">{
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is AI Privacy Gateway?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "AI Privacy Gateway is an open-source reverse proxy that sits between your AI client (ChatGPT, Cursor, Claude, DeepSeek) and the AI API. It automatically detects and masks sensitive data like phone numbers, emails, ID cards, bank cards before they leave your machine."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How long does it take to set up?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "About 30 seconds. Run the Docker container or Python script, change your API base URL to http://localhost:9999, and you're done. No code changes required."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What types of sensitive data can it detect?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The gateway detects 14 entity types: phone numbers, email addresses, Chinese ID card numbers, bank card numbers, person names (Chinese), locations, organizations, license plates, IP addresses, URLs, dates, currency amounts, postal codes, and custom keywords via regex patterns."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does my data leave my machine?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Masked data is forwarded to the AI API, but the original PII is never stored or transmitted. The mapping is kept locally in an encrypted SQLite vault that never leaves your machine."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Which AI services are supported?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Any OpenAI-compatible API. This includes ChatGPT (OpenAI), Claude (Anthropic), DeepSeek, Cursor, Kimi, Azure OpenAI, and any custom API endpoint that follows the OpenAI format."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is it free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. AI Privacy Gateway is MIT licensed — free for personal and commercial use. No account needed, no credit card required."
+        }
+      }
+    ]
+  }</script>
+
+  <!-- HowTo Structured Data -->
+  <script is:inline type="application/ld+json">{
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "Set up AI Privacy Gateway in 30 seconds",
+    "description": "Protect your AI API calls from leaking sensitive data.",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "position": 1,
+        "name": "Install the gateway",
+        "text": "Run docker run -d --name ai-privacy-gw -p 9999:9999 ghcr.io/gunxueqiu6/ai-privacy-gateway:lite",
+        "url": "https://privacygw.pages.dev/download"
+      },
+      {
+        "@type": "HowToStep",
+        "position": 2,
+        "name": "Change your API base URL",
+        "text": "Set your AI client's base_url to http://localhost:9999/v1 instead of https://api.openai.com/v1",
+        "url": "https://privacygw.pages.dev/download"
+      },
+      {
+        "@type": "HowToStep",
+        "position": 3,
+        "name": "Done",
+        "text": "All PII is automatically masked before reaching the AI API. No further configuration needed."
+      }
+    ]
+  }</script>
 </Layout>
 
 <style>

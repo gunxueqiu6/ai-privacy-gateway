@@ -1,0 +1,213 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Layout from '../../layouts/Layout.astro';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+import competitors, { type Competitor } from '../../data/competitors';
+
+export const getStaticPaths: GetStaticPaths = () => {
+  return competitors.map((c) => ({
+    params: { competitor: c.slug },
+    props: { competitor: c },
+  }));
+};
+
+const { competitor } = Astro.props as { competitor: Competitor };
+const pageUrl = `https://privacygw.pages.dev/vs/${competitor.slug}`;
+---
+
+<Layout
+  title={`${competitor.name} vs AI Privacy Gateway — ${competitor.primaryKeyword}`}
+  description={`Detailed comparison of ${competitor.name} and AI Privacy Gateway. ${competitor.description.slice(0, 120)}`}
+  keywords={`${competitor.name}对比,AI隐私工具比较,${competitor.primaryKeyword},PII脱敏工具选型,AI数据安全方案对比`}
+  canonicalURL={pageUrl}
+  ogType="article"
+  hreflang={[
+    { lang: 'zh-CN', url: pageUrl },
+    { lang: 'x-default', url: pageUrl },
+  ]}>
+  <Nav />
+
+  <section class="seo-page">
+    <div class="container">
+      <div class="seo-header">
+        <div class="seo-badge">Tool Comparison</div>
+        <h1>{competitor.name} vs AI Privacy Gateway</h1>
+        <p class="seo-subtitle">{competitor.primaryKeyword} — an in-depth comparison to help you choose the right AI data privacy tool for your stack.</p>
+      </div>
+
+      <div class="seo-tldr glass">
+        <strong>TL;DR:</strong> {competitor.name} — {competitor.tagline}. AI Privacy Gateway takes a different approach: a standalone proxy that masks PII at the network layer, requiring zero code changes and keeping data 100% local.
+      </div>
+
+      <h2>About {competitor.name}</h2>
+      <p>{competitor.description}</p>
+
+      <h3>What {competitor.name} Does Well</h3>
+      <div class="pro-con-grid">
+        <div class="pro-con-section">
+          <h4 class="pro-label">Strengths</h4>
+          <ul>
+            {competitor.strengths.map((s) => <li>{s}</li>)}
+          </ul>
+        </div>
+        <div class="pro-con-section">
+          <h4 class="con-label">Limitations</h4>
+          <ul>
+            {competitor.weaknesses.map((w) => <li>{w}</li>)}
+          </ul>
+        </div>
+      </div>
+
+      <h2>Detailed Comparison: {competitor.name} vs AI Privacy Gateway</h2>
+      <div class="comparison-table-wrapper glass">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Dimension</th>
+              <th>{competitor.name}</th>
+              <th class="col-us">AI Privacy Gateway</th>
+            </tr>
+          </thead>
+          <tbody>
+            {competitor.comparisonPoints.map((p) => (
+              <tr>
+                <td class="col-dim">{p.label}</td>
+                <td>{p.them}</td>
+                <td class="col-us">{p.us}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Why Teams Choose AI Privacy Gateway Over {competitor.name}</h2>
+      <div class="challenge-grid">
+        <div class="challenge-card glass">
+          <div class="challenge-num">1</div>
+          <h3>Zero Code Changes</h3>
+          <p>Unlike {competitor.name}'s approach, AI Privacy Gateway works as a network proxy. Deploy the Docker container, change the API base URL — done in 30 seconds.</p>
+        </div>
+        <div class="challenge-card glass">
+          <div class="challenge-num">2</div>
+          <h3>Data Never Leaves Your Infrastructure</h3>
+          <p>All PII masking happens locally. Your data is never sent to a third-party cloud for processing. This is critical for GDPR, HIPAA, and PIPL compliance.</p>
+        </div>
+        <div class="challenge-card glass">
+          <div class="challenge-num">3</div>
+          <h3>MIT Open Source</h3>
+          <p>Full source code available. No vendor lock-in, no per-seat pricing, no usage limits. Deploy anywhere, audit everything.</p>
+        </div>
+        <div class="challenge-card glass">
+          <div class="challenge-num">4</div>
+          <h3>14+ Entity Types</h3>
+          <p>Comprehensive PII detection including phone numbers, emails, ID cards, bank cards, names, addresses, API keys, and Chinese-specific formats.</p>
+        </div>
+      </div>
+
+      <h2>When {competitor.name} Might Be the Better Choice</h2>
+      <p>No tool is perfect for every situation. Here is when {competitor.name} might make more sense:</p>
+      <ul>
+        {competitor.strengths.map((s) => <li>{s}</li>)}
+        <li>If these specific strengths align with your primary requirements, {competitor.name} could be a good fit.</li>
+      </ul>
+      <p>However, if you need a self-hosted, open-source, zero-code-change solution that works across all your AI APIs, AI Privacy Gateway is the clear choice.</p>
+
+      <!-- CTA -->
+      <div class="seo-cta">
+        <h2>Try AI Privacy Gateway — Free and Open Source</h2>
+        <p>Deploy in 30 seconds. Compare for yourself.</p>
+        <div class="seo-cta-buttons">
+          <a href="/download" class="btn btn-primary btn-lg">Get Started Free</a>
+          <a href="/demo" class="btn btn-ghost btn-lg">Live Demo</a>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div class="seo-faq glass">
+        <h2>Frequently Asked Questions</h2>
+        <div class="faq-item">
+          <h3>Is AI Privacy Gateway a replacement for {competitor.name}?</h3>
+          <p>It depends on your use case. AI Privacy Gateway is specifically designed for AI API privacy — masking PII before it reaches any LLM provider. If {competitor.name} serves a broader or different purpose, they may be complementary rather than direct replacements.</p>
+        </div>
+        <div class="faq-item">
+          <h3>Can I use both {competitor.name} and AI Privacy Gateway together?</h3>
+          <p>Yes. Many teams use multiple privacy tools for defense-in-depth. AI Privacy Gateway sits at the network layer, so it works alongside any other tool in your stack.</p>
+        </div>
+        <div class="faq-item">
+          <h3>How does the performance compare?</h3>
+          <p>AI Privacy Gateway adds less than 1ms latency per request (Rust-based detection engine). {competitor.name}'s performance characteristics depend on its architecture.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Footer />
+</Layout>
+
+<style>
+  .seo-page { padding: 8rem 0 4rem; }
+  .seo-page .container { max-width: 820px; margin: 0 auto; }
+  .seo-header { margin-bottom: 3rem; }
+  .seo-badge {
+    display: inline-block; padding: 0.35rem 0.85rem; border-radius: 20px;
+    font-size: 0.78rem; font-weight: 600; color: var(--primary);
+    background: rgba(134, 239, 172, 0.08); border: 1px solid rgba(134, 239, 172, 0.15);
+    margin-bottom: 1.25rem;
+  }
+  .seo-page h1 { font-size: 2.75rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1.15; margin-bottom: 1.25rem; }
+  .seo-subtitle { font-size: 1.1rem; color: var(--text-secondary); line-height: 1.8; }
+  .seo-tldr { padding: 1.25rem 1.5rem; margin-bottom: 2.5rem; font-size: 0.95rem; line-height: 1.7; color: var(--text-primary); }
+  .seo-tldr strong { color: var(--primary); }
+  .seo-page h2 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.03em; margin: 3rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+  .seo-page h3 { font-size: 1.25rem; font-weight: 600; margin: 2rem 0 0.75rem; }
+  .seo-page p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 1.25rem; }
+  .seo-page ul { list-style: none; padding: 0; margin-bottom: 1.5rem; }
+  .seo-page ul li { padding: 0.5rem 0 0.5rem 1.5rem; position: relative; color: var(--text-secondary); line-height: 1.6; }
+  .seo-page ul li::before { content: ''; position: absolute; left: 0; top: 0.9rem; width: 6px; height: 6px; border-radius: 50%; background: var(--primary); opacity: 0.5; }
+
+  .pro-con-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+  .pro-con-section { padding: 1.5rem; border-radius: 16px; background: var(--glass-bg); border: 1px solid var(--border); }
+  .pro-label { color: var(--primary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 0.75rem; }
+  .con-label { color: var(--warning); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 0.75rem; }
+  .pro-con-section ul { margin: 0; }
+  .pro-con-section ul li { padding: 0.35rem 0 0.35rem 1.2rem; font-size: 0.9rem; }
+  .pro-con-section ul li::before { top: 0.7rem; width: 5px; height: 5px; }
+
+  .comparison-table-wrapper { padding: 0; overflow-x: auto; margin-bottom: 2.5rem; }
+  .comparison-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  .comparison-table th { padding: 0.85rem 1rem; text-align: left; font-weight: 600; color: var(--text-primary); border-bottom: 2px solid var(--border); background: var(--bg-deep); }
+  .comparison-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); color: var(--text-secondary); line-height: 1.5; }
+  .comparison-table .col-dim { font-weight: 600; color: var(--text-primary); white-space: nowrap; }
+  .comparison-table .col-us { background: rgba(134, 239, 172, 0.03); color: var(--primary); }
+
+  .challenge-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2.5rem; }
+  .challenge-card { padding: 1.75rem; }
+  .challenge-num { font-size: 2rem; font-weight: 800; color: var(--primary); opacity: 0.5; margin-bottom: 0.5rem; line-height: 1; }
+  .challenge-card h3 { margin: 0 0 0.5rem; font-size: 1.05rem; }
+  .challenge-card p { margin: 0; font-size: 0.88rem; line-height: 1.7; }
+
+  .seo-faq { padding: 2rem; margin-bottom: 3rem; }
+  .seo-faq h2 { border: none; margin-top: 0; }
+  .faq-item { padding: 1rem 0; border-bottom: 1px solid var(--border); }
+  .faq-item:last-child { border: none; }
+  .faq-item h3 { margin: 0 0 0.5rem; font-size: 1.05rem; color: var(--text-primary); }
+  .faq-item p { margin: 0; font-size: 0.92rem; }
+
+  .seo-cta { text-align: center; padding: 3rem 2rem; background: var(--glass-bg); border: 1px solid var(--border); border-radius: 20px; margin-top: 3rem; }
+  .seo-cta h2 { margin-top: 0; border: none; }
+  .seo-cta p { color: var(--text-secondary); margin-bottom: 1.5rem; }
+  .seo-cta-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+  @media (max-width: 768px) {
+    .seo-page { padding: 6rem 0 3rem; }
+    .seo-page h1 { font-size: 2rem; }
+    .seo-page h2 { font-size: 1.4rem; }
+    .pro-con-grid, .challenge-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 639px) {
+    .seo-page h1 { font-size: 1.75rem; }
+    .seo-cta-buttons { flex-direction: column; }
+    .seo-cta-buttons .btn { width: 100%; }
+  }
+</style>

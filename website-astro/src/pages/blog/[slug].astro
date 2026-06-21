@@ -1,0 +1,243 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts
+    .filter(p => !p.data.draft)
+    .map(p => ({ params: { slug: p.slug }, props: { post: p } }));
+}
+
+const { post } = Astro.props;
+const { title, description, pubDate, updatedDate, tags, ogImage, canonicalURL } = post.data;
+const { Content } = await post.render();
+
+const dateStr = pubDate.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+const imageUrl = ogImage || 'https://privacygw.pages.dev/og-image.png';
+---
+
+<Layout
+  title={title + ' — AI Privacy Gateway'}
+  description={description}
+  ogImage={imageUrl}
+  canonicalURL={canonicalURL || `https://privacygw.pages.dev/blog/${post.slug}`}
+  ogType="article">
+  <Nav />
+
+  <article class="blog-article">
+    <div class="container">
+      <header class="article-header">
+        <div class="article-meta">
+          <time datetime={pubDate.toISOString()}>{dateStr}</time>
+          {updatedDate && <span class="updated">Updated: {updatedDate.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })}</span>}
+        </div>
+        <h1 class="article-title">{title}</h1>
+        <p class="article-desc">{description}</p>
+        {tags.length > 0 && (
+          <div class="article-tags">
+            {tags.map(tag => <a href={`/blog?tag=${encodeURIComponent(tag)}`} class="badge">{tag}</a>)}
+          </div>
+        )}
+      </header>
+
+      <div class="article-content glass">
+        <Content />
+      </div>
+    </div>
+  </article>
+
+  <Footer />
+</Layout>
+
+<!-- JSON-LD for Article -->
+<script type="application/ld+json" set:html={JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: title,
+  description: description,
+  image: imageUrl,
+  datePublished: pubDate.toISOString(),
+  dateModified: (updatedDate || pubDate).toISOString(),
+  author: {
+    '@type': 'Organization',
+    name: 'AI Privacy Gateway'
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: 'AI Privacy Gateway',
+    logo: {
+      '@type': 'ImageObject',
+      url: 'https://privacygw.pages.dev/favicon.svg'
+    }
+  }
+})} />
+
+<style>
+  .blog-article {
+    padding: 6rem 0 var(--space-2xl);
+    position: relative;
+    z-index: 1;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+  }
+
+  .article-header {
+    text-align: center;
+    margin-bottom: var(--space-xl);
+  }
+
+  .article-meta {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-md);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+
+  .updated {
+    color: var(--primary-dim);
+  }
+
+  .article-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    margin-bottom: var(--space-md);
+  }
+
+  .article-desc {
+    color: var(--text-secondary);
+    font-size: 1.15rem;
+    line-height: 1.6;
+    margin-bottom: var(--space-lg);
+  }
+
+  .article-tags {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    background: var(--bg-elevated);
+    color: var(--primary-dim);
+    border: 1px solid var(--border);
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+
+  .badge:hover {
+    background: var(--primary-deep);
+    color: var(--bg-deep);
+  }
+
+  .article-content {
+    padding: var(--space-xl);
+    border-radius: 1rem;
+    border: 1px solid var(--border);
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: var(--text-primary);
+  }
+
+  .article-content :global(h2) {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 2rem 0 1rem;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+  }
+
+  .article-content :global(h3) {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 1.5rem 0 0.75rem;
+    color: var(--text-primary);
+  }
+
+  .article-content :global(p) {
+    margin-bottom: 1rem;
+  }
+
+  .article-content :global(code) {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--bg-elevated);
+    color: var(--primary);
+  }
+
+  .article-content :global(pre) {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    padding: var(--space-lg);
+    border-radius: 0.75rem;
+    background: var(--bg-deep);
+    border: 1px solid var(--border);
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    line-height: 1.6;
+  }
+
+  .article-content :global(pre code) {
+    background: none;
+    padding: 0;
+    color: var(--text-primary);
+  }
+
+  .article-content :global(ul), .article-content :global(ol) {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+  }
+
+  .article-content :global(li) {
+    margin-bottom: 0.5rem;
+  }
+
+  .article-content :global(a) {
+    color: var(--primary-dim);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .article-content :global(a:hover) {
+    color: var(--primary);
+  }
+
+  .article-content :global(blockquote) {
+    border-left: 3px solid var(--primary-deep);
+    padding: var(--space-md) var(--space-lg);
+    margin: 1.5rem 0;
+    background: var(--bg-card);
+    border-radius: 0 0.5rem 0.5rem 0;
+  }
+
+  .article-content :global(img) {
+    max-width: 100%;
+    border-radius: 0.75rem;
+    margin: 1.5rem 0;
+  }
+
+  .article-content :global(hr) {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2rem 0;
+  }
+</style>

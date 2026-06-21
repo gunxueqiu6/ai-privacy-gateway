@@ -5,9 +5,11 @@ import Footer from '../components/Footer.astro';
 ---
 
 <Layout
-  title="Online Demo — AI Privacy Gateway | Real-time PII Masking"
-  description="Interactive demo: paste text containing PII and see how AI Privacy Gateway detects and masks phone numbers, emails, ID cards, bank cards, and 14 entity types in real time. All processing local, no data upload."
-  canonicalURL="https://privacygw.pages.dev/demo">
+  title="Online PII Detection Demo — Free AI Privacy Gateway | No Upload Required"
+  description="Interactive demo: paste text containing PII and see how AI Privacy Gateway detects and masks phone numbers, emails, ID cards, bank cards, and 14+ entity types in real time. All processing stays in your browser — zero data uploaded."
+  keywords="PII检测演示,数据脱敏在线测试,隐私网关演示,敏感信息检测工具,个人隐私保护演示"
+  canonicalURL="https://privacygw.pages.dev/demo"
+  ogType="website">
   <Nav />
 
   <!-- Hero -->
@@ -120,6 +122,23 @@ import Footer from '../components/Footer.astro';
   </section>
 
   <Footer />
+
+  <!-- WebApplication Structured Data -->
+  <script type="application/ld+json">{
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "AI Privacy Gateway — Online PII Masking Demo",
+    "url": "https://privacygw.pages.dev/demo",
+    "description": "Free interactive demo showing real-time PII detection and masking. Paste text and see phone numbers, emails, ID cards get masked instantly.",
+    "applicationCategory": "SecurityApplication",
+    "operatingSystem": "All",
+    "browserRequirements": "Requires JavaScript",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }</script>
 
   <script is:inline>
     const API_ENDPOINT = import.meta.env.PUBLIC_API_URL || 'http://localhost:9999/api/mask';

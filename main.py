@@ -7,6 +7,7 @@ import os
 import sys
 from contextlib import asynccontextmanager
 from datetime import datetime
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -99,16 +100,29 @@ async def health() -> dict:
     return {"status": "healthy", "timestamp": datetime.now().isoformat()}
 
 
+def _env_exists() -> bool:
+    """Check whether a non-empty .env file exists (first-run detection)."""
+    if getattr(sys, 'frozen', False):
+        env_path = Path.cwd() / ".env"
+    else:
+        env_path = Path(__file__).resolve().parent / ".env"
+    return env_path.exists() and env_path.stat().st_size > 0
+
+
 @app.get("/admin")
 async def admin_panel():
-    """Redirect to admin panel."""
-    return RedirectResponse(url="/admin/static/index.html")
+    """Redirect to admin panel or setup wizard (first-run detection)."""
+    if _env_exists():
+        return RedirectResponse(url="/admin/static/index.html")
+    return RedirectResponse(url="/admin/static/setup.html")
 
 
 @app.get("/admin/")
 async def admin_panel_slash():
-    """Redirect to admin panel."""
-    return RedirectResponse(url="/admin/static/index.html")
+    """Redirect to admin panel or setup wizard (first-run detection)."""
+    if _env_exists():
+        return RedirectResponse(url="/admin/static/index.html")
+    return RedirectResponse(url="/admin/static/setup.html")
 
 
 # 注册所有路由模块（必须在 /admin 之后，否则 /admin/* API 路由优先）

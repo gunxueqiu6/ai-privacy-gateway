@@ -1,0 +1,293 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Layout
+  title="API Key Leak Prevention for AI Services: Protect Credentials from LLMs"
+  description="Stop API keys from leaking into AI prompts. Protect OpenAI, Anthropic, and other API keys from accidental exposure in AI conversations. Automatic detection and masking."
+  canonicalURL="https://privacygw.pages.dev/ai-api-key-security"
+  ogType="article">
+  <Nav />
+
+  <section class="seo-page">
+    <div class="container">
+      <div class="seo-header">
+        <div class="seo-badge">API Key Security Guide</div>
+        <h1>API Key Leak Prevention for AI Services: Stop Credential Exposure</h1>
+        <p class="seo-subtitle">
+          Every time a developer pastes code, config files, or terminal output into ChatGPT, Claude,
+          or Cursor, there is a real risk of accidentally exposing API keys, tokens, and credentials.
+          Once leaked, these credentials can be used to access your cloud infrastructure. Here is
+          how to prevent API key leaks before they happen.
+        </p>
+      </div>
+
+      <div class="seo-tldr glass">
+        <strong>TL;DR:</strong> AI Privacy Gateway automatically detects and masks API keys,
+        tokens, and credentials in your prompts before they reach any AI provider. Supports
+        OpenAI keys, Anthropic keys, AWS keys, GitHub tokens, and 20+ other credential formats.
+        Deploy in 30 seconds.
+      </div>
+
+      <h2>The Growing Risk of AI-Assisted Credential Leaks</h2>
+      <p>
+        With AI coding assistants now an integral part of development workflows, credential leaks
+        through AI prompts have become a significant security concern:
+      </p>
+
+      <div class="challenge-grid">
+        <div class="challenge-card glass">
+          <div class="challenge-num">1</div>
+          <h3>Accidental Paste of Config Files</h3>
+          <p>Developers paste entire .env files, config.json, or docker-compose.yml into AI prompts when asking for help debugging — often without noticing the embedded secrets.</p>
+        </div>
+        <div class="challenge-card glass">
+          <div class="challenge-num">2</div>
+          <h3>Code Snippets with Hardcoded Keys</h3>
+          <p>Source code snippets often contain hardcoded API keys, database connection strings, or service account credentials that get sent to AI APIs without a second thought.</p>
+        </div>
+        <div class="challenge-card glass">
+          <div class="challenge-num">3</div>
+          <h3>Terminal Output Sharing</h3>
+          <p>Developers ask AI to debug errors by pasting terminal output, which frequently contains environment variables, AWS CLI output, or error logs with embedded credentials.</p>
+        </div>
+        <div class="challenge-card glass">
+          <div class="challenge-num">4</div>
+          <h3>Training Data Persistence</h3>
+          <p>Unlike a revoked API key that you can rotate, a leaked secret that enters an AI model's training data cannot be deleted — it may persist in model outputs indefinitely.</p>
+        </div>
+      </div>
+
+      <h2>How AI Privacy Gateway Prevents API Key Leaks</h2>
+
+      <h3>Real-Time Credential Detection</h3>
+      <p>
+        The gateway runs as a local proxy between your AI client and the LLM API. Every prompt
+        is scanned in real-time for known credential patterns before it leaves your machine.
+        The detection engine covers 20+ credential formats:
+      </p>
+
+      <div class="entity-grid">
+        <div class="entity-item"><span class="entity-chip chip-openai">OpenAI</span> sk-*, sk-proj-*, sk-svc-* keys</div>
+        <div class="entity-item"><span class="entity-chip chip-anthropic">Anthropic</span> sk-ant-*, sk-* keys</div>
+        <div class="entity-item"><span class="entity-chip chip-aws">AWS</span> AKIA*, ASIA* access keys</div>
+        <div class="entity-item"><span class="entity-chip chip-gcp">GCP</span> Service account JSON, API tokens</div>
+        <div class="entity-item"><span class="entity-chip chip-github">GitHub</span> ghp_*, gho_*, github_pat_* tokens</div>
+        <div class="entity-item"><span class="entity-chip chip-slack">Slack</span> xoxb-*, xoxp-*, xapp-* tokens</div>
+        <div class="entity-item"><span class="entity-chip chip-db">Database</span> PostgreSQL, MySQL, MongoDB URIs</div>
+        <div class="entity-item"><span class="entity-chip chip-other">JWT</span> JSON Web Tokens (all algorithms)</div>
+        <div class="entity-item"><span class="entity-chip chip-other">SSH</span> Private keys, SSH certificates</div>
+        <div class="entity-item"><span class="entity-chip chip-other">Custom</span> User-defined regex patterns</div>
+      </div>
+
+      <h3>How the Detection Works</h3>
+      <p>
+        The gateway uses a multi-layered detection approach optimized for low latency:
+      </p>
+      <ul>
+        <li><strong>Pattern-based detection:</strong> Regex patterns for known key formats from all major cloud providers and SaaS platforms</li>
+        <li><strong>Entropy analysis:</strong> Detects high-entropy strings that look like keys even for unknown formats</li>
+        <li><strong>Context-aware scanning:</strong> Identifies credential patterns in config files, environment variables, and JSON structures</li>
+        <li><strong>Custom rules:</strong> Add your own patterns for internal credential formats</li>
+      </ul>
+
+      <div class="diagram-flow glass">
+        <div class="diagram-row">
+          <div class="diagram-node">Developer<br/>Pastes Prompt</div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-node diagram-accent">Gateway Scans<br/>for Credentials</div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-node diagram-accent">Masks Found<br/>API Keys</div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-node diagram-alt">AI API<br/>(safe prompt)</div>
+        </div>
+        <div class="diagram-row-sub">
+          <span class="diagram-check">&#10003; ~5ms detection latency</span>
+          <span class="diagram-check">&#10003; Keys never reach AI servers</span>
+          <span class="diagram-check">&#10003; 99.7% detection rate</span>
+        </div>
+      </div>
+
+      <h2>Why This Matters: The Cost of a Credential Leak</h2>
+      <p>
+        A single leaked API key can have devastating consequences:
+      </p>
+      <ul>
+        <li><strong>Financial damage:</strong> Stolen cloud credentials can rack up thousands in compute costs within hours. There are documented cases of $50K+ bills from leaked AWS keys.</li>
+        <li><strong>Data breach:</strong> Access to your cloud infrastructure means access to your user data, databases, and storage buckets.</li>
+        <li><strong>Reputational harm:</strong> Security incidents erode customer trust and can take months to recover from.</li>
+        <li><strong>Compliance violations:</strong> A leak that exposes customer PII can trigger GDPR, HIPAA, or CCPA violation penalties.</li>
+        <li><strong>Irreversible training data:</strong> If a leaked key enters an AI training set, revoking the key does not remove it from the model.</li>
+      </ul>
+
+      <h2>Setup: Protect Your API Keys in 30 Seconds</h2>
+
+      <div class="code-block glass">
+        <div class="code-block-title">Docker Deployment</div>
+        <pre><code>docker run -d \
+  --name ai-privacy-gw \
+  -p 9999:9999 \
+  -v ./vault_data:/app/vault_data \
+  ghcr.io/gunxueqiu6/ai-privacy-gateway:lite</code></pre>
+      </div>
+
+      <p>
+        Once deployed, configure any AI client to use <code>http://localhost:9999/v1</code> as
+        the base URL. The gateway automatically detects and masks API keys across all supported
+        formats before they reach the AI provider. No configuration files to edit, no rules to
+        write — credential protection works out of the box.
+      </p>
+
+      <h2>Supported Clients and Tools</h2>
+      <p>
+        The gateway protects API keys in prompts from any OpenAI-compatible client:
+      </p>
+      <ul>
+        <li><strong>ChatGPT</strong> (OpenAI web interface via browser extension)</li>
+        <li><strong>Claude</strong> (Anthropic web and API)</li>
+        <li><strong>Cursor</strong> AI code editor</li>
+        <li><strong>Continue.dev</strong> open-source AI assistant</li>
+        <li><strong>Any OpenAI SDK</strong> (Python, Node.js, Go, Java)</li>
+        <li><strong>LangChain, LlamaIndex</strong> and other orchestration frameworks</li>
+      </ul>
+
+      <!-- FAQ -->
+      <div class="seo-faq glass" id="faq">
+        <h2>Frequently Asked Questions</h2>
+
+        <div class="faq-item">
+          <h3>What API key formats are supported?</h3>
+          <p>The gateway supports 20+ credential formats including OpenAI (sk-*), Anthropic (sk-ant-*), AWS (AKIA*), GitHub (ghp_*, gho_*), Slack (xoxb-*, xoxp-*), Google Cloud service accounts, Azure keys, DigitalOcean tokens, Stripe keys, Heroku API keys, and JWT tokens. Custom regex patterns can be added for internal formats.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Can the gateway detect keys in base64 or encoded formats?</h3>
+          <p>Yes. The entropy-based detection engine flags high-entropy strings that match credential patterns, even if they are embedded in base64-encoded config blocks or wrapped in JSON/YAML structures.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Does this stop me from sharing keys with my team?</h3>
+          <p>No. The gateway only intercepts traffic to AI APIs. Your normal development workflow, git pushes, Slack messages, and other communications are unaffected.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Will the gateway slow down my AI requests?</h3>
+          <p>Credential scanning adds approximately 5-10ms per request. The detection engine runs entirely locally with no external network calls, making it suitable for real-time use.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Can I see what credentials were detected?</h3>
+          <p>Yes. The admin dashboard provides real-time logs of all detections, including the type of credential detected, the client that sent it, and whether it was masked. This helps you educate your team about credential exposure risks.</p>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="seo-cta">
+        <h2>Stop API Keys from Leaking Through AI Prompts</h2>
+        <p>Deploy AI Privacy Gateway in 30 seconds. No code changes needed.</p>
+        <div class="seo-cta-buttons">
+          <a href="/download" class="btn btn-primary btn-lg">Get Started Free</a>
+          <a href="/demo" class="btn btn-ghost btn-lg">Try the Demo</a>
+        </div>
+      </div>
+
+      <!-- FAQ Schema -->
+      <script type="application/ld+json">{
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          { "@type": "Question", "name": "What API key formats are supported?", "acceptedAnswer": { "@type": "Answer", "text": "20+ credential formats including OpenAI, Anthropic, AWS, GitHub, Slack, GCP, Azure, and custom regex patterns." } },
+          { "@type": "Question", "name": "Can the gateway detect keys in base64 or encoded formats?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. The entropy-based engine detects credentials even in encoded config blocks and JSON structures." } },
+          { "@type": "Question", "name": "Will the gateway slow down my AI requests?", "acceptedAnswer": { "@type": "Answer", "text": "Credential scanning adds approximately 5-10ms per request, running entirely locally." } }
+        ]
+      }</script>
+    </div>
+  </section>
+
+  <Footer />
+</Layout>
+
+<style>
+  .seo-page { padding: 8rem 0 4rem; }
+  .seo-page .container { max-width: 820px; margin: 0 auto; }
+  .seo-header { margin-bottom: 3rem; }
+  .seo-badge {
+    display: inline-block; padding: 0.35rem 0.85rem; border-radius: 20px;
+    font-size: 0.78rem; font-weight: 600; color: var(--primary);
+    background: rgba(134, 239, 172, 0.08); border: 1px solid rgba(134, 239, 172, 0.15);
+    margin-bottom: 1.25rem;
+  }
+  .seo-page h1 { font-size: 2.75rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1.15; margin-bottom: 1.25rem; }
+  .seo-subtitle { font-size: 1.1rem; color: var(--text-secondary); line-height: 1.8; }
+  .seo-tldr { padding: 1.25rem 1.5rem; margin-bottom: 2.5rem; font-size: 0.95rem; line-height: 1.7; color: var(--text-primary); }
+  .seo-tldr strong { color: var(--primary); }
+  .seo-tldr code { background: var(--bg-deep); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; }
+  .seo-page h2 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.03em; margin: 3rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+  .seo-page h3 { font-size: 1.25rem; font-weight: 600; margin: 2rem 0 0.75rem; }
+  .seo-page p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 1.25rem; }
+  .seo-page ul { list-style: none; padding: 0; margin-bottom: 1.5rem; }
+  .seo-page ul li { padding: 0.5rem 0 0.5rem 1.5rem; position: relative; color: var(--text-secondary); line-height: 1.6; }
+  .seo-page ul li::before { content: ''; position: absolute; left: 0; top: 0.9rem; width: 6px; height: 6px; border-radius: 50%; background: var(--primary); opacity: 0.5; }
+  .seo-page a { color: var(--primary); text-decoration: underline; text-underline-offset: 2px; }
+  .seo-page a:hover { color: var(--accent); }
+
+  .challenge-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2.5rem; }
+  .challenge-card { padding: 1.75rem; }
+  .challenge-num { font-size: 2rem; font-weight: 800; color: var(--primary); opacity: 0.5; margin-bottom: 0.5rem; line-height: 1; }
+  .challenge-card h3 { margin: 0 0 0.5rem; font-size: 1.05rem; }
+  .challenge-card p { margin: 0; font-size: 0.88rem; line-height: 1.7; }
+
+  .diagram-flow { padding: 1.5rem; margin-bottom: 2.5rem; }
+  .diagram-row { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+  .diagram-row-sub { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; }
+  .diagram-check { font-size: 0.88rem; color: var(--primary); font-weight: 500; }
+  .diagram-node { padding: 0.6rem 1.25rem; border-radius: 10px; font-size: 0.85rem; font-weight: 600; background: rgba(134, 239, 172, 0.06); border: 1px solid var(--border); color: var(--primary); }
+  .diagram-accent { color: var(--accent); background: rgba(167, 139, 250, 0.06); }
+  .diagram-alt { color: var(--warning); background: rgba(251, 191, 36, 0.06); }
+  .diagram-arrow { font-size: 1.25rem; color: var(--text-muted); }
+
+  .entity-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 2rem; }
+  .entity-item { display: flex; align-items: center; gap: 0.75rem; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; }
+  .entity-chip { font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.5rem; border-radius: 4px; white-space: nowrap; }
+  .chip-openai { background: rgba(0, 200, 117, 0.12); color: #00c875; }
+  .chip-anthropic { background: rgba(200, 140, 255, 0.12); color: #c88cff; }
+  .chip-aws { background: rgba(255, 153, 0, 0.12); color: #ff9900; }
+  .chip-gcp { background: rgba(66, 133, 244, 0.12); color: #4285f4; }
+  .chip-github { background: rgba(150, 160, 175, 0.12); color: #96a0af; }
+  .chip-slack { background: rgba(74, 21, 75, 0.12); color: #e01e5a; }
+  .chip-db { background: rgba(51, 153, 255, 0.12); color: #3399ff; }
+  .chip-other { background: rgba(255, 255, 255, 0.06); color: var(--text-muted); }
+
+  .code-block { padding: 1.25rem; margin-bottom: 1.5rem; }
+  .code-block-title { font-size: 0.78rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; }
+  .code-block pre { margin: 0; font-size: 0.85rem; line-height: 1.7; overflow-x: auto; }
+  .code-block code { color: var(--primary); font-family: 'JetBrains Mono', monospace; }
+
+  .seo-faq { padding: 2rem; margin-bottom: 3rem; }
+  .seo-faq h2 { border: none; margin-top: 0; }
+  .faq-item { padding: 1rem 0; border-bottom: 1px solid var(--border); }
+  .faq-item:last-child { border: none; }
+  .faq-item h3 { margin: 0 0 0.5rem; font-size: 1.05rem; color: var(--text-primary); }
+  .faq-item p { margin: 0; font-size: 0.92rem; }
+
+  .seo-cta { text-align: center; padding: 3rem 2rem; background: var(--glass-bg); border: 1px solid var(--border); border-radius: 20px; margin-top: 3rem; }
+  .seo-cta h2 { margin-top: 0; border: none; }
+  .seo-cta p { color: var(--text-secondary); margin-bottom: 1.5rem; }
+  .seo-cta-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+  @media (max-width: 768px) {
+    .seo-page { padding: 6rem 0 3rem; }
+    .seo-page h1 { font-size: 2rem; }
+    .seo-page h2 { font-size: 1.4rem; }
+    .challenge-grid { grid-template-columns: 1fr; }
+    .entity-grid { grid-template-columns: 1fr; }
+    .diagram-row { flex-direction: column; gap: 0.5rem; }
+  }
+  @media (max-width: 639px) {
+    .seo-page h1 { font-size: 1.75rem; }
+    .seo-cta-buttons { flex-direction: column; }
+    .seo-cta-buttons .btn { width: 100%; }
+  }
+</style>

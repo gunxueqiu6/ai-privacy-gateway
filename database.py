@@ -7,6 +7,9 @@ from datetime import UTC, datetime, timedelta
 from typing import Dict, List, Optional, Tuple, Generator, Any
 from contextlib import contextmanager
 
+from config import config as app_config
+from vault_crypto import get_vault_crypto
+
 logger = logging.getLogger(__name__)
 
 DB_PATH = os.environ.get("DB_PATH", "./vault_data/privacy_vault.db")
@@ -18,8 +21,13 @@ ALLOWED_STATS_COLUMNS = frozenset({
 })
 
 class Database:
-    def __init__(self, db_path: Optional[str] = None) -> None:
+    def __init__(self, db_path: Optional[str] = None, mapping_ttl: Optional[int] = None) -> None:
         self.db_path = db_path or DB_PATH
+        self.mapping_ttl = mapping_ttl if mapping_ttl is not None else app_config.MAPPING_TTL
+        # 无状态模式使用内存存储映射
+        self._memory_mappings: Dict[str, Dict[str, str]] = {}
+        # 记录每个 session 的创建时间以便基于 TTL 清理内存映射
+        self._memory_mapping_times: Dict[str, datetime] = {}
         self._ensure_dir()
         self._init_db()
 
@@ -130,39 +138,102 @@ class Database:
                 );
 
                 CREATE INDEX IF NOT EXISTS idx_login_ip ON login_attempts(ip_address);
+
+                CREATE TABLE IF NOT EXISTS custom_regex_rules (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT UNIQUE NOT NULL,
+                    pattern TEXT NOT NULL,
+                    entity_type TEXT NOT NULL,
+                    enabled INTEGER DEFAULT 1,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
             """)
 
+    def _encrypt_value(self, value: str) -> str:
+        """Encrypt *value* if vault encryption is active, otherwise return as-is."""
+        crypto = get_vault_crypto()
+        if crypto is None:
+            return value
+        return crypto.encrypt(value)
+
+    def _try_decrypt_value(self, value: str) -> str:
+        """Try to decrypt *value*; return plaintext on success, fall back to original."""
+        crypto = get_vault_crypto()
+        if crypto is None:
+            return value
+        decrypted = crypto.decrypt(value)
+        return decrypted if decrypted is not None else value
+
     def save_mappings(self, session_id: str, mappings: Dict[str, str], data_type: str = "unknown", team_id: Optional[str] = None) -> None:
+        # Encrypt values if vault encryption is active
+        encrypted = {k: self._encrypt_value(v) for k, v in mappings.items()}
+
+        if app_config.STATELESS_MODE:
+            # 无状态模式：仅存内存，不写 SQLite
+            if session_id not in self._memory_mappings:
+                self._memory_mappings[session_id] = {}
+            self._memory_mappings[session_id].update(encrypted)
+            self._memory_mapping_times[session_id] = datetime.utcnow()
+            logger.info(f"[无状态] 保存 {len(encrypted)} 条映射记录到内存")
+            return
+
         with self.get_conn() as conn:
             cursor = conn.cursor()
-            for placeholder, real_value in mappings.items():
+            for placeholder, real_value in encrypted.items():
                 cursor.execute(
                     "INSERT INTO vault_mappings (session_id, placeholder, real_value, data_type, team_id) VALUES (?, ?, ?, ?, COALESCE(?, 'default'))",
                     (session_id, placeholder, real_value, data_type, team_id)
                 )
-        logger.info(f"保存 {len(mappings)} 条映射记录")
+        logger.info(f"保存 {len(encrypted)} 条映射记录")
 
-    def cleanup_expired_mappings(self, retention_hours: int = 72) -> int:
-        """清理超过保留时长的映射记录"""
-        cutoff = (datetime.utcnow() - timedelta(hours=retention_hours)).strftime("%Y-%m-%d %H:%M:%S")
+    def cleanup_expired_mappings(self, retention_hours: Optional[int] = None) -> int:
+        """清理超过保留时长的映射记录（使用 self.mapping_ttl 秒数）"""
+        # 使用 self.mapping_ttl（秒）换算为小时作为默认值
+        hours = retention_hours if retention_hours is not None else max(1, self.mapping_ttl // 3600)
+        cutoff = (datetime.utcnow() - timedelta(hours=hours)).strftime("%Y-%m-%d %H:%M:%S")
+
+        # 清理过期内存映射
+        if self._memory_mappings and self.mapping_ttl > 0:
+            mem_cutoff = datetime.utcnow() - timedelta(seconds=self.mapping_ttl)
+            expired_sessions = [
+                sid for sid in self._memory_mappings
+                if self._memory_mapping_times.get(sid, datetime.min) < mem_cutoff
+            ]
+            for sid in expired_sessions:
+                self._memory_mappings.pop(sid, None)
+                self._memory_mapping_times.pop(sid, None)
+            if expired_sessions:
+                logger.info(f"[内存] 清理了 {len(expired_sessions)} 条过期映射 (保留 {hours} 小时)")
+
         with self.get_conn() as conn:
             cursor = conn.cursor()
             cursor.execute("DELETE FROM vault_mappings WHERE created_at < ?", (cutoff,))
             deleted = cursor.rowcount
         if deleted > 0:
-            logger.info(f"清理了 {deleted} 条过期映射记录 (保留 {retention_hours} 小时)")
+            logger.info(f"清理了 {deleted} 条过期映射记录 (保留 {hours} 小时)")
         return deleted
 
     def get_all_mappings(self) -> Dict[str, str]:
         mappings = {}
+        # 包含内存映射
+        for session_mappings in self._memory_mappings.values():
+            for placeholder, value in session_mappings.items():
+                if placeholder not in mappings:
+                    mappings[placeholder] = self._try_decrypt_value(value)
+        # 同时包含 SQLite 中持久化的映射
         with self.get_conn() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT placeholder, real_value FROM vault_mappings")
             for row in cursor.fetchall():
-                mappings[row["placeholder"]] = row["real_value"]
+                if row["placeholder"] not in mappings:
+                    mappings[row["placeholder"]] = self._try_decrypt_value(row["real_value"])
         return mappings
 
     def get_mapping(self, session_id: str, placeholder: str) -> Optional[str]:
+        # 优先检查内存映射（无状态模式下 SQLite 没有映射数据）
+        if session_id in self._memory_mappings and placeholder in self._memory_mappings[session_id]:
+            return self._try_decrypt_value(self._memory_mappings[session_id][placeholder])
+
         with self.get_conn() as conn:
             cursor = conn.cursor()
             cursor.execute(
@@ -170,9 +241,12 @@ class Database:
                 (session_id, placeholder)
             )
             row = cursor.fetchone()
-            return row["real_value"] if row else None
+            return self._try_decrypt_value(row["real_value"]) if row else None
 
     def clear_session(self, session_id: str) -> None:
+        # 清理内存映射
+        self._memory_mappings.pop(session_id, None)
+        self._memory_mapping_times.pop(session_id, None)
         with self.get_conn() as conn:
             cursor = conn.cursor()
             cursor.execute("DELETE FROM vault_mappings WHERE session_id = ?", (session_id,))
@@ -201,7 +275,51 @@ class Database:
                 keywords.append(row["keyword"])
         return keywords
 
+    # ==================== Custom Regex Rules ====================
+
+    def add_custom_regex_rule(self, name: str, pattern: str, entity_type: str) -> int:
+        """添加自定义正则规则，返回新规则ID，名称冲突时返回 -1"""
+        try:
+            with self.get_conn() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "INSERT INTO custom_regex_rules (name, pattern, entity_type) VALUES (?, ?, ?)",
+                    (name, pattern, entity_type)
+                )
+                return cursor.lastrowid or -1
+        except sqlite3.IntegrityError:
+            return -1
+
+    def delete_custom_regex_rule(self, rule_id: int) -> bool:
+        """删除自定义正则规则"""
+        with self.get_conn() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM custom_regex_rules WHERE id = ?", (rule_id,))
+            return cursor.rowcount > 0
+
+    def get_custom_regex_rules(self) -> List[Dict[str, Any]]:
+        """获取所有自定义正则规则"""
+        with self.get_conn() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT id, name, pattern, entity_type, enabled, created_at "
+                "FROM custom_regex_rules ORDER BY id ASC"
+            )
+            return [dict(row) for row in cursor.fetchall()]
+
+    def toggle_custom_regex_rule(self, rule_id: int, enabled: bool) -> bool:
+        """启用/禁用自定义正则规则"""
+        with self.get_conn() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "UPDATE custom_regex_rules SET enabled = ? WHERE id = ?",
+                (1 if enabled else 0, rule_id)
+            )
+            return cursor.rowcount > 0
+
     def clear_all_mappings(self) -> None:
+        self._memory_mappings.clear()
+        self._memory_mapping_times.clear()
         with self.get_conn() as conn:
             cursor = conn.cursor()
             cursor.execute("DELETE FROM vault_mappings")
