@@ -9,12 +9,11 @@ import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import com.privacygw.sdk.GatewayConfig
+import com.privacygw.sdk.PrivacyGateway
+import com.privacygw.vpn.core.PacketProcessor
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.nio.ByteBuffer
-import java.nio.channels.FileChannel
+import java.io.FileDescriptor
 
 /**
  * AI Privacy Gateway VPN Service
@@ -31,6 +30,7 @@ class PrivacyVpnService : VpnService() {
 
     companion object {
         const val TAG = "PrivacyVpnService"
+        const val PREFS_NAME = "privacy_vpn_prefs"
         const val NOTIFICATION_CHANNEL_ID = "privacy_vpn_channel"
         const val NOTIFICATION_ID = 1001
 
@@ -44,7 +44,7 @@ class PrivacyVpnService : VpnService() {
         // DNS服务器地址（TODO: 改为可配置，应从配置界面/远程设置读取）
         val DNS_SERVERS = listOf("8.8.8.8", "8.8.4.4")
 
-        // AI服务域名白名单（这些域名的请求会被脱敏）
+        // AI服务域名白名单（用于通知显示，实际过滤在 PacketProcessor 和 HttpParser 中）
         val AI_SERVICE_DOMAINS = setOf(
             "openai.com",
             "api.openai.com",
@@ -78,7 +78,7 @@ class PrivacyVpnService : VpnService() {
         @Volatile
         var isRunning = false
 
-        // 统计
+        // 统计（由 PacketProcessor 更新）
         @Volatile
         var maskedCount = 0
         @Volatile
@@ -86,7 +86,8 @@ class PrivacyVpnService : VpnService() {
     }
 
     private var vpnInterface: ParcelFileDescriptor? = null
-    private var vpnThread: Thread? = null
+    private var packetProcessor: PacketProcessor? = null
+    private var statsUpdater: Job? = null
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     // 配置
@@ -185,57 +186,42 @@ class PrivacyVpnService : VpnService() {
     }
 
     /**
-     * 启动数据包处理
+     * 启动数据包处理 — 使用 PacketProcessor 实现完整的
+     * HTTP/HTTPS拦截、PII脱敏和转发逻辑。
+     *
+     * 数据流：
+     *   TUN接口 → PacketProcessor → IP/TCP解析 → HTTP检测
+     *   → AI域名匹配 → PrivacyGateway脱敏 → 转发到真实服务器
+     *   → 响应回写TUN接口
+     *
+     * 非AI流量直接透传，零性能影响。
      */
     private fun startPacketProcessing() {
-        vpnThread = Thread {
-            Log.i(TAG, "Packet processing thread started")
+        val fd = vpnInterface?.fileDescriptor
+        if (fd == null) {
+            Log.e(TAG, "VPN interface not available")
+            return
+        }
 
-            val fd = vpnInterface?.fileDescriptor
-            if (fd == null) {
-                Log.e(TAG, "VPN interface not available")
-                return
-            }
+        packetProcessor = PacketProcessor(
+            vpnFd = fd,
+            gatewayUrl = gatewayUrl,
+            gatewayApiKey = gatewayApiKey,
+            onStatsChanged = { updateNotification() }
+        ).apply { start() }
 
-            val inputChannel = FileInputStream(fd).channel
-            val outputChannel = FileOutputStream(fd).channel
-            val buffer = ByteBuffer.allocate(config.mtu)
-
-            try {
-                while (isRunning && vpnInterface != null) {
-                    // 从TUN接口读取数据包
-                    buffer.clear()
-                    val read = inputChannel.read(buffer)
-                    if (read > 0) {
-                        buffer.flip()
-                        processPacket(buffer, outputChannel)
-                    }
+        // 定期轮询统计信息
+        statsUpdater = scope.launch {
+            while (isRunning) {
+                delay(3000)
+                val proc = packetProcessor
+                if (proc != null) {
+                    totalRequests = (proc.getTotalPackets() + proc.getInterceptedConnections()).toInt()
+                    maskedCount = proc.getMaskedRequests().toInt()
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "Packet processing error", e)
+                updateNotification()
             }
-
-            Log.i(TAG, "Packet processing thread ended")
-        }.apply { start() }
-    }
-
-    /**
-     * 处理单个数据包
-     *
-     * ALPHA WARNING: VPN filtering is NOT YET IMPLEMENTED.
-     * This method currently operates in pass-through mode — all packets
-     * are forwarded without inspection. The following functionality is
-     * planned but not yet implemented:
-     * 1. Parse IP header
-     * 2. Parse TCP header
-     * 3. Parse HTTP request
-     * 4. Check destination domain against AI service whitelist
-     * 5. If matched, call privacy gateway for masking
-     * 6. Reassemble packet and forward
-     */
-    private fun processPacket(packet: ByteBuffer, output: FileChannel) {
-        totalRequests++
-        output.write(packet)
+        }
     }
 
     /**
@@ -245,8 +231,11 @@ class PrivacyVpnService : VpnService() {
         Log.i(TAG, "Stopping VPN")
         isRunning = false
 
-        vpnThread?.interrupt()
-        vpnThread = null
+        statsUpdater?.cancel()
+        statsUpdater = null
+
+        packetProcessor?.stop()
+        packetProcessor = null
 
         vpnInterface?.close()
         vpnInterface = null
