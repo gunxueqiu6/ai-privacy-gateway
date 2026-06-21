@@ -92,7 +92,7 @@ async def api_mask_batch(request: Request):
     results = []
     for text in texts:
         masked_text, mappings, stats = engine.mask(text)
-        entities = [{"value": v, "placeholder": p} for p, v in mappings.items()]
+        entities = [{"type": _entity_type_from_placeholder(p), "value": v, "placeholder": p, "position": text.find(v)} for p, v in mappings.items()]
         results.append({"original": text, "masked": masked_text, "entities": entities, "stats": stats})
 
     return {"results": results, "total_count": len(results)}
