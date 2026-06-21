@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <!-- Allow cleartext traffic to gateway (for local development) -->
+    <!-- DEVELOPMENT ONLY: allow cleartext traffic to local gateway.
+         10.0.0.2 is the host loopback address from the Android emulator.
+         Remove this domain-config for production builds. -->
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">localhost</domain>
         <domain includeSubdomains="true">10.0.0.2</domain>

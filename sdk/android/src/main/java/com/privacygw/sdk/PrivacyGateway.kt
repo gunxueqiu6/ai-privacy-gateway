@@ -104,7 +104,8 @@ class PrivacyGateway private constructor(
         return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
-                    throw IOException("Request failed with code ${response.code()}")
+                    val errorBody = response.body?.string()
+                    throw IOException("Request failed with code ${response.code()}: $errorBody")
                 }
                 val body = response.body()?.string()
                     ?: throw IOException("Empty response body")
@@ -116,6 +117,7 @@ class PrivacyGateway private constructor(
     companion object {
         private var instance: PrivacyGateway? = null
 
+        @Synchronized
         fun initialize(config: GatewayConfig): PrivacyGateway {
             instance = PrivacyGateway(
                 baseUrl = config.baseUrl.removeSuffix("/"),
@@ -125,6 +127,7 @@ class PrivacyGateway private constructor(
             return instance!!
         }
 
+        @Synchronized
         fun getInstance(): PrivacyGateway {
             return instance ?: throw IllegalStateException("PrivacyGateway not initialized. Call initialize() first.")
         }
@@ -137,21 +140,25 @@ class PrivacyGateway private constructor(
         }
 
         @WorkerThread
+        @JvmStatic
         fun mask(text: String): MaskResult {
             return runBlocking(Dispatchers.IO) { getInstance().mask(text) }
         }
 
         @WorkerThread
+        @JvmStatic
         fun restore(maskedText: String, mappings: Map<String, String>): RestoreResult {
             return runBlocking(Dispatchers.IO) { getInstance().restore(maskedText, mappings) }
         }
 
         @WorkerThread
+        @JvmStatic
         fun maskBatch(texts: List<String>): BatchMaskResponse {
             return runBlocking(Dispatchers.IO) { getInstance().maskBatch(texts) }
         }
 
         @WorkerThread
+        @JvmStatic
         fun getEntities(): EntitiesResponse {
             return runBlocking(Dispatchers.IO) { getInstance().getEntities() }
         }

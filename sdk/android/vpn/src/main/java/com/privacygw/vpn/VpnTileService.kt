@@ -2,6 +2,7 @@ package com.privacygw.vpn
 
 import android.content.Intent
 import android.graphics.drawable.Icon
+import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import android.util.Log
@@ -37,7 +38,7 @@ class VpnTileService : TileService() {
             val intent = Intent(this, PrivacyVpnService::class.java).apply {
                 action = PrivacyVpnService.ACTION_STOP
             }
-            startService(intent)
+            startServiceCompat(intent)
         } else {
             // 开启VPN
             if (isLocked) {
@@ -68,8 +69,16 @@ class VpnTileService : TileService() {
         val intent = Intent(this, PrivacyVpnService::class.java).apply {
             action = PrivacyVpnService.ACTION_START
         }
-        startService(intent)
+        startServiceCompat(intent)
         updateTile()
+    }
+
+    private fun startServiceCompat(intent: Intent) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent)
+        } else {
+            startService(intent)
+        }
     }
 
     private fun updateTile() {

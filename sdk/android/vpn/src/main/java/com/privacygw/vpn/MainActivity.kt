@@ -2,9 +2,13 @@ package com.privacygw.vpn
 
 import android.app.Activity
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.VpnService
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Switch
@@ -67,29 +71,15 @@ class MainActivity : Activity() {
         }
     }
 
-    @Suppress("DEPRECATION")
     private fun loadConfig() {
-        // TODO: Migrate to EncryptedSharedPreferences for secure storage.
-        // Add dependency: implementation 'androidx.security:security-crypto:1.1.0-alpha06'
-        // Then replace with:
-        //   val masterKey = MasterKey.Builder(this)
-        //       .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-        //       .build()
-        //   val prefs = EncryptedSharedPreferences.create(
-        //       this, PrivacyVpnService.PREFS_NAME, masterKey,
-        //       EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-        //       EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        //   )
-        val prefs = getSharedPreferences(PrivacyVpnService.PREFS_NAME, MODE_PRIVATE)
+        val prefs = getSecurePrefs()
         editGatewayUrl.setText(prefs.getString("gateway_url", "http://localhost:9999"))
         editApiKey.setText(prefs.getString("api_key", ""))
         switchVpn.isChecked = PrivacyVpnService.isRunning
     }
 
-    @Suppress("DEPRECATION")
     private fun saveConfig() {
-        // TODO: Migrate to EncryptedSharedPreferences (see loadConfig() for code).
-        val prefs = getSharedPreferences(PrivacyVpnService.PREFS_NAME, MODE_PRIVATE)
+        val prefs = getSecurePrefs()
         prefs.edit()
             .putString("gateway_url", editGatewayUrl.text.toString())
             .putString("api_key", editApiKey.text.toString())
@@ -99,6 +89,17 @@ class MainActivity : Activity() {
         PrivacyVpnService.gatewayApiKey = editApiKey.text.toString()
 
         Log.i(TAG, "Config saved: gateway=${PrivacyVpnService.gatewayUrl}")
+    }
+
+    private fun getSecurePrefs(): SharedPreferences {
+        val masterKey = MasterKey.Builder(this)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
+        return EncryptedSharedPreferences.create(
+            this, PrivacyVpnService.PREFS_NAME, masterKey,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
     }
 
     private fun requestVpnPermission() {
@@ -133,7 +134,11 @@ class MainActivity : Activity() {
             putExtra(PrivacyVpnService.EXTRA_GATEWAY_URL, PrivacyVpnService.gatewayUrl)
             putExtra(PrivacyVpnService.EXTRA_API_KEY, PrivacyVpnService.gatewayApiKey)
         }
-        startService(intent)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent)
+        } else {
+            startService(intent)
+        }
 
         Log.i(TAG, "VPN service started")
         updateStats()

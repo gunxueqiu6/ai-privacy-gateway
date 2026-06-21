@@ -34,6 +34,13 @@ class PrivacyVpnService : VpnService() {
         const val NOTIFICATION_CHANNEL_ID = "privacy_vpn_channel"
         const val NOTIFICATION_ID = 1001
 
+        const val ACTION_START = "com.privacygw.vpn.START"
+        const val ACTION_STOP = "com.privacygw.vpn.STOP"
+        const val ACTION_UPDATE_STATS = "com.privacygw.vpn.UPDATE_STATS"
+
+        const val EXTRA_GATEWAY_URL = "gateway_url"
+        const val EXTRA_API_KEY = "api_key"
+
         // DNS服务器地址（TODO: 改为可配置，应从配置界面/远程设置读取）
         val DNS_SERVERS = listOf("8.8.8.8", "8.8.4.4")
 
@@ -214,22 +221,20 @@ class PrivacyVpnService : VpnService() {
 
     /**
      * 处理单个数据包
+     *
+     * ALPHA WARNING: VPN filtering is NOT YET IMPLEMENTED.
+     * This method currently operates in pass-through mode — all packets
+     * are forwarded without inspection. The following functionality is
+     * planned but not yet implemented:
+     * 1. Parse IP header
+     * 2. Parse TCP header
+     * 3. Parse HTTP request
+     * 4. Check destination domain against AI service whitelist
+     * 5. If matched, call privacy gateway for masking
+     * 6. Reassemble packet and forward
      */
     private fun processPacket(packet: ByteBuffer, output: FileChannel) {
-        // 简化实现：这里只做基本的IP/TCP解析
-        // 完整实现需要：
-        // 1. 解析IP头
-        // 2. 解析TCP头
-        // 3. 解析HTTP请求
-        // 4. 检查目标域名是否在白名单
-        // 5. 如果匹配，调用网关脱敏
-        // 6. 重新组装数据包并发送
-
         totalRequests++
-
-        // TODO: 完整的HTTP解析和脱敏逻辑
-        // 当前版本：VPN处于直通模式（passthrough），所有流量直接转发，不做过滤。
-        // 实际流量过滤（TLS/HTTP解析 → AI服务域名匹配 → 调用网关脱敏）待后续实现。
         output.write(packet)
     }
 
@@ -325,15 +330,5 @@ class PrivacyVpnService : VpnService() {
 
         val manager = getSystemService(NotificationManager::class.java)
         manager.notify(NOTIFICATION_ID, createNotification())
-    }
-
-    // Intent actions
-    companion object {
-        const val ACTION_START = "com.privacygw.vpn.START"
-        const val ACTION_STOP = "com.privacygw.vpn.STOP"
-        const val ACTION_UPDATE_STATS = "com.privacygw.vpn.UPDATE_STATS"
-
-        const val EXTRA_GATEWAY_URL = "gateway_url"
-        const val EXTRA_API_KEY = "api_key"
     }
 }

@@ -3,6 +3,7 @@ package com.privacygw.vpn
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.util.Log
 
 /**
@@ -30,7 +31,11 @@ class BootReceiver : BroadcastReceiver() {
                 val vpnIntent = Intent(context, PrivacyVpnService::class.java).apply {
                     action = PrivacyVpnService.ACTION_START
                 }
-                context.startService(vpnIntent)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(vpnIntent)
+                } else {
+                    context.startService(vpnIntent)
+                }
             }
         }
     }
