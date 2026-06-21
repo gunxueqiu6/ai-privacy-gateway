@@ -24,6 +24,13 @@ jobs:
       - run: npm run build
         env:
           PUBLIC_API_BASE: ${{ vars.PUBLIC_API_BASE || 'https://surf-illinois-servers-wrote.trycloudflare.com' }}
+          PUBLIC_BAIDU_VERIFICATION: ${{ vars.PUBLIC_BAIDU_VERIFICATION || '' }}
+          PUBLIC_GOOGLE_VERIFICATION: ${{ vars.PUBLIC_GOOGLE_VERIFICATION || '' }}
+          PUBLIC_SO360_VERIFICATION: ${{ vars.PUBLIC_SO360_VERIFICATION || '' }}
+          PUBLIC_SOGOU_VERIFICATION: ${{ vars.PUBLIC_SOGOU_VERIFICATION || '' }}
+          PUBLIC_BING_VERIFICATION: ${{ vars.PUBLIC_BING_VERIFICATION || '' }}
+          PUBLIC_SHENMA_VERIFICATION: ${{ vars.PUBLIC_SHENMA_VERIFICATION || '' }}
+          PUBLIC_BYTEDANCE_VERIFICATION: ${{ vars.PUBLIC_BYTEDANCE_VERIFICATION || '' }}
       - run: npx wrangler pages deploy dist --project-name=privacygw --branch=main
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
