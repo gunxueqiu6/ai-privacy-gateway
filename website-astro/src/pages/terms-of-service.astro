@@ -1,0 +1,184 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { getLangFromURL } from '../i18n/utils';
+
+const lang = getLangFromURL(Astro.url.pathname);
+const isZh = lang === 'zh';
+---
+
+<Layout
+  title={isZh ? '服务条款 — AI Privacy Gateway' : 'Terms of Service — AI Privacy Gateway'}
+  description={isZh ? 'AI Privacy Gateway 服务条款：MIT 开源许可证，软件按现状提供，用户负责合规使用。' : 'AI Privacy Gateway Terms of Service. MIT licensed, software provided as-is, users responsible for compliance.'}
+  canonicalURL="https://privacygw.pages.dev/terms-of-service">
+  <Nav />
+
+  <section class="seo-page">
+    <div class="container">
+      <div class="seo-header">
+        <div class="seo-badge">{isZh ? '服务条款' : 'Terms of Service'}</div>
+        <h1>{isZh ? '服务条款' : 'Terms of Service'}</h1>
+        <p class="seo-subtitle">{isZh ? '最后更新日期：2026 年 6 月 26 日' : 'Last updated: June 26, 2026'}</p>
+      </div>
+
+      <div class="seo-tldr glass">
+        <strong>{isZh ? '摘要：' : 'Summary: '}</strong>
+        {isZh
+          ? 'AI Privacy Gateway 采用 MIT 许可证发布。它是自托管的开源工具，按"现状"提供，无任何担保。您有责任确保使用方式符合当地法律法规。'
+          : 'AI Privacy Gateway is released under the MIT license. It is a self-hosted open-source tool provided "as is" without warranty. You are responsible for ensuring your use complies with applicable laws.'}
+      </div>
+
+      <h2>{isZh ? '1. 许可证' : '1. License'}</h2>
+      <p>
+        {isZh
+          ? 'AI Privacy Gateway 采用 MIT 许可证发布。您可以自由地使用、复制、修改、合并、发布、分发、再许可和/或出售本软件的副本，但须满足以下条件：'
+          : 'AI Privacy Gateway is released under the MIT License. You are free to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, subject to the following condition:'}
+      </p>
+      <div class="code-block glass">
+        <div class="code-block-title">MIT License</div>
+        <pre><code>MIT License
+
+Copyright (c) 2026 AI Privacy Gateway
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.</code></pre>
+      </div>
+
+      <h2>{isZh ? '2. 软件性质' : '2. Nature of the Software'}</h2>
+      <p>
+        {isZh
+          ? 'AI Privacy Gateway 是一个 AI API 隐私代理工具，拦截和脱敏发送至 AI API 的请求中的敏感信息。它是一个技术工具，不提供法律建议、合规保证或安全认证。用户应：'
+          : 'AI Privacy Gateway is an AI API privacy proxy tool that intercepts and masks sensitive information in requests sent to AI APIs. It is a technical tool and does not provide legal advice, compliance guarantees, or security certifications. Users should:'}
+      </p>
+      <ul>
+        <li>{isZh ? '咨询法律专业人士以确保符合适用的数据保护法律。' : 'Consult legal professionals to ensure compliance with applicable data protection laws.'}</li>
+        <li>{isZh ? '在将网关用于处理敏感数据前进行独立的安全评估。' : 'Conduct independent security assessments before using the gateway to process sensitive data.'}</li>
+        <li>{isZh ? '根据自身需求配置和测试网关的脱敏规则。' : 'Configure and test the gateway\'s masking rules according to their own requirements.'}</li>
+      </ul>
+
+      <h2>{isZh ? '3. 用户责任' : '3. User Responsibilities'}</h2>
+      <p>
+        {isZh
+          ? '作为用户，您同意：'
+          : 'As a user, you agree to:'}
+      </p>
+      <ul>
+        <li><strong>{isZh ? '合规使用：' : 'Compliant Use: '}</strong>{isZh ? '您有责任确保使用 AI Privacy Gateway 的方式符合所有适用的法律法规，包括但不限于 GDPR、CCPA、PIPL、HIPAA 等数据保护法规。' : 'You are responsible for ensuring that your use of AI Privacy Gateway complies with all applicable laws and regulations, including but not limited to GDPR, CCPA, PIPL, HIPAA, and other data protection regulations.'}</li>
+        <li><strong>{isZh ? '数据控制：' : 'Data Control: '}</strong>{isZh ? '您是您数据的控制者。AI Privacy Gateway 仅是您基础设施中的工具，用于处理您所控制的数据。' : 'You are the data controller of your data. AI Privacy Gateway is merely a tool in your infrastructure that processes data under your control.'}</li>
+        <li><strong>{isZh ? '安全配置：' : 'Security Configuration: '}</strong>{isZh ? '您负责安全地部署和配置网关，包括设置适当的网络访问控制、密钥管理和备份策略。' : 'You are responsible for securely deploying and configuring the gateway, including setting appropriate network access controls, key management, and backup strategies.'}</li>
+      </ul>
+
+      <h2>{isZh ? '4. 免责声明' : '4. Disclaimer of Warranty'}</h2>
+      <p>
+        {isZh
+          ? 'AI Privacy Gateway 按"现状"提供，不附带任何明示或暗示的保证。作者和版权持有人不保证软件的适销性、特定用途适用性、无侵权性或运行不中断。'
+          : 'AI Privacy Gateway is provided "as is", without warranty of any kind, express or implied. The authors and copyright holders make no warranties of merchantability, fitness for a particular purpose, non-infringement, or uninterrupted operation.'}
+      </p>
+      <p>
+        {isZh
+          ? '特别是，我们不保证：网关能检测所有类型的敏感信息；脱敏处理完全不可逆；或网关能抵御所有形式的攻击。'
+          : 'In particular, we do not warrant that: the gateway detects all types of sensitive information; masking is completely irreversible; or the gateway is resistant to all forms of attack.'}
+      </p>
+
+      <h2>{isZh ? '5. 责任限制' : '5. Limitation of Liability'}</h2>
+      <p>
+        {isZh
+          ? '在任何情况下，作者或版权持有人均不对因使用或无法使用本软件而产生的任何索赔、损害或其他责任负责，无论是合同诉讼、侵权诉讼还是其他诉讼。'
+          : 'In no event shall the authors or copyright holders be liable for any claims, damages, or other liability arising from the use or inability to use this software, whether in contract, tort, or otherwise.'}
+      </p>
+      <p>
+        {isZh
+          ? '这包括但不限于：数据泄露造成的损失、业务中断、商誉损失、数据丢失，或任何因使用网关导致的间接或附带损失——即使已被告知可能发生此类损害。'
+          : 'This includes, but is not limited to: losses from data breaches, business interruption, loss of goodwill, loss of data, or any indirect or consequential damages arising from the use of the gateway — even if advised of the possibility of such damages.'}
+      </p>
+
+      <h2>{isZh ? '6. 第三方服务' : '6. Third-Party Services'}</h2>
+      <p>
+        {isZh
+          ? 'AI Privacy Gateway 本身不是一个 AI 服务提供商。它代理请求到您指定的第三方 AI API 服务（如 OpenAI、Anthropic 等）。这些第三方服务有自己的服务条款和隐私政策，您有责任查阅和同意这些条款。'
+          : 'AI Privacy Gateway is itself not an AI service provider. It proxies requests to third-party AI API services you specify (e.g., OpenAI, Anthropic). These third-party services have their own terms of service and privacy policies; you are responsible for reviewing and agreeing to those terms.'}
+      </p>
+
+      <h2>{isZh ? '7. 条款变更' : '7. Changes to Terms'}</h2>
+      <p>
+        {isZh
+          ? '我们保留随时更新这些服务条款的权利。重大变更将通过 GitHub 仓库公告。继续使用本软件即表示您接受更新后的条款。'
+          : 'We reserve the right to update these terms of service at any time. Material changes will be announced via the GitHub repository. Continued use of the software constitutes acceptance of the updated terms.'}
+      </p>
+
+      <h2>{isZh ? '8. 适用法律' : '8. Governing Law'}</h2>
+      <p>
+        {isZh
+          ? '本条款受中华人民共和国法律管辖并依其解释。双方同意，因本条款引起的任何争议应提交至项目维护者所在地有管辖权的法院。'
+          : 'These terms shall be governed by and construed in accordance with the laws of the People\'s Republic of China. Any disputes arising from these terms shall be submitted to the competent courts in the location of the project maintainers.'}
+      </p>
+
+      <h2>{isZh ? '9. 联系方式' : '9. Contact'}</h2>
+      <p>
+        {isZh
+          ? '如果您对这些条款有任何疑问，请通过以下方式联系我们：'
+          : 'If you have questions about these terms, please contact us:'}
+      </p>
+      <ul>
+        <li>{isZh ? 'GitHub Issues：' : 'GitHub Issues: '}<a href="https://github.com/gunxueqiu6/ai-privacy-gateway/issues">https://github.com/gunxueqiu6/ai-privacy-gateway/issues</a></li>
+        <li>Telegram: <a href="https://t.me/chirstmas_7">https://t.me/chirstmas_7</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <Footer />
+</Layout>
+
+<style>
+  .seo-page { padding: 8rem 0 4rem; }
+  .seo-page .container { max-width: 820px; margin: 0 auto; }
+  .seo-header { margin-bottom: 3rem; }
+  .seo-badge {
+    display: inline-block; padding: 0.35rem 0.85rem; border-radius: 20px;
+    font-size: 0.78rem; font-weight: 600; color: var(--primary);
+    background: rgba(134, 239, 172, 0.08); border: 1px solid rgba(134, 239, 172, 0.15);
+    margin-bottom: 1.25rem;
+  }
+  .seo-page h1 { font-size: 2.75rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1.15; margin-bottom: 1.25rem; }
+  .seo-subtitle { font-size: 1.1rem; color: var(--text-secondary); line-height: 1.8; }
+  .seo-tldr { padding: 1.25rem 1.5rem; margin-bottom: 2.5rem; font-size: 0.95rem; line-height: 1.7; color: var(--text-primary); }
+  .seo-tldr strong { color: var(--primary); }
+  .seo-page h2 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.03em; margin: 3rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+  .seo-page h3 { font-size: 1.25rem; font-weight: 600; margin: 2rem 0 0.75rem; }
+  .seo-page p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 1.25rem; }
+  .seo-page ul { list-style: none; padding: 0; margin-bottom: 1.5rem; }
+  .seo-page ul li { padding: 0.5rem 0 0.5rem 1.5rem; position: relative; color: var(--text-secondary); line-height: 1.6; }
+  .seo-page ul li::before { content: ''; position: absolute; left: 0; top: 0.9rem; width: 6px; height: 6px; border-radius: 50%; background: var(--primary); opacity: 0.5; }
+  .seo-page a { color: var(--primary); text-decoration: underline; text-underline-offset: 2px; }
+  .seo-page a:hover { color: var(--accent); }
+
+  .code-block { padding: 1.5rem; margin-bottom: 1.5rem; overflow-x: auto; }
+  .code-block-title { font-size: 0.78rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; }
+  .code-block pre { margin: 0; font-size: 0.82rem; line-height: 1.6; overflow-x: auto; }
+  .code-block code { color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; }
+
+  @media (max-width: 768px) {
+    .seo-page { padding: 6rem 0 3rem; }
+    .seo-page h1 { font-size: 2rem; }
+    .seo-page h2 { font-size: 1.4rem; }
+  }
+  @media (max-width: 639px) {
+    .seo-page h1 { font-size: 1.75rem; }
+  }
+</style>

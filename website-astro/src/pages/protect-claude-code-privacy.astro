@@ -5,8 +5,8 @@ import Footer from '../components/Footer.astro';
 ---
 
 <Layout
-  title="Claude Code Privacy: Stop Leaking Source Code, Secrets, and PII"
-  description="Learn how Claude Code sends your code to Anthropic's API and how to protect it. Install a local privacy proxy in 30 seconds to mask API keys, database credentials, and sensitive data before they leave your machine."
+  title="Claude Code 隐私保护：阻止源代码与密钥泄漏"
+  description="了解 Claude Code 如何将你的代码发送到 Anthropic 的 API，以及如何保护它。30 秒搭建本地隐私代理，在数据离开你的电脑前自动脱敏 API 密钥、数据库凭证和敏感数据。"
   keywords="Claude Code隐私,保护代码不被AI读取,Claude代码安全,Anthropic API安全,AI编程工具数据防护"
   canonicalURL="https://privacygw.pages.dev/protect-claude-code-privacy"
   ogType="article">
@@ -15,64 +15,57 @@ import Footer from '../components/Footer.astro';
   <section class="seo-page">
     <div class="container">
       <div class="seo-header">
-        <div class="seo-badge">Claude Code Privacy Guide</div>
-        <h1>Claude Code Privacy: Stop Leaking Source Code and Secrets</h1>
+        <div class="seo-badge">Claude Code 隐私指南</div>
+        <h1>Claude Code 隐私保护：阻止源代码和密钥泄漏</h1>
         <p class="seo-subtitle">
-          Claude Code is a powerful AI coding assistant that runs in your terminal. But every prompt
-          you type — every file you reference, every secret in your env — gets sent to Anthropic's
-          API. Here is how to keep your sensitive data under your control.
+          Claude Code 是一个强大的 AI 编程助手，运行在你的终端中。但你输入的每一个提示词——
+          你引用的每个文件、环境中的每个密钥——都会被发送到 Anthropic 的 API。
+          以下是如何让你的敏感数据保持可控。
         </p>
       </div>
 
       <div class="seo-tldr glass">
-        <strong>TL;DR:</strong> Claude Code sends your terminal context — including environment
-        variables, code snippets, and file contents — to Anthropic's API. Use AI Privacy Gateway as
-        a local proxy to automatically mask API keys, passwords, PII, and other sensitive data
-        before they reach Anthropic. One environment variable change. 30 seconds.
+        <strong>TL;DR：</strong>Claude Code 将你的终端上下文——包括环境变量、代码片段和文件内容——发送到 Anthropic 的 API。使用 AI Privacy Gateway 作为本地代理，在数据到达 Anthropic 之前自动脱敏 API 密钥、密码、PII 和其他敏感数据。只需修改一个环境变量。30 秒搞定。
       </div>
 
-      <h2>What Data Does Claude Code Send?</h2>
+      <h2>Claude Code 会发送哪些数据？</h2>
       <p>
-        When you use Claude Code, the CLI tool sends several types of data to Anthropic's API:
+        当你使用 Claude Code 时，CLI 工具会向 Anthropic 的 API 发送多种类型的数据：
       </p>
       <ul>
-        <li><strong>Code and file contents</strong> from your current project</li>
-        <li><strong>Environment variables</strong> that could contain API keys and secrets</li>
-        <li><strong>Terminal output</strong> that may include sensitive command results</li>
-        <li><strong>Git history</strong> including commit messages with potential credential references</li>
-        <li><strong>Configuration files</strong> (.env, config files) referenced in your prompts</li>
-        <li><strong>Internal business logic</strong> and proprietary algorithms</li>
+        <li><strong>代码和文件内容</strong>来自你当前的项目</li>
+        <li><strong>环境变量</strong>可能包含 API 密钥和机密信息</li>
+        <li><strong>终端输出</strong>可能包含敏感的命令执行结果</li>
+        <li><strong>Git 历史</strong>包括可能含有凭证引用的提交消息</li>
+        <li><strong>配置文件</strong>（.env、配置文件）在提示词中被引用</li>
+        <li><strong>内部业务逻辑</strong>和专有算法</li>
       </ul>
       <p>
-        While Anthropic has strict data handling policies, the safest approach is to ensure
-        sensitive data never leaves your machine in plain text. A local privacy proxy is the
-        most effective way to achieve this.
+        Anthropic 有严格的数据处理政策，但最安全的方法是确保敏感数据永远不会以明文形式离开你的机器。本地隐私代理是实现这一目标的最有效方式。
       </p>
 
-      <h2>How AI Privacy Gateway Protects Claude Code</h2>
+      <h2>AI Privacy Gateway 如何保护 Claude Code</h2>
       <p>
-        AI Privacy Gateway sits between Claude Code and Anthropic's API. It scans every outgoing
-        request for sensitive patterns — API keys, passwords, phone numbers, emails, credit cards —
-        and replaces them with safe placeholders before forwarding to Anthropic.
+        AI Privacy Gateway 位于 Claude Code 和 Anthropic 的 API 之间。它扫描每一个外发请求中的敏感模式——API 密钥、密码、手机号、邮箱、信用卡——并在转发给 Anthropic 之前将其替换为安全占位符。
       </p>
 
       <div class="diagram-flow glass">
         <div class="diagram-row">
           <div class="diagram-node">Claude Code</div>
           <div class="diagram-arrow">&rarr;</div>
-          <div class="diagram-node diagram-accent">Privacy Gateway</div>
+          <div class="diagram-node diagram-accent">隐私网关</div>
           <div class="diagram-arrow">&rarr;</div>
           <div class="diagram-node diagram-alt">Anthropic API</div>
         </div>
-        <div class="diagram-note">API keys, secrets, PII masked here → never reach Anthropic in plain text</div>
+        <div class="diagram-note">API 密钥、机密信息、PII 在此处脱敏 → 永远不会以明文形式到达 Anthropic</div>
       </div>
 
-      <h2>Setup Guide: Protect Claude Code in 30 Seconds</h2>
+      <h2>设置指南：30 秒保护 Claude Code</h2>
 
-      <h3>Step 1: Install the Gateway</h3>
+      <h3>第 1 步：安装网关</h3>
 
       <div class="code-block glass">
-        <div class="code-block-title">Option A: Docker</div>
+        <div class="code-block-title">方式 A：Docker</div>
         <pre><code>docker run -d \
   --name ai-privacy-gw \
   -p 9999:9999 \
@@ -81,15 +74,15 @@ import Footer from '../components/Footer.astro';
       </div>
 
       <div class="code-block glass">
-        <div class="code-block-title">Option B: Python (pip)</div>
+        <div class="code-block-title">方式 B：Python (pip)</div>
         <pre><code>git clone https://github.com/gunxueqiu6/ai-privacy-gateway
 cd ai-privacy-gateway
 pip install -r requirements.txt
 python main.py</code></pre>
       </div>
 
-      <h3>Step 2: Configure Claude Code</h3>
-      <p>Set the <code>ANTHROPIC_BASE_URL</code> environment variable before launching Claude Code:</p>
+      <h3>第 2 步：配置 Claude Code</h3>
+      <p>在启动 Claude Code 之前设置 <code>ANTHROPIC_BASE_URL</code> 环境变量：</p>
 
       <div class="code-block glass">
         <div class="code-block-title">macOS / Linux</div>
@@ -103,64 +96,64 @@ claude</code></pre>
 claude</code></pre>
       </div>
 
-      <p>Your existing <code>ANTHROPIC_API_KEY</code> continues to work — the gateway forwards it automatically.</p>
+      <p>你现有的 <code>ANTHROPIC_API_KEY</code> 仍然有效——网关会自动转发它。</p>
 
-      <h3>Step 3: Verify It Works</h3>
+      <h3>第 3 步：验证是否生效</h3>
       <p>
-        Ask Claude Code a question that references a file containing an API key or phone number.
-        Open the gateway's admin dashboard at <a href="http://localhost:9999/admin">http://localhost:9999/admin</a>
-        to see the masked entities in real time.
+        向 Claude Code 提问一个涉及包含 API 密钥或手机号的文件的问题。
+        打开网关的管理面板 <a href="http://localhost:9999/admin">http://localhost:9999/admin</a>
+        即可实时查看被脱敏的实体。
       </p>
 
-      <h2>What Claude Code Users Are Masking</h2>
+      <h2>Claude Code 用户正在脱敏的内容</h2>
       <div class="entity-grid">
-        <div class="entity-item"><span class="entity-chip chip-secret">API Keys</span> OpenAI, AWS, GitHub tokens in env and code</div>
-        <div class="entity-item"><span class="entity-chip chip-phone">Phone</span> Contact numbers in configuration files</div>
-        <div class="entity-item"><span class="entity-chip chip-email">Email</span> Developer emails, user emails in test data</div>
-        <div class="entity-item"><span class="entity-chip chip-id">ID Card</span> User identification numbers in data samples</div>
-        <div class="entity-item"><span class="entity-chip chip-bank">Bank</span> Payment processing code with test card numbers</div>
-        <div class="entity-item"><span class="entity-chip chip-name">Name</span> Employee names, customer names in code</div>
-        <div class="entity-item"><span class="entity-chip chip-loc">Address</span> Business addresses, customer locations</div>
-        <div class="entity-item"><span class="entity-chip chip-org">Secrets</span> Database URLs, passwords, connection strings</div>
+        <div class="entity-item"><span class="entity-chip chip-secret">API 密钥</span> OpenAPI, AWS, GitHub 令牌在环境和代码中</div>
+        <div class="entity-item"><span class="entity-chip chip-phone">手机号</span> 配置文件中的联系号码</div>
+        <div class="entity-item"><span class="entity-chip chip-email">邮箱</span> 开发者邮箱、测试数据中的用户邮箱</div>
+        <div class="entity-item"><span class="entity-chip chip-id">身份证</span> 数据样本中的用户身份证号</div>
+        <div class="entity-item"><span class="entity-chip chip-bank">银行卡</span> 支付处理代码中的测试卡号</div>
+        <div class="entity-item"><span class="entity-chip chip-name">姓名</span> 代码中的员工姓名、客户姓名</div>
+        <div class="entity-item"><span class="entity-chip chip-loc">地址</span> 商业地址、客户位置</div>
+        <div class="entity-item"><span class="entity-chip chip-org">机密</span> 数据库 URL、密码、连接字符串</div>
       </div>
 
       <!-- FAQ -->
       <div class="seo-faq glass" id="faq">
-        <h2>Frequently Asked Questions</h2>
+        <h2>常见问题</h2>
 
         <div class="faq-item">
-          <h3>Does the gateway add latency to Claude Code?</h3>
-          <p>No. The gateway adds under 1ms of average latency. P99 latency stays under 2ms. Claude Code's terminal experience remains unchanged.</p>
+          <h3>网关会增加 Claude Code 的延迟吗？</h3>
+          <p>不会。网关平均延迟增加不超过 1ms。P99 延迟保持在 2ms 以下。Claude Code 的终端体验完全不受影响。</p>
         </div>
 
         <div class="faq-item">
-          <h3>Will this break Claude Code's context features?</h3>
-          <p>No. The gateway only masks sensitive data patterns. All code context, file references, and conversation history pass through normally — just with sensitive data replaced by safe placeholders.</p>
+          <h3>这会破坏 Claude Code 的上下文功能吗？</h3>
+          <p>不会。网关只脱敏敏感数据模式。所有代码上下文、文件引用和对话历史都能正常通过——只是敏感数据被替换为安全占位符。</p>
         </div>
 
         <div class="faq-item">
-          <h3>Can I use this with the Claude API directly?</h3>
-          <p>Yes. Point any OpenAI-compatible or Anthropic-compatible client to <code>http://localhost:9999/v1</code>. The gateway works with any API that follows the chat completions format.</p>
+          <h3>我可以在直接使用 Claude API 时使用它吗？</h3>
+          <p>可以。将任何兼容 OpenAI 或 Anthropic 的客户端指向 <code>http://localhost:9999/v1</code>。网关适用于任何支持聊天补全格式的 API。</p>
         </div>
 
         <div class="faq-item">
-          <h3>Does it support streaming (SSE)?</h3>
-          <p>Yes. The gateway fully supports SSE streaming with real-time masking and unmasking of response data.</p>
+          <h3>它支持流式传输（SSE）吗？</h3>
+          <p>支持。网关完全支持 SSE 流式传输，具有实时脱敏和恢复响应数据的功能。</p>
         </div>
 
         <div class="faq-item">
-          <h3>Is it free for commercial use?</h3>
-          <p>Yes. AI Privacy Gateway is MIT licensed. Free for personal and commercial use.</p>
+          <h3>商业使用免费吗？</h3>
+          <p>免费。AI Privacy Gateway 使用 MIT 许可证。个人和商业使用均免费。</p>
         </div>
       </div>
 
       <!-- CTA -->
       <div class="seo-cta">
-        <h2>Protect Your Claude Code Sessions</h2>
-        <p>Deploy AI Privacy Gateway in 30 seconds. Your data stays on your machine.</p>
+        <h2>保护你的 Claude Code 会话</h2>
+        <p>30 秒部署 AI Privacy Gateway。你的数据留在你的机器上。</p>
         <div class="seo-cta-buttons">
-          <a href="/download" class="btn btn-primary btn-lg">Get Started Free</a>
-          <a href="/demo" class="btn btn-ghost btn-lg">Try the Demo</a>
+          <a href="/download" class="btn btn-primary btn-lg">免费开始使用</a>
+          <a href="/demo" class="btn btn-ghost btn-lg">试用演示</a>
         </div>
       </div>
 
@@ -169,9 +162,9 @@ claude</code></pre>
         "@context": "https://schema.org",
         "@type": "FAQPage",
         "mainEntity": [
-          { "@type": "Question", "name": "Does the gateway add latency to Claude Code?", "acceptedAnswer": { "@type": "Answer", "text": "No. The gateway adds under 1ms of average latency." } },
-          { "@type": "Question", "name": "Will this break Claude Code's context features?", "acceptedAnswer": { "@type": "Answer", "text": "No. The gateway only masks sensitive data patterns while preserving all context." } },
-          { "@type": "Question", "name": "Does it support streaming?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Full SSE streaming support with real-time masking and unmasking." } }
+          { "@type": "Question", "name": "网关会增加 Claude Code 的延迟吗？", "acceptedAnswer": { "@type": "Answer", "text": "不会。网关平均延迟增加不超过 1ms。" } },
+          { "@type": "Question", "name": "这会破坏 Claude Code 的上下文功能吗？", "acceptedAnswer": { "@type": "Answer", "text": "不会。网关只脱敏敏感数据模式，保留所有上下文。" } },
+          { "@type": "Question", "name": "它支持流式传输吗？", "acceptedAnswer": { "@type": "Answer", "text": "支持。完全支持 SSE 流式传输，具有实时脱敏和恢复功能。" } }
         ]
       }</script>
     </div>

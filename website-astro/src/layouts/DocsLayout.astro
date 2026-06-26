@@ -1,6 +1,8 @@
 ---
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import { t } from '../i18n/translations';
+import { getLangFromURL } from '../i18n/utils';
 
 interface Props {
   title: string;
@@ -9,27 +11,35 @@ interface Props {
   frontmatter?: Record<string, any>;
 }
 
+const lang = getLangFromURL(Astro.url.pathname);
+
 const {
   title,
-  description = 'AI Privacy Gateway 技术文档 — 快速开始、部署指南、配置参考、API 文档、架构说明',
+  description = 'AI Privacy Gateway technical docs — quick start, deployment, configuration, API reference, architecture',
   canonicalURL = 'https://privacygw.pages.dev/docs',
   frontmatter = {},
 } = Astro.props;
 
 const fm = frontmatter || {};
-const pageTitle = `${fm.title || title} | AI Privacy Gateway 文档`;
+const pageTitle = fm.title ? `${fm.title} | AI Privacy Gateway` : title;
 const pageDescription = fm.description || description;
 const pageUrl = fm.canonicalURL || canonicalURL;
+
+const htmlLang = lang === 'zh' ? 'zh-CN' : 'en';
+const ogLocale = lang === 'zh' ? 'zh_CN' : 'en_US';
+const kw = lang === 'zh'
+  ? 'AI隐私,数据脱敏,隐私网关,LLM安全,技术文档,部署指南,API参考,架构说明'
+  : 'AI privacy, data masking, privacy gateway, LLM security, technical docs, deployment, API reference, architecture';
 ---
 
 <!doctype html>
-<html lang="zh-CN">
+<html lang={htmlLang}>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{pageTitle}</title>
   <meta name="description" content={pageDescription}>
-  <meta name="keywords" content="AI隐私,数据脱敏,隐私网关,LLM安全,技术文档,部署指南,API参考,架构说明">
+  <meta name="keywords" content={kw}>
   <meta name="robots" content="index, follow">
   {import.meta.env.PUBLIC_BAIDU_VERIFICATION && <meta name="baidu-site-verification" content={import.meta.env.PUBLIC_BAIDU_VERIFICATION}>}
   {import.meta.env.PUBLIC_GOOGLE_VERIFICATION && <meta name="google-site-verification" content={import.meta.env.PUBLIC_GOOGLE_VERIFICATION}>}
@@ -48,7 +58,7 @@ const pageUrl = fm.canonicalURL || canonicalURL;
   <meta property="og:image" content="https://privacygw.pages.dev/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:locale" content="zh_CN">
+  <meta property="og:locale" content={ogLocale}>
   <meta property="og:site_name" content="AI Privacy Gateway">
 
   <meta name="twitter:card" content="summary_large_image">
@@ -76,13 +86,13 @@ const pageUrl = fm.canonicalURL || canonicalURL;
   <main class="docs-layout">
     <aside class="docs-sidebar glass">
       <nav>
-        <h4>文档导航</h4>
-        <a href="/docs/quickstart">快速开始</a>
-        <a href="/docs/deploy">部署指南</a>
-        <a href="/docs/config">配置参考</a>
-        <a href="/docs/keywords">自定义敏感词</a>
-        <a href="/docs/architecture">架构说明</a>
-        <a href="/docs/api">API 参考</a>
+        <h4>{t(lang, 'docs.nav_title')}</h4>
+        <a href="/docs/quickstart">{t(lang, 'docs.nav_quickstart')}</a>
+        <a href="/docs/deploy">{t(lang, 'docs.nav_deploy')}</a>
+        <a href="/docs/config">{t(lang, 'docs.nav_config')}</a>
+        <a href="/docs/keywords">{t(lang, 'docs.nav_keywords')}</a>
+        <a href="/docs/architecture">{t(lang, 'docs.nav_architecture')}</a>
+        <a href="/docs/api">{t(lang, 'docs.nav_api')}</a>
       </nav>
     </aside>
 

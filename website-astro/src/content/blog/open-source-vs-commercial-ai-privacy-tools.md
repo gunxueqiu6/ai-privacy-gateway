@@ -3,6 +3,7 @@ title: "Open Source vs Commercial AI Privacy Tools Compared"
 description: "Compare leading AI data privacy solutions — open-source proxies, commercial DLP platforms, and browser-based tools. Features, pricing, and tradeoffs for 2026."
 pubDate: 2026-06-22
 tags: ["comparison", "open-source", "tools"]
+lang: "en"
 ---
 
 The AI privacy tool landscape has exploded. Open-source projects, commercial SaaS platforms, and browser extensions all promise to keep your data safe from AI models. Here's how they actually compare.

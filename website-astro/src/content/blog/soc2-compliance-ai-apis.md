@@ -3,6 +3,7 @@ title: "SOC 2 Compliance When Using AI APIs: A Practical Guide"
 description: "How to maintain SOC 2 compliance while using AI APIs like ChatGPT, Claude, and DeepSeek. Technical controls, audit preparation, and implementation patterns for security-conscious teams."
 pubDate: 2026-06-22
 tags: ["SOC2", "compliance", "enterprise"]
+lang: "en"
 ---
 
 SOC 2 certification validates that your organization has proper controls for security, availability, processing integrity, confidentiality, and privacy. But what happens when your data flows through third-party AI APIs?

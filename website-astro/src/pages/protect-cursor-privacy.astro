@@ -5,8 +5,8 @@ import Footer from '../components/Footer.astro';
 ---
 
 <Layout
-  title="How to Protect Your Privacy When Using Cursor AI — Stop Source Code and PII Leaks"
-  description="Learn how to stop Cursor AI from leaking your source code, API keys, and sensitive data. Install AI Privacy Gateway as a local proxy in 30 seconds — no code changes required."
+  title="使用 Cursor AI 时如何保护隐私 — 阻止源代码和 PII 泄漏"
+  description="了解如何阻止 Cursor AI 泄漏你的源代码、API 密钥和敏感数据。30 秒搭建 AI Privacy Gateway 作为本地代理，无需修改代码即可自动脱敏敏感信息。"
   keywords="Cursor隐私保护,Cursor代码上传安全,Cursor AI数据防护,IDE隐私代理,AI编辑器源代码保护"
   canonicalURL="https://privacygw.pages.dev/protect-cursor-privacy"
   ogType="article">
@@ -15,67 +15,64 @@ import Footer from '../components/Footer.astro';
   <section class="seo-page">
     <div class="container">
       <div class="seo-header">
-        <div class="seo-badge">Cursor AI Privacy Guide</div>
-        <h1>How to Protect Your Privacy When Using Cursor AI</h1>
+        <div class="seo-badge">Cursor AI 隐私指南</div>
+        <h1>使用 Cursor AI 时如何保护你的隐私</h1>
         <p class="seo-subtitle">
-          Cursor sends your code to AI APIs like OpenAI and Claude every time you ask for help.
-          Without a privacy proxy, every snippet, API key, and database credential in your codebase
-          could leave your machine. Here is how to stop it.
+          Cursor 每次请求 AI 帮助时都会将你的代码发送到 OpenAI 和 Claude 等 AI API。
+          没有隐私代理，代码片段、API 密钥和数据库凭证都可能离开你的机器。
+          以下是阻止方法。
         </p>
       </div>
 
       <div class="seo-tldr glass">
-        <strong>TL;DR:</strong> Change one setting in Cursor's API configuration. Set Base URL to
-        <code>http://localhost:9999/v1</code>, run the gateway locally, and all sensitive data is
-        automatically masked before it leaves your machine. Takes 30 seconds.
+        <strong>TL;DR：</strong>修改 Cursor API 配置中的一个设置。将 Base URL 设为
+        <code>http://localhost:9999/v1</code>，在本地运行网关，所有敏感数据在离开你的机器前
+        都会被自动脱敏。仅需 30 秒。
       </div>
 
-      <h2>Why Cursor AI Is a Privacy Risk</h2>
+      <h2>为什么 Cursor AI 是隐私风险</h2>
       <p>
-        Cursor is a powerful AI-assisted code editor, but every time you use its AI features —
-        inline editing, chat, code generation, or debugging — your code is sent to third-party AI
-        APIs. This includes:
+        Cursor 是一个强大的 AI 辅助代码编辑器，但每次你使用其 AI 功能——行内编辑、聊天、
+        代码生成或调试——你的代码都会被发送到第三方 AI API。这包括：
       </p>
       <ul>
-        <li><strong>Source code</strong> from your current file and open tabs</li>
-        <li><strong>API keys, tokens, and secrets</strong> that happen to be in your code</li>
-        <li><strong>Database connection strings</strong> containing credentials</li>
-        <li><strong>Internal business logic</strong> and proprietary algorithms</li>
-        <li><strong>Customer data</strong> referenced in your codebase</li>
+        <li><strong>源代码</strong>来自当前文件和打开的标签页</li>
+        <li><strong>API 密钥、令牌和机密</strong>恰好在你的代码中</li>
+        <li><strong>数据库连接字符串</strong>包含凭证信息</li>
+        <li><strong>内部业务逻辑</strong>和专有算法</li>
+        <li><strong>客户数据</strong>在代码库中被引用的内容</li>
       </ul>
       <p>
-        While <a href="https://docs.cursor.com/privacy" rel="nofollow">Cursor's privacy policy</a>
-        states they do not train on your code by default, your data still passes through third-party
-        AI providers. A local privacy proxy is the only way to ensure your sensitive data stays
-        under your control.
+        <a href="https://docs.cursor.com/privacy" rel="nofollow">Cursor 的隐私政策</a>
+        声明他们默认不会用你的代码进行训练，但你的数据仍然会经过第三方 AI 提供商。
+        本地隐私代理是确保敏感数据保持在你控制之下的唯一方式。
       </p>
 
-      <h2>How AI Privacy Gateway Protects Cursor AI</h2>
+      <h2>AI Privacy Gateway 如何保护 Cursor AI</h2>
       <p>
-        AI Privacy Gateway acts as a local reverse proxy that sits between Cursor and the AI API.
-        Every request passes through the gateway where it is scanned for sensitive patterns before
-        being forwarded:
+        AI Privacy Gateway 作为一个本地反向代理，位于 Cursor 和 AI API 之间。
+        每个请求在转发前都会经过网关的敏感模式扫描：
       </p>
 
       <div class="code-compare glass">
-        <div class="code-compare-header">Protecting Cursor AI API Calls</div>
+        <div class="code-compare-header">保护 Cursor AI API 调用</div>
         <div class="flow-diagram">
           <div class="flow-node">Cursor</div>
           <span class="flow-arrow">&rarr;</span>
-          <div class="flow-node flow-accent">Privacy Gateway</div>
+          <div class="flow-node flow-accent">隐私网关</div>
           <span class="flow-arrow">&rarr;</span>
           <div class="flow-node flow-danger">OpenAI / Claude API</div>
         </div>
-        <div class="flow-note">The gateway masks API keys, secrets, database credentials, and PII before they reach the AI API</div>
+        <div class="flow-note">网关在数据到达 AI API 前脱敏 API 密钥、机密、数据库凭证和 PII</div>
       </div>
 
-      <h2>Setup: Protect Cursor in 30 Seconds</h2>
+      <h2>设置指南：30 秒保护 Cursor</h2>
 
-      <h3>Step 1: Install the Gateway</h3>
-      <p>Choose your preferred method:</p>
+      <h3>第 1 步：安装网关</h3>
+      <p>选择你喜欢的方式：</p>
 
       <div class="code-block glass">
-        <div class="code-block-title">Docker (recommended)</div>
+        <div class="code-block-title">Docker（推荐）</div>
         <pre><code>docker run -d \
   --name ai-privacy-gw \
   -p 9999:9999 \
@@ -84,94 +81,92 @@ import Footer from '../components/Footer.astro';
       </div>
 
       <div class="code-block glass">
-        <div class="code-block-title">Python (no Docker needed)</div>
+        <div class="code-block-title">Python（无需 Docker）</div>
         <pre><code>git clone https://github.com/gunxueqiu6/ai-privacy-gateway
 cd ai-privacy-gateway
 pip install -r requirements.txt
 python main.py</code></pre>
       </div>
 
-      <h3>Step 2: Configure Cursor</h3>
+      <h3>第 2 步：配置 Cursor</h3>
       <p>
-        In Cursor, go to <strong>Settings &rarr; API Key &rarr; Overwrite OpenAI Base URL</strong>
-        and set it to:
+        在 Cursor 中，进入 <strong>设置 &rarr; API Key &rarr; Overwrite OpenAI Base URL</strong>
+        并将其设置为：
       </p>
       <div class="code-block glass">
         <pre><code>http://localhost:9999/v1</code></pre>
       </div>
-      <p>Keep your original API key in the API Key field. The gateway forwards it automatically.</p>
+      <p>在 API Key 字段中保留你原有的 API 密钥。网关会自动转发。</p>
 
-      <h3>Step 3: Verify</h3>
+      <h3>第 3 步：验证</h3>
       <p>
-        Open Cursor's AI chat and send a test message containing sensitive data like an API key or
-        phone number. Check the gateway's admin dashboard at
-        <a href="http://localhost:9999/admin">http://localhost:9999/admin</a> to see detected and
-        masked entities in real time.
+        打开 Cursor 的 AI 聊天，发送一条包含 API 密钥或手机号等敏感数据的测试消息。
+        检查网关管理面板 <a href="http://localhost:9999/admin">http://localhost:9999/admin</a>
+        查看实时检测和脱敏的实体。
       </p>
 
-      <h2>What Cursor Users Are Protecting</h2>
-      <p>With AI Privacy Gateway, Cursor users automatically mask:</p>
+      <h2>Cursor 用户正在保护的内容</h2>
+      <p>使用 AI Privacy Gateway，Cursor 用户自动脱敏以下内容：</p>
       <div class="entity-grid">
-        <div class="entity-item"><span class="entity-chip chip-secret">API Keys</span> sk-*, AKIA*, gh* tokens masked before leaving</div>
-        <div class="entity-item"><span class="entity-chip chip-phone">Phone</span> User phone numbers in code comments</div>
-        <div class="entity-item"><span class="entity-chip chip-email">Email</span> Test emails, user emails in code</div>
-        <div class="entity-item"><span class="entity-chip chip-id">ID Card</span> Chinese ID numbers in test data</div>
-        <div class="entity-item"><span class="entity-chip chip-bank">Bank Card</span> Payment test data, credit card numbers</div>
-        <div class="entity-item"><span class="entity-chip chip-name">Name</span> User names, employee names in code</div>
-        <div class="entity-item"><span class="entity-chip chip-loc">Address</span> Customer addresses in data samples</div>
-        <div class="entity-item"><span class="entity-chip chip-org">Secrets</span> Database URLs, connection strings, passwords</div>
+        <div class="entity-item"><span class="entity-chip chip-secret">API 密钥</span> sk-*, AKIA*, gh* 令牌在离开前被脱敏</div>
+        <div class="entity-item"><span class="entity-chip chip-phone">手机号</span> 代码注释中的用户电话号码</div>
+        <div class="entity-item"><span class="entity-chip chip-email">邮箱</span> 测试邮箱、代码中的用户邮箱</div>
+        <div class="entity-item"><span class="entity-chip chip-id">身份证</span> 测试数据中的身份证号</div>
+        <div class="entity-item"><span class="entity-chip chip-bank">银行卡</span> 支付测试数据、信用卡号</div>
+        <div class="entity-item"><span class="entity-chip chip-name">姓名</span> 代码中的用户名、员工名</div>
+        <div class="entity-item"><span class="entity-chip chip-loc">地址</span> 数据样本中的客户地址</div>
+        <div class="entity-item"><span class="entity-chip chip-org">机密</span> 数据库 URL、连接字符串、密码</div>
       </div>
 
-      <h2>Why Not Just Use Cursor's Privacy Mode?</h2>
+      <h2>为什么不仅仅用 Cursor 的隐私模式？</h2>
       <p>
-        Cursor offers a privacy mode that avoids code storage, but it does <strong>not</strong>
-        prevent your code from being sent to AI API providers. A local proxy like AI Privacy Gateway
-        is the <strong>only</strong> way to ensure your sensitive data never reaches third-party
-        servers in plain text.
+        Cursor 提供隐私模式来避免代码存储，但它并<strong>不能</strong>阻止你的代码被发送到 AI API 提供商。
+        像 AI Privacy Gateway 这样的本地代理是确保敏感数据永远不以明文形式到达第三方服务器的
+        <strong>唯一</strong>方式。
       </p>
 
       <!-- FAQ -->
       <div class="seo-faq glass" id="faq">
-        <h2>Frequently Asked Questions</h2>
+        <h2>常见问题</h2>
 
         <div class="faq-item">
-          <h3>Does AI Privacy Gateway slow down Cursor?</h3>
-          <p>No. The gateway adds under 1ms of latency per request on average. P99 latency stays under 2ms. You will not notice any difference in Cursor's response speed.</p>
+          <h3>AI Privacy Gateway 会拖慢 Cursor 吗？</h3>
+          <p>不会。网关平均每个请求增加不到 1ms 的延迟。P99 延迟保持在 2ms 以下。你不会注意到 Cursor 响应速度的任何变化。</p>
         </div>
 
         <div class="faq-item">
-          <h3>Can I use it with Cursor's built-in API key?</h3>
-          <p>Yes. Just change the base URL setting in Cursor's API configuration. Keep using your existing API key — the gateway forwards it.</p>
+          <h3>能否与 Cursor 内置的 API 密钥一起使用？</h3>
+          <p>可以。只需在 Cursor 的 API 配置中更改 base URL 设置。继续使用你现有的 API 密钥——网关会转发它。</p>
         </div>
 
         <div class="faq-item">
-          <h3>Does this work with Cursor Tab?</h3>
-          <p>Yes. All Cursor AI features that go through the API — inline editing, chat, code generation, and debugging — are protected by the gateway.</p>
+          <h3>这适用于 Cursor Tab 吗？</h3>
+          <p>适用。所有经过 API 的 Cursor AI 功能——行内编辑、聊天、代码生成和调试——都会受到网关保护。</p>
         </div>
 
         <div class="faq-item">
-          <h3>What if I use Cursor with a custom API endpoint?</h3>
-          <p>AI Privacy Gateway supports any OpenAI-compatible API. Set Cursor's base URL to <code>http://localhost:9999/v1</code> and configure the gateway's <code>TARGET_LLM</code> environment variable to point to your custom endpoint.</p>
+          <h3>如果我使用自定义 API 端点呢？</h3>
+          <p>AI Privacy Gateway 支持任何兼容 OpenAI 的 API。将 Cursor 的 base URL 设为 <code>http://localhost:9999/v1</code>，并配置网关的 <code>TARGET_LLM</code> 环境变量指向你的自定义端点。</p>
         </div>
 
         <div class="faq-item">
-          <h3>Is it free?</h3>
-          <p>Yes. AI Privacy Gateway is open source under the MIT license. Free for personal and commercial use. No account or credit card needed.</p>
+          <h3>它免费吗？</h3>
+          <p>是的。AI Privacy Gateway 在 MIT 许可下开源。个人和商业使用均免费。无需账户或信用卡。</p>
         </div>
 
         <div class="faq-item">
-          <h3>Can I use it on a team?</h3>
-          <p>Yes. The Docker image can be deployed on a shared server, and multiple team members can route their Cursor traffic through it. Each user's vault data stays isolated.</p>
+          <h3>可以在团队中使用吗？</h3>
+          <p>可以。Docker 镜像可以部署在共享服务器上，多个团队成员可以将他们的 Cursor 流量路由到该服务器。每个用户的保险库数据保持隔离。</p>
         </div>
       </div>
 
       <!-- CTA -->
       <div class="seo-cta">
-        <h2>Stop Leaking Code Through Cursor AI</h2>
-        <p>Deploy AI Privacy Gateway in 30 seconds. No code changes needed.</p>
+        <h2>阻止通过 Cursor AI 泄漏代码</h2>
+        <p>30 秒部署 AI Privacy Gateway。无需修改代码。</p>
         <div class="seo-cta-buttons">
-          <a href="/download" class="btn btn-primary btn-lg">Get Started Free</a>
-          <a href="/demo" class="btn btn-ghost btn-lg">Try the Demo</a>
+          <a href="/download" class="btn btn-primary btn-lg">免费开始使用</a>
+          <a href="/demo" class="btn btn-ghost btn-lg">试用演示</a>
         </div>
       </div>
 
@@ -180,8 +175,8 @@ python main.py</code></pre>
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
         "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://privacygw.pages.dev" },
-          { "@type": "ListItem", "position": 2, "name": "Protect Cursor Privacy", "item": "https://privacygw.pages.dev/protect-cursor-privacy" }
+          { "@type": "ListItem", "position": 1, "name": "首页", "item": "https://privacygw.pages.dev" },
+          { "@type": "ListItem", "position": 2, "name": "保护 Cursor 隐私", "item": "https://privacygw.pages.dev/protect-cursor-privacy" }
         ]
       }</script>
 
@@ -190,9 +185,9 @@ python main.py</code></pre>
         "@context": "https://schema.org",
         "@type": "FAQPage",
         "mainEntity": [
-          { "@type": "Question", "name": "Does AI Privacy Gateway slow down Cursor?", "acceptedAnswer": { "@type": "Answer", "text": "No. The gateway adds under 1ms of latency per request. P99 stays under 2ms." } },
-          { "@type": "Question", "name": "Can I use it with Cursor's built-in API key?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Just change the base URL setting. Keep using your existing API key." } },
-          { "@type": "Question", "name": "Does this work with Cursor Tab?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. All Cursor AI features that go through the API are protected." } }
+          { "@type": "Question", "name": "AI Privacy Gateway 会拖慢 Cursor 吗？", "acceptedAnswer": { "@type": "Answer", "text": "不会。网关平均每个请求增加不到 1ms 延迟。P99 保持在 2ms 以下。" } },
+          { "@type": "Question", "name": "能否与 Cursor 内置的 API 密钥一起使用？", "acceptedAnswer": { "@type": "Answer", "text": "可以。只需更改 base URL 设置。继续使用你现有的 API 密钥。" } },
+          { "@type": "Question", "name": "这适用于 Cursor Tab 吗？", "acceptedAnswer": { "@type": "Answer", "text": "适用。所有经过 API 的 Cursor AI 功能都会受到保护。" } }
         ]
       }</script>
     </div>

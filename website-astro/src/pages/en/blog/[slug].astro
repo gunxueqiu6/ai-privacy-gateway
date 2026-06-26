@@ -1,0 +1,14 @@
+---
+import { getCollection } from 'astro:content';
+import Page from '../../blog/[slug].astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts
+    .filter(p => !p.data.draft)
+    .map(p => ({ params: { slug: p.id }, props: { post: p } }));
+}
+
+const { post } = Astro.props;
+---
+<Page post={post} />

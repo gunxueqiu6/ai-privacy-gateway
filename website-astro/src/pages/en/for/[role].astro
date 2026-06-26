@@ -1,0 +1,15 @@
+---
+import type { GetStaticPaths } from 'astro';
+import roles from '../../../data/roles';
+import Page from '../../for/[role].astro';
+
+export const getStaticPaths: GetStaticPaths = () => {
+  return roles.map((r) => ({
+    params: { role: r.slug },
+    props: { role: r },
+  }));
+};
+
+const { role } = Astro.props;
+---
+<Page role={role} />

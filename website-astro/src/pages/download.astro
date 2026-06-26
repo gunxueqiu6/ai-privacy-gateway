@@ -2,12 +2,15 @@
 import Layout from '../layouts/Layout.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import { t } from '../i18n/translations';
+import { getLangFromURL } from '../i18n/utils';
+
+const lang = getLangFromURL(Astro.url.pathname);
 ---
 
 <Layout
-  title="下载 AI Privacy Gateway — Docker / Windows / macOS / 浏览器扩展"
-  description="下载 AI Privacy Gateway 客户端和浏览器扩展。支持 Docker 镜像、Windows .exe、macOS 便携版、Chrome/Edge 扩展。30 秒部署，保护你发给 AI 的敏感数据。"
-  keywords="下载AI隐私网关,Docker部署隐私代理,Windows隐私保护工具,macOS数据脱敏,Chrome扩展隐私,浏览器隐私插件"
+  title={t(lang, 'download.title')}
+  description={t(lang, 'download.subtitle')}
   canonicalURL="https://privacygw.pages.dev/download">
   <Nav />
 
@@ -18,13 +21,8 @@ import Footer from '../components/Footer.astro';
         <span class="badge-dot"></span>
         <span>v2.0.0</span>
       </div>
-      <h1 class="hero-title">
-        下载 <span class="gradient-text">Privacy Gateway</span>
-      </h1>
-      <p class="hero-description">
-        一条命令部署，双击即用。无需配置，自动生成密钥。<br/>
-        MIT 许可证开源免费。
-      </p>
+      <h1 class="hero-title" set:html={t(lang, 'download.hero_title')} />
+      <p class="hero-description" set:html={t(lang, 'download.hero_desc')} />
     </div>
   </section>
 
@@ -34,24 +32,20 @@ import Footer from '../components/Footer.astro';
 
       <!-- Windows Installer — recommended -->
       <div class="primary-download glass">
-        <div class="primary-badge">Recommended</div>
+        <div class="primary-badge">{t(lang, 'download.primary_badge')}</div>
         <div class="primary-content">
           <div class="primary-icon-wrap">
-            <span class="primary-icon">⊞</span>
+            <span class="primary-icon">&#8862;</span>
           </div>
           <div class="primary-text">
-            <h2>Download for Windows</h2>
-            <p class="primary-desc">Standalone executable. No install required — just download and run.</p>
+            <h2>{t(lang, 'download.primary_title')}</h2>
+            <p class="primary-desc">{t(lang, 'download.primary_desc')}</p>
             <div class="primary-meta">
-              <span>Windows 10 / 11</span>
-              <span>&middot;</span>
-              <span>64-bit</span>
-              <span>&middot;</span>
-              <span>Free &amp; Open Source</span>
+              <span>{t(lang, 'download.primary_meta')}</span>
             </div>
           </div>
           <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/releases/download/v2.0.0/PrivacyGateway.exe" class="btn btn-primary btn-large">
-            Download (.exe)
+            {t(lang, 'download.primary_btn')}
           </a>
         </div>
       </div>
@@ -62,85 +56,85 @@ import Footer from '../components/Footer.astro';
           <div class="download-icon-wrap">
             <span class="download-icon">&#8984;</span>
           </div>
-          <h2>macOS (.dmg)</h2>
-          <p>Build from source on macOS</p>
+          <h2>{t(lang, 'download.macos_title')}</h2>
+          <p>{t(lang, 'download.macos_desc')}</p>
           <div class="code-block">
             <pre><code>git clone https://github.com/gunxueqiu6/ai-privacy-gateway
 cd ai-privacy-gateway
 bash packaging/macos/build_dmg.sh</code></pre>
           </div>
-          <p class="download-hint">Requires macOS 10.15+. DMG output in <code>packaging/macos/output/</code></p>
-          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-outline btn-block">View on GitHub</a>
+          <p class="download-hint">{t(lang, 'download.macos_hint')}</p>
+          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-outline btn-block">{t(lang, 'download.macos_btn')}</a>
         </div>
 
         <div class="download-card glass">
           <div class="download-icon-wrap">
             <span class="download-icon">&#9635;</span>
           </div>
-          <h2>Docker</h2>
-          <p>Server deployment, one command</p>
+          <h2>{t(lang, 'download.docker_title')}</h2>
+          <p>{t(lang, 'download.docker_desc')}</p>
           <div class="code-block">
             <pre><code>docker run -d --name ai-privacy-gw -p 9999:9999 -v ./vault_data:/app/vault_data ghcr.io/gunxueqiu6/ai-privacy-gateway:lite</code></pre>
           </div>
-          <p class="download-hint">Also supports docker-compose up -d</p>
-          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway#docker" class="btn btn-outline btn-block">View Docs</a>
+          <p class="download-hint">{t(lang, 'download.docker_hint')}</p>
+          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway#docker" class="btn btn-outline btn-block">{t(lang, 'download.docker_btn')}</a>
         </div>
 
         <div class="download-card glass">
           <div class="download-icon-wrap">
             <span class="download-icon">&lt;/&gt;</span>
           </div>
-          <h2>pip Install</h2>
-          <p>Python developers, one pip command</p>
+          <h2>{t(lang, 'download.pip_title')}</h2>
+          <p>{t(lang, 'download.pip_desc')}</p>
           <div class="code-block">
             <pre><code>pip install -r requirements.txt
 python start.py --auto</code></pre>
           </div>
-          <p class="download-hint">Requires Python 3.8+</p>
-          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-outline btn-block">GitHub</a>
+          <p class="download-hint">{t(lang, 'download.pip_hint')}</p>
+          <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-outline btn-block">{t(lang, 'download.pip_btn')}</a>
         </div>
 
         <div class="download-card glass">
           <div class="download-icon-wrap">
             <span class="download-icon">&#127760;</span>
           </div>
-          <h2>Browser Extension</h2>
-          <p>Chrome / Edge plugin</p>
+          <h2>{t(lang, 'download.ext_title')}</h2>
+          <p>{t(lang, 'download.ext_desc')}</p>
           <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/releases/download/v2.0.0/ai-privacy-gateway-extension-v2.0.0.zip" class="btn btn-primary btn-block">
-            Download v2.0.0
+            {t(lang, 'download.ext_btn')}
           </a>
           <p class="download-hint" style="margin-top:0.5rem;">
-            Unzip &rarr; <code>chrome://extensions</code> &rarr; Developer mode &rarr; Load unpacked
+            {t(lang, 'download.ext_hint')}
           </p>
         </div>
       </div>
 
       <!-- Advanced Options -->
       <details class="advanced-section glass">
-        <summary class="advanced-summary">Advanced Options &mdash; Source code &amp; manual setup</summary>
+        <summary class="advanced-summary" set:html={t(lang, 'download.advanced_title')} />
         <div class="advanced-content">
           <div class="advanced-grid">
             <div class="advanced-card">
-              <h3>Windows (ZIP / portable)</h3>
-              <p>No installer, just the executable.</p>
+              <h3>{t(lang, 'download.adv_win_title')}</h3>
+              <p>{t(lang, 'download.adv_win_desc')}</p>
               <div class="code-block">
                 <pre><code>git clone https://github.com/gunxueqiu6/ai-privacy-gateway
 cd ai-privacy-gateway
 start.bat</code></pre>
               </div>
-              <p class="download-hint">Or download ZIP, extract, double-click <code>start.bat</code></p>
-              <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/archive/refs/heads/master.zip" class="btn btn-outline btn-block">Download ZIP</a>
+              <p class="download-hint">{t(lang, 'download.adv_win_hint')}</p>
+              <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/archive/refs/heads/master.zip" class="btn btn-outline btn-block">{t(lang, 'download.adv_win_btn')}</a>
             </div>
             <div class="advanced-card">
-              <h3>macOS / Linux (portable)</h3>
-              <p>From source, works on any Unix system.</p>
+              <h3>{t(lang, 'download.adv_unix_title')}</h3>
+              <p>{t(lang, 'download.adv_unix_desc')}</p>
               <div class="code-block">
                 <pre><code>git clone https://github.com/gunxueqiu6/ai-privacy-gateway
 cd ai-privacy-gateway
 bash start.sh</code></pre>
               </div>
-              <p class="download-hint">Also <code>chmod +x start.sh && ./start.sh</code></p>
-              <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/archive/refs/heads/master.zip" class="btn btn-outline btn-block">Download ZIP</a>
+              <p class="download-hint">{t(lang, 'download.adv_unix_hint')}</p>
+              <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/archive/refs/heads/master.zip" class="btn btn-outline btn-block">{t(lang, 'download.adv_unix_btn')}</a>
             </div>
           </div>
         </div>
@@ -148,13 +142,13 @@ bash start.sh</code></pre>
 
       <!-- Quick Start -->
       <div class="quick-start glass">
-        <h3>30 秒快速开始</h3>
+        <h3>{t(lang, 'download.quick_title')}</h3>
         <div class="steps">
           <div class="step">
             <span class="step-num">1</span>
             <div>
-              <h4>下载并启动</h4>
-              <p>运行可执行文件或 Docker 容器</p>
+              <h4>{t(lang, 'download.quick_step1_title')}</h4>
+              <p>{t(lang, 'download.quick_step1_desc')}</p>
             </div>
           </div>
           <div class="step-connector">
@@ -165,8 +159,8 @@ bash start.sh</code></pre>
           <div class="step">
             <span class="step-num">2</span>
             <div>
-              <h4>修改 API 地址</h4>
-              <p>改为 <code>http://localhost:9999/v1</code></p>
+              <h4>{t(lang, 'download.quick_step2_title')}</h4>
+              <p set:html={t(lang, 'download.quick_step2_desc')} />
             </div>
           </div>
           <div class="step-connector">
@@ -177,8 +171,8 @@ bash start.sh</code></pre>
           <div class="step">
             <span class="step-num">3</span>
             <div>
-              <h4>完成</h4>
-              <p>敏感数据自动脱敏，无需其他配置</p>
+              <h4>{t(lang, 'download.quick_step3_title')}</h4>
+              <p>{t(lang, 'download.quick_step3_desc')}</p>
             </div>
           </div>
         </div>

@@ -5,8 +5,8 @@ import Footer from '../components/Footer.astro';
 ---
 
 <Layout
-  title="DeepSeek Data Security: Protect Your Privacy When Using DeepSeek AI"
-  description="Is DeepSeek safe? Learn about DeepSeek data privacy risks, China's data laws, and how to protect personal data before sending prompts to DeepSeek AI. Set up protection in 30 seconds."
+  title="DeepSeek 数据安全：使用 DeepSeek AI 时保护你的隐私"
+  description="DeepSeek 安全吗？了解 DeepSeek 数据隐私风险、中国数据法律，以及在向 DeepSeek AI 发送提示词前如何保护个人数据。30 秒搭建防护。"
   keywords="DeepSeek数据安全,DeepSeek隐私问题,中国数据保护法律PIPL,DeepSeek代理防护,AI数据跨境安全"
   canonicalURL="https://privacygw.pages.dev/protect-deepseek-privacy"
   ogType="article"
@@ -19,129 +19,122 @@ import Footer from '../components/Footer.astro';
   <section class="seo-page">
     <div class="container">
       <div class="seo-header">
-        <div class="seo-badge">DeepSeek Privacy Guide</div>
-        <h1>DeepSeek Data Security: Protect Your Privacy When Using DeepSeek AI</h1>
+        <div class="seo-badge">DeepSeek 隐私指南</div>
+        <h1>DeepSeek 数据安全：使用 DeepSeek AI 时保护你的隐私</h1>
         <p class="seo-subtitle">
-          DeepSeek AI has gained global attention for its powerful language models at a fraction of
-          the cost. But if you are sending prompts containing personal or business data to DeepSeek,
-          you need to understand the data privacy implications. Here is how AI Privacy Gateway
-          protects your data before it reaches DeepSeek's servers.
+          DeepSeek AI 以其强大的语言模型和极低的成本获得了全球关注。但如果你向 DeepSeek 发送
+          包含个人或商业数据的提示词，你需要了解其中的数据隐私影响。以下介绍 AI Privacy Gateway
+          如何在数据到达 DeepSeek 服务器之前保护你的数据。
         </p>
       </div>
 
       <div class="seo-tldr glass">
-        <strong>TL;DR:</strong> Data sent to DeepSeek is processed under China's data protection
-        framework (PIPL). AI Privacy Gateway masks PII locally before forwarding to DeepSeek's API,
-        ensuring your sensitive data never leaves your infrastructure in readable form.
-        Deploy as a local proxy in 30 seconds. No code changes.
+        <strong>TL;DR：</strong>发送给 DeepSeek 的数据受中国数据保护框架（PIPL）管辖。
+        AI Privacy Gateway 在本地脱敏 PII，然后再转发到 DeepSeek 的 API，确保你的敏感数据
+        永远不会以可读形式离开你的基础设施。30 秒部署为本地代理。无需修改代码。
       </div>
 
-      <h2>The DeepSeek Privacy Concerns You Need to Know</h2>
+      <h2>你需要了解的 DeepSeek 隐私问题</h2>
       <p>
-        DeepSeek has become one of the most popular AI model providers, but several privacy
-        considerations set it apart from Western AI providers:
+        DeepSeek 已成为最受欢迎的 AI 模型提供商之一，但有几个隐私考量使其与西方 AI 提供商不同：
       </p>
 
       <div class="challenge-grid">
         <div class="challenge-card glass">
           <div class="challenge-num">1</div>
-          <h3>China's PIPL Data Framework</h3>
-          <p>DeepSeek operates under China's Personal Information Protection Law (PIPL), which has different data protection standards than GDPR. Data transferred to China may be subject to different legal frameworks.</p>
+          <h3>中国 PIPL 数据框架</h3>
+          <p>DeepSeek 受中国个人信息保护法（PIPL）管辖，其数据保护标准与 GDPR 不同。传输到中国的数据可能适用不同的法律框架。</p>
         </div>
         <div class="challenge-card glass">
           <div class="challenge-num">2</div>
-          <h3>Government Data Access Laws</h3>
-          <p>China's Data Security Law (DSL) and National Intelligence Law require companies to cooperate with state requests for data. Any personal data sent to DeepSeek could potentially be accessed.</p>
+          <h3>政府数据访问法律</h3>
+          <p>中国的数据安全法（DSL）和国家情报法要求公司配合国家数据请求。发送给 DeepSeek 的任何个人数据都可能被访问。</p>
         </div>
         <div class="challenge-card glass">
           <div class="challenge-num">3</div>
-          <h3>Cross-Border Data Transfer</h3>
-          <p>If you are outside China, sending data to DeepSeek constitutes a cross-border data transfer. The legal mechanisms for such transfers under PIPL are still evolving and may not match EU adequacy standards.</p>
+          <h3>跨境数据传输</h3>
+          <p>如果你在中国以外，向 DeepSeek 发送数据构成跨境数据传输。PIPL 下此类传输的法律机制仍在发展中，可能无法达到欧盟充分性认定标准。</p>
         </div>
         <div class="challenge-card glass">
           <div class="challenge-num">4</div>
-          <h3>Model Training Data Usage</h3>
-          <p>Like many AI providers, DeepSeek may use prompts for model training. Unlike some Western providers, opt-out mechanisms for data usage are less transparent and harder to enforce.</p>
+          <h3>模型训练数据使用</h3>
+          <p>与许多 AI 提供商一样，DeepSeek 可能将提示词用于模型训练。与某些西方提供商不同，数据使用的退出机制不太透明且更难执行。</p>
         </div>
       </div>
 
-      <h2>What Data Risks Does DeepSeek Pose?</h2>
+      <h2>DeepSeek 存在哪些数据风险？</h2>
       <p>
-        When you use DeepSeek through its web interface, API, or third-party applications, the
-        following types of data may be at risk:
+        当你通过 DeepSeek 的网页界面、API 或第三方应用使用时，以下类型的数据可能面临风险：
       </p>
       <ul>
-        <li><strong>Personal information:</strong> Names, phone numbers, email addresses, ID numbers you paste into prompts</li>
-        <li><strong>Business data:</strong> Proprietary business logic, strategic plans, internal communications</li>
-        <li><strong>Customer data:</strong> Customer PII that you process through DeepSeek's models</li>
-        <li><strong>Source code:</strong> Proprietary code, API keys, and database credentials sent for debugging</li>
-        <li><strong>Intellectual property:</strong> Patents, trade secrets, research data</li>
+        <li><strong>个人信息：</strong>你在提示词中粘贴的姓名、手机号、邮箱地址、身份证号</li>
+        <li><strong>商业数据：</strong>专有业务逻辑、战略计划、内部通信</li>
+        <li><strong>客户数据：</strong>你通过 DeepSeek 模型处理的客户 PII</li>
+        <li><strong>源代码：</strong>用于调试的专有代码、API 密钥和数据库凭证</li>
+        <li><strong>知识产权：</strong>专利、商业机密、研究数据</li>
       </ul>
       <p>
-        Unlike local AI models that run entirely on your hardware, every prompt sent to DeepSeek's
-        API leaves your infrastructure and is processed on servers in China.
+        与完全运行在本地硬件上的 AI 模型不同，发送给 DeepSeek API 的每个提示词都会离开你的基础设施，
+        并在中国的服务器上处理。
       </p>
 
-      <h2>How AI Privacy Gateway Protects Your DeepSeek Usage</h2>
+      <h2>AI Privacy Gateway 如何保护你的 DeepSeek 使用</h2>
 
-      <h3>Local PII Masking Before Data Leaves Your Network</h3>
+      <h3>在数据离开你的网络前进行本地 PII 脱敏</h3>
       <p>
-        The gateway runs on your infrastructure and intercepts all API calls to DeepSeek. Before
-        any data reaches DeepSeek's servers, the gateway scans every prompt and automatically
-        replaces sensitive information with anonymous placeholders:
+        网关运行在你的基础设施上，拦截所有对 DeepSeek 的 API 调用。在数据到达 DeepSeek 服务器之前，
+        网关扫描每个提示词并自动将敏感信息替换为匿名占位符：
       </p>
 
       <div class="diagram-flow glass">
         <div class="diagram-row">
-          <div class="diagram-node">Your App</div>
+          <div class="diagram-node">你的应用</div>
           <div class="diagram-arrow">&rarr;</div>
-          <div class="diagram-node diagram-accent">Privacy Gateway<br/>(masks PII locally)</div>
+          <div class="diagram-node diagram-accent">隐私网关<br/>（本地脱敏 PII）</div>
           <div class="diagram-arrow">&rarr;</div>
-          <div class="diagram-node diagram-alt">DeepSeek API<br/>(sees placeholders only)</div>
+          <div class="diagram-node diagram-alt">DeepSeek API<br/>（只看到占位符）</div>
         </div>
         <div class="diagram-row-sub">
-          <span class="diagram-check">&#10003; PII never leaves your machine</span>
-          <span class="diagram-check">&#10003; Compliant with PIPL data minimization</span>
-          <span class="diagram-check">&#10003; Works with OpenAI-compatible SDKs</span>
+          <span class="diagram-check">&#10003; PII 永远不会离开你的机器</span>
+          <span class="diagram-check">&#10003; 符合 PIPL 数据最小化原则</span>
+          <span class="diagram-check">&#10003; 兼容 OpenAI 的 SDK</span>
         </div>
       </div>
 
-      <h3>What Gets Masked</h3>
+      <h3>会被脱敏的内容</h3>
       <div class="entity-grid">
-        <div class="entity-item"><span class="entity-chip chip-phone">Phone</span> Mobile and landline numbers</div>
-        <div class="entity-item"><span class="entity-chip chip-email">Email</span> Personal and business email addresses</div>
-        <div class="entity-item"><span class="entity-chip chip-id">ID Card</span> Chinese ID numbers, passport numbers</div>
-        <div class="entity-item"><span class="entity-chip chip-bank">Bank</span> Bank card and credit card numbers</div>
-        <div class="entity-item"><span class="entity-chip chip-name">Name</span> Personal names in Chinese and English</div>
-        <div class="entity-item"><span class="entity-chip chip-loc">Address</span> Street addresses, provinces, cities</div>
-        <div class="entity-item"><span class="entity-chip chip-org">Company</span> Company names and organizational details</div>
-        <div class="entity-item"><span class="entity-chip chip-secret">Secret</span> API keys, tokens, passwords</div>
-        <div class="entity-item"><span class="entity-chip chip-other">IP</span> IP addresses and network identifiers</div>
+        <div class="entity-item"><span class="entity-chip chip-phone">手机号</span> 移动电话和固定电话号码</div>
+        <div class="entity-item"><span class="entity-chip chip-email">邮箱</span> 个人和企业的邮箱地址</div>
+        <div class="entity-item"><span class="entity-chip chip-id">身份证</span> 中国身份证号、护照号码</div>
+        <div class="entity-item"><span class="entity-chip chip-bank">银行卡</span> 银行卡号和信用卡号</div>
+        <div class="entity-item"><span class="entity-chip chip-name">姓名</span> 中文和英文的个人姓名</div>
+        <div class="entity-item"><span class="entity-chip chip-loc">地址</span> 街道地址、省份、城市</div>
+        <div class="entity-item"><span class="entity-chip chip-org">公司</span> 公司名称和组织信息</div>
+        <div class="entity-item"><span class="entity-chip chip-secret">密钥</span> API 密钥、令牌、密码</div>
+        <div class="entity-item"><span class="entity-chip chip-other">IP</span> IP 地址和网络标识符</div>
       </div>
 
-      <h2>Legal Considerations for DeepSeek Users</h2>
+      <h2>DeepSeek 用户的法律考量</h2>
 
-      <h3>For EU Users Under GDPR</h3>
+      <h3>GDPR 下的欧盟用户</h3>
       <p>
-        If you are subject to GDPR, sending personal data to DeepSeek requires adequate safeguards.
-        Since China does not have an EU adequacy decision, you would need Standard Contractual
-        Clauses (SCCs) or Binding Corporate Rules (BCRs) — which may not be available from
-        DeepSeek. By masking PII before sending it to DeepSeek, you significantly reduce your
-        compliance burden since the masked data may no longer qualify as personal data.
+        如果你受 GDPR 约束，向 DeepSeek 发送个人数据需要充分的保护措施。
+        由于中国没有欧盟充分性认定，你需要标准合同条款（SCCs）或具有约束力的公司规则（BCRs）——
+        而 DeepSeek 可能不提供这些。通过在发送前脱敏 PII，你可以显著降低合规负担，
+        因为脱敏后的数据可能不再构成个人数据。
       </p>
 
-      <h3>For China-Based Users Under PIPL</h3>
+      <h3>PIPL 下的中国用户</h3>
       <p>
-        China's PIPL applies to the processing of personal data within China. While DeepSeek
-        complies with local regulations, data minimization principles still apply. Masking PII
-        before sending it to any AI service, even domestically, is a best practice that aligns
-        with PIPL Article 6 (data minimization).
+        中国的 PIPL 适用于在中国境内处理的个人数据。虽然 DeepSeek 遵守当地法规，
+        但数据最小化原则仍然适用。在将数据发送给任何 AI 服务（即使是国内服务）之前脱敏 PII，
+        是符合 PIPL 第六条（数据最小化）的最佳实践。
       </p>
 
-      <h2>Setup: Protect DeepSeek Prompts in 30 Seconds</h2>
+      <h2>设置指南：30 秒保护 DeepSeek 提示词</h2>
 
       <div class="code-block glass">
-        <div class="code-block-title">Docker Deployment</div>
+        <div class="code-block-title">Docker 部署</div>
         <pre><code>docker run -d \
   --name ai-privacy-gw \
   -p 9999:9999 \
@@ -151,58 +144,58 @@ import Footer from '../components/Footer.astro';
       </div>
 
       <p>
-        After deployment, configure your DeepSeek API client to use
-        <code>http://localhost:9999/v1</code> as the base URL. The gateway automatically masks
-        all PII patterns before forwarding requests to DeepSeek's API.
+        部署后，将你的 DeepSeek API 客户端配置为使用
+        <code>http://localhost:9999/v1</code> 作为 base URL。网关会在将请求转发到
+        DeepSeek 的 API 之前自动脱敏所有 PII 模式。
       </p>
 
-      <h2>Why Choose AI Privacy Gateway for DeepSeek Protection?</h2>
+      <h2>为什么选择 AI Privacy Gateway 保护 DeepSeek？</h2>
       <ul>
-        <li><strong>Zero trust architecture:</strong> Your data is masked before it leaves your network</li>
-        <li><strong>OpenAI-compatible:</strong> Works with any SDK that supports OpenAI's API format</li>
-        <li><strong>No code changes:</strong> Just change the base URL in your existing config</li>
-        <li><strong>14+ entity types:</strong> Comprehensive PII detection including Chinese-specific formats</li>
-        <li><strong>Encrypted vault:</strong> Mapping data stored locally with AES-256 encryption</li>
-        <li><strong>Audit logging:</strong> Every masking event is logged for compliance purposes</li>
+        <li><strong>零信任架构：</strong>你的数据在离开你的网络前已被脱敏</li>
+        <li><strong>兼容 OpenAI：</strong>适用于任何支持 OpenAI API 格式的 SDK</li>
+        <li><strong>无需修改代码：</strong>只需更改现有配置中的 base URL</li>
+        <li><strong>14+ 实体类型：</strong>全面的 PII 检测，包括中国特有格式</li>
+        <li><strong>加密保险库：</strong>映射数据在本地存储，使用 AES-256 加密</li>
+        <li><strong>审计日志：</strong>每个脱敏事件都被记录以便合规</li>
       </ul>
 
       <!-- FAQ -->
       <div class="seo-faq glass" id="faq">
-        <h2>Frequently Asked Questions</h2>
+        <h2>常见问题</h2>
 
         <div class="faq-item">
-          <h3>Is DeepSeek safe to use for business data?</h3>
-          <p>DeepSeek's models are powerful and cost-effective, but sending raw business data to any cloud AI service carries risks. Using a privacy gateway that masks sensitive data before transmission is the safest approach for business use.</p>
+          <h3>DeepSeek 适合用于商业数据吗？</h3>
+          <p>DeepSeek 的模型功能强大且性价比高，但将原始业务数据发送到任何云端 AI 服务都存在风险。在传输前使用隐私网关脱敏敏感数据是商业使用中最安全的方法。</p>
         </div>
 
         <div class="faq-item">
-          <h3>Does the gateway work with DeepSeek's API?</h3>
-          <p>Yes. DeepSeek offers an OpenAI-compatible API, so the gateway works seamlessly. Just set the base URL to your local gateway and your API key still works as usual.</p>
+          <h3>网关能用于 DeepSeek 的 API 吗？</h3>
+          <p>可以。DeepSeek 提供兼容 OpenAI 的 API，因此网关可以无缝工作。只需将 base URL 设为你的本地网关，你的 API 密钥仍然有效。</p>
         </div>
 
         <div class="faq-item">
-          <h3>Can data sent to DeepSeek be used for training?</h3>
-          <p>DeepSeek's data usage policies for model training are less transparent than Western providers. By masking PII before sending, you ensure that even if your data is used for training, no personal information is exposed.</p>
+          <h3>发送给 DeepSeek 的数据会用于训练吗？</h3>
+          <p>DeepSeek 用于模型训练的数据使用政策不如西方提供商透明。通过在发送前脱敏 PII，你可以确保即使你的数据被用于训练，也不会暴露个人信息。</p>
         </div>
 
         <div class="faq-item">
-          <h3>Does this work with the DeepSeek web interface?</h3>
-          <p>Yes. Use the AI Privacy Gateway browser extension to intercept prompts from the DeepSeek web chat interface and route them through your local gateway. Download it from our download page.</p>
+          <h3>这适用于 DeepSeek 网页界面吗？</h3>
+          <p>适用。使用 AI Privacy Gateway 浏览器扩展拦截来自 DeepSeek 网页聊天界面的提示词，并将其路由到你的本地网关。从我们的下载页面获取。</p>
         </div>
 
         <div class="faq-item">
-          <h3>What about latency — will masking slow down my requests?</h3>
-          <p>Masking adds less than 5ms per request on average. The gateway processes data locally with no external network calls for the masking engine, so the performance impact is negligible.</p>
+          <h3>延迟如何——脱敏会拖慢我的请求吗？</h3>
+          <p>脱敏平均增加不到 5ms 的延迟。网关在本地处理数据，脱敏引擎无需外部网络调用，因此性能影响可以忽略不计。</p>
         </div>
       </div>
 
       <!-- CTA -->
       <div class="seo-cta">
-        <h2>Protect Your DeepSeek Conversations</h2>
-        <p>Deploy AI Privacy Gateway in 30 seconds. No code changes needed.</p>
+        <h2>保护你的 DeepSeek 对话</h2>
+        <p>30 秒部署 AI Privacy Gateway。无需修改代码。</p>
         <div class="seo-cta-buttons">
-          <a href="/download" class="btn btn-primary btn-lg">Get Started Free</a>
-          <a href="/demo" class="btn btn-ghost btn-lg">Try the Demo</a>
+          <a href="/download" class="btn btn-primary btn-lg">免费开始使用</a>
+          <a href="/demo" class="btn btn-ghost btn-lg">试用演示</a>
         </div>
       </div>
 
@@ -211,9 +204,9 @@ import Footer from '../components/Footer.astro';
         "@context": "https://schema.org",
         "@type": "FAQPage",
         "mainEntity": [
-          { "@type": "Question", "name": "Is DeepSeek safe to use for business data?", "acceptedAnswer": { "@type": "Answer", "text": "Using a privacy gateway that masks sensitive data before transmission is the safest approach for business use of DeepSeek." } },
-          { "@type": "Question", "name": "Does the gateway work with DeepSeek's API?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. DeepSeek offers an OpenAI-compatible API, so the gateway works seamlessly." } },
-          { "@type": "Question", "name": "Can data sent to DeepSeek be used for training?", "acceptedAnswer": { "@type": "Answer", "text": "By masking PII before sending, you ensure that even if your data is used for training, no personal information is exposed." } }
+          { "@type": "Question", "name": "DeepSeek 适合用于商业数据吗？", "acceptedAnswer": { "@type": "Answer", "text": "在传输前使用隐私网关脱敏敏感数据是商业使用中最安全的方法。" } },
+          { "@type": "Question", "name": "网关能用于 DeepSeek 的 API 吗？", "acceptedAnswer": { "@type": "Answer", "text": "可以。DeepSeek 提供兼容 OpenAI 的 API，网关可无缝工作。" } },
+          { "@type": "Question", "name": "发送给 DeepSeek 的数据会用于训练吗？", "acceptedAnswer": { "@type": "Answer", "text": "通过在发送前脱敏 PII，即使数据被用于训练，也不会暴露个人信息。" } }
         ]
       }</script>
     </div>

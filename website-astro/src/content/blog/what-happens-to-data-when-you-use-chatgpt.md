@@ -3,6 +3,7 @@ title: "What Happens to Your Data When You Use ChatGPT"
 description: "Does ChatGPT store your data? Who can see your prompts? A technical deep-dive into ChatGPT's data handling, the real privacy risks, and how to protect yourself."
 pubDate: 2026-06-22
 tags: ["ChatGPT", "privacy", "data-security"]
+lang: "en"
 ---
 
 When you type a question into ChatGPT, where does that data actually go? Can OpenAI employees read your prompts? Does the model memorize your inputs? These questions keep CISOs up at night — and for good reason.

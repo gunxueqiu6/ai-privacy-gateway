@@ -1,3 +1,11 @@
+---
+import { t } from '../i18n/translations';
+import { getLangFromURL } from '../i18n/utils';
+
+const lang = getLangFromURL(Astro.url.pathname);
+const ft = { product: t(lang, 'footer.product'), home: t(lang, 'footer.home'), pricing: t(lang, 'footer.pricing'), demo: t(lang, 'footer.demo'), download: t(lang, 'footer.download'), docs: t(lang, 'footer.docs'), features: t(lang, 'footer.features'), resources: t(lang, 'footer.resources'), docs_link: t(lang, 'footer.docs_link'), api_reference: t(lang, 'footer.api_reference'), github: t(lang, 'footer.github'), privacy_policy: t(lang, 'footer.privacy_policy'), terms_of_service: t(lang, 'footer.terms_of_service'), company: t(lang, 'footer.company'), about: t(lang, 'footer.about'), contact: t(lang, 'footer.contact'), copyright: t(lang, 'footer.copyright') };
+---
+
 <footer class="footer">
   <div class="container">
     <div class="footer-grid">
@@ -9,9 +17,7 @@
           </svg>
           <span>Privacy Gateway</span>
         </div>
-        <p class="footer-tagline">
-          Open-source AI privacy firewall. Deploy in 30 seconds. MIT licensed.
-        </p>
+        <p class="footer-tagline">{ft.copyright}</p>
         <div class="footer-social">
           <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="social-link" aria-label="GitHub">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -22,31 +28,33 @@
       </div>
 
       <div class="footer-col">
-        <h4>Product</h4>
-        <a href="/#features">Features</a>
-        <a href="/demo">Live Demo</a>
-        <a href="/pricing">Pricing</a>
-        <a href="/download">Download</a>
+        <h4>{ft.product}</h4>
+        <a href="/#features">{ft.features}</a>
+        <a href="/demo">{ft.demo}</a>
+        <a href="/pricing">{ft.pricing}</a>
+        <a href="/download">{ft.download}</a>
       </div>
 
       <div class="footer-col">
-        <h4>Docs</h4>
-        <a href="/docs/quickstart">Quick Start</a>
-        <a href="/docs/deploy">Deployment</a>
-        <a href="/docs/config">Configuration</a>
-        <a href="/docs/api">API Reference</a>
+        <h4>{ft.docs}</h4>
+        <a href="/docs/quickstart">{t(lang, 'docs.quickstart')}</a>
+        <a href="/docs/deploy">{t(lang, 'docs.deploy')}</a>
+        <a href="/docs/config">{t(lang, 'docs.config')}</a>
+        <a href="/docs/api">{t(lang, 'docs.api')}</a>
       </div>
 
       <div class="footer-col">
-        <h4>Community</h4>
-        <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/issues">GitHub Issues</a>
+        <h4>{ft.company}</h4>
+        <a href="/privacy-policy">{ft.privacy_policy}</a>
+        <a href="/terms-of-service">{ft.terms_of_service}</a>
+        <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/issues">{ft.contact}</a>
         <a href="https://t.me/chirstmas_7">Telegram</a>
-        <a href="https://github.com/gunxueqiu6/ai-privacy-gateway">Source Code</a>
+        <a href="https://github.com/gunxueqiu6/ai-privacy-gateway">{ft.github}</a>
       </div>
     </div>
 
     <div class="footer-bottom">
-      <p>&copy; 2026 AI Privacy Gateway. Released under the MIT License.</p>
+      <p>&copy; 2026 AI Privacy Gateway. MIT Licensed. Open Source.</p>
     </div>
   </div>
 </footer>

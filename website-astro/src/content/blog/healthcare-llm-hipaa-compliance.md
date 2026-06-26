@@ -3,6 +3,7 @@ title: "Healthcare AI: How to Use LLMs Without Violating HIPAA"
 description: "Healthcare organizations using AI face HIPAA compliance risks. Learn about PHI protection, Business Associate Agreements, and technical safeguards for safe LLM adoption."
 pubDate: 2026-06-22
 tags: ["HIPAA", "healthcare", "compliance"]
+lang: "en"
 ---
 
 Healthcare is one of the highest-potential and highest-risk domains for AI adoption. Clinical decision support, medical coding, patient communication — the use cases are compelling. But HIPAA's requirements for Protected Health Information (PHI) create serious compliance challenges.

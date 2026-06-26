@@ -3,6 +3,7 @@ title: "The Developer's Guide to AI Data Privacy in 2026"
 description: "A practical guide for developers who use AI tools daily. Understand the privacy risks, compare protection options, and implement data safeguards in your workflow."
 pubDate: 2026-06-22
 tags: ["guide", "privacy", "tools"]
+lang: "en"
 ---
 
 AI tools are now part of every developer's daily workflow — code generation, debugging, documentation, data analysis. But with great productivity comes great data responsibility. This guide covers what every developer should know about AI data privacy in 2026.

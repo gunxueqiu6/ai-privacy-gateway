@@ -1,0 +1,920 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AI隐私网关",
+    "description": "边缘侧本地隐私网关 - 拦截AI请求自动脱敏",
+    "version": "2.0.0"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Root",
+        "description": "Root - health check.",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Root  Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health",
+        "description": "健康检查接口",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Health Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin": {
+      "get": {
+        "summary": "Admin Panel",
+        "description": "Redirect to admin panel or setup wizard (first-run detection).",
+        "operationId": "admin_panel_admin_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/": {
+      "get": {
+        "summary": "Admin Panel Slash",
+        "description": "Redirect to admin panel or setup wizard (first-run detection).",
+        "operationId": "admin_panel_slash_admin__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/chat/completions": {
+      "post": {
+        "tags": [
+          "proxy"
+        ],
+        "summary": "Chat Completions",
+        "description": "聊天完成接口 - 核心脱敏代理",
+        "operationId": "chat_completions_v1_chat_completions_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/{path}": {
+      "post": {
+        "tags": [
+          "proxy"
+        ],
+        "summary": "Proxy V1",
+        "description": "通用 v1 路由代理（仅白名单路径）",
+        "operationId": "proxy_v1_v1__path__post",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "proxy"
+        ],
+        "summary": "Proxy V1",
+        "description": "通用 v1 路由代理（仅白名单路径）",
+        "operationId": "proxy_v1_v1__path__post",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "proxy"
+        ],
+        "summary": "Proxy V1",
+        "description": "通用 v1 路由代理（仅白名单路径）",
+        "operationId": "proxy_v1_v1__path__post",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "proxy"
+        ],
+        "summary": "Proxy V1",
+        "description": "通用 v1 路由代理（仅白名单路径）",
+        "operationId": "proxy_v1_v1__path__post",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "proxy"
+        ],
+        "summary": "Proxy V1",
+        "description": "通用 v1 路由代理（仅白名单路径）",
+        "operationId": "proxy_v1_v1__path__post",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/mask": {
+      "post": {
+        "tags": [
+          "api"
+        ],
+        "summary": "Api Mask",
+        "description": "独立脱敏 API",
+        "operationId": "api_mask_api_mask_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/restore": {
+      "post": {
+        "tags": [
+          "api"
+        ],
+        "summary": "Api Restore",
+        "description": "独立还原 API",
+        "operationId": "api_restore_api_restore_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/mask/batch": {
+      "post": {
+        "tags": [
+          "api"
+        ],
+        "summary": "Api Mask Batch",
+        "description": "批量脱敏 API",
+        "operationId": "api_mask_batch_api_mask_batch_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/entities": {
+      "get": {
+        "tags": [
+          "api"
+        ],
+        "summary": "Api Get Entities",
+        "description": "获取支持的实体类型列表",
+        "operationId": "api_get_entities_api_entities_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Api Get Entities Api Entities Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/status": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Auth Status",
+        "description": "认证状态 — Lite 版本仅支持管理员认证（见 /admin/login）",
+        "operationId": "auth_status_auth_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/login": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Admin Login",
+        "description": "管理员登录",
+        "operationId": "admin_login_admin_login_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/logout": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Admin Logout",
+        "description": "管理员登出",
+        "operationId": "admin_logout_admin_logout_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/stats": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Get Stats",
+        "description": "获取统计信息 - 需要认证",
+        "operationId": "get_stats_admin_stats_get",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Stats Admin Stats Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/keywords": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "List Keywords",
+        "description": "获取自定义敏感词列表 - 需要认证",
+        "operationId": "list_keywords_admin_keywords_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response List Keywords Admin Keywords Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/keywords/add": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Add Keyword",
+        "description": "添加自定义敏感词 - 需要认证",
+        "operationId": "add_keyword_admin_keywords_add_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/keywords/delete": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Delete Keyword",
+        "description": "删除自定义敏感词 - 需要认证",
+        "operationId": "delete_keyword_admin_keywords_delete_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/upstreams": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Get Upstreams",
+        "description": "获取上游节点健康状态 - 需要认证",
+        "operationId": "get_upstreams_admin_upstreams_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Get Upstreams Admin Upstreams Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/version": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Get Version",
+        "description": "Get version info.",
+        "operationId": "get_version_admin_version_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Get Version Admin Version Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/integrity": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Check Integrity",
+        "description": "完整性检查",
+        "operationId": "check_integrity_admin_integrity_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Check Integrity Admin Integrity Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/clear": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Clear Mappings",
+        "description": "清除所有映射记录 - 需要认证",
+        "operationId": "clear_mappings_admin_clear_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Clear Mappings Admin Clear Post"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/audit/stream": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Audit Stream",
+        "description": "实时审计事件流 (SSE)",
+        "operationId": "audit_stream_admin_audit_stream_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/regex-rules": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Admin List Regex Rules",
+        "description": "获取所有自定义正则规则 - 需要认证",
+        "operationId": "admin_list_regex_rules_admin_regex_rules_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Admin List Regex Rules Admin Regex Rules Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Admin Add Regex Rule",
+        "description": "添加自定义正则规则 - 需要认证",
+        "operationId": "admin_add_regex_rule_admin_regex_rules_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/regex-rules/{rule_id}": {
+      "delete": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Admin Delete Regex Rule",
+        "description": "删除自定义正则规则 - 需要认证",
+        "operationId": "admin_delete_regex_rule_admin_regex_rules__rule_id__delete",
+        "parameters": [
+          {
+            "name": "rule_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Rule Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/regex-rules/{rule_id}/toggle": {
+      "put": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Admin Toggle Regex Rule",
+        "description": "启用/禁用自定义正则规则 - 需要认证",
+        "operationId": "admin_toggle_regex_rule_admin_regex_rules__rule_id__toggle_put",
+        "parameters": [
+          {
+            "name": "rule_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Rule Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/setup": {
+      "post": {
+        "tags": [
+          "setup"
+        ],
+        "summary": "Setup Config",
+        "description": "Save setup configuration and write .env file.\n\nAccepts JSON body:\n  - provider: str  (openai | deepseek | anthropic | google | custom)\n  - api_key: str   (required)\n  - base_url: str  (required for custom provider)\n  - admin_password: str  (optional, min 6 chars)\n  - port: int      (optional, 1-65535)",
+        "operationId": "setup_config_api_setup_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/setup/status": {
+      "get": {
+        "tags": [
+          "setup"
+        ],
+        "summary": "Setup Status",
+        "description": "Check whether the gateway has been configured (.env exists with content).",
+        "operationId": "setup_status_api_setup_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/setup/test-connection": {
+      "post": {
+        "tags": [
+          "setup"
+        ],
+        "summary": "Test Connection",
+        "description": "Test an API key against a provider endpoint (server-side, no CORS).\nAccepts JSON body:\n  - provider: str\n  - api_key: str\n  - base_url: str  (required for custom provider)",
+        "operationId": "test_connection_api_setup_test_connection_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

@@ -5,8 +5,8 @@ import Footer from '../components/Footer.astro';
 ---
 
 <Layout
-  title="ChatGPT Privacy Protection: How to Mask PII Before Sending to OpenAI"
-  description="Protect your privacy when using ChatGPT. Learn how to mask phone numbers, emails, and personal data before they reach OpenAI's servers. Set up a local privacy proxy in 30 seconds."
+  title="ChatGPT 隐私保护：在发送给 OpenAI 之前脱敏 PII"
+  description="保护你在使用 ChatGPT 时的隐私。了解如何在手机号、邮箱和个人数据到达 OpenAI 服务器之前进行脱敏。30 秒搭建本地隐私代理。"
   keywords="ChatGPT隐私保护,防止ChatGPT数据泄露,OpenAI数据安全,PII脱敏ChatGPT,聊天数据隐私保护"
   canonicalURL="https://privacygw.pages.dev/protect-chatgpt-privacy"
   ogType="article">
@@ -15,62 +15,57 @@ import Footer from '../components/Footer.astro';
   <section class="seo-page">
     <div class="container">
       <div class="seo-header">
-        <div class="seo-badge">ChatGPT Privacy Guide</div>
-        <h1>ChatGPT Privacy Protection: Mask PII Before Sending to OpenAI</h1>
+        <div class="seo-badge">ChatGPT 隐私指南</div>
+        <h1>ChatGPT 隐私保护：在发送给 OpenAI 之前脱敏 PII</h1>
         <p class="seo-subtitle">
-          Every time you paste customer data, personal information, or business documents into
-          ChatGPT, that data is processed on OpenAI's servers. Here is how to use AI Privacy Gateway
-          to automatically mask sensitive information before it ever reaches ChatGPT.
+          每次你将客户数据、个人信息或业务文档粘贴到 ChatGPT 中时，这些数据都会在 OpenAI 的服务器上处理。
+          以下是使用 AI Privacy Gateway 在数据到达 ChatGPT 之前自动脱敏敏感信息的方法。
         </p>
       </div>
 
       <div class="seo-tldr glass">
-        <strong>TL;DR:</strong> Set up AI Privacy Gateway as a local proxy and configure any
-        OpenAI-compatible client app to route through it. ChatGPT desktop, API clients, and
-        third-party apps all get PII-protected. Takes 30 seconds.
+        <strong>TL;DR：</strong>将 AI Privacy Gateway 搭建为本地代理，配置任何兼容 OpenAI 的客户端应用通过它转发。
+          ChatGPT 桌面版、API 客户端和第三方应用都能获得 PII 保护。只需 30 秒。
       </div>
 
-      <h2>Why ChatGPT Needs Privacy Protection</h2>
+      <h2>为什么 ChatGPT 需要隐私保护</h2>
       <p>
-        ChatGPT processes billions of conversations daily. While OpenAI has privacy and data usage
-        controls, the fundamental architecture means your data is processed on their servers.
-        Consider these risks:
+        ChatGPT 每天处理数十亿次对话。虽然 OpenAI 有隐私和数据使用控制措施，但基本架构决定了你的数据是在他们的服务器上处理的。
+        考虑以下风险：
       </p>
       <ul>
-        <li><strong>Training data leakage:</strong> Data you share could be used for model training unless you opt out</li>
-        <li><strong>Data breach surface:</strong> Your prompts travel across the internet to OpenAI's servers</li>
-        <li><strong>Inadvertent sharing:</strong> Easy to accidentally paste PII or confidential data in a prompt</li>
-        <li><strong>Team/enterprise settings:</strong> Even in enterprise, your data transits through OpenAI's infrastructure</li>
+        <li><strong>训练数据泄漏：</strong>你分享的数据可能被用于模型训练，除非你选择退出</li>
+        <li><strong>数据泄露面：</strong>你的提示词通过网络传输到 OpenAI 的服务器</li>
+        <li><strong>无意分享：</strong>很容易不小心在提示词中粘贴 PII 或机密数据</li>
+        <li><strong>团队/企业环境：</strong>即使在企业版中，你的数据也会经过 OpenAI 的基础设施</li>
       </ul>
       <p>
-        A local privacy proxy is the most effective way to ensure sensitive data never reaches
-        OpenAI's servers in readable form.
+        本地隐私代理是确保敏感数据以可读形式永远不会到达 OpenAI 服务器的最有效方式。
       </p>
 
-      <h2>How AI Privacy Gateway Protects ChatGPT</h2>
+      <h2>AI Privacy Gateway 如何保护 ChatGPT</h2>
       <p>
-        The gateway acts as a transparent proxy between your ChatGPT client and OpenAI's API.
-        It intercepts every API call, scans for PII patterns, and replaces sensitive data with
-        safe placeholders before forwarding to OpenAI.
+        网关充当你的 ChatGPT 客户端和 OpenAI API 之间的透明代理。
+        它拦截每一次 API 调用，扫描 PII 模式，并在转发给 OpenAI 之前将敏感数据替换为安全占位符。
       </p>
 
       <div class="diagram-flow glass">
         <div class="diagram-row">
-          <div class="diagram-node">ChatGPT Client</div>
+          <div class="diagram-node">ChatGPT 客户端</div>
           <div class="diagram-arrow">&rarr;</div>
-          <div class="diagram-node diagram-accent">Privacy Gateway</div>
+          <div class="diagram-node diagram-accent">隐私网关</div>
           <div class="diagram-arrow">&rarr;</div>
           <div class="diagram-node diagram-alt">OpenAI API</div>
         </div>
-        <div class="diagram-note">PII is masked by the gateway before reaching OpenAI</div>
+        <div class="diagram-note">PII 在到达 OpenAI 之前被网关脱敏</div>
       </div>
 
-      <h2>Setup Guide: Privacy-Protect Your ChatGPT Usage</h2>
+      <h2>设置指南：为你的 ChatGPT 使用提供隐私保护</h2>
 
-      <h3>Step 1: Install the Gateway</h3>
+      <h3>第 1 步：安装网关</h3>
 
       <div class="code-block glass">
-        <div class="code-block-title">Docker (recommended)</div>
+        <div class="code-block-title">Docker（推荐）</div>
         <pre><code>docker run -d \
   --name ai-privacy-gw \
   -p 9999:9999 \
@@ -79,81 +74,81 @@ import Footer from '../components/Footer.astro';
   ghcr.io/gunxueqiu6/ai-privacy-gateway:lite</code></pre>
       </div>
 
-      <h3>Step 2: Route Your API Calls Through the Gateway</h3>
-      <p>If you use ChatGPT via API (OpenAI SDK, LangChain, or any library):</p>
+      <h3>第 2 步：将 API 调用路由到网关</h3>
+      <p>如果你通过 API 使用 ChatGPT（OpenAI SDK、LangChain 或任何库）：</p>
 
       <div class="code-block glass">
         <div class="code-block-title">Python OpenAI SDK</div>
         <pre><code>from openai import OpenAI
 
 client = OpenAI(
-    base_url="http://localhost:9999/v1",  # Route through privacy gateway
-    api_key="sk-..."                       # Your original key still works
+    base_url="http://localhost:9999/v1",  # 通过隐私网关路由
+    api_key="sk-..."                       # 你的原始密钥仍然有效
 )
 
-# All PII in your prompts is now automatically masked
+# 你提示词中的所有 PII 现在会自动脱敏
 response = client.chat.completions.create(
     model="gpt-4",
-    messages=[&#123;"role": "user", "content": "My phone is 13812345678 and email is alice@example.com"&#125;]
+    messages=[&#123;"role": "user", "content": "我的手机是 13812345678，邮箱是 alice@example.com"&#125;]
 )</code></pre>
       </div>
 
-      <h3>Step 3: Use the ChatGPT Privacy Browser</h3>
+      <h3>第 3 步：使用 ChatGPT 隐私浏览器扩展</h3>
       <p>
-        For web-based ChatGPT usage, use the <strong>AI Privacy Gateway browser extension</strong>
-        that intercepts requests from chat.openai.com and routes them through your local gateway.
-        Download it from the <a href="/download">download page</a>.
+        对于基于网页的 ChatGPT 使用，使用 <strong>AI Privacy Gateway 浏览器扩展</strong>
+        拦截来自 chat.openai.com 的请求并将其路由到你的本地网关。
+        从<a href="/download">下载页面</a>获取。
       </p>
 
-      <h2>What PII Gets Masked in ChatGPT</h2>
+      <h2>ChatGPT 中哪些 PII 会被脱敏</h2>
       <div class="entity-grid">
-        <div class="entity-item"><span class="entity-chip chip-phone">Phone</span> +86 13812345678 → [PHONE_1]</div>
-        <div class="entity-item"><span class="entity-chip chip-email">Email</span> alice@example.com → [EMAIL_1]</div>
-        <div class="entity-item"><span class="entity-chip chip-id">ID Card</span> 110101199001011234 → [IDCARD_1]</div>
-        <div class="entity-item"><span class="entity-chip chip-bank">Bank</span> 6222021234567890 → [BANKCARD_1]</div>
-        <div class="entity-item"><span class="entity-chip chip-name">Name</span> 张三 → [PER_1]</div>
-        <div class="entity-item"><span class="entity-chip chip-loc">Address</span> 北京市海淀区 → [LOC_1]</div>
-        <div class="entity-item"><span class="entity-chip chip-org">Company</span> 科技有限公司 → [ORG_1]</div>
-        <div class="entity-item"><span class="entity-chip chip-secret">Custom</span> API keys, passwords → user-defined</div>
+        <div class="entity-item"><span class="entity-chip chip-phone">手机号</span> 13812345678 → [PHONE_1]</div>
+        <div class="entity-item"><span class="entity-chip chip-email">邮箱</span> alice@example.com → [EMAIL_1]</div>
+        <div class="entity-item"><span class="entity-chip chip-id">身份证</span> 110101199001011234 → [IDCARD_1]</div>
+        <div class="entity-item"><span class="entity-chip chip-bank">银行卡</span> 6222021234567890 → [BANKCARD_1]</div>
+        <div class="entity-item"><span class="entity-chip chip-name">姓名</span> 张三 → [PER_1]</div>
+        <div class="entity-item"><span class="entity-chip chip-loc">地址</span> 北京市海淀区 → [LOC_1]</div>
+        <div class="entity-item"><span class="entity-chip chip-org">公司</span> 科技有限公司 → [ORG_1]</div>
+        <div class="entity-item"><span class="entity-chip chip-secret">自定义</span> API 密钥、密码 → 用户自定义</div>
       </div>
 
       <!-- FAQ -->
       <div class="seo-faq glass" id="faq">
-        <h2>Frequently Asked Questions</h2>
+        <h2>常见问题</h2>
 
         <div class="faq-item">
-          <h3>Does this work with ChatGPT Plus or Team plans?</h3>
-          <p>Yes. The gateway works with any OpenAI plan. It intercepts API calls regardless of your subscription tier.</p>
+          <h3>这适用于 ChatGPT Plus 或 Team 套餐吗？</h3>
+          <p>可以。网关适用于任何 OpenAI 套餐。它拦截 API 调用，与你的订阅层级无关。</p>
         </div>
 
         <div class="faq-item">
-          <h3>Can I use it with ChatGPT's web interface?</h3>
-          <p>Yes, using the browser extension. The extension intercepts requests from chat.openai.com and routes them through your local gateway. Download it from the download page.</p>
+          <h3>我可以在 ChatGPT 网页界面中使用它吗？</h3>
+          <p>可以，使用浏览器扩展即可。扩展拦截来自 chat.openai.com 的请求并将其路由到你的本地网关。从下载页面获取。</p>
         </div>
 
         <div class="faq-item">
-          <h3>Does the gateway store my data?</h3>
-          <p>No. The gateway does not store your prompts or responses. The masking mapping is stored locally in an encrypted SQLite vault that never leaves your machine.</p>
+          <h3>网关会存储我的数据吗？</h3>
+          <p>不会。网关不存储你的提示词或响应。脱敏映射存储在本地加密的 SQLite 数据库中，永不离开你的机器。</p>
         </div>
 
         <div class="faq-item">
-          <h3>Will it affect ChatGPT's response quality?</h3>
-          <p>No. ChatGPT responds to the masked content with placeholders. The gateway then restores the original values in the response before returning it to you. You see the complete, unmasked response.</p>
+          <h3>它会影响 ChatGPT 的回复质量吗？</h3>
+          <p>不会。ChatGPT 看到的是带有占位符的脱敏内容。网关在将响应返回给你之前恢复原始值。你看到的是完整、未脱敏的响应。</p>
         </div>
 
         <div class="faq-item">
-          <h3>Is this better than just being careful about what I paste?</h3>
-          <p>Yes. Human error is the biggest privacy risk. The gateway catches sensitive data you might not notice — like embedded phone numbers in code samples, email addresses in configuration files, or ID numbers in test data.</p>
+          <h3>这比仅仅注意粘贴的内容更好吗？</h3>
+          <p>是的。人为错误是最大的隐私风险。网关能够捕获你可能注意不到的敏感数据——比如代码样本中嵌入的手机号、配置文件中的邮箱地址或测试数据中的身份证号。</p>
         </div>
       </div>
 
       <!-- CTA -->
       <div class="seo-cta">
-        <h2>Protect Your ChatGPT Conversations</h2>
-        <p>Deploy AI Privacy Gateway in 30 seconds. No code changes needed.</p>
+        <h2>保护你的 ChatGPT 对话</h2>
+        <p>30 秒部署 AI Privacy Gateway。无需修改代码。</p>
         <div class="seo-cta-buttons">
-          <a href="/download" class="btn btn-primary btn-lg">Get Started Free</a>
-          <a href="/demo" class="btn btn-ghost btn-lg">Try the Demo</a>
+          <a href="/download" class="btn btn-primary btn-lg">免费开始使用</a>
+          <a href="/demo" class="btn btn-ghost btn-lg">试用演示</a>
         </div>
       </div>
 
@@ -162,9 +157,9 @@ response = client.chat.completions.create(
         "@context": "https://schema.org",
         "@type": "FAQPage",
         "mainEntity": [
-          { "@type": "Question", "name": "Does this work with ChatGPT Plus or Team plans?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Works with any OpenAI plan." } },
-          { "@type": "Question", "name": "Does the gateway store my data?", "acceptedAnswer": { "@type": "Answer", "text": "No. The gateway does not store prompts or responses. Mapping data stays local." } },
-          { "@type": "Question", "name": "Will it affect ChatGPT's response quality?", "acceptedAnswer": { "@type": "Answer", "text": "No. ChatGPT sees masked placeholders; the gateway restores original values in responses." } }
+          { "@type": "Question", "name": "这适用于 ChatGPT Plus 或 Team 套餐吗？", "acceptedAnswer": { "@type": "Answer", "text": "可以。适用于任何 OpenAI 套餐。" } },
+          { "@type": "Question", "name": "网关会存储我的数据吗？", "acceptedAnswer": { "@type": "Answer", "text": "不会。网关不存储提示词或响应。映射数据留在本地。" } },
+          { "@type": "Question", "name": "它会影响 ChatGPT 的回复质量吗？", "acceptedAnswer": { "@type": "Answer", "text": "不会。ChatGPT 看到脱敏占位符；网关在响应中恢复原始值。" } }
         ]
       }</script>
     </div>

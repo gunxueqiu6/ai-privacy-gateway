@@ -1,3 +1,12 @@
+---
+import { t } from '../i18n/translations';
+import { getLangFromURL } from '../i18n/utils';
+import LangSwitcher from './LangSwitcher.astro';
+
+const lang = getLangFromURL(Astro.url.pathname);
+const nav = { home: t(lang, 'nav.home'), demo: t(lang, 'nav.demo'), features: t(lang, 'nav.features'), pricing: t(lang, 'nav.pricing'), docs: t(lang, 'nav.docs'), download: t(lang, 'nav.download'), menu_aria: t(lang, 'nav.menu_aria') };
+---
+
 <nav class="nav glass" id="navbar">
   <div class="container nav-container">
     <a href="/" class="nav-brand">
@@ -10,19 +19,20 @@
       <span class="brand-text">Privacy Gateway</span>
     </a>
 
-    <button class="hamburger" id="hamburger-btn" aria-label="菜单" aria-expanded="false">
+    <button class="hamburger" id="hamburger-btn" aria-label={nav.menu_aria} aria-expanded="false">
       <span></span>
       <span></span>
       <span></span>
     </button>
 
     <div class="nav-links" id="nav-links">
-      <a href="/" class="nav-link">首页</a>
-      <a href="/demo" class="nav-link">演示</a>
-      <a href="/#features" class="nav-link">功能</a>
-      <a href="/pricing" class="nav-link">定价</a>
-      <a href="/docs" class="nav-link">文档</a>
-      <a href="/download" class="btn btn-primary nav-cta">立即部署</a>
+      <a href="/" class="nav-link">{nav.home}</a>
+      <a href="/demo" class="nav-link">{nav.demo}</a>
+      <a href="/#features" class="nav-link">{nav.features}</a>
+      <a href="/pricing" class="nav-link">{nav.pricing}</a>
+      <a href="/docs" class="nav-link">{nav.docs}</a>
+      <a href="/download" class="btn btn-primary nav-cta">{nav.download}</a>
+      <LangSwitcher />
     </div>
   </div>
 </nav>
@@ -120,9 +130,7 @@
     font-size: 0.88rem;
   }
 
-  /* ===========================================
-     Hamburger
-     =========================================== */
+  /* Hamburger */
   .hamburger {
     display: none;
     flex-direction: column;
@@ -200,7 +208,6 @@
 
 <script is:inline>
   (function() {
-    // Hamburger toggle
     var btn = document.getElementById('hamburger-btn');
     var navLinks = document.getElementById('nav-links');
     if (btn && navLinks) {
@@ -211,7 +218,6 @@
         document.body.style.overflow = isOpen ? 'hidden' : '';
       });
 
-      // Close on link click
       navLinks.querySelectorAll('a').forEach(function(link) {
         link.addEventListener('click', function() {
           navLinks.classList.remove('active');
@@ -222,7 +228,6 @@
       });
     }
 
-    // Scroll detection for navbar style
     var nav = document.getElementById('navbar');
     if (nav) {
       function onScroll() {

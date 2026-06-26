@@ -1,0 +1,15 @@
+---
+import type { GetStaticPaths } from 'astro';
+import integrations from '../../../data/integrations';
+import Page from '../../integrations/[tool].astro';
+
+export const getStaticPaths: GetStaticPaths = () => {
+  return integrations.map((i) => ({
+    params: { tool: i.slug },
+    props: { integration: i },
+  }));
+};
+
+const { integration } = Astro.props;
+---
+<Page integration={integration} />

@@ -3,6 +3,7 @@ title: "PII Masking vs Data Encryption: What's the Difference for AI API Securit
 description: "Masking removes data. Encryption scrambles it. For AI API calls, the difference matters. Learn when to use each and why masking is the right choice for LLM data privacy."
 pubDate: 2026-06-22
 tags: ["PII", "security", "encryption"]
+lang: "en"
 ---
 
 Your CISO asks: "Is our AI API traffic encrypted?" You say yes, it's TLS. They nod. But here's the problem: TLS protects data *in transit*, not *at rest* on the AI provider's servers. The distinction between masking and encryption is critical — and most teams get it wrong.

@@ -3,6 +3,7 @@ title: "How to Use AI Coding Tools Without Leaking Source Code"
 description: "Do AI coding assistants like Cursor, Copilot, and Claude Code send your code to the cloud? Learn what data they actually transmit and how to keep proprietary source code safe."
 pubDate: 2026-06-22
 tags: ["Cursor", "Copilot", "security"]
+lang: "en"
 ---
 
 Every time you accept an AI code suggestion, data flows off your machine. The question every engineering leader should be asking: what exactly is in that data stream?

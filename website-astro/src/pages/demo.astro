@@ -2,12 +2,43 @@
 import Layout from '../layouts/Layout.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import { t } from '../i18n/translations';
+import { getLangFromURL } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+const lang = getLangFromURL(Astro.url.pathname);
+
+const i18n = {
+  typeNames: {
+    'PII_PHONE': t(lang, 'demo.legend_phone'),
+    'PII_EMAIL': t(lang, 'demo.legend_email'),
+    'PII_IDCARD': t(lang, 'demo.legend_idcard'),
+    'PII_BANK': t(lang, 'demo.legend_bank'),
+    'PII_PER': t(lang, 'demo.legend_person'),
+    'PII_LOC': t(lang, 'demo.legend_location'),
+    'PII_ORG': t(lang, 'demo.legend_org'),
+    'PII_PLATE': t(lang, 'demo.legend_plate'),
+    'PII_IP': t(lang, 'demo.legend_ip'),
+    'PII_URL': t(lang, 'demo.legend_url'),
+    'PII_DATE': t(lang, 'demo.legend_date'),
+    'PII_AMOUNT': t(lang, 'demo.legend_amount'),
+    'PII_POSTCODE': t(lang, 'demo.legend_postcode'),
+    'PII_CUST': t(lang, 'demo.legend_custom'),
+  },
+  exampleText: t(lang, 'demo.example_text'),
+  detecting: t(lang, 'demo.detecting'),
+  connectionError: t(lang, 'demo.connection_error'),
+  entitiesDetected: t(lang, 'demo.entities_detected'),
+  replacements: t(lang, 'demo.replacements'),
+  items: t(lang, 'demo.entities_count'),
+  emptyPlaceholder: t(lang, 'demo.empty_placeholder'),
+  pleaseEnter: t(lang, 'demo.please_enter'),
+};
 ---
 
 <Layout
-  title="Online PII Detection Demo — Free AI Privacy Gateway | No Upload Required"
-  description="Interactive demo: paste text containing PII and see how AI Privacy Gateway detects and masks phone numbers, emails, ID cards, bank cards, and 14+ entity types in real time. All processing stays in your browser — zero data uploaded."
-  keywords="PII检测演示,数据脱敏在线测试,隐私网关演示,敏感信息检测工具,个人隐私保护演示"
+  title={t(lang, 'demo.title')}
+  description={t(lang, 'demo.subtitle')}
   canonicalURL="https://privacygw.pages.dev/demo"
   ogType="website">
   <Nav />
@@ -19,15 +50,10 @@ import Footer from '../components/Footer.astro';
     <div class="container hero-content">
       <div class="hero-badge">
         <span class="pulse-dot"></span>
-        <span>Interactive Demo &middot; All Processing Local</span>
+        <span>{t(lang, 'demo.badge')}</span>
       </div>
-      <h1 class="hero-title">
-        See it in <span class="gradient-text">action</span>
-      </h1>
-      <p class="hero-desc">
-        Paste any text containing sensitive data below. The demo runs entirely in your browser
-        &mdash; nothing is uploaded, nothing is stored.
-      </p>
+      <h1 class="hero-title" set:html={t(lang, 'demo.hero_title')} />
+      <p class="hero-desc">{t(lang, 'demo.hero_desc')}</p>
     </div>
   </section>
 
@@ -40,23 +66,23 @@ import Footer from '../components/Footer.astro';
           <div class="panel-head">
             <h2>
               <span class="panel-indicator input-indicator"></span>
-              Raw Text
+              {t(lang, 'demo.raw_text')}
             </h2>
-            <span class="panel-badge badge-input">Input</span>
+            <span class="panel-badge badge-input">{t(lang, 'demo.input_badge')}</span>
           </div>
           <textarea
             id="inputText"
             class="demo-textarea"
-            placeholder='Paste text containing PII...&#10;&#10;Example:&#10;张三住在北京市海淀区，电话13812345678，邮箱test@example.com，身份证号110101199001011234'></textarea>
+            placeholder={t(lang, 'demo.input_placeholder')}></textarea>
           <div class="panel-toolbar">
-            <button class="btn btn-sm btn-secondary" onclick="loadExample()">Load Example</button>
-            <button class="btn btn-sm btn-secondary" onclick="clearText()">Clear</button>
+            <button class="btn btn-sm btn-secondary" onclick="loadExample()">{t(lang, 'demo.load_example')}</button>
+            <button class="btn btn-sm btn-secondary" onclick="clearText()">{t(lang, 'demo.clear')}</button>
           </div>
           <button class="btn btn-primary btn-full" onclick="processText()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             </svg>
-            Mask PII
+            {t(lang, 'demo.mask_btn')}
           </button>
         </div>
 
@@ -65,9 +91,9 @@ import Footer from '../components/Footer.astro';
           <div class="panel-head">
             <h2>
               <span class="panel-indicator output-indicator"></span>
-              Masked Result
+              {t(lang, 'demo.masked_result')}
             </h2>
-            <span class="panel-badge badge-output">Output</span>
+            <span class="panel-badge badge-output">{t(lang, 'demo.output_badge')}</span>
           </div>
           <div class="demo-output" id="outputText">
             <div class="output-empty">
@@ -77,7 +103,7 @@ import Footer from '../components/Footer.astro';
                   <path d="M9 12l2 2 4-4"/>
                 </svg>
               </div>
-              <p>Masked output will appear here</p>
+              <p>{t(lang, 'demo.empty_placeholder')}</p>
             </div>
           </div>
           <div class="output-stats" id="outputStats"></div>
@@ -86,32 +112,32 @@ import Footer from '../components/Footer.astro';
 
       <!-- Legend -->
       <div class="legend glass">
-        <h3>Entity Type Legend</h3>
+        <h3>{t(lang, 'demo.legend_title')}</h3>
         <div class="legend-tags">
-          <span class="legend-tag tag-phone">Phone</span>
-          <span class="legend-tag tag-email">Email</span>
-          <span class="legend-tag tag-idcard">ID Card</span>
-          <span class="legend-tag tag-bank">Bank Card</span>
-          <span class="legend-tag tag-person">Name</span>
-          <span class="legend-tag tag-location">Address</span>
-          <span class="legend-tag tag-org">Org</span>
+          <span class="legend-tag tag-phone">{t(lang, 'demo.legend_phone')}</span>
+          <span class="legend-tag tag-email">{t(lang, 'demo.legend_email')}</span>
+          <span class="legend-tag tag-idcard">{t(lang, 'demo.legend_idcard')}</span>
+          <span class="legend-tag tag-bank">{t(lang, 'demo.legend_bank')}</span>
+          <span class="legend-tag tag-person">{t(lang, 'demo.legend_person')}</span>
+          <span class="legend-tag tag-location">{t(lang, 'demo.legend_location')}</span>
+          <span class="legend-tag tag-org">{t(lang, 'demo.legend_org')}</span>
         </div>
       </div>
 
       <!-- Entities Table -->
       <div class="entities-panel glass" id="entitiesPanel" style="display: none;">
         <div class="entities-header">
-          <h3>Detected Entities</h3>
-          <span class="entities-count" id="entitiesCount">0 items</span>
+          <h3>{t(lang, 'demo.detected_title')}</h3>
+          <span class="entities-count" id="entitiesCount">0 {t(lang, 'demo.entities_count')}</span>
         </div>
         <div class="entities-table-wrap">
           <table class="entities-table">
             <thead>
               <tr>
-                <th>Type</th>
-                <th>Original Value</th>
-                <th>Placeholder</th>
-                <th>Position</th>
+                <th>{t(lang, 'demo.col_type')}</th>
+                <th>{t(lang, 'demo.col_value')}</th>
+                <th>{t(lang, 'demo.col_placeholder')}</th>
+                <th>{t(lang, 'demo.col_position')}</th>
               </tr>
             </thead>
             <tbody id="entitiesBody"></tbody>
@@ -123,60 +149,60 @@ import Footer from '../components/Footer.astro';
 
   <Footer />
 
-  <!-- WebApplication Structured Data -->
-  <script type="application/ld+json">{
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "AI Privacy Gateway — Online PII Masking Demo",
-    "url": "https://privacygw.pages.dev/demo",
-    "description": "Free interactive demo showing real-time PII detection and masking. Paste text and see phone numbers, emails, ID cards get masked instantly.",
-    "applicationCategory": "SecurityApplication",
-    "operatingSystem": "All",
-    "browserRequirements": "Requires JavaScript",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    }
-  }</script>
+  <!-- Structured Data -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: t(lang, 'demo.title'),
+    url: 'https://privacygw.pages.dev/demo',
+    description: t(lang, 'demo.subtitle'),
+    applicationCategory: 'SecurityApplication',
+    operatingSystem: 'All',
+    browserRequirements: 'Requires JavaScript',
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' }
+  })} />
+
+  <!-- I18N strings for client-side JS -->
+  <script type="application/json" id="i18n-data" set:html={JSON.stringify(i18n)}></script>
 
   <script is:inline>
-    const API_ENDPOINT = import.meta.env.PUBLIC_API_URL || 'http://localhost:9999/api/mask';
-    let isProcessing = false;
+    var API_ENDPOINT = import.meta.env.PUBLIC_API_URL || 'http://localhost:9999/api/mask';
+    var isProcessing = false;
+    var I = JSON.parse(document.getElementById('i18n-data').textContent);
 
     function loadExample() {
-      document.getElementById('inputText').value = `张三住在北京市海淀区中关村大街1号，联系电话13812345678，邮箱test@example.com。\n身份证号：110101199001011234，银行卡号：6222021234567890123。\n公司名称：北京科技有限公司，车牌号：京A12345，IP地址：192.168.1.100。\n今天是2024年1月15日，转账金额¥999.99，邮编100080。`;
+      document.getElementById('inputText').value = I.exampleText;
     }
 
     function clearText() {
       document.getElementById('inputText').value = '';
       document.getElementById('outputText').innerHTML =
-        '<div class="output-empty"><div class="empty-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div><p>Masked output will appear here</p></div>';
+        '<div class="output-empty"><div class="empty-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div><p>' + I.emptyPlaceholder + '</p></div>';
       document.getElementById('outputStats').innerHTML = '';
       document.getElementById('entitiesPanel').style.display = 'none';
     }
 
     async function processText() {
-      const input = document.getElementById('inputText').value.trim();
-      if (!input) { alert('Please enter text to mask'); return; }
+      var input = document.getElementById('inputText').value.trim();
+      if (!input) { alert(I.pleaseEnter); return; }
       if (isProcessing) return;
       isProcessing = true;
 
-      const outputDiv = document.getElementById('outputText');
-      outputDiv.innerHTML = '<div class="output-loading"><div class="spinner"></div><p>Detecting sensitive data...</p></div>';
+      var outputDiv = document.getElementById('outputText');
+      outputDiv.innerHTML = '<div class="output-loading"><div class="spinner"></div><p>' + I.detecting + '</p></div>';
       document.getElementById('outputStats').innerHTML = '';
       document.getElementById('entitiesPanel').style.display = 'none';
 
       try {
-        const response = await fetch(API_ENDPOINT, {
+        var response = await fetch(API_ENDPOINT, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text: input })
         });
-        const result = await response.json();
+        var result = await response.json();
         displayResult(result);
       } catch (error) {
-        outputDiv.innerHTML = '<div class="output-error"><div class="error-icon">!</div><p>Connection failed. Make sure the gateway is running at <strong>http://localhost:9999</strong></p></div>';
+        outputDiv.innerHTML = '<div class="output-error"><div class="error-icon">!</div><p>' + I.connectionError + '</p></div>';
         console.error('API Error:', error);
       } finally {
         isProcessing = false;
@@ -184,13 +210,13 @@ import Footer from '../components/Footer.astro';
     }
 
     function displayResult(result) {
-      const outputDiv = document.getElementById('outputText');
-      const statsDiv = document.getElementById('outputStats');
-      const entitiesPanel = document.getElementById('entitiesPanel');
-      const entitiesBody = document.getElementById('entitiesBody');
-      const entitiesCount = document.getElementById('entitiesCount');
+      var outputDiv = document.getElementById('outputText');
+      var statsDiv = document.getElementById('outputStats');
+      var entitiesPanel = document.getElementById('entitiesPanel');
+      var entitiesBody = document.getElementById('entitiesBody');
+      var entitiesCount = document.getElementById('entitiesCount');
 
-      const tagMap = {
+      var tagMap = {
         'PII_PHONE': 'tag-phone', 'PII_EMAIL': 'tag-email', 'PII_IDCARD': 'tag-idcard',
         'PII_BANK': 'tag-bank', 'PII_PER': 'tag-person', 'PII_LOC': 'tag-location',
         'PII_ORG': 'tag-org', 'PII_PLATE': 'tag-org', 'PII_IP': 'tag-email',
@@ -198,15 +224,9 @@ import Footer from '../components/Footer.astro';
         'PII_POSTCODE': 'tag-location', 'PII_CUST': 'tag-person',
       };
 
-      const typeNames = {
-        'PII_PHONE': 'Phone', 'PII_EMAIL': 'Email', 'PII_IDCARD': 'ID Card',
-        'PII_BANK': 'Bank Card', 'PII_PER': 'Name', 'PII_LOC': 'Address',
-        'PII_ORG': 'Org', 'PII_PLATE': 'License Plate', 'PII_IP': 'IP',
-        'PII_URL': 'URL', 'PII_DATE': 'Date', 'PII_AMOUNT': 'Amount',
-        'PII_POSTCODE': 'Postal Code', 'PII_CUST': 'Custom'
-      };
+      var typeNames = I.typeNames;
 
-      let html = escapeHtml(result.masked_text);
+      var html = escapeHtml(result.masked_text);
       result.entities.forEach(function(entity) {
         var tag = tagMap[entity.type] || 'tag-org';
         var re = new RegExp(escapeRegex(escapeHtml(entity.placeholder)), 'g');
@@ -221,13 +241,13 @@ import Footer from '../components/Footer.astro';
       }
       statsDiv.innerHTML =
         '<div class="stats-row">' +
-          '<div class="stat-block"><span class="stat-val">' + totalMasked + '</span><span class="stat-lbl">Entities Detected</span></div>' +
-          '<div class="stat-block"><span class="stat-val">' + result.entities.length + '</span><span class="stat-lbl">Replacements</span></div>' +
+          '<div class="stat-block"><span class="stat-val">' + totalMasked + '</span><span class="stat-lbl">' + I.entitiesDetected + '</span></div>' +
+          '<div class="stat-block"><span class="stat-val">' + result.entities.length + '</span><span class="stat-lbl">' + I.replacements + '</span></div>' +
         '</div>';
 
       if (result.entities && result.entities.length > 0) {
         entitiesPanel.style.display = 'block';
-        entitiesCount.textContent = result.entities.length + ' items';
+        entitiesCount.textContent = result.entities.length + ' ' + I.items;
         entitiesBody.innerHTML = result.entities.map(function(e) {
           return '<tr>' +
             '<td><span class="entity-tag ' + (tagMap[e.type] || 'tag-org') + '">' + (typeNames[e.type] || e.type) + '</span></td>' +

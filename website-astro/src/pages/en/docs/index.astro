@@ -1,0 +1,147 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Nav from '../../../components/Nav.astro';
+import Footer from '../../../components/Footer.astro';
+---
+
+<Layout
+  title="Documentation - AI Privacy Gateway"
+  description="AI Privacy Gateway technical documentation: quick start, deployment guide, configuration reference, architecture overview. A complete guide from zero to production deployment."
+  keywords="AI privacy gateway docs, deployment guide, configuration tutorial, API reference, PII detection config, privacy proxy documentation">
+  <Nav />
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container hero-content">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        <span>Technical Docs</span>
+      </div>
+      <h1 class="hero-title">
+        <span class="gradient-text">Documentation</span> Center
+      </h1>
+      <p class="hero-description">
+        From quick start to production deployment, from config reference to architecture.<br/>
+        Everything you need to unlock the full power of AI Privacy Gateway.
+      </p>
+    </div>
+  </section>
+
+  <!-- Docs Grid -->
+  <section class="docs-section">
+    <div class="container">
+      <div class="docs-grid">
+        <a href="/en/docs/quickstart" class="docs-card glass">
+          <span class="card-num">01</span>
+          <div class="card-icon-wrap">
+            <span class="card-icon">&#9654;</span>
+          </div>
+          <h2>Quick Start</h2>
+          <p>5-minute deploy for Docker, Windows, macOS</p>
+        </a>
+
+        <a href="/en/docs/deploy" class="docs-card glass">
+          <span class="card-num">02</span>
+          <div class="card-icon-wrap">
+            <span class="card-icon">&#9701;</span>
+          </div>
+          <h2>Deployment Guide</h2>
+          <p>Docker Compose, bare metal, systemd configuration</p>
+        </a>
+
+        <a href="/en/docs/config" class="docs-card glass">
+          <span class="card-num">03</span>
+          <div class="card-icon-wrap">
+            <span class="card-icon">&#9881;</span>
+          </div>
+          <h2>Configuration</h2>
+          <p>Environment variables, masking rules</p>
+        </a>
+
+        <a href="/en/docs/keywords" class="docs-card glass">
+          <span class="card-num">04</span>
+          <div class="card-icon-wrap">
+            <span class="card-icon">&#9733;</span>
+          </div>
+          <h2>Custom Keywords</h2>
+          <p>Add team-specific sensitive words and regex patterns</p>
+        </a>
+
+        <a href="/en/docs/architecture" class="docs-card glass">
+          <span class="card-num">05</span>
+          <div class="card-icon-wrap">
+            <span class="card-icon">&#9711;</span>
+          </div>
+          <h2>Architecture</h2>
+          <p>Data flow, SSE streaming, Rust integrity checks</p>
+        </a>
+
+        <a href="/en/docs/api" class="docs-card glass">
+          <span class="card-num">06</span>
+          <div class="card-icon-wrap">
+            <span class="card-icon">&lt;/&gt;</span>
+          </div>
+          <h2>API Reference</h2>
+          <p>Admin endpoints, stats queries, keyword management</p>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <Footer />
+</Layout>
+
+<style>
+  .hero {
+    padding: 10rem 0 4rem;
+    position: relative;
+  }
+  .hero-content { text-align: center; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: var(--bg-surface); padding: 0.5rem 1rem; border-radius: 20px;
+    font-size: 0.875rem; font-weight: 500; color: var(--primary); margin-bottom: 1.5rem;
+  }
+  .badge-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .hero-title { font-size: 3.5rem; font-weight: 700; letter-spacing: -0.04em; margin-bottom: 1.5rem; line-height: 1.15; }
+  .gradient-text {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .hero-description { font-size: 1.125rem; color: var(--text-secondary); line-height: 1.8; max-width: 560px; margin: 0 auto; }
+
+  .docs-section { padding: 4rem 0 8rem; }
+  .docs-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem; max-width: 960px; margin: 0 auto;
+  }
+  .docs-card {
+    padding: 2rem; display: block; color: var(--text-primary);
+    text-decoration: none; position: relative; overflow: hidden;
+  }
+  .docs-card:hover { border-color: var(--primary); }
+  .docs-card:hover .card-icon-wrap { background: rgba(134, 239, 172, 0.15); }
+  .docs-card:hover .card-icon { color: var(--primary); }
+
+  .card-num {
+    position: absolute; top: 1rem; right: 1.25rem;
+    font-size: 0.7rem; font-weight: 700; color: var(--text-muted);
+    letter-spacing: 0.08em;
+  }
+  .card-icon-wrap {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: rgba(134, 239, 172, 0.08);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1rem; transition: background 0.3s ease;
+  }
+  .card-icon { font-size: 1.1rem; color: var(--primary); transition: color 0.3s ease; }
+  .docs-card h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary); }
+  .docs-card p { color: var(--text-secondary); font-size: 0.88rem; line-height: 1.6; }
+
+  @media (max-width: 768px) {
+    .hero-title { font-size: 2.25rem; }
+    .docs-grid { grid-template-columns: 1fr; }
+  }
+</style>

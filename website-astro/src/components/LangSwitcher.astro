@@ -1,0 +1,97 @@
+---
+import { t } from '../i18n/translations';
+import { getLangFromURL, getPathForLang } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+const currentPath = Astro.url.pathname;
+const currentLang = getLangFromURL(currentPath);
+const labels = t(currentLang, 'lang_switcher');
+---
+
+<div class="lang-switcher">
+  <button class="lang-current" aria-label={labels.label as string}>
+    {currentLang === 'zh' ? labels.zh : labels.en}
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M6 9l6 6 6-6"/>
+    </svg>
+  </button>
+  <div class="lang-dropdown">
+    <a href={getPathForLang(currentPath, 'zh')} class={currentLang === 'zh' ? 'active' : ''}>
+      {labels.zh}
+    </a>
+    <a href={getPathForLang(currentPath, 'en')} class={currentLang === 'en' ? 'active' : ''}>
+      {labels.en}
+    </a>
+  </div>
+</div>
+
+<style>
+  .lang-switcher {
+    position: relative;
+    margin-left: 0.5rem;
+  }
+
+  .lang-current {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: rgba(134, 239, 172, 0.06);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.35rem 0.65rem;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.02em;
+  }
+
+  .lang-current svg {
+    transition: transform 0.2s ease;
+  }
+
+  .lang-current:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  .lang-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    background: rgba(10, 10, 20, 0.98);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.35rem;
+    min-width: 90px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: all 0.2s ease;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  .lang-switcher:hover .lang-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .lang-dropdown a {
+    display: block;
+    padding: 0.4rem 0.75rem;
+    border-radius: 7px;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    transition: all 0.15s ease;
+  }
+
+  .lang-dropdown a:hover,
+  .lang-dropdown a.active {
+    color: var(--primary);
+    background: rgba(134, 239, 172, 0.08);
+  }
+</style>

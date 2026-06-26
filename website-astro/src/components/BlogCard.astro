@@ -1,4 +1,7 @@
 ---
+import { t } from '../i18n/translations';
+import { getLangFromURL } from '../i18n/utils';
+
 interface Props {
   title: string;
   description: string;
@@ -8,7 +11,8 @@ interface Props {
 }
 
 const { title, description, pubDate, tags, slug } = Astro.props;
-const dateStr = pubDate.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+const lang = getLangFromURL(Astro.url.pathname);
+const dateStr = pubDate.toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 ---
 
 <article class="blog-card glass reveal">
@@ -25,7 +29,7 @@ const dateStr = pubDate.toLocaleDateString('zh-CN', { year: 'numeric', month: 'l
   </h3>
   <p class="blog-card-desc">{description}</p>
   <a href={`/blog/${slug}`} class="blog-card-link">
-    Read Article
+    {t(lang, 'blog.read_article')}
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       <path d="M5 12h14M12 5l7 7-7 7"/>
     </svg>

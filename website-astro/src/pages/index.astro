@@ -2,17 +2,22 @@
 import Layout from '../layouts/Layout.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import { t } from '../i18n/translations';
+import { getLangFromURL } from '../i18n/utils';
+
+const lang = getLangFromURL(Astro.url.pathname);
 ---
 
 <Layout
-  title="AI Privacy Gateway — Open Source PII Masking Proxy for ChatGPT, Claude, Cursor, DeepSeek"
-  description="Open-source AI API privacy gateway. Auto-detect and mask phone numbers, emails, ID cards, bank cards, and 14+ entity types before they reach AI models. 30-second deploy. Works with ChatGPT, Claude, Cursor, DeepSeek, any OpenAI-compatible API. MIT licensed."
-  keywords="AI隐私网关,数据脱敏代理,PII掩码,LLM安全代理,开源隐私网关,AI API隐私隔离,PII检测,数据隐私防火墙"
+  title={t(lang, 'home.title_line1') + ' — ' + t(lang, 'home.title_line2') + ' ' + t(lang, 'home.title_line3')}
+  description={t(lang, 'home.desc')}
+  keywords={lang === 'zh' ? 'AI隐私网关,数据脱敏代理,PII掩码,LLM安全代理,开源隐私网关,AI API隐私隔离,PII检测,数据隐私防火墙' : 'AI privacy gateway, data masking proxy, PII masking, LLM security, open source privacy gateway, AI API privacy, PII detection, data privacy firewall'}
   canonicalURL="https://privacygw.pages.dev"
   hreflang={[
     { lang: 'zh-CN', url: 'https://privacygw.pages.dev' },
     { lang: 'x-default', url: 'https://privacygw.pages.dev' },
-  ]}>
+  ]}
+  lang={lang}>
   <Nav />
 
   <!-- ============================================
@@ -27,24 +32,22 @@ import Footer from '../components/Footer.astro';
       <div class="hero-content">
         <div class="hero-badge">
           <span class="pulse-dot"></span>
-          <span>v2.0.0 &middot; MIT Licensed &middot; Open Source</span>
+          <span>{t(lang, 'home.badge')}</span>
         </div>
 
         <h1 class="hero-title">
-          Your AI data is leaking<br/>
-          <span class="gradient-text">PII right now.</span><br/>
-          Install a firewall in 30 seconds.
+          {t(lang, 'home.title_line1')}<br/>
+          <span class="gradient-text">{t(lang, 'home.title_line2')}</span><br/>
+          {t(lang, 'home.title_line3')}
         </h1>
 
         <p class="hero-desc">
-          AI Privacy Gateway intercepts every API call to LLMs&mdash;detecting and masking
-          phone numbers, emails, ID cards, bank cards, and<br class="hide-mobile"/>
-          <strong>14 entity types</strong> before they leave your machine.
+          {t(lang, 'home.desc')} <strong>{t(lang, 'home.desc_strong')}</strong>
         </p>
 
         <div class="hero-actions">
           <a href="/download" class="btn btn-primary btn-lg">
-            Deploy Now
+            {t(lang, 'home.deploy_now')}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>
@@ -53,35 +56,35 @@ import Footer from '../components/Footer.astro';
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
               <polygon points="5 3 19 12 5 21 5 3"/>
             </svg>
-            Watch Demo
+            {t(lang, 'home.watch_demo')}
           </a>
           <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-ghost btn-lg">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
             </svg>
-            GitHub
+            {t(lang, 'home.github')}
           </a>
         </div>
 
         <div class="hero-stats">
           <div class="hero-stat">
             <span class="hero-stat-num">14</span>
-            <span class="hero-stat-label">Entity Types Detected</span>
+            <span class="hero-stat-label">{t(lang, 'home.stats_entities')}</span>
           </div>
           <div class="hero-stat-divider"></div>
           <div class="hero-stat">
             <span class="hero-stat-num">&lt;1ms</span>
-            <span class="hero-stat-label">Avg. Latency Added</span>
+            <span class="hero-stat-label">{t(lang, 'home.stats_latency')}</span>
           </div>
           <div class="hero-stat-divider"></div>
           <div class="hero-stat">
             <span class="hero-stat-num">10K+</span>
-            <span class="hero-stat-label">QPS Per Instance</span>
+            <span class="hero-stat-label">{t(lang, 'home.stats_qps')}</span>
           </div>
           <div class="hero-stat-divider"></div>
           <div class="hero-stat">
             <span class="hero-stat-num">0</span>
-            <span class="hero-stat-label">Data Ever Uploaded</span>
+            <span class="hero-stat-label">{t(lang, 'home.stats_local')}</span>
           </div>
         </div>
 
@@ -89,10 +92,10 @@ import Footer from '../components/Footer.astro';
         <div class="masking-demo glass">
           <div class="masking-header">
             <div class="masking-tabs">
-              <span class="masking-tab active" data-tab="before">Raw Request</span>
-              <span class="masking-tab" data-tab="after">Masked &#8594; AI</span>
+              <span class="masking-tab active" data-tab="before">{t(lang, 'home.masking_raw')}</span>
+              <span class="masking-tab" data-tab="after">{t(lang, 'home.masking_masked')}</span>
             </div>
-            <span class="masking-badge">Live Preview</span>
+            <span class="masking-badge">{t(lang, 'home.masking_live_preview')}</span>
           </div>
           <div class="masking-body" id="masking-body">
             <pre class="masking-code" id="masking-before"><code>&#123;
@@ -115,14 +118,11 @@ import Footer from '../components/Footer.astro';
 &#125;</code></pre>
           </div>
           <div class="masking-footer">
-            <span class="masking-protected">&#10003; All PII masked before reaching AI</span>
+            <span class="masking-protected">{t(lang, 'home.masking_protected')}</span>
           </div>
         </div>
 
-        <p class="hero-integrations">
-          Works with <strong>ChatGPT</strong>, <strong>Claude</strong>, <strong>DeepSeek</strong>,
-          <strong>Cursor</strong>, <strong>Kimi</strong> &mdash; any OpenAI-compatible API.
-        </p>
+        <p class="hero-integrations" set:html={t(lang, 'home.works_with')} />
       </div>
     </div>
   </section>
@@ -132,11 +132,10 @@ import Footer from '../components/Footer.astro';
        ============================================ -->
   <section class="problem" id="problem">
     <div class="container">
-      <div class="section-label">The Risk</div>
-      <h2 class="section-title">Every AI call exposes your<br/>sensitive data</h2>
+      <div class="section-label">{t(lang, 'home.problem_label')}</div>
+      <h2 class="section-title" set:html={t(lang, 'home.problem_title')} />
       <p class="section-subtitle">
-        Every time you paste code, patient records, or customer data into an AI prompt,
-        that information leaves your control. Here is what is at stake.
+        {t(lang, 'home.problem_subtitle')}
       </p>
 
       <div class="problem-grid">
@@ -148,11 +147,11 @@ import Footer from '../components/Footer.astro';
               <path d="M2 12l10 5 10-5"/>
             </svg>
           </div>
-          <h3>Data at rest nowhere</h3>
-          <p>Phone numbers, emails, addresses, and bank cards fly through third-party servers every time you use an AI tool.</p>
+          <h3>{t(lang, 'home.problem_card1_title')}</h3>
+          <p>{t(lang, 'home.problem_card1_desc')}</p>
           <div class="problem-stat">
-            <span class="problem-stat-num">78%</span>
-            <span class="problem-stat-label">of corporate AI prompts contain PII</span>
+            <span class="problem-stat-num">{t(lang, 'home.problem_card1_stat')}</span>
+            <span class="problem-stat-label">{t(lang, 'home.problem_card1_label')}</span>
           </div>
         </div>
 
@@ -163,11 +162,11 @@ import Footer from '../components/Footer.astro';
               <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
             </svg>
           </div>
-          <h3>Training data leaks</h3>
-          <p>LLMs memorize patterns. Your data could resurface in another user's session — a documented risk in production AI systems.</p>
+          <h3>{t(lang, 'home.problem_card2_title')}</h3>
+          <p>{t(lang, 'home.problem_card2_desc')}</p>
           <div class="problem-stat">
-            <span class="problem-stat-num risk-warn">Known</span>
-            <span class="problem-stat-label">Model inversion &amp; extraction attacks</span>
+            <span class="problem-stat-num risk-warn">{t(lang, 'home.problem_card2_stat')}</span>
+            <span class="problem-stat-label">{t(lang, 'home.problem_card2_label')}</span>
           </div>
         </div>
 
@@ -179,11 +178,11 @@ import Footer from '../components/Footer.astro';
               <line x1="12" y1="16" x2="12.01" y2="16"/>
             </svg>
           </div>
-          <h3>Regulatory exposure</h3>
-          <p>Sending PII to third-party AI APIs without masking violates GDPR, CCPA, PIPL, and HIPAA. Fines can reach millions.</p>
+          <h3>{t(lang, 'home.problem_card3_title')}</h3>
+          <p>{t(lang, 'home.problem_card3_desc')}</p>
           <div class="problem-stat">
-            <span class="problem-stat-num risk-danger">&euro;20M+</span>
-            <span class="problem-stat-label">GDPR max fine per violation</span>
+            <span class="problem-stat-num risk-danger">{t(lang, 'home.problem_card3_stat')}</span>
+            <span class="problem-stat-label">{t(lang, 'home.problem_card3_label')}</span>
           </div>
         </div>
       </div>
@@ -195,10 +194,10 @@ import Footer from '../components/Footer.astro';
        ============================================ -->
   <section class="how-it-works" id="how-it-works">
     <div class="container">
-      <div class="section-label">How It Works</div>
-      <h2 class="section-title">Three steps. Zero code changes.</h2>
+      <div class="section-label">{t(lang, 'home.how_label')}</div>
+      <h2 class="section-title">{t(lang, 'home.how_title')}</h2>
       <p class="section-subtitle">
-        Point your API base URL to the gateway. Everything else is automatic.
+        {t(lang, 'home.how_subtitle')}
       </p>
 
       <div class="steps-visual">
@@ -210,8 +209,8 @@ import Footer from '../components/Footer.astro';
                 <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
               </svg>
             </div>
-            <h3>Intercept</h3>
-            <p>Gateway captures every request headed to your AI provider</p>
+            <h3>{t(lang, 'home.step1_title')}</h3>
+            <p>{t(lang, 'home.step1_desc')}</p>
           </div>
           <div class="step-arrow">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -228,8 +227,8 @@ import Footer from '../components/Footer.astro';
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
               </svg>
             </div>
-            <h3>Detect &amp; Mask</h3>
-            <p>14 entity types identified via regex + NER, replaced with safe placeholders</p>
+            <h3>{t(lang, 'home.step2_title')}</h3>
+            <p>{t(lang, 'home.step2_desc')}</p>
           </div>
           <div class="step-arrow">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -246,8 +245,8 @@ import Footer from '../components/Footer.astro';
                 <polyline points="20 6 9 17 4 12"/>
               </svg>
             </div>
-            <h3>Forward &amp; Restore</h3>
-            <p>Masked data sent to LLM; response placeholders restored before returning to you</p>
+            <h3>{t(lang, 'home.step3_title')}</h3>
+            <p>{t(lang, 'home.step3_desc')}</p>
           </div>
         </div>
       </div>
@@ -255,20 +254,20 @@ import Footer from '../components/Footer.astro';
       <!-- Quick code example -->
       <div class="code-compare glass">
         <div class="code-compare-header">
-          <span>One-line change. Any SDK.</span>
+          <span>{t(lang, 'home.code_compare_title')}</span>
         </div>
         <div class="code-compare-grid">
           <div class="code-panel">
-            <div class="code-panel-label before-label">Before</div>
-            <pre><code><span class="code-cmt"># Unprotected — direct to AI</span>
+            <div class="code-panel-label before-label">{t(lang, 'home.code_before_label')}</div>
+            <pre><code><span class="code-cmt">{t(lang, 'home.code_before_cmt')}</span>
 client = OpenAI(
   api_key="sk-...",
   <span class="code-highlight">base_url="https://api.openai.com/v1"</span>
 )</code></pre>
           </div>
           <div class="code-panel">
-            <div class="code-panel-label after-label">After</div>
-            <pre><code><span class="code-cmt"># Protected — via gateway</span>
+            <div class="code-panel-label after-label">{t(lang, 'home.code_after_label')}</div>
+            <pre><code><span class="code-cmt">{t(lang, 'home.code_after_cmt')}</span>
 client = OpenAI(
   api_key="sk-...",
   <span class="code-highlight code-highlight-green">base_url="http://localhost:9999/v1"</span>
@@ -284,26 +283,25 @@ client = OpenAI(
        ============================================ -->
   <section class="features" id="features">
     <div class="container">
-      <div class="section-label">Capabilities</div>
-      <h2 class="section-title">Enterprise-grade privacy,<br/>developer-friendly DX</h2>
+      <div class="section-label">{t(lang, 'home.features_label')}</div>
+      <h2 class="section-title">{t(lang, 'home.features_title')}</h2>
       <p class="section-subtitle">
-        Built for teams that ship fast and care about data security.
-        Every feature ships in the free Lite edition.
+        {t(lang, 'home.features_section_subtitle')}
       </p>
 
       <div class="bento">
 
         <!-- Main: Detection engine -->
         <div class="bento-card bento-main glass glow-hover">
-          <div class="bento-badge">Core Engine</div>
+          <div class="bento-badge">{t(lang, 'home.bento_badge_engine')}</div>
           <div class="bento-card-content">
             <div class="bento-icon-large">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
               </svg>
             </div>
-            <h3>Intelligent Masking Engine</h3>
-            <p>Regex + NER dual-engine detects 14 entity types: phone, email, ID card, bank card, name, address, license plate, IP, URL, date, amount, postal code, organization, and custom keywords. Zero configuration.</p>
+            <h3>{t(lang, 'home.bento_main_title')}</h3>
+            <p>{t(lang, 'home.bento_main_desc')}</p>
             <div class="entity-chips">
               <span class="chip chip-phone">Phone</span>
               <span class="chip chip-email">Email</span>
@@ -312,21 +310,21 @@ client = OpenAI(
               <span class="chip chip-name">Name</span>
               <span class="chip chip-loc">Address</span>
               <span class="chip chip-org">Org</span>
-              <span class="chip chip-more">+7 more</span>
+              <span class="chip chip-more">{t(lang, 'home.bento_main_chips')}</span>
             </div>
           </div>
           <div class="bento-metrics">
             <div class="bento-metric">
               <span class="bento-metric-num">14</span>
-              <span class="bento-metric-label">Entity Types</span>
+              <span class="bento-metric-label">{t(lang, 'home.bento_metric_types')}</span>
             </div>
             <div class="bento-metric">
               <span class="bento-metric-num">&lt;1ms</span>
-              <span class="bento-metric-label">Detection Latency</span>
+              <span class="bento-metric-label">{t(lang, 'home.bento_metric_latency')}</span>
             </div>
             <div class="bento-metric">
               <span class="bento-metric-num">93%</span>
-              <span class="bento-metric-label">Coverage Rate</span>
+              <span class="bento-metric-label">{t(lang, 'home.bento_metric_coverage')}</span>
             </div>
           </div>
         </div>
@@ -339,8 +337,8 @@ client = OpenAI(
               <line x1="12" y1="19" x2="20" y2="19"/>
             </svg>
           </div>
-          <h3>SSE Streaming</h3>
-          <p>Full SSE proxy with real-time masking and unmasking. Zero added perceptible latency.</p>
+          <h3>{t(lang, 'home.bento_sse_title')}</h3>
+          <p>{t(lang, 'home.bento_sse_desc')}</p>
         </div>
 
         <!-- Local storage -->
@@ -350,8 +348,8 @@ client = OpenAI(
               <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
             </svg>
           </div>
-          <h3>Local SQLite Vault</h3>
-          <p>Encrypted local storage. Mapping data never leaves your machine.</p>
+          <h3>{t(lang, 'home.bento_vault_title')}</h3>
+          <p>{t(lang, 'home.bento_vault_desc')}</p>
         </div>
 
         <!-- 30s deploy -->
@@ -362,28 +360,28 @@ client = OpenAI(
               <polyline points="12 6 12 12 16 14"/>
             </svg>
           </div>
-          <h3>30-Second Deploy</h3>
-          <p>Single binary, Docker, or pip. Download and run. No dependencies.</p>
+          <h3>{t(lang, 'home.bento_deploy_title')}</h3>
+          <p>{t(lang, 'home.bento_deploy_desc')}</p>
         </div>
 
         <!-- Architecture -->
         <div class="bento-card bento-arch glass glow-hover">
-          <div class="bento-badge">Architecture</div>
+          <div class="bento-badge">{t(lang, 'home.bento_arch_badge')}</div>
           <div class="bento-card-content">
-            <h3>Data Flow Pipeline</h3>
-            <p>Request enters gateway &rarr; regex scan &rarr; NER inference &rarr; placeholder replacement &rarr; forward to LLM. Response reverses the pipeline. End-to-end under 1ms overhead.</p>
+            <h3>{t(lang, 'home.bento_arch_title')}</h3>
+            <p>{t(lang, 'home.bento_arch_desc')}</p>
             <div class="flow-pipeline">
-              <div class="pipeline-node">Client</div>
+              <div class="pipeline-node">{t(lang, 'home.bento_pipeline_client')}</div>
               <span class="pipeline-arrow">&rarr;</span>
-              <div class="pipeline-node pipeline-accent">Gateway</div>
+              <div class="pipeline-node pipeline-accent">{t(lang, 'home.bento_pipeline_gateway')}</div>
               <span class="pipeline-arrow">&rarr;</span>
-              <div class="pipeline-node">LLM</div>
+              <div class="pipeline-node">{t(lang, 'home.bento_pipeline_llm')}</div>
             </div>
             <div class="pipeline-tags">
-              <span class="pipeline-tag">Regex Match</span>
-              <span class="pipeline-tag">NER Detect</span>
-              <span class="pipeline-tag">Map &amp; Replace</span>
-              <span class="pipeline-tag">Reverse on Response</span>
+              <span class="pipeline-tag">{t(lang, 'home.bento_pipeline_tag1')}</span>
+              <span class="pipeline-tag">{t(lang, 'home.bento_pipeline_tag2')}</span>
+              <span class="pipeline-tag">{t(lang, 'home.bento_pipeline_tag3')}</span>
+              <span class="pipeline-tag">{t(lang, 'home.bento_pipeline_tag4')}</span>
             </div>
           </div>
         </div>
@@ -396,8 +394,8 @@ client = OpenAI(
               <line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
           </div>
-          <h3>Custom Rules</h3>
-          <p>Regex + keyword patterns for domain-specific PII. Flexible and extensible.</p>
+          <h3>{t(lang, 'home.bento_rules_title')}</h3>
+          <p>{t(lang, 'home.bento_rules_desc')}</p>
         </div>
 
         <!-- Admin dashboard -->
@@ -409,8 +407,8 @@ client = OpenAI(
               <line x1="12" y1="17" x2="12" y2="21"/>
             </svg>
           </div>
-          <h3>Admin Dashboard</h3>
-          <p>Real-time stats: masking count, entity distribution, mapping records, and throughput.</p>
+          <h3>{t(lang, 'home.bento_dashboard_title')}</h3>
+          <p>{t(lang, 'home.bento_dashboard_desc')}</p>
         </div>
 
         <!-- Open source -->
@@ -422,8 +420,8 @@ client = OpenAI(
               <path d="M2 12l10 5 10-5"/>
             </svg>
           </div>
-          <h3>MIT Licensed</h3>
-          <p>Free forever. Personal use, commercial use, self-hosted. No restrictions.</p>
+          <h3>{t(lang, 'home.bento_mit_title')}</h3>
+          <p>{t(lang, 'home.bento_mit_desc')}</p>
         </div>
 
         <!-- Performance -->
@@ -435,25 +433,25 @@ client = OpenAI(
               </svg>
             </div>
             <div class="bento-perf-content">
-              <h3>Performance Benchmarks</h3>
-              <p>P99 latency under 2ms. Single instance handles 10,000+ QPS. Zero data leaves your network.</p>
+              <h3>{t(lang, 'home.bento_perf_title')}</h3>
+              <p>{t(lang, 'home.bento_perf_desc')}</p>
               <div class="perf-bars">
                 <div class="perf-bar">
-                  <span class="perf-bar-label">Regex Matching</span>
+                  <span class="perf-bar-label">{t(lang, 'home.perf_bar_regex')}</span>
                   <div class="perf-bar-track">
                     <div class="perf-bar-fill" style="width:95%"></div>
                   </div>
                   <span class="perf-bar-val">0.3ms</span>
                 </div>
                 <div class="perf-bar">
-                  <span class="perf-bar-label">NER Inference</span>
+                  <span class="perf-bar-label">{t(lang, 'home.perf_bar_ner')}</span>
                   <div class="perf-bar-track">
                     <div class="perf-bar-fill perf-fill-accent" style="width:88%"></div>
                   </div>
                   <span class="perf-bar-val">0.8ms</span>
                 </div>
                 <div class="perf-bar">
-                  <span class="perf-bar-label">Map Restore</span>
+                  <span class="perf-bar-label">{t(lang, 'home.perf_bar_restore')}</span>
                   <div class="perf-bar-track">
                     <div class="perf-bar-fill perf-fill-green" style="width:98%"></div>
                   </div>
@@ -473,10 +471,10 @@ client = OpenAI(
        ============================================ -->
   <section class="compat">
     <div class="container">
-      <div class="section-label">Compatibility</div>
-      <h2 class="section-title">Works with everything</h2>
+      <div class="section-label">{t(lang, 'home.compat_label')}</div>
+      <h2 class="section-title">{t(lang, 'home.compat_title')}</h2>
       <p class="section-subtitle">
-        Drop-in proxy for any OpenAI-compatible API. No SDK changes, no vendor lock-in.
+        {t(lang, 'home.compat_subtitle')}
       </p>
 
       <div class="compat-grid">
@@ -484,37 +482,37 @@ client = OpenAI(
           <div class="compat-icon">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.4 2.4C18.3 4.5 20.5 8.2 20.5 12c0 3.8-2.2 7.5-5.1 9.6-.3.2-.6.4-.9.6l-.6-1.2c.3-.2.6-.4.8-.6 2.4-1.8 4.1-5.3 4.1-8.4s-1.7-6.6-4.1-8.4c-.3-.2-.5-.4-.8-.6l.6-1.2c.3.2.6.4.9.6zM8.6 2.4c.3.2.6.4.9.6l.6 1.2c-.3.2-.6.4-.8.6C6.9 6.6 5.6 10.1 5.6 12s1.3 5.4 3.7 7.2c.3.2.5.4.8.6l-.6 1.2c-.3-.2-.6-.4-.9-.6C5.7 18.4 3.5 14.7 3.5 12s2.2-6.4 5.1-9.6zM12 2c1.1 0 2 .9 2 2v16c0 1.1-.9 2-2 2s-2-.9-2-2V4c0-1.1.9-2 2-2z"/></svg>
           </div>
-          <span class="compat-name">Python SDK</span>
+          <span class="compat-name">{t(lang, 'home.compat_python')}</span>
         </div>
         <div class="compat-card glass">
           <div class="compat-icon">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
           </div>
-          <span class="compat-name">JavaScript SDK</span>
+          <span class="compat-name">{t(lang, 'home.compat_js')}</span>
         </div>
         <div class="compat-card glass">
           <div class="compat-icon">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 2h-11C5.1 2 4 3.1 4 4.5v15C4 20.9 5.1 22 6.5 22h11c1.4 0 2.5-1.1 2.5-2.5v-15C20 3.1 18.9 2 17.5 2zM12 20c-.8 0-1.5-.7-1.5-1.5S11.2 17 12 17s1.5.7 1.5 1.5S12.8 20 12 20zm5-4H7V5h10v11z"/></svg>
           </div>
-          <span class="compat-name">Flutter SDK</span>
+          <span class="compat-name">{t(lang, 'home.compat_flutter')}</span>
         </div>
         <div class="compat-card glass">
           <div class="compat-icon">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18c0 .6.4 1 1 1h2c.6 0 1-.4 1-1v-2H6v2zM14 18c0 .6.4 1 1 1h2c.6 0 1-.4 1-1v-2h-4v2zM4 8v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8H4zm16-2V4c0-1.1-.9-2-2-2H6C4.9 2 4 2.9 4 4v2h16z"/></svg>
           </div>
-          <span class="compat-name">Android SDK</span>
+          <span class="compat-name">{t(lang, 'home.compat_android')}</span>
         </div>
         <div class="compat-card glass">
           <div class="compat-icon">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.7 1.3c-.4-.4-1-.4-1.4 0l-2 2c-.4.4-.4 1 0 1.4.4.4 1 .4 1.4 0l2-2c.4-.4.4-1 0-1.4zM3.9 3.9c-.4.4-.4 1 0 1.4l2 2c.4.4 1 .4 1.4 0 .4-.4.4-1 0-1.4l-2-2c-.4-.4-1-.4-1.4 0zm11.3 2.8L8.9 13c-.4.4-.4 1 0 1.4.4.4 1 .4 1.4 0l6.3-6.3c.4-.4.4-1 0-1.4-.4-.4-1-.4-1.4 0zM20 12c-.6 0-1 .4-1 1v6H5V5h6c.6 0 1-.4 1-1s-.4-1-1-1H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-8c0-.6-.4-1-1-1z"/></svg>
           </div>
-          <span class="compat-name">iOS SDK</span>
+          <span class="compat-name">{t(lang, 'home.compat_ios')}</span>
         </div>
         <div class="compat-card glass">
           <div class="compat-icon">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
           </div>
-          <span class="compat-name">Browser Ext.</span>
+          <span class="compat-name">{t(lang, 'home.compat_browser')}</span>
         </div>
       </div>
     </div>
@@ -528,15 +526,15 @@ client = OpenAI(
     <div class="cta-orb-2"></div>
     <div class="container cta-inner">
       <h2 class="cta-title">
-        Your data should not be<br/>
-        <span class="gradient-text">nobody else's training set.</span>
+        {t(lang, 'home.cta_title1')}<br/>
+        <span class="gradient-text">{t(lang, 'home.cta_title2')}</span>
       </h2>
       <p class="cta-desc">
-        Deploy in 30 seconds. No credit card. No account. No data ever leaves your machine.
+        {t(lang, 'home.cta_desc')}
       </p>
       <div class="cta-actions">
         <a href="/download" class="btn btn-primary btn-lg">
-          Get Started Free
+          {t(lang, 'home.cta_get_started')}
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M5 12h14M12 5l7 7-7 7"/>
           </svg>
@@ -545,7 +543,7 @@ client = OpenAI(
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
           </svg>
-          Star on GitHub
+          {t(lang, 'home.cta_star_github')}
         </a>
       </div>
     </div>
@@ -554,90 +552,90 @@ client = OpenAI(
   <Footer />
 
   <!-- FAQ Structured Data -->
-  <script is:inline type="application/ld+json">{
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
+  <script is:inline type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    'mainEntity': [
       {
-        "@type": "Question",
-        "name": "What is AI Privacy Gateway?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "AI Privacy Gateway is an open-source reverse proxy that sits between your AI client (ChatGPT, Cursor, Claude, DeepSeek) and the AI API. It automatically detects and masks sensitive data like phone numbers, emails, ID cards, bank cards before they leave your machine."
+        '@type': 'Question',
+        'name': t(lang, 'home.faq_q1'),
+        'acceptedAnswer': {
+          '@type': 'Answer',
+          'text': t(lang, 'home.faq_a1')
         }
       },
       {
-        "@type": "Question",
-        "name": "How long does it take to set up?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "About 30 seconds. Run the Docker container or Python script, change your API base URL to http://localhost:9999, and you're done. No code changes required."
+        '@type': 'Question',
+        'name': t(lang, 'home.faq_q2'),
+        'acceptedAnswer': {
+          '@type': 'Answer',
+          'text': t(lang, 'home.faq_a2')
         }
       },
       {
-        "@type": "Question",
-        "name": "What types of sensitive data can it detect?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "The gateway detects 14 entity types: phone numbers, email addresses, Chinese ID card numbers, bank card numbers, person names (Chinese), locations, organizations, license plates, IP addresses, URLs, dates, currency amounts, postal codes, and custom keywords via regex patterns."
+        '@type': 'Question',
+        'name': t(lang, 'home.faq_q3'),
+        'acceptedAnswer': {
+          '@type': 'Answer',
+          'text': t(lang, 'home.faq_a3')
         }
       },
       {
-        "@type": "Question",
-        "name": "Does my data leave my machine?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "No. Masked data is forwarded to the AI API, but the original PII is never stored or transmitted. The mapping is kept locally in an encrypted SQLite vault that never leaves your machine."
+        '@type': 'Question',
+        'name': t(lang, 'home.faq_q4'),
+        'acceptedAnswer': {
+          '@type': 'Answer',
+          'text': t(lang, 'home.faq_a4')
         }
       },
       {
-        "@type": "Question",
-        "name": "Which AI services are supported?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Any OpenAI-compatible API. This includes ChatGPT (OpenAI), Claude (Anthropic), DeepSeek, Cursor, Kimi, Azure OpenAI, and any custom API endpoint that follows the OpenAI format."
+        '@type': 'Question',
+        'name': t(lang, 'home.faq_q5'),
+        'acceptedAnswer': {
+          '@type': 'Answer',
+          'text': t(lang, 'home.faq_a5')
         }
       },
       {
-        "@type": "Question",
-        "name": "Is it free?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes. AI Privacy Gateway is MIT licensed — free for personal and commercial use. No account needed, no credit card required."
+        '@type': 'Question',
+        'name': t(lang, 'home.faq_q6'),
+        'acceptedAnswer': {
+          '@type': 'Answer',
+          'text': t(lang, 'home.faq_a6')
         }
       }
     ]
-  }</script>
+  })} />
 
   <!-- HowTo Structured Data -->
-  <script is:inline type="application/ld+json">{
-    "@context": "https://schema.org",
-    "@type": "HowTo",
-    "name": "Set up AI Privacy Gateway in 30 seconds",
-    "description": "Protect your AI API calls from leaking sensitive data.",
-    "step": [
+  <script is:inline type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    'name': t(lang, 'home.howto_name'),
+    'description': t(lang, 'home.howto_desc'),
+    'step': [
       {
-        "@type": "HowToStep",
-        "position": 1,
-        "name": "Install the gateway",
-        "text": "Run docker run -d --name ai-privacy-gw -p 9999:9999 ghcr.io/gunxueqiu6/ai-privacy-gateway:lite",
-        "url": "https://privacygw.pages.dev/download"
+        '@type': 'HowToStep',
+        'position': 1,
+        'name': t(lang, 'home.howto_s1_name'),
+        'text': t(lang, 'home.howto_s1_text'),
+        'url': 'https://privacygw.pages.dev/download'
       },
       {
-        "@type": "HowToStep",
-        "position": 2,
-        "name": "Change your API base URL",
-        "text": "Set your AI client's base_url to http://localhost:9999/v1 instead of https://api.openai.com/v1",
-        "url": "https://privacygw.pages.dev/download"
+        '@type': 'HowToStep',
+        'position': 2,
+        'name': t(lang, 'home.howto_s2_name'),
+        'text': t(lang, 'home.howto_s2_text'),
+        'url': 'https://privacygw.pages.dev/download'
       },
       {
-        "@type": "HowToStep",
-        "position": 3,
-        "name": "Done",
-        "text": "All PII is automatically masked before reaching the AI API. No further configuration needed."
+        '@type': 'HowToStep',
+        'position': 3,
+        'name': t(lang, 'home.howto_s3_name'),
+        'text': t(lang, 'home.howto_s3_text')
       }
     ]
-  }</script>
+  })} />
 </Layout>
 
 <style>

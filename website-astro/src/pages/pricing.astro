@@ -2,12 +2,15 @@
 import Layout from '../layouts/Layout.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import { t } from '../i18n/translations';
+import { getLangFromURL } from '../i18n/utils';
+
+const lang = getLangFromURL(Astro.url.pathname);
 ---
 
 <Layout
-  title="AI Privacy Gateway — Free Forever. MIT Licensed."
-  description="AI Privacy Gateway is free forever under the MIT license. No hidden costs, no subscriptions, no data collection. Personal and commercial use allowed."
-  keywords="免费AI隐私工具,开源PII网关,隐私保护免费方案,MIT开源数据脱敏,免费数据安全"
+  title={t(lang, 'pricing.title')}
+  description={t(lang, 'pricing.subtitle')}
   canonicalURL="https://privacygw.pages.dev/pricing">
   <Nav />
 
@@ -18,16 +21,13 @@ import Footer from '../components/Footer.astro';
     <div class="container hero-content">
       <div class="hero-badge">
         <span class="pulse-dot"></span>
-        <span>Free Forever &middot; MIT Licensed</span>
+        <span>{t(lang, 'pricing.badge')}</span>
       </div>
       <h1 class="hero-title">
-        No subscriptions.<br/>
-        <span class="gradient-text">Just privacy.</span>
+        {t(lang, 'pricing.hero_title1')}<br/>
+        <span class="gradient-text">{t(lang, 'pricing.hero_title2')}</span>
       </h1>
-      <p class="hero-desc">
-        AI Privacy Gateway is open source and free. Always. No credit card, no account,
-        no data collection. You run it on your own machine.
-      </p>
+      <p class="hero-desc">{t(lang, 'pricing.hero_desc')}</p>
     </div>
   </section>
 
@@ -38,98 +38,96 @@ import Footer from '../components/Footer.astro';
         <!-- Lite / OSS Card -->
         <div class="pricing-card pricing-featured glass glow-hover">
           <div class="pricing-glow"></div>
-          <div class="pricing-badge">Free Forever</div>
+          <div class="pricing-badge">{t(lang, 'pricing.lite_badge')}</div>
           <div class="pricing-header">
-            <h2 class="pricing-name">Lite Edition</h2>
+            <h2 class="pricing-name">{t(lang, 'pricing.lite_name')}</h2>
             <div class="pricing-amount">
               <span class="pricing-currency">$</span>
-              <span class="pricing-value">0</span>
+              <span class="pricing-value">{t(lang, 'pricing.lite_price')}</span>
             </div>
-            <p class="pricing-period">MIT License &middot; No restrictions</p>
+            <p class="pricing-period">{t(lang, 'pricing.lite_period')}</p>
           </div>
 
           <ul class="pricing-features">
             <li class="pricing-feat">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              Intelligent masking engine (14 entity types)
+              {t(lang, 'pricing.lite_feature1')}
             </li>
             <li class="pricing-feat">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              Regex + NER dual-engine detection
+              {t(lang, 'pricing.lite_feature2')}
             </li>
             <li class="pricing-feat">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              SSE streaming proxy with real-time masking
+              {t(lang, 'pricing.lite_feature3')}
             </li>
             <li class="pricing-feat">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              Local SQLite encrypted vault
+              {t(lang, 'pricing.lite_feature4')}
             </li>
             <li class="pricing-feat">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              Custom regex &amp; keyword rules
+              {t(lang, 'pricing.lite_feature5')}
             </li>
             <li class="pricing-feat">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              Real-time admin dashboard
+              {t(lang, 'pricing.lite_feature6')}
             </li>
             <li class="pricing-feat">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              Docker / pip / binary / browser extension
+              {t(lang, 'pricing.lite_feature7')}
             </li>
             <li class="pricing-feat">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              Commercial use allowed
+              {t(lang, 'pricing.lite_feature8')}
             </li>
           </ul>
 
           <a href="/download" class="btn btn-primary pricing-cta">
-            Get Started Free
+            {t(lang, 'pricing.lite_cta')}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>
           </a>
 
-          <p class="pricing-footnote">
-            No registration. No email. Just download and run.
-          </p>
+          <p class="pricing-footnote">{t(lang, 'pricing.lite_footnote')}</p>
         </div>
 
-        <!-- 企业支持 -->
+        <!-- Enterprise -->
         <div class="pricing-card glass">
-          <div class="pricing-badge pricing-badge-soon">For Teams</div>
+          <div class="pricing-badge pricing-badge-soon">{t(lang, 'pricing.ent_badge')}</div>
           <div class="pricing-header">
-            <h2 class="pricing-name">Enterprise Support</h2>
-            <p class="pricing-period" style="margin-top:0.75rem;">Custom deployment &amp; compliance support for organizations</p>
+            <h2 class="pricing-name">{t(lang, 'pricing.ent_name')}</h2>
+            <p class="pricing-period" style="margin-top:0.75rem;">{t(lang, 'pricing.ent_desc')}</p>
           </div>
 
           <ul class="pricing-features">
             <li class="pricing-feat">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              On-premise or VPC deployment
+              {t(lang, 'pricing.ent_feature1')}
             </li>
             <li class="pricing-feat">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              Custom compliance reporting
+              {t(lang, 'pricing.ent_feature2')}
             </li>
             <li class="pricing-feat">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              SSO / SAML integration
+              {t(lang, 'pricing.ent_feature3')}
             </li>
             <li class="pricing-feat">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              SLA-backed support
+              {t(lang, 'pricing.ent_feature4')}
             </li>
             <li class="pricing-feat">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              Dedicated support engineer
+              {t(lang, 'pricing.ent_feature5')}
             </li>
           </ul>
 
           <a href="https://t.me/chirstmas_7" class="btn btn-ghost pricing-cta">
-            Contact Us
+            {t(lang, 'pricing.ent_cta')}
           </a>
-          <p class="pricing-footnote">Tailored pricing for your organization.</p>
+          <p class="pricing-footnote">{t(lang, 'pricing.ent_footnote')}</p>
         </div>
       </div>
     </div>
@@ -138,52 +136,52 @@ import Footer from '../components/Footer.astro';
   <!-- Feature comparison -->
   <section class="comparison">
     <div class="container">
-      <h2 class="section-title">Everything included</h2>
-      <p class="section-subtitle">All features are free and open source. No paywalls.</p>
+      <h2 class="section-title">{t(lang, 'pricing.comp_title')}</h2>
+      <p class="section-subtitle">{t(lang, 'pricing.comp_subtitle')}</p>
 
       <div class="comparison-table-wrap glass">
         <table class="comparison-table">
           <thead>
             <tr>
-              <th class="comp-feat-th">Feature</th>
-              <th class="comp-tier-th comp-lite">Lite (Free)</th>
+              <th class="comp-feat-th">{t(lang, 'pricing.comp_feature_col')}</th>
+              <th class="comp-tier-th comp-lite">{t(lang, 'pricing.comp_lite_col')}</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td class="comp-feat">14 entity type detection</td>
+              <td class="comp-feat">{t(lang, 'pricing.comp_f1')}</td>
               <td class="comp-cell"><span class="check">&#10003;</span></td>
             </tr>
             <tr>
-              <td class="comp-feat">SSE streaming proxy with real-time masking</td>
+              <td class="comp-feat">{t(lang, 'pricing.comp_f2')}</td>
               <td class="comp-cell"><span class="check">&#10003;</span></td>
             </tr>
             <tr>
-              <td class="comp-feat">AES-256-GCM encrypted vault</td>
+              <td class="comp-feat">{t(lang, 'pricing.comp_f3')}</td>
               <td class="comp-cell"><span class="check">&#10003;</span></td>
             </tr>
             <tr>
-              <td class="comp-feat">Custom regex/keyword rules</td>
+              <td class="comp-feat">{t(lang, 'pricing.comp_f4')}</td>
               <td class="comp-cell"><span class="check">&#10003;</span></td>
             </tr>
             <tr>
-              <td class="comp-feat">Admin dashboard + audit stream</td>
+              <td class="comp-feat">{t(lang, 'pricing.comp_f5')}</td>
               <td class="comp-cell"><span class="check">&#10003;</span></td>
             </tr>
             <tr>
-              <td class="comp-feat">Docker / pip / Windows / macOS / browser ext</td>
+              <td class="comp-feat">{t(lang, 'pricing.comp_f6')}</td>
               <td class="comp-cell"><span class="check">&#10003;</span></td>
             </tr>
             <tr>
-              <td class="comp-feat">Multi-upstream load balancing</td>
+              <td class="comp-feat">{t(lang, 'pricing.comp_f7')}</td>
               <td class="comp-cell"><span class="check">&#10003;</span></td>
             </tr>
             <tr>
-              <td class="comp-feat">MIT License (personal + commercial)</td>
+              <td class="comp-feat">{t(lang, 'pricing.comp_f8')}</td>
               <td class="comp-cell"><span class="check">&#10003;</span></td>
             </tr>
             <tr>
-              <td class="comp-feat">No telemetry, 100% local</td>
+              <td class="comp-feat">{t(lang, 'pricing.comp_f9')}</td>
               <td class="comp-cell"><span class="check">&#10003;</span></td>
             </tr>
           </tbody>
@@ -201,19 +199,16 @@ import Footer from '../components/Footer.astro';
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
         </div>
-        <h3>Open Source. Auditable. Trustable.</h3>
-        <p>
-          Every line of code is on GitHub. No telemetry, no phone-home, no hidden data collection.
-          If you don't trust the binary, build from source.
-        </p>
+        <h3>{t(lang, 'pricing.trust_title')}</h3>
+        <p>{t(lang, 'pricing.trust_desc')}</p>
         <div class="trust-buttons">
           <a href="https://github.com/gunxueqiu6/ai-privacy-gateway" class="btn btn-primary">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
             </svg>
-            View Source
+            {t(lang, 'pricing.trust_source')}
           </a>
-          <a href="/download" class="btn btn-ghost">Download Lite</a>
+          <a href="/download" class="btn btn-ghost">{t(lang, 'pricing.trust_download')}</a>
         </div>
       </div>
     </div>
@@ -222,31 +217,31 @@ import Footer from '../components/Footer.astro';
   <!-- FAQ -->
   <section class="faq">
     <div class="container">
-      <h2 class="section-title">Frequently asked questions</h2>
+      <h2 class="section-title">{t(lang, 'pricing.faq_title')}</h2>
       <div class="faq-grid">
         <div class="faq-item glass">
-          <h3>Is Lite really free forever?</h3>
-          <p>Yes. MIT licensed, no strings attached. No hidden costs, no upsells, no data collection. Free for personal and commercial use.</p>
+          <h3>{t(lang, 'pricing.faq_q1')}</h3>
+          <p>{t(lang, 'pricing.faq_a1')}</p>
         </div>
         <div class="faq-item glass">
-          <h3>Can I use it in a commercial product?</h3>
-          <p>Absolutely. MIT license permits use in closed-source commercial products. No attribution required.</p>
+          <h3>{t(lang, 'pricing.faq_q2')}</h3>
+          <p>{t(lang, 'pricing.faq_a2')}</p>
         </div>
         <div class="faq-item glass">
-          <h3>Where is my data stored?</h3>
-          <p>Entirely on your machine. The gateway uses a local SQLite database. No data is ever uploaded to any third-party server.</p>
+          <h3>{t(lang, 'pricing.faq_q3')}</h3>
+          <p>{t(lang, 'pricing.faq_a3')}</p>
         </div>
         <div class="faq-item glass">
-          <h3>Does it work with Cursor / DeepSeek / Kimi?</h3>
-          <p>Yes. Any tool that uses an OpenAI-compatible API can point to the gateway. Just change the <code>base_url</code>.</p>
+          <h3>{t(lang, 'pricing.faq_q4')}</h3>
+          <p set:html={t(lang, 'pricing.faq_a4')} />
         </div>
         <div class="faq-item glass">
-          <h3>What if I need help?</h3>
-          <p>Open an issue on <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/issues">GitHub Issues</a>, check the <a href="/docs">docs</a>, or reach out via <a href="https://t.me/chirstmas_7">Telegram</a>.</p>
+          <h3>{t(lang, 'pricing.faq_q5')}</h3>
+          <p set:html={t(lang, 'pricing.faq_a5')} />
         </div>
         <div class="faq-item glass">
-          <h3>Can I get enterprise support?</h3>
-          <p>Yes. Custom deployment, compliance reporting, SSO/SAML, and SLA-backed support are available for organizations. <a href="https://t.me/chirstmas_7">Contact us</a> for details.</p>
+          <h3>{t(lang, 'pricing.faq_q6')}</h3>
+          <p set:html={t(lang, 'pricing.faq_a6')} />
         </div>
       </div>
     </div>

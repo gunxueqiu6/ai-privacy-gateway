@@ -3,6 +3,7 @@ title: "How Banks and Fintech Can Safely Use LLMs"
 description: "Banks and fintech companies face unique regulatory challenges when adopting AI. Learn how to use LLMs while maintaining PCI DSS, SOX, and financial privacy compliance."
 pubDate: 2026-06-22
 tags: ["fintech", "banking", "compliance"]
+lang: "en"
 ---
 
 Financial services stand to gain massive efficiency from AI — automated underwriting, fraud detection, customer service, code generation. They also face the strictest data protection requirements of any industry.

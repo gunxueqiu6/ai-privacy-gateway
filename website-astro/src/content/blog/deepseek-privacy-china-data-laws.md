@@ -3,6 +3,7 @@ title: "DeepSeek Privacy: What China's Data Laws Mean for Your Prompts"
 description: "Is DeepSeek safe to use? Understand where your data goes when using DeepSeek AI, China's data protection laws, and practical steps to protect sensitive information."
 pubDate: 2026-06-22
 tags: ["DeepSeek", "privacy", "compliance"]
+lang: "en"
 ---
 
 DeepSeek has emerged as one of the most capable AI models, rivaling GPT-4 and Claude on many benchmarks. But for organizations and developers outside China, one question dominates: where does your data actually go?

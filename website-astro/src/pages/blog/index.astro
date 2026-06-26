@@ -4,13 +4,21 @@ import Layout from '../../layouts/Layout.astro';
 import Nav from '../../components/Nav.astro';
 import Footer from '../../components/Footer.astro';
 import BlogCard from '../../components/BlogCard.astro';
+import { getLangFromURL } from '../../i18n/utils';
 
+const lang = getLangFromURL(Astro.url.pathname);
 const allPosts = await getCollection('blog');
 const posts = allPosts
   .filter(p => !p.data.draft)
+  .filter(p => {
+    const postLang = (p.data as any).lang || 'en';
+    if (lang === 'zh') return postLang === 'zh';
+    return postLang === 'en';
+  })
   .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
 
 const allTags = [...new Set(posts.flatMap(p => p.data.tags))].sort();
+const blogBasePath = lang === 'en' ? '/en/blog' : '/blog';
 
 const selectedTag = Astro.url.searchParams.get('tag');
 const filteredPosts = selectedTag
@@ -38,10 +46,10 @@ const filteredPosts = selectedTag
 
       {allTags.length > 0 && (
         <div class="tag-filter">
-          <a href="/blog" class={`tag-chip ${!selectedTag ? 'active' : ''}`}>All</a>
+          <a href={blogBasePath} class={`tag-chip ${!selectedTag ? 'active' : ''}`}>All</a>
           {allTags.map(tag => (
             <a
-              href={`/blog?tag=${encodeURIComponent(tag)}`}
+              href={`${blogBasePath}?tag=${encodeURIComponent(tag)}`}
               class={`tag-chip ${selectedTag === tag ? 'active' : ''}`}
             >
               {tag}

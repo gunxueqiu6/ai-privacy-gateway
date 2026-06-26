@@ -1,0 +1,179 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { getLangFromURL } from '../i18n/utils';
+
+const lang = getLangFromURL(Astro.url.pathname);
+const isZh = lang === 'zh';
+---
+
+<Layout
+  title={isZh ? '隐私政策 — AI Privacy Gateway' : 'Privacy Policy — AI Privacy Gateway'}
+  description={isZh ? 'AI Privacy Gateway 隐私政策：了解我们如何处理您的数据。本地脱敏，零数据上传，用户完全掌控。' : 'AI Privacy Gateway Privacy Policy. How we handle your data. Local masking, zero data upload, full user control.'}
+  canonicalURL="https://privacygw.pages.dev/privacy-policy">
+  <Nav />
+
+  <section class="seo-page">
+    <div class="container">
+      <div class="seo-header">
+        <div class="seo-badge">{isZh ? '隐私政策' : 'Privacy Policy'}</div>
+        <h1>{isZh ? '隐私政策' : 'Privacy Policy'}</h1>
+        <p class="seo-subtitle">{isZh ? '最后更新日期：2026 年 6 月 26 日' : 'Last updated: June 26, 2026'}</p>
+      </div>
+
+      <div class="seo-tldr glass">
+        <strong>{isZh ? '核心承诺：' : 'Our Commitment: '}</strong>
+        {isZh
+          ? 'AI Privacy Gateway 是开源、自托管的 AI API 隐私网关。我们不会收集您的数据，不会向第三方出售信息，不会在您的机器之外存储任何敏感内容。所有 PII 脱敏操作在本地完成，原始数据永不离开您的控制。'
+          : 'AI Privacy Gateway is an open-source, self-hosted AI API privacy gateway. We do not collect your data, sell information to third parties, or store any sensitive content outside your machine. All PII masking happens locally; raw data never leaves your control.'}
+      </div>
+
+      <h2>{isZh ? '1. 我们处理的数据' : '1. Data We Process'}</h2>
+      <p>
+        {isZh
+          ? 'AI Privacy Gateway 作为反向代理运行，位于您的 AI 客户端（如 ChatGPT、Cursor、Claude、DeepSeek）与 AI API 服务之间。网关处理以下数据：'
+          : 'AI Privacy Gateway operates as a reverse proxy between your AI client (e.g., ChatGPT, Cursor, Claude, DeepSeek) and the AI API service. The gateway processes:'}
+      </p>
+      <ul>
+        <li><strong>{isZh ? 'API 请求内容' : 'API Request Content'}</strong> — {isZh ? '您发送给 AI 模型的提示词（prompts），包括文本、代码、文件等。' : 'Prompts you send to AI models, including text, code, files, etc.'}</li>
+        <li><strong>{isZh ? 'API 响应内容' : 'API Response Content'}</strong> — {isZh ? 'AI 模型返回的生成结果，其中已脱敏的占位符会被还原为原始映射值。' : 'Generated responses from AI models, where masked placeholders are restored to original mapped values.'}</li>
+        <li><strong>{isZh ? '元数据' : 'Metadata'}</strong> — {isZh ? '请求时间戳、目标 API 端点、HTTP 状态码等基本运行信息，仅用于管理面板的实时统计展示。' : 'Request timestamps, target API endpoints, HTTP status codes — used solely for the admin dashboard real-time statistics.'}</li>
+      </ul>
+      <p>
+        {isZh
+          ? '网关不会主动收集任何个人身份信息（PII）。如果请求中包含 PII，网关会在本地检测并脱敏，然后才将处理后的请求转发给 AI API。'
+          : 'The gateway does not actively collect any personal identifiable information (PII). If a request contains PII, the gateway detects and masks it locally before forwarding the processed request to the AI API.'}
+      </p>
+
+      <h2>{isZh ? '2. 数据存储与加密' : '2. Data Storage and Encryption'}</h2>
+      <p>
+        {isZh
+          ? 'AI Privacy Gateway 使用本地的 SQLite 数据库（称为"Vault"）来存储敏感信息的脱敏映射关系。vault 采用 AES-256-GCM 加密，密钥在启动时自动生成。'
+          : 'AI Privacy Gateway uses a local SQLite database (called the "Vault") to store masked mapping relationships for sensitive information. The vault is encrypted with AES-256-GCM; the encryption key is auto-generated at startup.'}
+      </p>
+      <ul>
+        <li><strong>{isZh ? '存储位置' : 'Storage Location'}</strong> — {isZh ? 'vault 文件存储于您运行网关的机器本地。您完全控制该文件。' : 'The vault file is stored locally on the machine where you run the gateway. You have full control over it.'}</li>
+        <li><strong>{isZh ? '加密方式' : 'Encryption'}</strong> — {isZh ? '所有映射数据使用 AES-256-GCM 加密存储。加密密钥仅存在于本地内存中。' : 'All mapping data is encrypted using AES-256-GCM. The encryption key exists only in local memory.'}</li>
+        <li><strong>{isZh ? '数据保留' : 'Data Retention'}</strong> — {isZh ? '映射数据在 vault 中保留，直到您删除 vault 文件或停止使用网关。您可以随时清理 vault 中的映射记录。' : 'Mapping data persists in the vault until you delete the vault file or stop using the gateway. You can clear mapping records at any time.'}</li>
+        <li><strong>{isZh ? '不持久化原始 PII' : 'No PII Persistence'}</strong> — {isZh ? '原始敏感信息不会以明文形式持久化存储。只有脱敏后的占位符与原始值之间的加密映射关系被保存。' : 'Raw sensitive information is never persisted in plaintext. Only encrypted mapping relationships between masked placeholders and original values are stored.'}</li>
+      </ul>
+
+      <h2>{isZh ? '3. 数据共享与第三方' : '3. Data Sharing and Third Parties'}</h2>
+      <p>
+        {isZh
+          ? 'AI Privacy Gateway 不会将您的数据出售、出租或分享给任何第三方。具体来说：'
+          : 'AI Privacy Gateway does not sell, rent, or share your data with any third party. Specifically:'}
+      </p>
+      <ul>
+        <li>{isZh ? '没有遥测：网关不会向任何远程服务器发送使用数据或统计信息。' : 'No telemetry: The gateway sends no usage data or statistics to any remote server.'}</li>
+        <li>{isZh ? '没有广告跟踪：网站和管理面板不包含任何广告或第三方跟踪脚本。' : 'No ad tracking: The website and admin dashboard contain no ads or third-party tracking scripts.'}</li>
+        <li>{isZh ? '只有 AI API 通信：网关仅与您配置的上游 AI API 通信，发送脱敏后的请求内容。' : 'AI API only: The gateway communicates exclusively with the upstream AI API you configured, sending masked request content.'}</li>
+      </ul>
+
+      <h2>{isZh ? '4. 自托管与控制' : '4. Self-Hosting and Control'}</h2>
+      <p>
+        {isZh
+          ? 'AI Privacy Gateway 是自托管软件。您在自己的基础设施上运行它——无论是个人电脑、服务器还是云实例。这意味着：'
+          : 'AI Privacy Gateway is self-hosted software. You run it on your own infrastructure — whether a personal computer, server, or cloud instance. This means:'}
+      </p>
+      <ul>
+        <li>{isZh ? '您的数据始终在您控制的机器上处理。' : 'Your data is always processed on a machine you control.'}</li>
+        <li>{isZh ? '您可以随时停止使用网关，删除 vault 文件，或迁移到其他环境。' : 'You can stop using the gateway, delete the vault file, or migrate to another environment at any time.'}</li>
+        <li>{isZh ? '没有"删除账户"的流程——因为没有账户可以删除。您只需删除本地数据即可。' : 'There is no "delete account" process — because there is no account to delete. Just delete your local data.'}</li>
+      </ul>
+
+      <h2>{isZh ? '5. 网站数据收集' : '5. Website Data Collection'}</h2>
+      <p>
+        {isZh
+          ? 'AI Privacy Gateway 官网（privacygw.pages.dev）是一个静态网站，部署于 Cloudflare Pages。该网站：'
+          : 'The AI Privacy Gateway website (privacygw.pages.dev) is a static site deployed on Cloudflare Pages. The website:'}
+      </p>
+      <ul>
+        <li>{isZh ? '不使用 cookies。' : 'Does not use cookies.'}</li>
+        <li>{isZh ? '不包含第三方跟踪脚本。' : 'Does not include third-party tracking scripts.'}</li>
+        <li>{isZh ? '不收集访问者的个人信息。' : 'Does not collect visitor personal information.'}</li>
+        <li>{isZh ? '可能记录基本的页面访问统计以用于运营分析，但不会关联到个人身份。' : 'May log basic page access statistics for operational analysis, but these are not linked to personal identity.'}</li>
+      </ul>
+
+      <h2>{isZh ? '6. 数据安全' : '6. Data Security'}</h2>
+      <p>
+        {isZh
+          ? '我们采取以下措施保护您的数据：'
+          : 'We take the following measures to protect your data:'}
+      </p>
+      <ul>
+        <li><strong>{isZh ? '本地脱敏：' : 'Local Masking: '}</strong>{isZh ? '所有 PII 检测和脱敏操作在您的本地机器上完成，数据在离开您的控制前已被处理。' : 'All PII detection and masking happens on your local machine; data is processed before leaving your control.'}</li>
+        <li><strong>{isZh ? '加密存储：' : 'Encrypted Storage: '}</strong>{isZh ? '所有映射数据使用 AES-256-GCM 加密。' : 'All mapping data is encrypted with AES-256-GCM.'}</li>
+        <li><strong>{isZh ? '最小权限：' : 'Least Privilege: '}</strong>{isZh ? '网关只需要网络访问权限即可连接到您的 AI API。它不请求文件系统或其他系统资源的权限。' : 'The gateway only requires network access to connect to your AI API. It does not request filesystem or other system resource permissions.'}</li>
+        <li><strong>{isZh ? '开源审计：' : 'Open Source Audit: '}</strong>{isZh ? '全部代码在 GitHub 上开源，任何人都可以审计安全性。' : 'All source code is open on GitHub for anyone to audit.'}</li>
+      </ul>
+
+      <h2>{isZh ? '7. 您的权利' : '7. Your Rights'}</h2>
+      <p>
+        {isZh
+          ? '根据适用的数据保护法律（如 GDPR、CCPA、PIPL），您拥有以下权利：'
+          : 'Under applicable data protection laws (e.g., GDPR, CCPA, PIPL), you have the following rights:'}
+      </p>
+      <ul>
+        <li><strong>{isZh ? '知情权：' : 'Right to Know: '}</strong>{isZh ? '本隐私政策说明了我们处理的数据类型和方式。' : 'This privacy policy explains the types and methods of data we process.'}</li>
+        <li><strong>{isZh ? '删除权：' : 'Right to Delete: '}</strong>{isZh ? '您可以随时删除本地的 vault 文件来清除所有映射数据。' : 'You can delete all mapping data at any time by removing the local vault file.'}</li>
+        <li><strong>{isZh ? '数据可移植权：' : 'Right to Data Portability: '}</strong>{isZh ? 'vault 文件是标准的 SQLite 数据库，您可以直接读取和导出。' : 'The vault file is a standard SQLite database — you can read and export it directly.'}</li>
+        <li><strong>{isZh ? '限制处理权：' : 'Right to Restrict Processing: '}</strong>{isZh ? '停止网关即可完全停止所有数据处理。' : 'Stop the gateway to halt all data processing entirely.'}</li>
+      </ul>
+
+      <h2>{isZh ? '8. 隐私政策的变更' : '8. Changes to This Privacy Policy'}</h2>
+      <p>
+        {isZh
+          ? '我们可能会不时更新本隐私政策。重大变更将通过 GitHub 仓库的 Release 页面公告。我们建议您定期查阅本页面以了解最新信息。'
+          : 'We may update this privacy policy from time to time. Material changes will be announced via the GitHub repository Releases page. We encourage you to review this page periodically.'}
+      </p>
+
+      <h2>{isZh ? '9. 联系我们' : '9. Contact Us'}</h2>
+      <p>
+        {isZh
+          ? '如果您对本隐私政策有任何疑问、意见或担忧，请通过以下方式联系我们：'
+          : 'If you have questions, comments, or concerns about this privacy policy, please contact us:'}
+      </p>
+      <ul>
+        <li>{isZh ? 'GitHub Issues：' : 'GitHub Issues: '}<a href="https://github.com/gunxueqiu6/ai-privacy-gateway/issues">https://github.com/gunxueqiu6/ai-privacy-gateway/issues</a></li>
+        <li>Telegram: <a href="https://t.me/chirstmas_7">https://t.me/chirstmas_7</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <Footer />
+</Layout>
+
+<style>
+  .seo-page { padding: 8rem 0 4rem; }
+  .seo-page .container { max-width: 820px; margin: 0 auto; }
+  .seo-header { margin-bottom: 3rem; }
+  .seo-badge {
+    display: inline-block; padding: 0.35rem 0.85rem; border-radius: 20px;
+    font-size: 0.78rem; font-weight: 600; color: var(--primary);
+    background: rgba(134, 239, 172, 0.08); border: 1px solid rgba(134, 239, 172, 0.15);
+    margin-bottom: 1.25rem;
+  }
+  .seo-page h1 { font-size: 2.75rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1.15; margin-bottom: 1.25rem; }
+  .seo-subtitle { font-size: 1.1rem; color: var(--text-secondary); line-height: 1.8; }
+  .seo-tldr { padding: 1.25rem 1.5rem; margin-bottom: 2.5rem; font-size: 0.95rem; line-height: 1.7; color: var(--text-primary); }
+  .seo-tldr strong { color: var(--primary); }
+  .seo-page h2 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.03em; margin: 3rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+  .seo-page h3 { font-size: 1.25rem; font-weight: 600; margin: 2rem 0 0.75rem; }
+  .seo-page p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 1.25rem; }
+  .seo-page ul { list-style: none; padding: 0; margin-bottom: 1.5rem; }
+  .seo-page ul li { padding: 0.5rem 0 0.5rem 1.5rem; position: relative; color: var(--text-secondary); line-height: 1.6; }
+  .seo-page ul li::before { content: ''; position: absolute; left: 0; top: 0.9rem; width: 6px; height: 6px; border-radius: 50%; background: var(--primary); opacity: 0.5; }
+  .seo-page a { color: var(--primary); text-decoration: underline; text-underline-offset: 2px; }
+  .seo-page a:hover { color: var(--accent); }
+
+  @media (max-width: 768px) {
+    .seo-page { padding: 6rem 0 3rem; }
+    .seo-page h1 { font-size: 2rem; }
+    .seo-page h2 { font-size: 1.4rem; }
+  }
+  @media (max-width: 639px) {
+    .seo-page h1 { font-size: 1.75rem; }
+  }
+</style>

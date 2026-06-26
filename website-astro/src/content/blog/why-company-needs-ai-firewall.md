@@ -3,6 +3,7 @@ title: "Why Your Company Needs an AI Firewall"
 description: "Shadow AI is your biggest unmanaged security risk. An AI firewall gives you visibility and control over what data leaves your organization when employees use AI tools."
 pubDate: 2026-06-22
 tags: ["enterprise", "security", "firewall"]
+lang: "en"
 ---
 
 Your employees are using AI tools right now. ChatGPT, Claude, GitHub Copilot, Cursor, DeepSeek — the list grows monthly. Do you know what data they're sending?
