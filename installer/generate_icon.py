@@ -2,6 +2,7 @@
 Generate a simple app icon for AI Privacy Gateway installer.
 Produces installer/app.ico — a multi-size .ico file with a shield-like design.
 """
+
 import struct
 from io import BytesIO
 from PIL import Image, ImageDraw

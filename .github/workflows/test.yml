@@ -108,8 +108,15 @@ jobs:
       - name: Test Docker container
         run: |
           docker run -d --name test-gateway -p 9999:9999 ai-privacy-gateway:lite
-          sleep 5
-          curl -f http://localhost:9999/health || exit 1
+          for i in $(seq 1 12); do
+            sleep 2
+            if curl -sf http://localhost:9999/health; then
+              echo "Gateway healthy after $((i * 2))s"
+              break
+            fi
+            echo "Waiting for gateway... ($((i * 2))s)"
+          done
+          curl -f http://localhost:9999/health || (docker logs test-gateway && exit 1)
           docker stop test-gateway
 
   security-scan:
