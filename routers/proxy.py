@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 proxy_router = APIRouter(tags=["proxy"])
 
-ALLOWED_V1_PROXY_PATHS = {"models", "embeddings", "moderations"}
+ALLOWED_V1_PROXY_PATHS = {"models", "embeddings", "moderations", "messages", "images", "audio"}
 
 
 def _resolve_auth_and_headers(request: Request):
@@ -52,7 +52,16 @@ async def chat_completions(request: Request) -> Response:
 
     masked_body, mappings, stats, session_id, used_placeholders = gateway.mask_request(body)
 
-    if mappings:
+    # Dry-Run 模式：添加检测结果响应头，不写 Vault
+    dry_run_headers = {}
+    if config.DRY_RUN_MODE:
+        total_detected = sum(stats.values())
+        if total_detected > 0:
+            detected_types = [k for k, v in stats.items() if v > 0]
+            dry_run_headers["X-Dry-Run-Detected"] = str(total_detected)
+            dry_run_headers["X-Dry-Run-Detected-Types"] = ",".join(detected_types)
+
+    if mappings and not config.DRY_RUN_MODE:
         db.save_mappings(session_id, mappings, data_type="unknown", team_id=None)
         db.update_stats(stats, team_id=None)
 
@@ -87,7 +96,10 @@ async def chat_completions(request: Request) -> Response:
     return Response(
         content=resp_body,
         status_code=status_code,
-        headers={"Content-Type": resp_headers.get("content-type", "application/json")},
+        headers={
+            "Content-Type": resp_headers.get("content-type", "application/json"),
+            **dry_run_headers,
+        },
     )
 
 

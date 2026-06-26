@@ -7,7 +7,7 @@ import secrets
 import os
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict
 
 import bcrypt
 
@@ -82,6 +82,9 @@ class Config:
     UPSTREAM_LB_STRATEGY: str = os.environ.get("UPSTREAM_LB_STRATEGY", "round_robin")
     UPSTREAM_HEALTH_CHECK_INTERVAL: int = int(os.environ.get("UPSTREAM_HEALTH_CHECK_INTERVAL", "30"))
 
+    # 模型路由映射（JSON 格式: {"模型名": "上游URL", "*": "默认上游"}）
+    UPSTREAM_MODEL_MAP_RAW: str = os.environ.get("UPSTREAM_MODEL_MAP", "{}")
+
     # 数据库配置
     DB_PATH: str = os.environ.get("DB_PATH", "./vault_data/privacy_vault.db")
     DB_TYPE: str = os.environ.get("DB_TYPE", "sqlite")
@@ -106,6 +109,22 @@ class Config:
     # 无状态模式（纯内存，不落盘）
     STATELESS_MODE: bool = os.environ.get("STATELESS_MODE", "0") == "1"
 
+    # Dry-Run 模式：检测并日志记录敏感信息，但不实际脱敏，不写入 Vault
+    DRY_RUN_MODE: bool = os.environ.get("DRY_RUN_MODE", "0") == "1"
+
+    # 速率限制存储后端（内存: memory://, Redis: redis://host:port/db）
+    RATE_LIMIT_STORAGE: str = os.environ.get("RATE_LIMIT_STORAGE", "memory://")
+
+    # 并发限制
+    MAX_CONCURRENT_REQUESTS: int = int(os.environ.get("MAX_CONCURRENT_REQUESTS", "50"))
+    # 优雅关闭超时秒数
+    SHUTDOWN_TIMEOUT: int = int(os.environ.get("SHUTDOWN_TIMEOUT", "30"))
+    # 请求体大小限制（默认 10MB）
+    MAX_REQUEST_BODY_SIZE: int = int(os.environ.get("MAX_REQUEST_BODY_SIZE", "10485760"))
+    # TLS/SSL 配置（空字符串 = 不启用 TLS）
+    SSL_CERTFILE: str = os.environ.get("SSL_CERTFILE", "")
+    SSL_KEYFILE: str = os.environ.get("SSL_KEYFILE", "")
+
     # Runtime tier (always "lite" in open-source version)
     tier: str = "lite"
 
@@ -129,6 +148,13 @@ class Config:
         if not self.VAULT_ENCRYPT_KEY:
             logger.warning("VAULT_ENCRYPT_KEY not set — vault encryption is disabled")
 
+        # 模型路由映射解析
+        try:
+            self.UPSTREAM_MODEL_MAP: Dict[str, str] = json.loads(self.UPSTREAM_MODEL_MAP_RAW)
+        except json.JSONDecodeError:
+            logger.warning("UPSTREAM_MODEL_MAP 不是有效的 JSON，将使用空映射")
+            self.UPSTREAM_MODEL_MAP: Dict[str, str] = {}
+
         # Admin password
         if not self.ADMIN_PASSWORD_HASH and self.ADMIN_PASSWORD:
             salt = bcrypt.gensalt()
@@ -151,6 +177,47 @@ class Config:
         _save_persisted_secrets(persisted)
 
         self._validate()
+
+    def reload(self) -> None:
+        """Hot-reload: re-read environment variables and update config in-place."""
+        _load_dotenv()
+
+        self.LISTEN_PORT = int(os.environ.get("LISTEN_PORT", "9999"))
+        self.TARGET_LLM = os.environ.get("TARGET_LLM", "https://api.openai.com")
+        self.UPSTREAM_API_KEY = os.environ.get("UPSTREAM_API_KEY", "")
+        self.UPSTREAM_LLM_URLS = os.environ.get("UPSTREAM_LLM_URLS", "")
+        self.UPSTREAM_LB_STRATEGY = os.environ.get("UPSTREAM_LB_STRATEGY", "round_robin")
+        self.UPSTREAM_HEALTH_CHECK_INTERVAL = int(os.environ.get("UPSTREAM_HEALTH_CHECK_INTERVAL", "30"))
+        self.DB_PATH = os.environ.get("DB_PATH", "./vault_data/privacy_vault.db")
+        self.DB_TYPE = os.environ.get("DB_TYPE", "sqlite")
+        self.MASK_ENGINE_TYPE = os.environ.get("MASK_ENGINE_TYPE", "regex")
+        self.MAPPING_TTL = int(os.environ.get("MAPPING_TTL", "259200"))
+        self.STATELESS_MODE = os.environ.get("STATELESS_MODE", "0") == "1"
+        self.MAX_CONCURRENT_REQUESTS = int(os.environ.get("MAX_CONCURRENT_REQUESTS", "50"))
+        self.SHUTDOWN_TIMEOUT = int(os.environ.get("SHUTDOWN_TIMEOUT", "30"))
+        self.MAX_REQUEST_BODY_SIZE = int(os.environ.get("MAX_REQUEST_BODY_SIZE", "10485760"))
+        self.UPSTREAM_MODEL_MAP_RAW = os.environ.get("UPSTREAM_MODEL_MAP", "{}")
+        try:
+            self.UPSTREAM_MODEL_MAP = json.loads(self.UPSTREAM_MODEL_MAP_RAW)
+        except json.JSONDecodeError:
+            self.UPSTREAM_MODEL_MAP = {}
+        if os.environ.get("SSL_CERTFILE"):
+            self.SSL_CERTFILE = os.environ["SSL_CERTFILE"]
+        if os.environ.get("SSL_KEYFILE"):
+            self.SSL_KEYFILE = os.environ["SSL_KEYFILE"]
+
+        # Secrets: only update if explicitly set (never blank them out)
+        if os.environ.get("ADMIN_PASSWORD"):
+            self.ADMIN_PASSWORD = os.environ["ADMIN_PASSWORD"]
+        if os.environ.get("ADMIN_PASSWORD_HASH"):
+            self.ADMIN_PASSWORD_HASH = os.environ["ADMIN_PASSWORD_HASH"]
+        if os.environ.get("JWT_SECRET"):
+            self.JWT_SECRET = os.environ["JWT_SECRET"]
+        if os.environ.get("VAULT_ENCRYPT_KEY"):
+            self.VAULT_ENCRYPT_KEY = os.environ["VAULT_ENCRYPT_KEY"]
+
+        self._validate()
+        logger.info("Configuration hot-reloaded from environment")
 
     def _validate(self) -> None:
         """启动配置校验"""

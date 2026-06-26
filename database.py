@@ -2,7 +2,9 @@ import json
 import os
 import hashlib
 import logging
+import random
 import sqlite3
+import time as _time
 from datetime import UTC, datetime, timedelta
 from typing import Dict, List, Optional, Tuple, Generator, Any
 from contextlib import contextmanager
@@ -51,20 +53,38 @@ class Database:
 
     @contextmanager
     def _exclusive_conn(self) -> Generator[sqlite3.Connection, None, None]:
-        """获取具有排他写锁的数据库连接（BEGIN IMMEDIATE），用于原子操作"""
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        conn.execute("PRAGMA journal_mode=WAL")
-        conn.execute("PRAGMA synchronous=NORMAL")
-        conn.execute("BEGIN IMMEDIATE")
-        try:
-            yield conn
-            conn.commit()
-        except Exception:
-            conn.rollback()
-            raise
-        finally:
-            conn.close()
+        """获取具有排他写锁的数据库连接（BEGIN IMMEDIATE），用于原子操作
+
+        当遇到 "database is locked" 时自动重试（最多 3 次，每次间隔 100ms + 随机抖动）。
+        """
+        max_retries = 3
+        for attempt in range(1, max_retries + 1):
+            conn = sqlite3.connect(self.db_path)
+            conn.row_factory = sqlite3.Row
+            conn.execute("PRAGMA journal_mode=WAL")
+            conn.execute("PRAGMA synchronous=NORMAL")
+            try:
+                conn.execute("BEGIN IMMEDIATE")
+            except sqlite3.OperationalError as e:
+                conn.close()
+                if "database is locked" in str(e) and attempt < max_retries:
+                    delay = 0.1 + random.uniform(0, 0.05)
+                    logger.warning("数据库锁定，重试 %d/%d (等待 %.2fs)", attempt, max_retries, delay)
+                    _time.sleep(delay)
+                    continue
+                if "database is locked" in str(e):
+                    logger.error("数据库锁定重试均失败 (%d 次)", max_retries)
+                raise
+
+            try:
+                yield conn
+                conn.commit()
+            except Exception:
+                conn.rollback()
+                raise
+            finally:
+                conn.close()
+            return
 
     def _init_db(self) -> None:
         with self.get_conn() as conn:
@@ -149,6 +169,12 @@ class Database:
                 );
             """)
 
+    def _ensure_initialized(self) -> None:
+        """Health check: verify the database is accessible and tables exist.
+        Raises on failure so callers can catch and handle."""
+        with self.get_conn() as conn:
+            conn.execute("SELECT 1 FROM vault_mappings LIMIT 1")
+
     def _encrypt_value(self, value: str) -> str:
         """Encrypt *value* if vault encryption is active, otherwise return as-is."""
         crypto = get_vault_crypto()
@@ -163,6 +189,82 @@ class Database:
             return value
         decrypted = crypto.decrypt(value)
         return decrypted if decrypted is not None else value
+
+    def check_integrity(self) -> bool:
+        """运行 PRAGMA integrity_check 验证数据库完整性"""
+        try:
+            with self.get_conn() as conn:
+                cursor = conn.cursor()
+                cursor.execute("PRAGMA integrity_check")
+                result = cursor.fetchone()[0]
+                if result == "ok":
+                    logger.info("数据库完整性检查通过")
+                    return True
+                logger.error("数据库完整性检查失败: %s", result)
+                return False
+        except Exception as e:
+            logger.error("数据库完整性检查异常: %s", e)
+            return False
+
+    def backup_vault(self, path: str) -> int:
+        """备份 Vault 数据库到指定路径
+
+        Args:
+            path: 备份文件路径
+
+        Returns:
+            备份文件大小（字节）
+        """
+        dest_dir = os.path.dirname(path)
+        if dest_dir:
+            os.makedirs(dest_dir, exist_ok=True)
+        with sqlite3.connect(path) as dest:
+            src = sqlite3.connect(self.db_path)
+            try:
+                src.backup(dest, pages=1)
+            finally:
+                src.close()
+        size = os.path.getsize(path)
+        logger.info("Vault 备份完成: %s (%d 字节)", path, size)
+        return size
+
+    def restore_vault(self, path: str, force: bool = False) -> bool:
+        """从备份文件恢复 Vault 数据库
+
+        Args:
+            path: 备份文件路径
+            force: 如果为 True，允许覆盖非空 Vault
+
+        Returns:
+            恢复成功返回 True
+
+        Raises:
+            ValueError: Vault 非空且 force=False
+            RuntimeError: 恢复后完整性检查失败
+        """
+        # 检查当前 Vault 是否为空
+        with self.get_conn() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) FROM vault_mappings")
+            count = cursor.fetchone()[0]
+            if count > 0 and not force:
+                raise ValueError("保险库非空，如需覆盖请设置 force=True")
+
+        # 执行恢复（从备份文件复制到主数据库）
+        with sqlite3.connect(path) as src:
+            dest = sqlite3.connect(self.db_path)
+            try:
+                dest.execute("PRAGMA journal_mode=WAL")
+                src.backup(dest, pages=1)
+            finally:
+                dest.close()
+
+        # 验证完整性
+        if not self.check_integrity():
+            raise RuntimeError("恢复后完整性检查失败")
+
+        logger.info("从 %s 恢复 Vault 成功", path)
+        return True
 
     def save_mappings(self, session_id: str, mappings: Dict[str, str], data_type: str = "unknown", team_id: Optional[str] = None) -> None:
         # Encrypt values if vault encryption is active
@@ -535,6 +637,17 @@ class Database:
                 "postcode_count": 0,
                 "total_count": 0
             }
+
+    def get_stats_range(self, from_date: str, to_date: str) -> List[Dict[str, Any]]:
+        """Get daily stats for a date range (inclusive).
+        Returns list of row dicts sorted by date ascending."""
+        with self.get_conn() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT * FROM stats WHERE date >= ? AND date <= ? ORDER BY date ASC",
+                (from_date, to_date)
+            )
+            return [dict(row) for row in cursor.fetchall()]
 
 
 

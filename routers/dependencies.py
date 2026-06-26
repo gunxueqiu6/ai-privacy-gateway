@@ -1,5 +1,33 @@
 """
 共享依赖 — 认证、限流、请求过滤等跨路由依赖。
+
+速率限制的多 Worker 限制
+=========================
+slowapi 默认使用内存存储，每个 uvicorn worker 拥有独立的计数器。
+当启用多个 worker（`uvicorn --workers N`）时，客户端可以绕过 N 倍的速率限制。
+
+解决方案（按推荐优先级排序）:
+
+1. 单 Worker 部署
+   - 当前行为在 1 个 worker 下是正确的。
+   - 如果不需要多 worker 并发，保持默认即可。
+
+2. Redis 后端存储
+   - 设置 RATE_LIMIT_STORAGE=redis://host:port/db
+   - slowapi 支持 RedisStorage（需要安装 slowapi[redis] 或 redis 包）:
+       from slowapi import Limiter
+       from slowapi.storage import RedisStorage
+       limiter = Limiter(key_func=..., storage_uri="redis://localhost:6379/0")
+   - 所有 worker 共享同一 Redis 计数器，速率限制准确。
+
+3. 反向代理限流
+   - 使用 nginx limit_req 模块:
+       limit_req_zone $binary_remote_addr zone=api:10m rate=60r/m;
+       location /v1/ { limit_req zone=api burst=20 nodelay; }
+   - 使用 Cloudflare Rate Limiting（WAF 层面）
+   - 前置网关如 Kong / Traefik 的内置限流插件
+
+配置变量: RATE_LIMIT_STORAGE（见 config.py）
 """
 from datetime import UTC, datetime, timedelta
 from typing import Any, Dict, Optional, Set

@@ -1,12 +1,15 @@
-"""Admin panel routes — login, stats, keywords, version, integrity checks, audit stream."""
+"""Admin panel routes — login, stats, keywords, version, integrity checks, audit stream,
+vault backup/restore, dry-run toggle."""
 
 import asyncio
 import json
 import logging
+import os
 import re
-from typing import Optional
+from datetime import datetime, timedelta
+from typing import Optional, List
 
-from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi import APIRouter, HTTPException, Query, Request, Response
 from fastapi.responses import JSONResponse, StreamingResponse
 
 from .dependencies import (
@@ -68,7 +71,7 @@ async def admin_login(request: Request) -> JSONResponse:
 
     token = create_jwt_token()
 
-    response = JSONResponse({"status": "ok", "message": "登录成功", "token": token})
+    response = JSONResponse({"status": "ok", "message": "登录成功"})
     response.set_cookie(key="session_token", value=token, httponly=True, secure=request.url.scheme == "https", samesite="strict", max_age=86400)
     return response
 
@@ -196,7 +199,6 @@ async def check_integrity(request: Request) -> dict:
     """完整性检查"""
     await require_admin(request)
 
-    import os
     db_path = config.DB_PATH
     config_path = "config.py"
 
@@ -355,3 +357,261 @@ async def admin_toggle_regex_rule(request: Request, rule_id: int):
     status_text = "启用" if new_enabled else "禁用"
     logger.info(f"管理员{status_text}自定义正则规则: {target['name']} (id={rule_id})")
     return {"status": "ok", "id": rule_id, "enabled": new_enabled, "message": f"规则 '{target['name']}' 已{status_text}"}
+
+
+# ==================== Vault Backup & Recovery ====================
+
+
+@router.get("/admin/vault/integrity")
+@limiter.limit("10/minute")
+async def vault_integrity(request: Request) -> dict:
+    """Vault 数据库完整性检查 - 需要认证"""
+    await require_admin(request)
+
+    result = db.check_integrity()
+    return {"status": "ok" if result else "error", "integrity_ok": result}
+
+
+@router.post("/admin/vault/backup")
+@limiter.limit("5/minute")
+async def vault_backup(request: Request) -> dict:
+    """备份 Vault 数据库 - 需要认证"""
+    await require_admin(request)
+
+    backup_dir = os.path.join(os.path.dirname(config.DB_PATH), "backups")
+    os.makedirs(backup_dir, exist_ok=True)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    backup_path = os.path.join(backup_dir, f"vault_backup_{timestamp}.db")
+
+    size = db.backup_vault(backup_path)
+    db.log_audit(None, "vault_backup", {"path": backup_path, "size": size})
+    logger.info("管理员触发 Vault 备份: %s (%d 字节)", backup_path, size)
+    return {"status": "ok", "path": backup_path, "size": size}
+
+
+@router.post("/admin/vault/restore")
+@limiter.limit("3/minute")
+async def vault_restore(request: Request):
+    """从备份文件恢复 Vault 数据库 - 需要认证"""
+    await require_admin(request)
+
+    body, ok = await safe_json(request)
+    if not ok:
+        return BAD_ENCODING_RESPONSE
+    backup_path = (body.get("path") or "").strip()
+    force = body.get("force", False)
+
+    if not backup_path:
+        return JSONResponse(status_code=400, content={"error": "备份路径不能为空"})
+    if not os.path.exists(backup_path):
+        return JSONResponse(status_code=404, content={"error": "备份文件不存在"})
+
+    try:
+        db.restore_vault(backup_path, force=bool(force))
+        db.log_audit(None, "vault_restore", {"path": backup_path})
+        logger.info("管理员从 %s 恢复 Vault", backup_path)
+        return {"status": "ok", "message": "Vault 恢复成功"}
+    except (ValueError, RuntimeError) as e:
+        logger.error("Vault 恢复失败: %s", e)
+        return JSONResponse(status_code=400, content={"error": str(e)})
+
+
+# ==================== Dry-Run Mode ====================
+
+
+@router.post("/admin/dry-run/toggle")
+@limiter.limit("10/minute")
+async def toggle_dry_run(request: Request):
+    """启用/禁用 Dry-Run 模式 - 需要认证"""
+    await require_admin(request)
+
+    body, ok = await safe_json(request)
+    if not ok:
+        return BAD_ENCODING_RESPONSE
+    enable = body.get("enable", not config.DRY_RUN_MODE)
+    config.DRY_RUN_MODE = bool(enable)
+
+    status_text = "启用" if config.DRY_RUN_MODE else "禁用"
+    logger.info("管理员%s Dry-Run 模式", status_text)
+    db.log_audit(None, "dry_run_toggle", {"dry_run": config.DRY_RUN_MODE})
+    return {"status": "ok", "dry_run": config.DRY_RUN_MODE, "message": f"Dry-Run 模式已{status_text}"}
+
+
+# ==================== Config Hot-Reload ====================
+
+
+def _sanitize_config() -> dict:
+    """Return non-sensitive configuration fields (exclude passwords, keys)."""
+    return {
+        "listen_port": config.LISTEN_PORT,
+        "target_llm": config.TARGET_LLM,
+        "upstream_llm_urls": config.UPSTREAM_LLM_URLS,
+        "upstream_lb_strategy": config.UPSTREAM_LB_STRATEGY,
+        "upstream_health_check_interval": config.UPSTREAM_HEALTH_CHECK_INTERVAL,
+        "db_path": config.DB_PATH,
+        "db_type": config.DB_TYPE,
+        "mask_engine_type": config.MASK_ENGINE_TYPE,
+        "mapping_ttl": config.MAPPING_TTL,
+        "stateless_mode": config.STATELESS_MODE,
+        "max_concurrent_requests": config.MAX_CONCURRENT_REQUESTS,
+        "tier": config.tier,
+    }
+
+
+@router.post("/admin/config/reload")
+@limiter.limit("5/minute")
+async def config_reload(request: Request) -> dict:
+    """Reload configuration from environment variables — requires admin auth.
+
+    Re-reads .env / environment, updates Config singleton, GatewayCore's
+    timeout/retry settings, and the LoadBalancer's upstream list/strategy.
+    Returns sanitized config (no secrets).
+    """
+    await require_admin(request)
+    logger.info("管理员触发热重载配置")
+
+    config.reload()
+
+    from gateway_core import get_gateway_core
+    core = get_gateway_core()
+    await core.reload_config()
+
+    return _sanitize_config()
+
+
+# ==================== Historical Stats ====================
+
+
+@router.get("/admin/stats/history")
+@limiter.limit("10/minute")
+async def get_stats_history(
+    request: Request,
+    from_date: Optional[str] = Query(default=None, description="起始日期 YYYY-MM-DD"),
+    to_date: Optional[str] = Query(default=None, description="结束日期 YYYY-MM-DD"),
+) -> dict:
+    """Get historical daily stats for a date range — requires admin auth.
+
+    Defaults to the last 7 days if neither date is provided.
+    Returns daily aggregates: total_requests, total_tokens, pii_detected, etc.
+    """
+    await require_admin(request)
+
+    if not from_date:
+        from_date = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
+    if not to_date:
+        to_date = datetime.now().strftime("%Y-%m-%d")
+
+    records = db.get_stats_range(from_date, to_date)
+
+    summary = {}
+    if records:
+        for col in ("phone", "email", "idcard", "bankcard", "custom",
+                     "person", "location", "org", "plate", "ip",
+                     "url", "date", "amount", "postcode", "total"):
+            summary[col] = sum(r.get(f"{col}_count", 0) for r in records)
+
+    return {
+        "from": from_date,
+        "to": to_date,
+        "records": records,
+        "total_days": len(records),
+        "summary": summary,
+    }
+
+
+# ==================== Rules Import/Export ====================
+
+
+@router.get("/admin/rules/export")
+@limiter.limit("10/minute")
+async def export_rules(request: Request) -> dict:
+    """Export all custom keywords and regex rules — requires admin auth."""
+    await require_admin(request)
+
+    engine = get_mask_engine()
+    keywords = engine.get_custom_keywords()
+
+    rules = db.get_custom_regex_rules()
+    regex_rules = [
+        {
+            "name": r["name"],
+            "pattern": r["pattern"],
+            "entity_type": r["entity_type"],
+        }
+        for r in rules
+    ]
+
+    return {"keywords": keywords, "regex_rules": regex_rules}
+
+
+@router.post("/admin/rules/import")
+@limiter.limit("10/minute")
+async def import_rules(request: Request) -> dict:
+    """Bulk-import custom keywords and regex rules — requires admin auth.
+
+    Accepts the same JSON format as /admin/rules/export returns:
+        {"keywords": [...], "regex_rules": [{"name": "...", "pattern": "...", "entity_type": "..."}]}
+    Skips duplicates. Returns count of imported items.
+    """
+    await require_admin(request)
+
+    body, ok = await safe_json(request)
+    if not ok:
+        return BAD_ENCODING_RESPONSE
+
+    keywords = body.get("keywords", [])
+    regex_rules = body.get("regex_rules", [])
+
+    if not isinstance(keywords, list) or not isinstance(regex_rules, list):
+        return JSONResponse(
+            status_code=400,
+            content={"error": "无效的格式：keywords 和 regex_rules 应为数组"},
+        )
+
+    engine = get_mask_engine()
+    imported_count = 0
+    errors: List[str] = []
+
+    for kw in keywords:
+        if not isinstance(kw, str) or not kw.strip():
+            continue
+        if engine.add_custom_keyword(kw.strip()):
+            db.add_custom_keyword(kw.strip())
+            imported_count += 1
+
+    for rule in regex_rules:
+        name = (rule.get("name") or "").strip()
+        pattern = (rule.get("pattern") or "").strip()
+        entity_type = (rule.get("entity_type") or "").strip().lower()
+
+        if not name or not pattern:
+            errors.append("跳过无效规则（名称或正则缺失）")
+            continue
+        if entity_type not in KNOWN_ENTITY_TYPES:
+            errors.append(f"跳过规则 '{name}': 未知实体类型 '{entity_type}'")
+            continue
+
+        try:
+            re.compile(pattern)
+        except re.error as e:
+            errors.append(f"跳过规则 '{name}': 无效正则 — {e}")
+            continue
+
+        rule_id = db.add_custom_regex_rule(name, pattern, entity_type)
+        if rule_id == -1:
+            continue  # duplicate name, skip gracefully
+
+        try:
+            engine.add_custom_regex_rule(name, pattern, entity_type)
+            imported_count += 1
+        except (ValueError, re.error) as e:
+            db.delete_custom_regex_rule(rule_id)
+            errors.append(f"引擎添加规则 '{name}' 失败: {e}")
+
+    logger.info(f"管理员导入规则: {imported_count} 条成功, {len(errors)} 条错误")
+    return {
+        "status": "ok",
+        "imported": imported_count,
+        "errors": errors if errors else None,
+        "message": f"成功导入 {imported_count} 条规则",
+    }

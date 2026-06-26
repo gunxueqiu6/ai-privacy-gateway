@@ -4,6 +4,7 @@
 """
 import re
 import hashlib
+import threading
 import logging
 from abc import ABC, abstractmethod
 from typing import Tuple, Dict, List, Optional, Any
@@ -191,6 +192,7 @@ class RegexMaskEngine(MaskEngineInterface):
 
     # 占位符使用随机序列号标识，无需固定密钥
     _sequence_counter = 0
+    _sequence_lock = threading.Lock()
 
     BUILTIN_RULES = {
         "phone": re.compile(r'(?<!\d)(1[3-9]\d{9})(?!\d)'),
@@ -257,8 +259,7 @@ class RegexMaskEngine(MaskEngineInterface):
 
     @classmethod
     def _get_next_sequence(cls) -> str:
-        import threading
-        with threading.Lock():
+        with cls._sequence_lock:
             cls._sequence_counter += 1
             return cls._to_alpha_id(cls._sequence_counter)
 
