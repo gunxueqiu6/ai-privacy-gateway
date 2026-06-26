@@ -76,3 +76,14 @@ sdk/js/coverage/
 # PyInstaller配置
 *.spec
 !PrivacyGateway.spec
+
+# 安装程序构建产物
+installer/Output/
+
+# Astro 构建产物
+website-astro/dist/
+website-astro/site.zip
+
+# 支付二维码（本地文件，不提交）
+website-astro/public/wechat-pay-qr.jpg
+website-astro/public/wechat-qr-alt.jpg

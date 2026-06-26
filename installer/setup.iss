@@ -5,7 +5,7 @@
 #define MyAppPublisher "AI Privacy Gateway"
 #define MyAppURL "https://privacygw.pages.dev"
 #define MyAppExeName "PrivacyGateway.exe"
-#define MyAppVersion "1.1.0"
+#define MyAppVersion "2.0.0"
 
 [Setup]
 AppId={{A7B8E9C4-2D3F-4A1B-8E6C-9F0D1A2B3C4E}

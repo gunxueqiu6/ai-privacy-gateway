@@ -13,6 +13,9 @@ a = Analysis(
         ('stream_buffer.py', '.'),
         ('gateway_core.py', '.'),
         ('database.py', '.'),
+        ('load_balancer.py', '.'),
+        ('audit.py', '.'),
+        ('vault_crypto.py', '.'),
     ],
     hiddenimports=[
         'uvicorn',

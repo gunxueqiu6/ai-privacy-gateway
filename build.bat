@@ -42,7 +42,7 @@ if exist "dist\PrivacyGateway.exe" (
         echo   全部构建成功！
         echo.
         echo   EXE:       dist\PrivacyGateway.exe
-        echo   安装程序: installer\Output\AI-Privacy-Gateway-Setup-1.1.0.exe
+        echo   安装程序: installer\Output\AI-Privacy-Gateway-Setup-2.0.0.exe
         echo.
         echo   双击安装程序即可安装到 Program Files。
         echo   或在 dist\ 中直接运行 PrivacyGateway.exe（需同级放 .env）

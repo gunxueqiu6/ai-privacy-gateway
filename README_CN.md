@@ -2,7 +2,7 @@
 
 > 你的 AI 数据正在裸奔。30 秒装上防火墙。
 
-**v1.1.0** — 开源 AI API 隐私网关。在数据离开你机器之前自动脱敏。
+**v2.0.0** — 开源 AI API 隐私网关。在数据离开你机器之前自动脱敏。v2.0 新增：AES-256-GCM Vault 加密、多上游负载均衡、发布/订阅审计总线、浏览器扩展 SDK、Windows/macOS 安装程序。
 
 高性能反向代理，自动脱敏 AI API 请求/响应中的敏感数据（手机号、身份证、邮箱、银行卡、人名、地名等），支持所有 OpenAI 兼容服务，包括 DeepSeek、Claude、ChatGPT 和 Cursor。
 
@@ -235,7 +235,11 @@ WantedBy=multi-user.target
 | `DB_PATH` | ./vault_data/privacy_vault.db | SQLite 数据库路径 |
 | `ADMIN_PASSWORD` | （自动生成） | 管理后台密码 |
 | `JWT_SECRET` | （自动生成） | JWT 签名密钥 |
-| `VAULT_ENCRYPT_KEY` | （自动生成） | Vault 加密密钥 |
+| `VAULT_ENCRYPT_KEY` | （自动生成） | AES-256-GCM Vault 加密密钥 |
+| `UPSTREAM_LLM_URLS` | （空） | 多上游 LLM 地址，逗号分隔，用于负载均衡 |
+| `UPSTREAM_LB_STRATEGY` | round_robin | 负载均衡策略：round_robin、random、least_connections |
+| `MAPPING_TTL` | 259200（72小时） | 映射条目 TTL 秒数（0 = 请求完成后即删除） |
+| `STATELESS_MODE` | 0 | 设为 1 启用无状态模式（纯内存，不落盘） |
 
 ---
 
@@ -287,7 +291,14 @@ ai-privacy-gateway/
 │   ├── api.py             # 脱敏/还原 API
 │   ├── admin.py           # 管理后台
 │   └── auth.py            # 认证
+├── load_balancer.py       # 多上游负载均衡器
+├── audit.py               # 发布/订阅审计事件总线
+├── vault_crypto.py        # AES-256-GCM Vault 加密
 ├── static/                # 管理后台前端
+├── sdk/                   # 客户端 SDK
+│   ├── browser-extension/ # Chrome/Edge 浏览器扩展
+│   ├── js/                # JavaScript/TypeScript SDK
+│   └── flutter/           # Flutter/Dart SDK
 ├── tests/                 # 测试用例
 └── website-astro/         # 官网 (Astro)
 ```

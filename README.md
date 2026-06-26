@@ -3,7 +3,7 @@
 > Open-source PII masking proxy for ChatGPT, Claude, Cursor, DeepSeek, and any LLM API.
 > Install a firewall for your AI data in 30 seconds. [MIT Licensed]
 
-**v1.1.0** — A high-performance reverse proxy that automatically detects and masks sensitive data (phone numbers, ID cards, emails, bank cards, names, locations, API keys, and 14+ entity types) in AI API requests and responses. Protects PII before it leaves your machine.
+**v2.0.0** — A high-performance reverse proxy that automatically detects and masks sensitive data (phone numbers, ID cards, emails, bank cards, names, locations, API keys, and 14+ entity types) in AI API requests and responses. Protects PII before it leaves your machine. New in v2.0: AES-256-GCM vault encryption, multi-upstream load balancer, pub/sub audit bus, browser extension SDK, Windows/macOS installers.
 
 <p align="center">
   <a href="https://privacygw.pages.dev"><strong>Website</strong></a> ·
@@ -243,7 +243,11 @@ Download from [Releases](https://github.com/gunxueqiu6/ai-privacy-gateway/releas
 | `DB_PATH` | ./vault_data/privacy_vault.db | SQLite database path |
 | `ADMIN_PASSWORD` | (auto-generated) | Admin dashboard password |
 | `JWT_SECRET` | (auto-generated) | JWT signing secret |
-| `VAULT_ENCRYPT_KEY` | (auto-generated) | Vault encryption key |
+| `VAULT_ENCRYPT_KEY` | (auto-generated) | AES-256-GCM vault encryption key |
+| `UPSTREAM_LLM_URLS` | (empty) | Comma-separated upstream URLs for load balancing |
+| `UPSTREAM_LB_STRATEGY` | round_robin | Load balancer strategy: round_robin / random / least_connections |
+| `MAPPING_TTL` | 259200 (72h) | Mapping TTL in seconds (0 = delete on request complete) |
+| `STATELESS_MODE` | 0 | Set to 1 for in-memory only (no disk writes) |
 
 ---
 
@@ -295,7 +299,14 @@ ai-privacy-gateway/
 │   ├── api.py             # Mask/restore API
 │   ├── admin.py           # Admin dashboard
 │   └── auth.py            # Auth endpoints
+├── load_balancer.py       # Multi-upstream load balancer
+├── audit.py               # Pub/sub audit event bus
+├── vault_crypto.py        # AES-256-GCM vault encryption
 ├── static/                # Admin dashboard UI
+├── sdk/                   # Client SDKs
+│   ├── browser-extension/ # Chrome/Edge extension
+│   ├── js/                # JavaScript/TypeScript SDK
+│   └── flutter/           # Flutter/Dart SDK
 ├── tests/                 # Test suite
 └── website-astro/         # Public website (Astro)
 ```
