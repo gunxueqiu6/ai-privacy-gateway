@@ -135,7 +135,7 @@ class PrivacyGateway private constructor(
         private fun buildHeaders(config: GatewayConfig): Map<String, String> {
             val headers = mutableMapOf<String, String>()
             config.headers.forEach { headers[it.key] = it.value }
-            config.apiKey?.let { headers["X-API-Key"] = it }
+            config.apiKey?.let { headers["Authorization"] = "Bearer $it" }
             return headers
         }
 

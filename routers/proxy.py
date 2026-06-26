@@ -20,8 +20,16 @@ ALLOWED_V1_PROXY_PATHS = {"models", "embeddings", "moderations"}
 
 
 def _resolve_auth_and_headers(request: Request):
-    """Extract auth header and build forwarding headers (Lite version)."""
+    """Extract auth header and build forwarding headers (Lite version).
+
+    Backward-compatible: checks Authorization first, then falls back
+    to X-API-Key for older SDKs that haven't migrated yet.
+    """
     auth_header = request.headers.get("Authorization", "")
+    if not auth_header:
+        api_key = request.headers.get("X-API-Key", "")
+        if api_key:
+            auth_header = f"Bearer {api_key}"
     if not auth_header:
         return None
 

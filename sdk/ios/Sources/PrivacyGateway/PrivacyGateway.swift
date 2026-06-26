@@ -118,7 +118,7 @@ public class PrivacyGateway {
     private static func buildHeaders(config: GatewayConfig) -> [String: String] {
         var headers = config.headers
         if let apiKey = config.apiKey {
-            headers["X-API-Key"] = apiKey
+            headers["Authorization"] = "Bearer \(apiKey)"
         }
         return headers
     }

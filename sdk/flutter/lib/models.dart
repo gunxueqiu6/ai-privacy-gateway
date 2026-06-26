@@ -38,7 +38,7 @@ class GatewayConfig {
     final Map<String, String> result = Map<String, String>.from(headers);
     final key = apiKey;
     if (key != null) {
-      result['X-API-Key'] = key;
+      result['Authorization'] = 'Bearer $key';
     }
     return result;
   }

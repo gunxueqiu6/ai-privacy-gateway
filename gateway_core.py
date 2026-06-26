@@ -15,7 +15,7 @@ import httpx
 
 from config import config
 from load_balancer import LoadBalancer
-from mask_engine import get_mask_engine, MaskEngineInterface
+from mask_engine import get_mask_engine
 from audit import audit_bus
 from database import db
 
@@ -93,16 +93,15 @@ class GatewayCore:
         }
 
         messages = body.get("messages", [])
+        masked_body = copy.deepcopy(body)
+        masked_messages = masked_body["messages"]
         for i, msg in enumerate(messages):
             content = msg.get("content", "")
             if not content:
                 continue
 
             masked_content, mappings, stats = self.mask_engine.mask(content)
-            # 深拷贝消息对象以保留原始内容
-            msg = copy.deepcopy(msg)
-            msg["content"] = masked_content
-            messages[i] = msg
+            masked_messages[i]["content"] = masked_content
             all_mappings.update(mappings)
 
             for k, v in stats.items():
@@ -127,12 +126,12 @@ class GatewayCore:
         # 提取实际出现在脱敏文本中的占位符
         pii_pattern = re.compile(r'\[PII_\w+_[A-Z]+\]')
         used_placeholders: Set[str] = set()
-        for msg in messages:
+        for msg in masked_messages:
             content = msg.get("content", "")
             if content:
                 used_placeholders.update(pii_pattern.findall(content))
 
-        return body, all_mappings, total_stats, session_id, used_placeholders
+        return masked_body, all_mappings, total_stats, session_id, used_placeholders
 
     def unmask_response(self, text: str, mappings: Dict[str, str], session_id: Optional[str] = None, used_placeholders: Optional[Set[str]] = None) -> str:
         """
