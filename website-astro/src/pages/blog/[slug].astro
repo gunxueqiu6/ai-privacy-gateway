@@ -1,5 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import Nav from '../../components/Nav.astro';
 import Footer from '../../components/Footer.astro';
@@ -8,12 +8,12 @@ export async function getStaticPaths() {
   const posts = await getCollection('blog');
   return posts
     .filter(p => !p.data.draft)
-    .map(p => ({ params: { slug: p.slug }, props: { post: p } }));
+    .map(p => ({ params: { slug: p.id }, props: { post: p } }));
 }
 
 const { post } = Astro.props;
 const { title, description, pubDate, updatedDate, tags, ogImage, canonicalURL } = post.data;
-const { Content } = await post.render();
+const { Content } = await render(post);
 
 const dateStr = pubDate.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
 const imageUrl = ogImage || 'https://privacygw.pages.dev/og-image.png';
@@ -23,7 +23,7 @@ const imageUrl = ogImage || 'https://privacygw.pages.dev/og-image.png';
   title={title + ' — AI Privacy Gateway'}
   description={description}
   ogImage={imageUrl}
-  canonicalURL={canonicalURL || `https://privacygw.pages.dev/blog/${post.slug}`}
+  canonicalURL={canonicalURL || `https://privacygw.pages.dev/blog/${post.id}`}
   ogType="article">
   <Nav />
 
