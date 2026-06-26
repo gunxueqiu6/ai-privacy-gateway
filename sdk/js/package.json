@@ -1,6 +1,6 @@
 {
   "name": "@privacygw/sdk",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "module",
   "description": "AI Privacy Gateway JavaScript SDK - Protect your sensitive data when interacting with AI services",
   "main": "dist/index.js",
