@@ -50,6 +50,32 @@
 
 ## Quick Start
 
+### One-Click Install (Recommended)
+
+**Windows:**
+```bash
+# 1. Double-click install.bat — or run from terminal:
+install.bat
+
+# 2. Double-click start.bat — or:
+start.bat
+```
+
+**macOS / Linux:**
+```bash
+# 1. Run the installer:
+chmod +x install.sh && ./install.sh
+
+# 2. Start the gateway:
+./start.sh
+```
+
+The installer checks your Python version, creates a virtual environment, installs dependencies, generates a secure `.env` config with a random admin password, and creates a desktop shortcut (Windows). The start script auto-detects your environment, checks port availability, and launches the gateway.
+
+Open `http://localhost:9999` to access the admin dashboard.
+
+> Non-interactive mode for CI/CD: `python start.py --non-interactive`
+
 ### Docker (3 commands)
 
 ```bash
@@ -60,20 +86,6 @@ docker run -d --name ai-privacy-gw -p 9999:9999 \
 
 # Point your AI client to http://localhost:9999 — done.
 ```
-
-### One-Click Script
-
-```bash
-# Windows: double-click start.bat, or:
-python start.py
-
-# macOS / Linux:
-./start.sh
-```
-
-The wizard auto-detects your environment, walks through AI provider selection, generates secure keys, and starts the gateway.
-
-> Non-interactive mode for CI/CD: `python start.py --non-interactive`
 
 ### Python (pip install)
 

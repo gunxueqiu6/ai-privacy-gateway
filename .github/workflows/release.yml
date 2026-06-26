@@ -8,6 +8,8 @@ on:
 permissions:
   contents: write
   packages: write
+  id-token: write
+  attestations: write
 
 jobs:
   build-lite:
@@ -22,6 +24,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest
+            type=raw,value=lite
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -30,10 +44,17 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Build and push Docker image
-        run: |
-          docker build --no-cache -t ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:lite .
-          docker tag ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:lite ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:latest
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and load Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Scan Docker image with Trivy
         run: |
@@ -46,10 +67,18 @@ jobs:
           curl -f --retry 3 --retry-delay 2 http://localhost:19999/health || (docker logs ci-test && exit 1)
           docker stop ci-test
 
-      - name: Push and export Docker image
+      - name: Build and push Docker image with provenance
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          provenance: true
+          sbom: true
+          cache-from: type=gha
+
+      - name: Export Docker image
         run: |
-          docker push ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:lite
-          docker push ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:latest
           docker save ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:lite > lite_image.tar
 
       - name: Generate Docker image checksum
@@ -133,16 +162,69 @@ jobs:
           name: macos-exe
           path: dist/PrivacyGateway
 
+  publish-js-sdk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
+          cache: npm
+          cache-dependency-path: sdk/js/package-lock.json
+
+      - name: Build JS SDK
+        run: |
+          npm ci
+          npm run build
+        working-directory: sdk/js
+
+      - name: Verify version matches tag
+        run: |
+          PKG_VERSION=$(node -p "require('./sdk/js/package.json').version")
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "ERROR: package.json version ($PKG_VERSION) does not match tag ($TAG_VERSION)"
+            exit 1
+          fi
+          echo "Version check passed: $PKG_VERSION"
+
+      - name: Publish to npm
+        run: npm publish
+        working-directory: sdk/js
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
   release:
     needs: [build-lite, build-windows, build-macos]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - name: Download all artifacts
         uses: actions/download-artifact@v4
+
+      - name: Extract release notes from CHANGELOG
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          python <<EOF
+import re, sys
+changelog = open('CHANGELOG.md').read()
+version = '${VERSION}'
+pattern = r'## \[' + re.escape(version) + r'\].*?\n(.*?)(?=\n## \[|\n---|\Z)'
+match = re.search(pattern, changelog, re.DOTALL)
+if match:
+    print(match.group(1).strip())
+else:
+    print(f'Release notes for version {version} not found in CHANGELOG.md', file=sys.stderr)
+    exit(1)
+EOF > release_body.md
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
+          body_path: release_body.md
           files: |
             lite-docker-image/lite_image.tar
             lite-docker-checksum/lite_image.tar.sha256
@@ -150,28 +232,5 @@ jobs:
             windows-checksum/PrivacyGateway.exe.sha256
             macos-exe/PrivacyGateway
             macos-checksum/PrivacyGateway.sha256
-          body: |
-            ## AI Privacy Gateway Lite
-
-            ### Docker（推荐）
-            ```bash
-            docker run -d -p 9999:9999 ghcr.io/${{ github.repository_owner }}/ai-privacy-gateway:lite
-            ```
-
-            ### 下载
-            - **Windows**: PrivacyGateway.exe（双击运行）
-            - **macOS**: PrivacyGateway（命令行运行）
-            - **Docker**: lite_image.tar（离线导入：`docker load < lite_image.tar`）
-
-            ### 使用方法
-            1. 运行程序
-            2. 将 AI 客户端 API 地址改为 `http://localhost:9999`
-            3. 打开管理后台 `http://localhost:9999/admin`
-
-            ### 功能
-            - 自动脱敏手机号、身份证、邮箱、银行卡
-            - 支持流式输出 (SSE)
-            - 自定义敏感词
-            - 本地 SQLite 存储
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
