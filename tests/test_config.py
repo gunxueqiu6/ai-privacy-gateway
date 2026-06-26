@@ -29,7 +29,8 @@ class TestConfigDefaults:
         assert config.MASK_ENGINE_TYPE == "regex"
 
     def test_default_admin_password(self, config):
-        assert config.ADMIN_PASSWORD == ""
+        # Set in conftest.py — aligns with test_admin_correct_login
+        assert config.ADMIN_PASSWORD == "test_admin_pw_123"
 
     def test_admin_password_hash_generated(self, config):
         """密码哈希自动从明文生成"""

@@ -271,16 +271,22 @@ class RegexMaskEngine(MaskEngineInterface):
                     filter_fn=None) -> str:
         """Apply a single built-in regex rule to the text.
 
-        For each match found, creates a placeholder, updates mappings and stats.
+        Uses position-based replacement to avoid over-replacing when
+        the same PII value appears multiple times in the text.
         The optional filter_fn(match) should return True to skip the match.
         """
-        for match in self.BUILTIN_RULES[rule_key].findall(result):
-            if filter_fn and filter_fn(match):
+        replacements = []
+        for match in self.BUILTIN_RULES[rule_key].finditer(result):
+            match_str = match.group(0)
+            if filter_fn and filter_fn(match_str):
                 continue
-            placeholder = self._create_placeholder(rule_key, match)
-            result = result.replace(match, placeholder)
-            mappings[placeholder] = match
+            placeholder = self._create_placeholder(rule_key, match_str)
+            replacements.append((match.start(), match.end(), placeholder, match_str))
+            mappings[placeholder] = match_str
             stats[rule_key] += 1
+        # Replace from end to start to preserve positions
+        for start, end, placeholder, _ in sorted(replacements, key=lambda x: -x[0]):
+            result = result[:start] + placeholder + result[end:]
         return result
 
     def mask(self, text: str) -> Tuple[str, Dict[str, str], Dict[str, int]]:
@@ -298,28 +304,32 @@ class RegexMaskEngine(MaskEngineInterface):
             "person": 0, "location": 0, "organization": 0, "custom": 0
         }
 
-        # 1. 自定义关键词优先处理（使用 Aho-Corasick 自动机）
-        matches = self._automaton.search(result)
-        seen_keywords: set = set()
-        for _, _, keyword in matches:
-            if keyword not in seen_keywords:
-                seen_keywords.add(keyword)
-                placeholder = self._create_placeholder("custom", keyword)
-                result = result.replace(keyword, placeholder)
-                mappings[placeholder] = keyword
-                stats["custom"] += 1
+        # 1. 自定义关键词优先处理（使用 Aho-Corasick 自动机，位置替换）
+        kw_matches = self._automaton.search(result)
+        kw_replacements = []
+        for start, end, keyword in kw_matches:
+            placeholder = self._create_placeholder("custom", keyword)
+            kw_replacements.append((start, end, placeholder, keyword))
+            mappings[placeholder] = keyword
+            stats["custom"] += 1
+        # Replace from end to start to preserve positions
+        for start, end, placeholder, _ in sorted(kw_replacements, key=lambda x: -x[0]):
+            result = result[:start] + placeholder + result[end:]
 
-        # 2. 自定义正则规则（用户自定义匹配模式）
+        # 2. 自定义正则规则（位置替换）
         for rule_name, (compiled_regex, entity_type) in self._custom_regex_rules.items():
             if rule_name in self._disabled_custom_regex_rules:
                 continue
+            rule_replacements = []
             for match in compiled_regex.finditer(result):
                 match_str = match.group(0)
                 placeholder = self._create_placeholder(entity_type, match_str)
-                result = result.replace(match_str, placeholder)
+                rule_replacements.append((match.start(), match.end(), placeholder, match_str))
                 mappings[placeholder] = match_str
                 if entity_type in stats:
                     stats[entity_type] += 1
+            for start, end, placeholder, _ in sorted(rule_replacements, key=lambda x: -x[0]):
+                result = result[:start] + placeholder + result[end:]
 
         # 3. NER 引擎检测人名、地名、机构名
         if self._ner_engine:

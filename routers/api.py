@@ -4,15 +4,11 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
-from mask_engine import get_mask_engine, HAS_NER, KNOWN_ENTITY_TYPES
-import re
-import logging
+from mask_engine import get_mask_engine, HAS_NER
 
-from .dependencies import safe_json, BAD_ENCODING_RESPONSE
+from .dependencies import safe_json, BAD_ENCODING_RESPONSE, limiter
 
 api_router = APIRouter(tags=["api"])
-
-logger = logging.getLogger(__name__)
 
 
 def _entity_type_from_placeholder(placeholder: str) -> str:
@@ -30,12 +26,14 @@ def _entity_type_from_placeholder(placeholder: str) -> str:
 
 
 @api_router.post("/api/mask")
+@limiter.limit("60/minute")
 async def api_mask(request: Request):
     """独立脱敏 API"""
     body, ok = await safe_json(request)
     if not ok:
         return BAD_ENCODING_RESPONSE
     text = body.get("text", "")
+    custom_keywords = body.get("custom_keywords", [])
 
     if not text:
         return JSONResponse(status_code=400, content={"error": "text 参数不能为空"})
@@ -43,7 +41,22 @@ async def api_mask(request: Request):
         return JSONResponse(status_code=413, content={"error": "输入文本过长，最大支持 100KB"})
 
     engine = get_mask_engine()
-    masked_text, mappings, stats = engine.mask(text)
+
+    # Temporarily inject custom keywords from the request into the engine
+    added = []
+    if isinstance(custom_keywords, list):
+        for kw in custom_keywords:
+            if isinstance(kw, str) and kw.strip():
+                kw = kw.strip()
+                if engine.add_custom_keyword(kw):
+                    added.append(kw)
+
+    try:
+        masked_text, mappings, stats = engine.mask(text)
+    finally:
+        # Remove temporarily added keywords to keep engine state clean
+        for kw in added:
+            engine.remove_custom_keyword(kw)
 
     entities = []
     for placeholder, value in mappings.items():
@@ -123,100 +136,3 @@ async def api_get_entities(request: Request) -> dict:
         {"type": "PII_CUST", "name": "自定义", "description": "自定义敏感词", "enabled": True, "engine": "regex"},
     ]
     return {"entities": entities, "total": len(entities), "version": "Lite", "ner_available": HAS_NER}
-
-
-# ==================== Custom Regex Rules API ====================
-
-
-@api_router.get("/api/custom-regex-rules")
-async def api_list_custom_regex_rules(request: Request) -> dict:
-    """获取所有自定义正则规则"""
-    from database import db
-    rules = db.get_custom_regex_rules()
-    return {"rules": rules, "total": len(rules)}
-
-
-@api_router.post("/api/custom-regex-rules")
-async def api_add_custom_regex_rule(request: Request):
-    """添加自定义正则规则"""
-    body, ok = await safe_json(request)
-    if not ok:
-        return BAD_ENCODING_RESPONSE
-
-    name = (body.get("name") or "").strip()
-    pattern = (body.get("pattern") or "").strip()
-    entity_type = (body.get("entity_type") or "").strip().lower()
-
-    if not name:
-        return JSONResponse(status_code=400, content={"error": "规则名称不能为空"})
-    if len(name) > 100:
-        return JSONResponse(status_code=400, content={"error": "规则名称不能超过 100 个字符"})
-    if not pattern:
-        return JSONResponse(status_code=400, content={"error": "正则表达式不能为空"})
-    if entity_type not in KNOWN_ENTITY_TYPES:
-        return JSONResponse(status_code=400, content={"error": f"未知实体类型: {entity_type}，支持的实体类型: {', '.join(sorted(KNOWN_ENTITY_TYPES))}"})
-
-    # 验证正则表达式合法性
-    try:
-        re.compile(pattern)
-    except re.error as e:
-        return JSONResponse(status_code=400, content={"error": f"无效的正则表达式: {e}"})
-
-    from database import db
-    rule_id = db.add_custom_regex_rule(name, pattern, entity_type)
-    if rule_id == -1:
-        return JSONResponse(status_code=409, content={"error": f"规则名称 '{name}' 已存在"})
-
-    # 同步到引擎
-    engine = get_mask_engine()
-    try:
-        engine.add_custom_regex_rule(name, pattern, entity_type)
-    except (ValueError, re.error) as e:
-        # 引擎错误不应发生（已在前面验证），但以防万一回滚 DB
-        db.delete_custom_regex_rule(rule_id)
-        return JSONResponse(status_code=500, content={"error": f"引擎添加规则失败: {e}"})
-
-    logger.info(f"API 添加自定义正则规则: {name} (type={entity_type})")
-    return {"status": "ok", "id": rule_id, "message": f"规则 '{name}' 已添加"}
-
-
-@api_router.delete("/api/custom-regex-rules/{rule_id}")
-async def api_delete_custom_regex_rule(request: Request, rule_id: int):
-    """删除自定义正则规则"""
-    from database import db
-    rules = db.get_custom_regex_rules()
-    target = next((r for r in rules if r["id"] == rule_id), None)
-    if target is None:
-        return JSONResponse(status_code=404, content={"error": f"规则 ID {rule_id} 不存在"})
-
-    # 先删除 DB，再从引擎移除
-    if not db.delete_custom_regex_rule(rule_id):
-        return JSONResponse(status_code=500, content={"error": "数据库删除失败"})
-
-    engine = get_mask_engine()
-    engine.remove_custom_regex_rule(target["name"])
-
-    logger.info(f"API 删除自定义正则规则: {target['name']} (id={rule_id})")
-    return {"status": "ok", "message": f"规则 '{target['name']}' 已删除"}
-
-
-@api_router.put("/api/custom-regex-rules/{rule_id}/toggle")
-async def api_toggle_custom_regex_rule(request: Request, rule_id: int):
-    """启用/禁用自定义正则规则"""
-    from database import db
-    rules = db.get_custom_regex_rules()
-    target = next((r for r in rules if r["id"] == rule_id), None)
-    if target is None:
-        return JSONResponse(status_code=404, content={"error": f"规则 ID {rule_id} 不存在"})
-
-    new_enabled = not target["enabled"]
-
-    if not db.toggle_custom_regex_rule(rule_id, new_enabled):
-        return JSONResponse(status_code=500, content={"error": "数据库更新失败"})
-
-    engine = get_mask_engine()
-    engine.toggle_custom_regex_rule(target["name"], new_enabled)
-
-    status_text = "启用" if new_enabled else "禁用"
-    logger.info(f"API {status_text}自定义正则规则: {target['name']} (id={rule_id})")
-    return {"status": "ok", "id": rule_id, "enabled": new_enabled, "message": f"规则 '{target['name']}' 已{status_text}"}

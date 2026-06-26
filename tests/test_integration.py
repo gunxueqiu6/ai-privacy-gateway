@@ -311,16 +311,20 @@ class TestIntegrationRateLimit:
         except ImportError:
             pytest.skip("main module not available")
 
-    @pytest.mark.skip(reason="rate limit test interferes with other tests in shared limiter state")
     def test_rate_limit_mask(self, client):
         """测试脱敏 API 速率限制"""
+        from routers.dependencies import reset_limiter
+        reset_limiter()  # Isolate from other tests that share the in-memory limiter
         responses = []
-        for i in range(70):
-            response = client.post(
-                "/api/mask",
-                json={"text": f"测试{i}"}
-            )
-            responses.append(response.status_code)
+        try:
+            for i in range(70):
+                response = client.post(
+                    "/api/mask",
+                    json={"text": f"测试{i}"}
+                )
+                responses.append(response.status_code)
+        finally:
+            reset_limiter()  # Restore budget for subsequent tests
 
         assert 429 in responses
 

@@ -161,50 +161,51 @@ class Config:
             urls = [u.strip() for u in self.UPSTREAM_LLM_URLS.split(",") if u.strip()]
             for url in urls:
                 if not (url.startswith("http://") or url.startswith("https://")):
-                    print(f"[配置错误] UPSTREAM_LLM_URLS 中的 URL 格式无效: {url}，必须以 http:// 或 https:// 开头")
+                    logger.error("UPSTREAM_LLM_URLS 中的 URL 格式无效: %s，必须以 http:// 或 https:// 开头", url)
                     has_error = True
             strategy = self.UPSTREAM_LB_STRATEGY
             if strategy not in ("round_robin", "random", "least_connections"):
-                print(f"[配置错误] UPSTREAM_LB_STRATEGY 无效: {strategy}，仅支持 round_robin/random/least_connections")
+                logger.error("UPSTREAM_LB_STRATEGY 无效: %s，仅支持 round_robin/random/least_connections", strategy)
                 has_error = True
 
         # TARGET_LLM URL 格式校验（仅当未配置 UPSTREAM_LLM_URLS 时）
         if not self.UPSTREAM_LLM_URLS:
             if not (self.TARGET_LLM.startswith("http://") or self.TARGET_LLM.startswith("https://")):
-                print(f"[配置错误] TARGET_LLM URL 格式无效: {self.TARGET_LLM}，必须以 http:// 或 https:// 开头")
+                logger.error("TARGET_LLM URL 格式无效: %s，必须以 http:// 或 https:// 开头", self.TARGET_LLM)
                 has_error = True
 
         # LISTEN_PORT 端口号校验
         if not 1 <= self.LISTEN_PORT <= 65535:
-            print(f"[配置错误] LISTEN_PORT 端口号超出范围: {self.LISTEN_PORT}，有效范围 1-65535")
+            logger.error("LISTEN_PORT 端口号超出范围: %d，有效范围 1-65535", self.LISTEN_PORT)
             has_error = True
 
         # DB_TYPE 校验
         if self.DB_TYPE and self.DB_TYPE not in ("sqlite", "postgresql"):
-            print(f"[配置错误] DB_TYPE 不支持: {self.DB_TYPE}，仅支持 sqlite 或 postgresql")
+            logger.error("DB_TYPE 不支持: %s，仅支持 sqlite 或 postgresql", self.DB_TYPE)
             has_error = True
 
         # MASK_ENGINE_TYPE 校验
         if self.MASK_ENGINE_TYPE != "regex":
-            print(f"[配置错误] MASK_ENGINE_TYPE 不支持: {self.MASK_ENGINE_TYPE}，目前仅支持 regex")
+            logger.error("MASK_ENGINE_TYPE 不支持: %s，目前仅支持 regex", self.MASK_ENGINE_TYPE)
             has_error = True
 
         # 警告项
         if not self.UPSTREAM_API_KEY:
-            print("[配置警告] 未配置上游API密钥，代理请求可能失败")
+            logger.warning("未配置上游API密钥，代理请求可能失败")
 
         if len(self.JWT_SECRET) < 32:
-            print(f"[配置警告] JWT_SECRET 长度不足 32: 当前 {len(self.JWT_SECRET)} 位")
+            logger.warning("JWT_SECRET 长度不足 32: 当前 %d 位", len(self.JWT_SECRET))
 
         # MAPPING_TTL 校验
         if self.MAPPING_TTL < 0:
-            print(f"[配置警告] MAPPING_TTL 不能为负数: {self.MAPPING_TTL}，使用 0")
+            logger.warning("MAPPING_TTL 不能为负数: %d，使用 0", self.MAPPING_TTL)
             self.MAPPING_TTL = 0
 
         if has_error:
+            logger.critical("配置校验失败，退出")
             sys.exit(1)
         else:
-            print("配置校验通过")
+            logger.info("配置校验通过")
 
 # 全局配置实例
 config = Config()

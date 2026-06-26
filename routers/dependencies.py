@@ -42,6 +42,19 @@ def _get_client_ip(request: Request) -> str:
 
 limiter = Limiter(key_func=_get_client_ip)
 
+# NOTE: In-memory rate limiter — each uvicorn worker has its own counter.
+# With multiple workers (`uvicorn --workers N`), a client can exceed the
+# per-worker limit N-fold. For multi-worker deployments, swap in a shared
+# backend such as `Limiter(key_func=..., storage_uri="redis://...")`.
+
+
+def reset_limiter() -> None:
+    """Reset the rate limiter storage. Used in tests to prevent
+    state leakage between test cases that share the same limiter."""
+    storage = getattr(limiter, "_storage", None) or getattr(limiter, "storage", None)
+    if storage is not None:
+        storage.reset()
+
 
 # ==================== Proxy Helpers ====================
 
