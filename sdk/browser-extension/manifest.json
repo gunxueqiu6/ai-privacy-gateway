@@ -8,12 +8,14 @@
     "contextMenus",
     "activeTab",
     "scripting",
-    "clipboardWrite"
+    "clipboardWrite",
+    "notifications"
   ],
   "host_permissions": [
     "http://localhost:9999/*",
     "https://*.deepseek.com/*",
     "https://chat.openai.com/*",
+    "https://chatgpt.com/*",
     "https://claude.ai/*",
     "https://kimi.moonshot.cn/*",
     "https://www.yuanbao.cn/*",
@@ -26,6 +28,7 @@
     {
       "matches": [
         "https://chat.openai.com/*",
+        "https://chatgpt.com/*",
         "https://claude.ai/*",
         "https://kimi.moonshot.cn/*",
         "https://*.deepseek.com/*",

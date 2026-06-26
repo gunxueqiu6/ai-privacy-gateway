@@ -16,7 +16,8 @@ class PrivacyGatewayBackground {
   }
 
   async loadSettings() {
-    const result = await chrome.storage.local.get(['gatewayUrl', 'enabledEntities']);
+    const result = await chrome.storage.local.get(['gatewayUrl', 'enabledEntities', 'customKeywords']);
+    this.customKeywords = result.customKeywords || [];
     if (result.gatewayUrl) {
       try {
         const parsed = new URL(result.gatewayUrl);
@@ -65,7 +66,7 @@ class PrivacyGatewayBackground {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ text })
+        body: JSON.stringify({ text, custom_keywords: this.customKeywords })
       });
 
       if (!response.ok) {
@@ -139,7 +140,7 @@ class PrivacyGatewayBackground {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ text })
+        body: JSON.stringify({ text, custom_keywords: this.customKeywords })
       });
 
       if (!response.ok) {

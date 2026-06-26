@@ -8,7 +8,7 @@ class PrivacyGatewayContent {
 
   detectPage() {
     const url = window.location.href;
-    if (url.includes('chat.openai.com')) return 'chatgpt';
+    if (url.includes('chat.openai.com') || url.includes('chatgpt.com')) return 'chatgpt';
     if (url.includes('claude.ai')) return 'claude';
     if (url.includes('kimi.moonshot')) return 'kimi';
     if (url.includes('deepseek')) return 'deepseek';
@@ -274,9 +274,14 @@ class PrivacyGatewayContent {
 
       if (response && response.masked_text) {
         textarea.value = response.masked_text;
+        textarea.dataset.privacyOriginal = originalText;
+        // Restore original after the page's native send handler reads the masked value
         setTimeout(() => {
-          textarea.value = originalText;
-        }, 100);
+          if (textarea.value !== originalText && textarea.value !== '') {
+            textarea.value = textarea.dataset.privacyOriginal || originalText;
+          }
+          delete textarea.dataset.privacyOriginal;
+        }, 500);
       }
     } catch (error) {
       console.error('Mask send error:', error);

@@ -66,6 +66,11 @@ class PopupHandler {
   }
 
   async loadMaskState() {
+    // Load persisted state first, then sync with active tab
+    const stored = await chrome.storage.local.get('maskEnabled');
+    const persisted = stored.maskEnabled !== undefined ? stored.maskEnabled : true;
+    this.updateToggle(persisted);
+
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
     if (tabs.length > 0) {
       try {
@@ -73,8 +78,8 @@ class PopupHandler {
         if (response) {
           this.updateToggle(response.isMaskEnabled);
         }
-      } catch (error) {
-        this.updateToggle(true);
+      } catch (_) {
+        // Content script not available, use persisted state
       }
     }
   }
@@ -82,18 +87,21 @@ class PopupHandler {
   async toggleMask() {
     const toggle = document.getElementById('maskToggle');
     const isEnabled = !toggle.classList.contains('active');
-    
+
     this.updateToggle(isEnabled);
+
+    // Persist state
+    await chrome.storage.local.set({ maskEnabled: isEnabled });
 
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
     if (tabs.length > 0) {
       try {
-        await chrome.tabs.sendMessage(tabs[0].id, { 
-          action: 'toggleMask', 
-          enabled: isEnabled 
+        await chrome.tabs.sendMessage(tabs[0].id, {
+          action: 'toggleMask',
+          enabled: isEnabled
         });
-      } catch (error) {
-        console.log('Content script not available');
+      } catch (_) {
+        // Content script not available
       }
     }
   }
