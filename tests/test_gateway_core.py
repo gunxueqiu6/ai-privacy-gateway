@@ -174,13 +174,16 @@ class TestProxyError:
     """代理错误处理测试"""
 
     def test_proxy_timeout_returns_504(self):
-        """超时返回 504"""
-        import httpx
-        from gateway_core import GatewayCore
+        """连接失败返回 502"""
+        import os
         import asyncio
+        from gateway_core import GatewayCore
+
+        # Point at a closed port to trigger connection error
+        os.environ["TARGET_LLM"] = "http://127.0.0.1:1"
+        os.environ["UPSTREAM_TIMEOUT"] = "0.1"
 
         gw = GatewayCore()
-        gw.timeout = 0.001
 
         async def run():
             status, body, headers = await gw.proxy_request(
@@ -191,7 +194,6 @@ class TestProxyError:
             )
             return status, body, headers
 
-        # The request should fail (timeout or connection error)
         result = asyncio.run(run())
-        # Either 504 (timeout) or 502 (connection error) is valid
+        # 502 = connection refused / 504 = timeout
         assert result[0] in [502, 504]
