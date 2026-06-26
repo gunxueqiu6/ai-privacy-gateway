@@ -1,7 +1,10 @@
 name: privacy_gateway_sdk
-description: AI Privacy Gateway SDK for Flutter - Protect sensitive data in AI interactions
+description: Protect sensitive data (phone numbers, emails, IDs, bank cards) in Flutter AI app interactions through automatic PII masking and restoration.
 version: 1.0.0
-homepage: https://github.com/gunxueqiu6/ai-privacy-gateway
+homepage: https://privacygw.pages.dev
+repository: https://github.com/gunxueqiu6/ai-privacy-gateway
+issue_tracker: https://github.com/gunxueqiu6/ai-privacy-gateway/issues
+documentation: https://github.com/gunxueqiu6/ai-privacy-gateway/tree/master/sdk/flutter
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

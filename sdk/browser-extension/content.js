@@ -1,8 +1,19 @@
+// Shared entity patterns — single source of truth (Bug 2)
+const ENTITY_PATTERNS = [
+  { pattern: /1[3-9]\d{9}/g, label: '手机号' },
+  { pattern: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, label: '邮箱' },
+  { pattern: /[1-9]\d{5}(18|19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[\dXx]/g, label: '身份证' },
+  { pattern: /\b([1-9]\d{15,18})\b/g, label: '银行卡' },
+];
+
 class PrivacyGatewayContent {
   constructor() {
     this.isMaskEnabled = true;
     this.gatewayUrl = 'http://localhost:9999';
     this.currentPage = this.detectPage();
+    // Bug 4: listener tracking for cleanup
+    this._listeners = [];
+    this._observer = null;
     this.init();
   }
 
@@ -102,17 +113,16 @@ class PrivacyGatewayContent {
       return AI_INPUT_SELECTORS.some(sel => el.matches(sel) || el.closest(sel));
     };
 
-    // 监听全局 input 事件，实时高亮检测到的实体
-    document.addEventListener('input', (e) => {
+    // Bug 4: Store handler references for cleanup
+    this._handleInput = (e) => {
       if (!this.isMaskEnabled) return;
       const target = e.target;
       if (isAiChatInput(target)) {
         this.showEntityDetection(target);
       }
-    }, true);
+    };
 
-    // 也监听 focusin 以在聚焦输入框时显示检测
-    document.addEventListener('focusin', (e) => {
+    this._handleFocusIn = (e) => {
       if (!this.isMaskEnabled) return;
       const target = e.target;
       if (isAiChatInput(target)) {
@@ -120,7 +130,25 @@ class PrivacyGatewayContent {
           this.showEntityDetection(target);
         }
       }
-    }, true);
+    };
+
+    // Bug 5: Remove badge when input loses focus
+    this._handleBlur = (e) => {
+      const target = e.target;
+      if (isAiChatInput(target)) {
+        this.removeDetectionBadge();
+      }
+    };
+
+    document.addEventListener('input', this._handleInput, true);
+    document.addEventListener('focusin', this._handleFocusIn, true);
+    document.addEventListener('blur', this._handleBlur, true);
+
+    this._listeners.push(
+      { element: document, type: 'input', handler: this._handleInput, options: true },
+      { element: document, type: 'focusin', handler: this._handleFocusIn, options: true },
+      { element: document, type: 'blur', handler: this._handleBlur, options: true }
+    );
   }
 
   showEntityDetection(inputEl) {
@@ -130,15 +158,8 @@ class PrivacyGatewayContent {
       return;
     }
 
-    const entityPatterns = [
-      { pattern: /1[3-9]\d{9}/g, label: '手机号' },
-      { pattern: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, label: '邮箱' },
-      { pattern: /[1-9]\d{5}(18|19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[\dXx]/g, label: '身份证' },
-      { pattern: /\b([1-9]\d{15,18})\b/g, label: '银行卡' },
-    ];
-
     const detected = [];
-    entityPatterns.forEach(({ pattern, label }) => {
+    ENTITY_PATTERNS.forEach(({ pattern, label }) => {
       const matches = text.match(pattern);
       if (matches) {
         detected.push({ label, count: matches.length, examples: matches.slice(0, 2) });
@@ -189,7 +210,7 @@ class PrivacyGatewayContent {
   }
 
   setupChatGPTListener() {
-    const observer = new MutationObserver((mutations) => {
+    this._observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
           if (node.querySelector?.('[data-testid="send-button"]')) {
@@ -199,44 +220,50 @@ class PrivacyGatewayContent {
       });
     });
 
-    observer.observe(document.body, { childList: true, subtree: true });
+    this._observer.observe(document.body, { childList: true, subtree: true });
   }
 
   setupClaudeListener() {
-    document.addEventListener('keydown', (e) => {
+    this._handleKeyDown = (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         const textarea = document.querySelector('textarea');
         if (textarea && this.isMaskEnabled) {
           this.handleSend(textarea);
         }
       }
-    });
+    };
+    document.addEventListener('keydown', this._handleKeyDown);
+    this._listeners.push({ element: document, type: 'keydown', handler: this._handleKeyDown });
   }
 
   setupKimiListener() {
-    document.addEventListener('click', (e) => {
+    this._handleClick = (e) => {
       if (e.target.closest('button')?.textContent.includes('发送')) {
         const textarea = document.querySelector('textarea');
         if (textarea && this.isMaskEnabled) {
           this.handleSend(textarea);
         }
       }
-    });
+    };
+    document.addEventListener('click', this._handleClick);
+    this._listeners.push({ element: document, type: 'click', handler: this._handleClick });
   }
 
   setupDeepseekListener() {
-    document.addEventListener('click', (e) => {
+    this._handleDeepseekClick = (e) => {
       if (e.target.closest('[role="button"]')?.textContent.includes('发送')) {
         const textarea = document.querySelector('textarea');
         if (textarea && this.isMaskEnabled) {
           this.handleSend(textarea);
         }
       }
-    });
+    };
+    document.addEventListener('click', this._handleDeepseekClick);
+    this._listeners.push({ element: document, type: 'click', handler: this._handleDeepseekClick });
   }
 
   setupGenericListener() {
-    document.addEventListener('click', (e) => {
+    this._handleGenericClick = (e) => {
       const sendButton = e.target.closest('button');
       if (sendButton && sendButton.textContent.includes('发送')) {
         const textarea = document.querySelector('textarea');
@@ -244,7 +271,9 @@ class PrivacyGatewayContent {
           this.handleSend(textarea);
         }
       }
-    });
+    };
+    document.addEventListener('click', this._handleGenericClick);
+    this._listeners.push({ element: document, type: 'click', handler: this._handleGenericClick });
   }
 
   attachSendInterceptor(container) {
@@ -308,59 +337,16 @@ class PrivacyGatewayContent {
     });
   }
 
-  highlightEntities(text) {
-    const entityPatterns = [
-      { pattern: /1[3-9]\d{9}/g, type: 'phone' },
-      { pattern: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, type: 'email' },
-      { pattern: /[1-9]\d{5}(18|19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[\dXx]/g, type: 'idcard' },
-    ];
-
-    // Split text into segments: entity matches (to wrap) and non-matches (plain text)
-    const allMatches = [];
-    entityPatterns.forEach(({ pattern, type }) => {
-      // Reset lastIndex and clone to avoid cross-pattern interference
-      const p = new RegExp(pattern.source, 'g');
-      let match;
-      while ((match = p.exec(text)) !== null) {
-        allMatches.push({ start: match.index, end: match.index + match[0].length, type, value: match[0] });
-      }
+  // Bug 4: Cleanup method — removes all registered listeners and observer
+  destroy() {
+    this._listeners.forEach(({ element, type, handler, options }) => {
+      element.removeEventListener(type, handler, options);
     });
-
-    if (allMatches.length === 0) return text;
-
-    allMatches.sort((a, b) => a.start - b.start);
-
-    // Merge overlapping ranges
-    const merged = [];
-    for (const m of allMatches) {
-      if (merged.length > 0 && m.start <= merged[merged.length - 1].end) {
-        if (m.end > merged[merged.length - 1].end) {
-          merged[merged.length - 1].end = m.end;
-        }
-      } else {
-        merged.push({ start: m.start, end: m.end, type: m.type });
-      }
+    this._listeners = [];
+    if (this._observer) {
+      this._observer.disconnect();
+      this._observer = null;
     }
-
-    // Build result as DOM nodes
-    const container = document.createElement('div');
-    let lastIndex = 0;
-    merged.forEach(({ start, end, type }) => {
-      if (start > lastIndex) {
-        container.appendChild(document.createTextNode(text.slice(lastIndex, start)));
-      }
-      const span = document.createElement('span');
-      span.className = 'privacy-gateway-highlight';
-      span.title = type;
-      span.textContent = text.slice(start, end);
-      container.appendChild(span);
-      lastIndex = end;
-    });
-    if (lastIndex < text.length) {
-      container.appendChild(document.createTextNode(text.slice(lastIndex)));
-    }
-
-    return container.innerHTML;
   }
 }
 

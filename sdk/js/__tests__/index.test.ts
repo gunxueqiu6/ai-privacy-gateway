@@ -56,13 +56,11 @@ describe('PrivacyGateway', () => {
     });
 
     it('should handle timeout', async () => {
-      mockFetch.mockImplementationOnce(() => 
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('AbortError')), 100)
-        )
-      );
+      const abortError = new Error('The operation was aborted');
+      abortError.name = 'AbortError';
+      mockFetch.mockRejectedValueOnce(abortError);
 
-      await expect(gateway.mask('test')).rejects.toThrow();
+      await expect(gateway.mask('test')).rejects.toThrow('Request timeout');
     });
   });
 
@@ -169,6 +167,58 @@ describe('PrivacyGateway', () => {
       const entities = gateway.detectEntities('这是一段普通文本');
 
       expect(entities.length).toBe(0);
+    });
+
+    it('should warn and truncate when input exceeds 50000 chars', () => {
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const longText = 'a'.repeat(50001);
+      const entities = gateway.detectEntities(longText);
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('truncating')
+      );
+      expect(entities.length).toBe(0);
+
+      warnSpy.mockRestore();
+    });
+
+    it('should detect entities in truncated text', () => {
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const phoneNum = '13812345678';
+      const longText = phoneNum + 'a'.repeat(50000);
+
+      const entities = gateway.detectEntities(longText);
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('truncating')
+      );
+      expect(entities.length).toBeGreaterThan(0);
+      expect(entities[0].value).toBe(phoneNum);
+
+      warnSpy.mockRestore();
+    });
+  });
+
+  describe('error response handling', () => {
+    it('should extract error message from ErrorResponse JSON', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        json: () => Promise.resolve({ error: 'Custom server error' })
+      });
+
+      await expect(gateway.mask('test')).rejects.toThrow('Custom server error');
+    });
+
+    it('should fallback to HTTP status when error field is empty', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: () => Promise.resolve({})
+      });
+
+      await expect(gateway.mask('test')).rejects.toThrow('HTTP error! status: 500');
     });
   });
 });

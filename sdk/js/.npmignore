@@ -1,0 +1,10 @@
+__tests__/
+src/
+coverage/
+.eslintrc.json
+jest.config.cjs
+rollup.config.js
+tsconfig.json
+package-lock.json
+node_modules/
+.gitignore
