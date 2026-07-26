@@ -474,7 +474,7 @@ docker run -d -p 9999:9999 ghcr.io/gunxueqiu6/ai-privacy-gateway:lite
 
 **但不是孤立方案。组合使用效果最好。** 代理覆盖实时 API 调用，`.cursorignore` 限制文件范围，代码扫描覆盖存量风险。
 
-项目地址（MIT 开源）：https://github.com/gunxueqiu6/ai-privacy-gateway
+项目地址（PolyForm Shield 许可）：https://github.com/gunxueqiu6/ai-privacy-gateway
 
 ---
 
@@ -600,7 +600,7 @@ docker run -d -p 9999:9999 \
 
 AI 模型是一个工具——给它足够的上下文理解任务，但不需要给它真实的个人信息。
 
-项目地址（MIT 开源）：https://github.com/gunxueqiu6/ai-privacy-gateway
+项目地址（PolyForm Shield 许可）：https://github.com/gunxueqiu6/ai-privacy-gateway
 在线演示：https://privacygw.pages.dev/demo
 
 

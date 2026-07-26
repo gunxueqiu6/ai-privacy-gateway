@@ -21,7 +21,7 @@ Open-source PII firewall for AI APIs. Auto-mask sensitive data before it reaches
 **PII firewall for LLM APIs — mask sensitive data before it leaves your machine.**
 
 [![GitHub Stars](https://img.shields.io/github/stars/gunxueqiu6/ai-privacy-gateway?style=social)](https://github.com/gunxueqiu6/ai-privacy-gateway)
-[![MIT License](https://img.shields.io/github/license/gunxueqiu6/ai-privacy-gateway)](https://github.com/gunxueqiu6/ai-privacy-gateway)
+[![PolyForm Shield](https://img.shields.io/badge/license-PolyForm%20Shield-brightgreen)](https://polyformproject.org/licenses/shield/1.0.0)
 [![Docker Pulls](https://img.shields.io/docker/pulls/gunxueqiu6/ai-privacy-gateway)](https://ghcr.io/gunxueqiu6/ai-privacy-gateway)
 
 ## Quick Start
@@ -64,7 +64,7 @@ flowchart LR
 - **SSE streaming** — Real-time chat masking with sliding-window buffer
 - **Zero dependencies** — No external services, no telemetry, fully offline
 - **14+ entity types** — Phones, emails, IDs, bank cards, API keys, names, locations...
-- **MIT license** — Free for personal and commercial use
+- **PolyForm Shield** — Free for noncommercial use; commercial use requires a license
 
 ## Works With
 
@@ -137,7 +137,7 @@ docker push ghcr.io/gunxueqiu6/ai-privacy-gateway:v1.1.0
 
 **Categories:** Developer Tools, Security, Open Source
 
-**Pricing:** Free (MIT Open Source)
+**Pricing:** Free for noncommercial use (PolyForm Shield)
 
 ### Description
 
@@ -159,7 +159,7 @@ entity types) from your AI API calls before they leave your machine.
 - SSE streaming support (real-time chat masking)
 - Works with ChatGPT, Claude, Cursor, DeepSeek, Copilot
 - Fully local — no external services, no telemetry
-- MIT licensed
+- PolyForm Shield — source available
 
 🆚 vs alternatives:
 - vs LLM Guard: proxy (not SDK), SSE streaming, lower latency
@@ -190,7 +190,7 @@ Key design decisions:
 2. Proxy, not SDK — works with any AI tool without code changes
 3. Local, not cloud — your data never touches a third party
 
-3 months of building. MIT licensed. Hope it helps someone.
+3 months of building. PolyForm Shield. Hope it helps someone.
 
 Happy to answer any questions!
 

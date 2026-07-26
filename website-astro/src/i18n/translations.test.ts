@@ -48,8 +48,8 @@ describe('t() translation function', () => {
   });
 
   it('handles footer section keys correctly', () => {
-    expect(t('zh', 'footer.copyright')).toBe('AI Privacy Gateway. MIT Licensed. Open Source.');
-    expect(t('en', 'footer.copyright')).toBe('AI Privacy Gateway. MIT Licensed. Open Source.');
+    expect(t('zh', 'footer.copyright')).toBe('AI Privacy Gateway. PolyForm Shield. Source Available.');
+    expect(t('en', 'footer.copyright')).toBe('AI Privacy Gateway. PolyForm Shield. Source Available.');
   });
 
   it('handles lang_switcher section keys', () => {

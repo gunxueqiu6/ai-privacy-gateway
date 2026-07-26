@@ -19,7 +19,7 @@ AI Privacy Gateway does exactly that:
 - Regex-based detection at <1ms latency — transparent to real-time AI chat
 - SSE streaming support — masks PII in real-time streaming responses
 - Works with ChatGPT, Claude, Cursor, DeepSeek, Copilot — any OpenAI-compatible API
-- MIT licensed. Zero external dependencies. Fully local.
+- PolyForm Shield. Zero external dependencies. Fully local.
 
 The problem this solves:
 - Developers sending code with API keys/secrets to Cursor/Claude Code
@@ -96,4 +96,4 @@ A: Yes. Both support custom API base URLs. Point them at `http://localhost:9999`
 A: Regex is less accurate for unstructured text detection (e.g., names in free text). But it catches 95%+ of structured PII (phones, emails, IDs, cards, keys) with sub-millisecond latency. For the AI API use case — where speed matters because users are waiting for streaming responses — regex is the right tradeoff.
 
 **Q: Can I use this in production at my company?**
-A: Yes. MIT licensed. Enterprise deployment supports Kubernetes with Helm, horizontal scaling, and centralized audit logging. Details at https://privacygw.pages.dev/enterprise-ai-data-protection
+A: Yes. PolyForm Shield licensed. Enterprise deployment supports Kubernetes with Helm, horizontal scaling, and centralized audit logging. Details at https://privacygw.pages.dev/enterprise-ai-data-protection

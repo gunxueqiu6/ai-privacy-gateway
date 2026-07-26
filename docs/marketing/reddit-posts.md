@@ -208,7 +208,7 @@ Full writeup with benchmarks: github.com/gunxueqiu6/ai-privacy-gateway
 
 **Best posting time**: Saturday 9:00 AM ET
 
-**Title**: My side project: A privacy-first proxy for AI APIs — built solo, MIT open source
+**Title**: My side project: A privacy-first proxy for AI APIs — built solo, PolyForm Shield
 
 **Body**:
 
@@ -235,7 +235,7 @@ So I built it myself on weekends.
 
 **What I'd do differently**: Skip the regex-vs-NER debate and just use a two-stage pipeline from the start. Also, Docker multi-stage builds to keep the image from ballooning.
 
-**Where it stands now**: MIT licensed, used by a few small teams I don't know. No monetization plan — it's a tool I needed, shared in case others need it too.
+**Where it stands now**: PolyForm Shield licensed, used by a few small teams I don't know. No monetization plan — it's a tool I needed, shared in case others need it too.
 
 GitHub: github.com/gunxueqiu6/ai-privacy-gateway
 Demo: privacygw.pages.dev

@@ -84,7 +84,7 @@ const renderCell = (value: string): string => {
   if (value === 'no') return lang === 'zh' ? '不支持' : 'No';
   if (value === 'partial') return lang === 'zh' ? '部分' : 'Partial';
   if (value === 'native') return lang === 'zh' ? '原生' : 'Native';
-  if (value === 'lic_mit') return lang === 'zh' ? 'MIT' : 'MIT';
+  if (value === 'lic_mit') return lang === 'zh' ? 'PolyForm Shield' : 'PolyForm Shield';
   if (value === 'lic_apache') return lang === 'zh' ? 'Apache 2.0' : 'Apache 2.0';
   if (value === 'lic_prop') return lang === 'zh' ? '专有' : 'Proprietary';
   if (value === 'free') return lang === 'zh' ? '免费' : 'Free';
@@ -309,8 +309,8 @@ const legendSelf = lang === 'zh' ? '我们的优势' : 'Our Strength';
               <path d="M2 12l10 5 10-5"/>
             </svg>
           </div>
-          <h3>{lang === 'zh' ? 'MIT 开源协议' : 'MIT Licensed'}</h3>
-          <p>{lang === 'zh' ? '永久免费。个人使用、商业使用、私有部署均无限制。无需注册、无需信用卡、不收集遥测数据。' : 'Free forever. No restrictions on personal use, commercial use, or self-hosting. No registration, no credit card, no telemetry.'}</p>
+          <h3>{lang === 'zh' ? 'PolyForm Shield | 非商业免费' : 'PolyForm Shield'}</h3>
+          <p>{lang === 'zh' ? '非商业免费，商业使用需获授权。个人和非商业使用无限制，私有部署允许。无需注册、无需信用卡、不收集遥测数据。' : 'Free for noncommercial use. Commercial use requires a license. No registration, no credit card, no telemetry.'}</p>
         </div>
 
         <div class="strength-card glass">

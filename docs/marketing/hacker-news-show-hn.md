@@ -35,7 +35,7 @@ I built an open-source local proxy that auto-detects and masks 15 types of PII b
 - AES-256-GCM encrypted local vault for placeholder↔original mapping
 - Works with any OpenAI-compatible API: ChatGPT, Claude, DeepSeek, Cursor, Copilot
 - Docker one-liner, 30s deploy
-- 100% local, zero telemetry, MIT license
+- 100% local, zero telemetry, PolyForm Shield
 
 The two-stage pipeline (regex first, NER second, skip spans already matched) cuts processing time by ~60% vs running both on the full text. For streaming, I use a sliding window buffer that resolves entity boundaries across chunk boundaries without adding perceptible delay.
 
@@ -151,11 +151,11 @@ It's an open-source tool I built because I needed it for my team at work. We had
 
 Open sourcing it was a natural step — other teams have the same compliance gap for AI tooling. I'd rather share it than have 50 teams independently build the same thing.
 
-Is it a "product"? Not in the SaaS sense. It's MIT licensed, there's no paid tier, no VC, no growth targets. If it saves some teams a few hours of compliance headache, that's success to me.
+Is it a "product"? Not in the SaaS sense. It's PolyForm Shield licensed, there's no paid tier, no VC, no growth targets. If it saves some teams a few hours of compliance headache, that's success to me.
 
 ### Q10: "What's the business model?"
 
-No business model. It's MIT open source.
+No business model. It's PolyForm Shield, source available.
 
 If there's enough demand, I might offer:
 - Managed hosting for teams that don't want to self-host

@@ -1,7 +1,7 @@
 # AI Privacy Gateway
 
 > Open-source PII masking proxy for ChatGPT, Claude, Cursor, DeepSeek, and any LLM API.
-> Install a firewall for your AI data in 30 seconds. [MIT Licensed]
+> Install a firewall for your AI data in 30 seconds. [PolyForm Shield | Free for Noncommercial Use]
 
 **v2.0.0** — A high-performance reverse proxy that automatically detects and masks sensitive data (phone numbers, ID cards, emails, bank cards, names, locations, API keys, and 14+ entity types) in AI API requests and responses. Protects PII before it leaves your machine. New in v2.0: AES-256-GCM vault encryption, multi-upstream load balancer, pub/sub audit bus, browser extension SDK, Windows/macOS installers.
 
@@ -14,7 +14,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/github/stars/gunxueqiu6/ai-privacy-gateway?style=social" alt="GitHub Stars">
-  <img src="https://img.shields.io/github/license/gunxueqiu6/ai-privacy-gateway" alt="MIT License">
+  <img src="https://img.shields.io/badge/license-PolyForm%20Shield-brightgreen" alt="PolyForm Shield">
   <img src="https://img.shields.io/badge/language-Python-blue" alt="Python">
   <img src="https://img.shields.io/badge/PII%20Entities-14%2B-brightgreen" alt="14+ PII Entities">
   <img src="https://img.shields.io/badge/docker-ready-2496ED?logo=docker" alt="Docker Ready">
@@ -148,7 +148,7 @@ flowchart LR
 
 | Feature | AI Privacy Gateway | LLM Guard | PasteGuard | Nightfall AI | Private AI |
 |---------|:---:|:---:|:---:|:---:|:---:|
-| **License** | MIT | MIT | MIT | Commercial | Commercial |
+| **License** | PolyForm Shield | MIT | MIT | Commercial | Commercial |
 | **Deployment** | Docker / pip | pip | Browser Extension | Cloud API | SDK / Cloud |
 | **Setup time** | 30s | 5 min | 1 min | 1 hour+ | 1 hour+ |
 | **PII types** | 14+ | 10+ | 8+ | 30+ | 50+ |
@@ -343,7 +343,7 @@ python main.py
 
 ## License
 
-MIT License. See [LICENSE](LICENSE) for details.
+PolyForm Shield License 1.0.0. See [LICENSE](LICENSE) for details.
 
 ## Links
 

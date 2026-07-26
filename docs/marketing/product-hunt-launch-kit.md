@@ -37,7 +37,7 @@ You run a local Python server (FastAPI + Uvicorn) that intercepts requests to Op
 
 1. **Streaming-aware.** Most privacy proxies buffer the full response, process it, then send it. This one streams token-by-token through an async generator — the AI feels just as fast, the PII masking happens in real time.
 2. **Round-trip reconstruction.** The proxy remembers which placeholder mapped to which value. When the AI response contains `[EMAIL_1]`, it reconstructs the real email in the output so your downstream tooling sees the original data.
-3. **MIT licensed.** You can fork it, embed it, ship it inside a Docker container, or run it as a system service. No "email us for enterprise." No usage caps.
+3. **PolyForm Shield.** You can fork it, embed it, ship it inside a Docker container, or run it as a system service. No "email us for enterprise." No usage caps.
 
 **One-line install**
 
@@ -70,7 +70,7 @@ The tech stack is FastAPI (async SSE streaming), a `dataclass`-based detection e
 - Would a web UI change how you use it, or is CLI the right interface?
 - Is GitHub or Docker Hub the better distribution channel for your team?
 
-The repo is at github.com/gunxueqiu6/ai-privacy-gateway, MIT licensed. I read every issue and PR.
+The repo is at github.com/gunxueqiu6/ai-privacy-gateway, PolyForm Shield licensed. I read every issue and PR.
 
 Thanks for checking it out.
 
@@ -198,7 +198,7 @@ The one caveat: the current version processes each chunk inline in the async gen
 
 ### Q3: Is it really free?
 
-Yes. MIT license. No paid tier now, no plans for one. The only cost is whatever you pay the AI provider for API calls.
+Yes. PolyForm Shield license. Noncommercial use is free. Commercial use requires a license.
 
 That said, if enough people want a hosted version (a managed proxy they just point their DNS at), I would consider it as a separate service — but the open-source project stays free and unchanged.
 
@@ -241,7 +241,7 @@ The `--locale` flag adjusts some phone patterns and adds locale-specific entity 
 
 ### Q9: Is there a hosted/cloud version?
 
-Not yet. The project is MIT licensed and designed to run locally. Running it as a cloud service would mean your traffic passes through my server, which defeats the privacy purpose for most users.
+Not yet. The project is PolyForm Shield licensed and designed to run locally. Running it as a cloud service would mean your traffic passes through my server, which defeats the privacy purpose for most users.
 
 If you want a managed proxy for your team, the Docker image is production-ready. Deploy it on your own infrastructure (Fly.io, Railway, a $10 VPS) and point your clients at it. I have a Docker Compose template in the repo.
 
@@ -433,7 +433,7 @@ The tech is straightforward: FastAPI for the server, `dataclass`-based entity de
 
 **The project:**
 
-- MIT licensed: github.com/gunxueqiu6/ai-privacy-gateway
+- PolyForm Shield: github.com/gunxueqiu6/ai-privacy-gateway
 - Live docs: privacygw.pages.dev
 - Ships tomorrow on Product Hunt.
 
@@ -449,7 +449,7 @@ I built this for myself. If it helps you too, I would love to hear what you thin
 
 **Body:**
 
-> tl;dr: `pip install ai-privacy-gateway && privacy-gateway --provider openai` masks emails, phone numbers, API keys, and 11 more entity types before they reach the AI provider. Streaming-supported, round-trip reconstruction, MIT licensed.
+> tl;dr: `pip install ai-privacy-gateway && privacy-gateway --provider openai` masks emails, phone numbers, API keys, and 11 more entity types before they reach the AI provider. Streaming-supported, round-trip reconstruction, PolyForm Shield licensed.
 >
 > Repo: github.com/gunxueqiu6/ai-privacy-gateway
 >

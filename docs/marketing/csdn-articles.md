@@ -188,7 +188,7 @@ AI客户端 → localhost:9999（代理） → [脱敏] → OpenAI/DeepSeek/等
 **缺点：**
 - 对非结构化文本（自由文本中的人名）的识别准确率低于 ML 方案
 
-**代表工具：** AI Privacy Gateway（MIT 开源）
+**代表工具：** AI Privacy Gateway（PolyForm Shield 许可）
 
 **部署示例：**
 ```bash

@@ -58,7 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Refactored custom regex routes — deduplicated redundant code, improved masking accuracy
-- Stripped project to MIT-licensed Lite edition only (removed Pro/Enterprise tier)
+- Stripped project to PolyForm Shield Lite edition only (removed Pro/Enterprise tier)
 
 ---
 
@@ -137,7 +137,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Dockerfile** and **docker-compose.yml** for containerized deployment
 - **PyInstaller packaging** — `PrivacyGateway.spec` for standalone executable builds
 - `robots.txt` and SEO basics for website
-- MIT License
+- PolyForm Shield License 1.0.0
 
 ### Changed
 

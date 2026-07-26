@@ -1,6 +1,6 @@
 # AI Privacy Gateway
 > Open-source PII masking proxy for ChatGPT, Claude, Cursor, DeepSeek, and any LLM API.
-> Auto-detects and masks 15 types of sensitive data before it leaves your machine. 30s deploy, MIT license.
+> Auto-detects and masks 15 types of sensitive data before it leaves your machine. 30s deploy, PolyForm Shield.
 
 ## Core Documentation
 https://privacygw.pages.dev/docs/quickstart — 5-minute deployment guide

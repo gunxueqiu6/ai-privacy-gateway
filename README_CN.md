@@ -15,7 +15,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/github/stars/gunxueqiu6/ai-privacy-gateway?style=social" alt="GitHub Stars">
-  <img src="https://img.shields.io/github/license/gunxueqiu6/ai-privacy-gateway" alt="MIT License">
+  <img src="https://img.shields.io/badge/license-PolyForm%20Shield-brightgreen" alt="PolyForm Shield">
   <img src="https://img.shields.io/badge/language-Python-blue" alt="Python">
   <img src="https://img.shields.io/badge/PII%20实体-14%2B-brightgreen" alt="14+ PII 实体">
   <img src="https://img.shields.io/badge/docker-就绪-2496ED?logo=docker" alt="Docker 就绪">
@@ -128,7 +128,7 @@ flowchart LR
 
 | 特性 | AI Privacy Gateway | LLM Guard | PasteGuard | Nightfall AI | Private AI |
 |------|:---:|:---:|:---:|:---:|:---:|
-| **许可证** | MIT | MIT | MIT | 商业 | 商业 |
+| **许可证** | PolyForm Shield | MIT | MIT | 商业 | 商业 |
 | **部署方式** | Docker / pip | pip | 浏览器扩展 | 云端 API | SDK / 云 |
 | **部署时间** | 30 秒 | 5 分钟 | 1 分钟 | 1 小时+ | 1 小时+ |
 | **PII 类型** | 14+ | 10+ | 8+ | 30+ | 50+ |
@@ -323,7 +323,7 @@ python main.py
 
 ## License
 
-MIT License。详见 [LICENSE](LICENSE)。
+PolyForm Shield License 1.0.0。详见 [LICENSE](LICENSE)。
 
 ## 链接
 

@@ -376,7 +376,7 @@ For security vulnerabilities, **do not open a public issue**. Please contact the
 
 ## License
 
-By contributing to AI Privacy Gateway, you agree that your contributions will be licensed under the [MIT License](LICENSE).
+By contributing to AI Privacy Gateway, you agree that your contributions will be licensed under the [PolyForm Shield License 1.0.0](LICENSE).
 
 ---
 

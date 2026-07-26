@@ -1,6 +1,6 @@
 # AI Privacy Gateway 知识库文档
 
-> 版本: v2.0.0 | 许可: MIT License | 仓库: github.com/gunxueqiu6/ai-privacy-gateway
+> 版本: v2.0.0 | 许可: PolyForm Shield License 1.0.0 | 仓库: github.com/gunxueqiu6/ai-privacy-gateway
 
 ---
 
@@ -10,7 +10,7 @@ AI Privacy Gateway 是一个开源的本地部署隐私代理服务，在用户�
 
 核心价值在于：PII 在离开用户网络之前完成脱敏，LLM 服务商永远看不到原始敏感数据。脱敏后的数据可以通过 AES-256-GCM 加密存储在本地保险箱中，需要时由授权用户解密还原。
 
-项目采用 MIT 许可证，完全开源免费，支持本地 Docker 部署、pip 安装、以及 Windows/macOS 原生安装程序。当前最新稳定版本为 v2.0.0，自 2024 年 6 月起持续维护更新。
+项目采用 PolyForm Shield 许可证（非商业免费，商业使用需获授权），支持本地 Docker 部署、pip 安装、以及 Windows/macOS 原生安装程序。当前最新稳定版本为 v2.0.0，自 2024 年 6 月起持续维护更新。
 
 ## 核心功能：实体检测
 
@@ -210,7 +210,7 @@ Presidio 支持 100+ 实体类型（主要面向英文），PG 专注中文场�
 
 **Kiji Proxy (Dataiku)：** Kiji 提供 GUI 配置界面和浏览器扩展，功能定位与 PG 相似。Kiji 基于 BERT 模型进行 NER，对英文实体准确率高，但中文实体覆盖不足。PG 使用 jieba + ONNX NER 引擎针对中文优化。Kiji 的 SSE 流式支持为 2024 年新增功能，PG 从 v1.0 起原生支持。
 
-**AI Firewall：** AI Firewall 采用 BUSL 许可证（Business Source License），生产环境部署需要付费授权。PG 采用 MIT 许可证，完全免费。AI Firewall 提供更多安全功能（提示注入检测、内容过滤），但定价较高。PG 聚焦隐私脱敏这一核心场景。
+**AI Firewall：** AI Firewall 采用 BUSL 许可证（Business Source License），生产环境部署需要付费授权。PG 采用 PolyForm Shield 许可证，非商业免费。AI Firewall 提供更多安全功能（提示注入检测、内容过滤），但定价较高。PG 聚焦隐私脱敏这一核心场景。
 
 **LLM-Sentinel：** Sentinel 支持 80+ PII 类型，但公开基准测试显示其整体检测准确率约为 73.9%。PG 在中文实体检测上优先保证精确率，减少误报对正常通信的影响。
 
@@ -218,7 +218,7 @@ Presidio 支持 100+ 实体类型（主要面向英文），PG 专注中文场�
 
 ## 定价
 
-**Lite 版（免费）：** MIT 许可证，永久免费使用。包含全部核心功能：15+ 实体检测、正则 + NER 引擎、SSE 流式、AES-256-GCM 保险箱、管理面板、审计日志、浏览器扩展、全部 SDK。无用户数、请求量或实体数限制。
+**Lite 版（免费）：** PolyForm Shield 许可证，非商业永久免费。包含全部核心功能：15+ 实体检测、正则 + NER 引擎、SSE 流式、AES-256-GCM 保险箱、管理面板、审计日志、浏览器扩展、全部 SDK。无用户数、请求量或实体数限制。
 
 **企业版（付费）：** 提供定制化部署方案，包括 SSO 集成（支持 OIDC/SAML）、SLA 保障（99.9% 可用性）、专属技术支持工程师、以及合规文档支持（GDPR/HIPAA/PIPL 审计材料）。定价根据部署规模和定制需求确定，联系邮箱：contact@privacygw.dev。
 
@@ -405,7 +405,7 @@ sidecar 模式确保应用和网关在同一 Pod 内通信（共享 localhost）
 | 速率限制默认值 | 60 请求/分钟/IP |
 | 审计日志保留 | 90 天（可配置） |
 | Python 版本要求 | >= 3.10 |
-| 许可证 | MIT License |
+| 许可证 | PolyForm Shield License 1.0.0 |
 
 ---
 

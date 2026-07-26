@@ -94,7 +94,7 @@ docker run -d -p 9999:9999 ghcr.io/gunxueqiu6/ai-privacy-gateway:lite
 ```
 
 Point your AI client at `http://localhost:9999`. Done. All PII auto-masked
-before it leaves your machine. MIT licensed, fully open source.
+before it leaves your machine. PolyForm Shield licensed, source available.
 
 [继续正文...]
 

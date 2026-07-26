@@ -10,7 +10,7 @@ const isZh = lang === 'zh';
 
 <Layout
   title={isZh ? '服务条款 — AI Privacy Gateway' : 'Terms of Service — AI Privacy Gateway'}
-  description={isZh ? 'AI Privacy Gateway 服务条款：MIT 开源许可证，软件按现状提供，用户负责合规使用。' : 'AI Privacy Gateway Terms of Service. MIT licensed, software provided as-is, users responsible for compliance.'}
+  description={isZh ? 'AI Privacy Gateway 服务条款：PolyForm Shield 1.0.0 许可证，软件按现状提供，用户负责合规使用。' : 'AI Privacy Gateway Terms of Service. PolyForm Shield License 1.0.0, software provided as-is, users responsible for compliance.'}
   canonicalURL="https://privacygw.pages.dev/terms-of-service">
   <Nav />
 
@@ -25,31 +25,35 @@ const isZh = lang === 'zh';
       <div class="seo-tldr glass">
         <strong>{isZh ? '摘要：' : 'Summary: '}</strong>
         {isZh
-          ? 'AI Privacy Gateway 采用 MIT 许可证发布。它是自托管的开源工具，按"现状"提供，无任何担保。您有责任确保使用方式符合当地法律法规。'
-          : 'AI Privacy Gateway is released under the MIT license. It is a self-hosted open-source tool provided "as is" without warranty. You are responsible for ensuring your use complies with applicable laws.'}
+          ? 'AI Privacy Gateway 采用 PolyForm Shield 1.0.0 许可证发布。它是自托管的开源工具，按"现状"提供，无任何担保。您有责任确保使用方式符合当地法律法规。'
+          : 'AI Privacy Gateway is released under the PolyForm Shield License 1.0.0. It is a self-hosted open-source tool provided "as is" without warranty. You are responsible for ensuring your use complies with applicable laws.'}
       </div>
 
       <h2>{isZh ? '1. 许可证' : '1. License'}</h2>
       <p>
         {isZh
-          ? 'AI Privacy Gateway 采用 MIT 许可证发布。您可以自由地使用、复制、修改、合并、发布、分发、再许可和/或出售本软件的副本，但须满足以下条件：'
-          : 'AI Privacy Gateway is released under the MIT License. You are free to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, subject to the following condition:'}
+          ? 'AI Privacy Gateway 采用 PolyForm Shield 1.0.0 许可证发布。非商业用途免费，商业使用需获得授权。'
+          : 'AI Privacy Gateway is released under the PolyForm Shield License 1.0.0. Free for noncommercial use. Commercial use requires a license.'}
       </p>
       <div class="code-block glass">
-        <div class="code-block-title">MIT License</div>
-        <pre><code>MIT License
+        <div class="code-block-title">PolyForm Shield License 1.0.0</div>
+        <pre><code>PolyForm Shield License 1.0.0
 
 Copyright (c) 2025 AI Privacy Gateway
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person or organization
+obtaining a copy of this software and associated documentation files
+(the "Software"), to use, copy, modify, merge, publish, and distribute
+the Software, and to permit persons to whom the Software is furnished to
+do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. Noncommercial Use. The above rights are granted for noncommercial use
+   only. Noncommercial use means use that is not intended for or directed
+   toward commercial advantage or monetary compensation.
+
+2. Commercial Use. Any use of the Software that is intended for or directed
+   toward commercial advantage or monetary compensation requires a separate
+   commercial license. Contact the copyright holder for commercial licensing.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -57,7 +61,9 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.</code></pre>
+SOFTWARE.
+
+Full license: https://polyformproject.org/licenses/shield/1.0.0</code></pre>
       </div>
 
       <h2>{isZh ? '2. 软件性质' : '2. Nature of the Software'}</h2>

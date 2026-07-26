@@ -12,7 +12,7 @@ AI 隐私工具领域已经爆发。开源项目、商业 SaaS 平台和浏览�
 
 ### 1. AI Privacy Gateway（开源）
 
-开源本地代理，拦截 AI API 调用并脱敏 PII。免费、MIT 许可、自托管。
+开源本地代理，拦截 AI API 调用并脱敏 PII。非商业免费、PolyForm Shield 许可、自托管。
 
 ### 2. Commercial DLP 平台（商业）
 

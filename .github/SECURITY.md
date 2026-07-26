@@ -24,7 +24,7 @@ AI Privacy Gateway is designed with security-first principles:
 - **Zero Telemetry**: No usage data, no crash reports, no analytics are collected.
 - **AES-256-GCM Vault**: PII mappings are encrypted at rest with AES-256-GCM when `VAULT_ENCRYPT_KEY` is configured.
 - **Audit Hash Chain**: All audit log entries are linked with SHA-256 hash chain for tamper evidence.
-- **MIT Licensed**: Full source code auditability.
+- **PolyForm Shield**: Source code available for audit.
 
 ## What to Include in Your Report
 

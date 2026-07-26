@@ -102,7 +102,7 @@ docker run -d -p 9999:9999 ghcr.io/gunxueqiu6/ai-privacy-gateway:lite
 
 **每种方案覆盖不同的风险层。最好的做法是组合使用。** 本地隐私代理覆盖实时 API 调用；`.cursorignore` 限制文件范围；代码扫描覆盖存量风险。
 
-项目地址：https://github.com/gunxueqiu6/ai-privacy-gateway （MIT 开源）
+项目地址：https://github.com/gunxueqiu6/ai-privacy-gateway （PolyForm Shield 许可）
 
 ---
 
@@ -260,6 +260,6 @@ curl -X POST http://localhost:9999/api/mask \
 
 本地演示（浏览器端处理，数据不上传）：https://privacygw.pages.dev/demo
 
-GitHub（MIT 开源）：https://github.com/gunxueqiu6/ai-privacy-gateway
+GitHub（PolyForm Shield 许可）：https://github.com/gunxueqiu6/ai-privacy-gateway
 
 **如果你的团队用 Cursor/Claude Code/ChatGPT 等 AI 工具，部署一个本地代理是目前成本最低、效果最好的脱敏方式。**

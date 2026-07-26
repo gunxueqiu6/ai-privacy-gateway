@@ -38,7 +38,7 @@ Point your AI client to `http://localhost:9999/v1` — that's it. Works with Cha
 
 The NER model (spaCy) adds about 2ms per request as a fallback for unstructured entities. If you only care about structured PII (which covers 95%+ of actual leaks), regex-only mode is <200 microseconds.
 
-MIT licensed. No telemetry. No cloud dependency. No "upgrade to pro."
+PolyForm Shield. No telemetry. No cloud dependency. No "upgrade to pro."
 
 GitHub: github.com/gunxueqiu6/ai-privacy-gateway
 Website: privacygw.pages.dev
@@ -240,7 +240,7 @@ Benchmark methodology in the repo's tests/ directory.
 
 **Best posting time**: Saturday 9:00 AM ET
 
-**Title**: My side project: A privacy-first proxy for AI APIs — built solo, MIT open source
+**Title**: My side project: A privacy-first proxy for AI APIs — built solo, PolyForm Shield
 
 **Body**：
 
@@ -332,7 +332,7 @@ Point your AI client to `http://localhost:9999/v1` — zero code changes needed.
 - NER detection: 2.1ms average
 - Total overhead (non-streaming): ~5ms
 - SSE overhead: ~0.05ms per chunk
-- 100% local, zero telemetry, MIT license
+- 100% local, zero telemetry, PolyForm Shield
 - Works with ChatGPT, Claude, DeepSeek, Cursor, Copilot — anything OpenAI-compatible
 
 **Stack**: Python/FastAPI (proxy), spaCy (NER), SQLite + AES-256-GCM (vault), Preact (admin dashboard)

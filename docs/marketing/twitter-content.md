@@ -18,7 +18,7 @@ API keys & 14+ entity types before they leave your machine.
 
 • 30s Docker deploy
 • <1ms latency
-• MIT license
+• PolyForm Shield
 • Works with ChatGPT, Cursor, Claude Code, DeepSeek
 
 https://github.com/gunxueqiu6/ai-privacy-gateway
@@ -120,7 +120,7 @@ How AI Privacy Gateway works:
 4. Forward masked request
 5. AI never sees raw data
 
-Zero config. MIT license.
+Zero config. PolyForm Shield.
 ```
 
 ### 互动型

@@ -12,7 +12,7 @@ The AI privacy tool landscape has exploded. Open-source projects, commercial Saa
 
 ### Open-Source Proxy Solutions
 
-**AI Privacy Gateway** (MIT License)
+**AI Privacy Gateway** (PolyForm Shield License 1.0.0)
 - Type: Local proxy server
 - Deployment: Docker, 30-second setup
 - PII Detection: 14+ entity types (regex-based, < 1ms latency)
@@ -56,7 +56,7 @@ The AI privacy tool landscape has exploded. Open-source projects, commercial Saa
 
 | Feature | AI Privacy Gateway | LLM Guard | PasteGuard | Nightfall | Private AI |
 |---------|-------------------|-----------|------------|-----------|------------|
-| **License** | MIT | MIT | MIT | Commercial | Commercial |
+| **License** | PolyForm Shield | MIT | MIT | Commercial | Commercial |
 | **Deployment** | Docker | pip | Extension | API | SDK/Cloud |
 | **Setup time** | 30s | 5 min | 1 min | 1 hour | 1 hour |
 | **PII types** | 14+ | 10+ | 8+ | 30+ | 50+ |
