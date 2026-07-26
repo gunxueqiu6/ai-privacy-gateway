@@ -185,6 +185,106 @@ const competitors: Competitor[] = [
     ],
     primaryKeyword: 'Private AI open source alternative',
   },
+  {
+    slug: 'presidio',
+    name: 'Microsoft Presidio',
+    tagline: 'Open-source PII detection and anonymization library by Microsoft',
+    description:
+      'Microsoft Presidio is an open-source library for context-aware PII detection and anonymization of text and images. It provides a modular framework with pluggable detection and anonymization components.',
+    strengths: [
+      'Context-aware entity detection with analyzers',
+      'Modular architecture with pluggable components',
+      'Image redaction support (PII in images)',
+    ],
+    weaknesses: [
+      'Library integration required — no proxy/gateway',
+      'Python-only — no cross-platform deployment',
+      'No streaming/SSE support for real-time masking',
+    ],
+    comparisonPoints: [
+      { label: 'Architecture', them: 'Python library (code integration)', us: 'Standalone proxy (zero code changes)' },
+      { label: 'Deployment', them: 'pip install + code changes', us: '30-second Docker deploy, change base URL' },
+      { label: 'Real-time Proxy', them: 'Not available', us: 'Full SSE streaming with live masking' },
+      { label: 'Performance', them: 'Python-based processing', us: 'Rust engine — sub-1ms latency' },
+      { label: 'License', them: 'MIT', us: 'PolyForm Shield' },
+    ],
+    primaryKeyword: 'Microsoft Presidio vs AI Privacy Gateway comparison',
+  },
+  {
+    slug: 'kiji-proxy',
+    name: 'Kiji Proxy',
+    tagline: 'Open-source AI data leak prevention proxy',
+    description:
+      'Kiji Proxy is an open-source proxy that monitors and controls data sent to AI APIs. It focuses on data loss prevention for enterprise AI usage with policy-based filtering.',
+    strengths: [
+      'Policy-based data filtering and control',
+      'Open source with community contributions',
+      'Enterprise-focused DLP features',
+    ],
+    weaknesses: [
+      'Limited PII entity detection coverage',
+      'Requires policy configuration for each use case',
+      'Less mature ecosystem and documentation',
+    ],
+    comparisonPoints: [
+      { label: 'PII Detection', them: 'Basic regex-based detection', us: 'Regex + NER dual engine — 14 entity types' },
+      { label: 'Deployment', them: 'Docker with config setup', us: '30-second Docker — zero config required' },
+      { label: 'SSE Streaming', them: 'Limited support', us: 'Full SSE proxy with real-time masking' },
+      { label: 'Performance', them: 'Moderate latency', us: 'Sub-1ms Rust engine' },
+      { label: 'License', them: 'Apache 2.0', us: 'PolyForm Shield' },
+    ],
+    primaryKeyword: 'Kiji Proxy vs AI Privacy Gateway alternative',
+  },
+  {
+    slug: 'ai-firewall',
+    name: 'AI Firewall',
+    tagline: 'Cloud-based AI safety and security filtering platform',
+    description:
+      'AI Firewall is a cloud-based security platform that filters prompts and responses for AI applications, providing content moderation, PII detection, and threat prevention as a managed service.',
+    strengths: [
+      'Cloud-managed — no infrastructure to maintain',
+      'Content moderation and safety filters',
+      'Threat intelligence integration',
+    ],
+    weaknesses: [
+      'Cloud-only — data processed on external servers',
+      'Subscription-based pricing can be costly',
+      'No self-hosted deployment option',
+    ],
+    comparisonPoints: [
+      { label: 'Data Residency', them: 'Data processed in cloud', us: '100% local — data never leaves your infra' },
+      { label: 'Deployment', them: 'Cloud API integration', us: 'Self-hosted Docker, 30-second deploy' },
+      { label: 'Pricing', them: 'Per-request subscription', us: 'Free Lite, flat pricing for Pro' },
+      { label: 'Open Source', them: 'Proprietary', us: 'PolyForm Shield — source available' },
+      { label: 'Offline Support', them: 'Requires internet', us: 'Fully offline capable' },
+    ],
+    primaryKeyword: 'AI Firewall self-hosted alternative open source',
+  },
+  {
+    slug: 'llm-sentinel',
+    name: 'LLM Sentinel',
+    tagline: 'AI prompt security gateway with real-time threat detection',
+    description:
+      'LLM Sentinel is a security gateway for LLM applications that provides prompt injection detection, data loss prevention, and PII redaction as a managed proxy service.',
+    strengths: [
+      'Advanced prompt injection detection',
+      'Real-time threat monitoring dashboard',
+      'Managed service with quick setup',
+    ],
+    weaknesses: [
+      'Cloud-managed — no self-hosting option',
+      'Per-request pricing scales poorly',
+      'Limited PII entity coverage compared to alternatives',
+    ],
+    comparisonPoints: [
+      { label: 'Self-Hosted', them: 'Not available', us: 'Docker, binary, any environment' },
+      { label: 'PII Coverage', them: 'Basic entity types', us: '14+ types including Chinese formats' },
+      { label: 'Latency', them: 'Cloud round-trip latency', us: 'Sub-1ms local processing' },
+      { label: 'Pricing Model', them: 'Per-request billing', us: 'Free Lite, flat-rate Pro' },
+      { label: 'License', them: 'Proprietary SaaS', us: 'PolyForm Shield' },
+    ],
+    primaryKeyword: 'LLM Sentinel open source alternative self-hosted',
+  },
 ];
 
 export default competitors;

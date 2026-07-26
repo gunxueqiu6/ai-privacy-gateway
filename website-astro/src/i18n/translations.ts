@@ -37,7 +37,7 @@ const dict: Record<Lang, NestedDict> = {
     home: {
       badge: 'v2.0.0 · PolyForm Shield · 非商业免费',
       title_line1: '你的 AI 数据正在裸奔',
-      title_line2: 'PII 敏感信息。',
+      title_line2: 'PII 敏感信息',
       title_line3: '30 秒装上防火墙。',
       desc: 'AI Privacy Gateway 拦截每一次发往 LLM 的 API 调用——在数据离开你的机器之前，检测并脱敏手机号、邮箱、身份证、银行卡等',
       desc_strong: '14 种实体类型。',

@@ -170,7 +170,7 @@ claude config set ANTHROPIC_BASE_URL "http://localhost:9999/v1"`,
     primaryKeyword: 'Claude Code privacy protect source code API keys',
   },
   {
-    slug: 'cursor-ide',
+    slug: 'cursor',
     name: 'Cursor IDE',
     tagline: 'Use Cursor without sending your entire codebase to the cloud unprotected',
     description:
@@ -218,6 +218,55 @@ export OPENAI_BASE_URL="http://localhost:9999/v1"
       'Protects code, comments, and config files',
     ],
     primaryKeyword: 'Continue.dev AI privacy open source code assistant',
+  },
+  {
+    slug: 'vscode',
+    name: 'VS Code',
+    tagline: 'Use VS Code AI features with complete privacy protection',
+    description:
+      'Visual Studio Code extensions like GitHub Copilot and VS Code Chat send code context to AI providers. AI Privacy Gateway intercepts these API calls, masking sensitive data before it reaches external servers.',
+    setupCode: `# Set environment variable before launching VS Code
+export OPENAI_BASE_URL="http://localhost:9999/v1"
+
+# Or configure in VS Code settings.json
+"openai.experimental.baseUrl": "http://localhost:9999/v1"`,
+    setupSteps: [
+      'Deploy the privacy gateway locally',
+      'Set OPENAI_BASE_URL or configure in VS Code settings',
+      'All VS Code AI features now use privacy-protected API calls',
+    ],
+    benefits: [
+      'Protect source code sent to GitHub Copilot and VS Code Chat',
+      'Auto-mask API keys, tokens, and secrets in code snippets',
+      'Works with any VS Code AI extension that supports custom endpoints',
+    ],
+    primaryKeyword: 'VS Code AI privacy Copilot source code protection',
+  },
+  {
+    slug: 'chatgpt',
+    name: 'ChatGPT',
+    tagline: 'Use ChatGPT without exposing your sensitive data to OpenAI servers',
+    description:
+      'ChatGPT is the most widely used AI assistant. AI Privacy Gateway allows you to use ChatGPT through a privacy proxy that masks PII in your prompts before they reach OpenAI, without changing how you interact with ChatGPT.',
+    setupCode: `# Set environment variable for OpenAI SDK
+export OPENAI_BASE_URL="http://localhost:9999/v1"
+
+# Or configure in ChatGPT API client
+client = OpenAI(
+    base_url="http://localhost:9999/v1",
+    api_key="your-api-key"
+)`,
+    setupSteps: [
+      'Deploy the privacy gateway locally or on your network',
+      'Configure your OpenAI API client to point to the gateway',
+      'All prompts are now PII-masked before reaching OpenAI',
+    ],
+    benefits: [
+      'Protect sensitive data in ChatGPT prompts',
+      'Works with ChatGPT API, not the web interface directly',
+      'Zero code changes — just change the base URL',
+    ],
+    primaryKeyword: 'ChatGPT privacy proxy PII masking OpenAI',
   },
 ];
 

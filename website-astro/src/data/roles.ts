@@ -23,7 +23,7 @@ const roles: Role[] = [
       'Open source MIT — no vendor risk, full code ownership',
       'GDPR/HIPAA/PIPL data minimization out of the box',
     ],
-    primaryKeyword: 'AI data protection for CTO enterprise',
+    primaryKeyword: 'Enterprise AI Data Protection',
   },
   {
     slug: 'security-engineer',
@@ -40,7 +40,7 @@ const roles: Role[] = [
       'Zero data egress — masking happens locally, never in cloud',
       'Extensible entity detection — add custom patterns for your org',
     ],
-    primaryKeyword: 'AI security engineer data leak prevention',
+    primaryKeyword: 'AI Data Leak Prevention for Security Teams',
   },
   {
     slug: 'compliance-officer',
@@ -57,7 +57,7 @@ const roles: Role[] = [
       'Technical enforcement of AI data handling policies',
       'Cross-border data transfer compliance (PIPL, GDPR Chapter V)',
     ],
-    primaryKeyword: 'AI compliance officer GDPR HIPAA data protection',
+    primaryKeyword: 'GDPR and HIPAA Compliant AI Usage',
   },
   {
     slug: 'devops-engineer',
@@ -74,7 +74,7 @@ const roles: Role[] = [
       'Environment-variable config — 12-factor app compatible',
       'Health check endpoint, structured logging, metrics ready',
     ],
-    primaryKeyword: 'DevOps AI privacy proxy deployment infrastructure',
+    primaryKeyword: 'Zero-Config AI Privacy Infrastructure',
   },
   {
     slug: 'developer',
@@ -91,7 +91,7 @@ const roles: Role[] = [
       'Detects and redacts API keys, tokens, and secrets',
       'Zero code changes — just change the API base URL',
     ],
-    primaryKeyword: 'developer AI privacy protect source code API keys',
+    primaryKeyword: 'Protect Source Code and API Keys from AI',
   },
   {
     slug: 'data-privacy-officer',
@@ -108,7 +108,7 @@ const roles: Role[] = [
       'PII masking as a documented technical safeguard',
       'Supports data minimization principle (GDPR Art. 5(1)(c))',
     ],
-    primaryKeyword: 'DPO AI data protection impact assessment privacy',
+    primaryKeyword: 'DPIA and AI Data Protection Compliance',
   },
   {
     slug: 'healthcare-cio',
@@ -125,7 +125,7 @@ const roles: Role[] = [
       'One privacy layer covers all AI tools and APIs',
       'Audit logs for HIPAA Security Rule compliance',
     ],
-    primaryKeyword: 'healthcare CIO HIPAA AI PHI protection LLM',
+    primaryKeyword: 'HIPAA Compliant PHI Protection for AI',
   },
   {
     slug: 'fintech-cto',
@@ -142,7 +142,7 @@ const roles: Role[] = [
       'PCI DSS scope reduction — masked data is not cardholder data',
       'Regulatory compliance for GLBA, CCPA, financial privacy laws',
     ],
-    primaryKeyword: 'fintech CTO AI financial data protection PCI compliance',
+    primaryKeyword: 'Financial Data Protection and PCI Compliance',
   },
 ];
 
