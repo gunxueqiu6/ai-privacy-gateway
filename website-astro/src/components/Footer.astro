@@ -41,20 +41,23 @@ const ft = { product: t(lang, 'footer.product'), home: t(lang, 'footer.home'), p
         <a href="/docs/deploy">{t(lang, 'docs.deploy')}</a>
         <a href="/docs/config">{t(lang, 'docs.config')}</a>
         <a href="/docs/api">{t(lang, 'docs.api')}</a>
+        <a href="/changelog">{t(lang, 'footer.changelog')}</a>
       </div>
 
       <div class="footer-col">
         <h4>{ft.company}</h4>
         <a href="/privacy-policy">{ft.privacy_policy}</a>
         <a href="/terms-of-service">{ft.terms_of_service}</a>
+        <a href="/changelog">{t(lang, 'footer.changelog')}</a>
         <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/issues">{ft.contact}</a>
-        <a href="https://t.me/chirstmas_7">Telegram</a>
+        <a href="mailto:contact@privacygw.dev">contact@privacygw.dev</a>
         <a href="https://github.com/gunxueqiu6/ai-privacy-gateway">{ft.github}</a>
+        <a href="https://doctrail.pages.dev" class="sister-link">{t(lang, 'footer.doctrail')}</a>
       </div>
     </div>
 
     <div class="footer-bottom">
-      <p>&copy; 2026 AI Privacy Gateway. MIT Licensed. Open Source.</p>
+      <p>&copy; 2025 AI Privacy Gateway. MIT Licensed. Open Source.</p>
     </div>
   </div>
 </footer>
@@ -143,6 +146,16 @@ const ft = { product: t(lang, 'footer.product'), home: t(lang, 'footer.home'), p
       color: var(--primary);
     }
   }
+
+  .sister-link {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    opacity: 0.7;
+  }
+  .sister-link:hover { opacity: 1; }
 
   .footer-bottom {
     padding-top: 2rem;

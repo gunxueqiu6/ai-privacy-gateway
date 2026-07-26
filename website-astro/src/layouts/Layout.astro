@@ -2,6 +2,7 @@
 import { t } from '../i18n/translations';
 import { getLangFromURL } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
+import DifyChat from '../components/DifyChat.astro';
 import '../styles/global.css';
 
 interface Props {
@@ -135,6 +136,7 @@ const orgDesc = 'Open-source AI API privacy gateway that auto-detects and masks 
   <div class="gradient-orb gradient-orb-1"></div>
   <div class="gradient-orb gradient-orb-2"></div>
   <slot />
+  <DifyChat />
 </body>
 </html>
 

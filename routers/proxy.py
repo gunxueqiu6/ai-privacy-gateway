@@ -1,6 +1,7 @@
 """
 核心代理路由 — chat/completions + v1 通用代理。
 """
+import hashlib
 import json
 import logging
 
@@ -20,21 +21,41 @@ ALLOWED_V1_PROXY_PATHS = {"models", "embeddings", "moderations", "messages", "im
 
 
 def _resolve_auth_and_headers(request: Request):
-    """Extract auth header and build forwarding headers (Lite version).
+    """Extract auth header, raw API key, and build forwarding headers.
+
+    Returns (headers_dict, raw_api_key) or (None, None) if unauthorized.
 
     Backward-compatible: checks Authorization first, then falls back
     to X-API-Key for older SDKs that haven't migrated yet.
     """
+    raw_api_key = ""
     auth_header = request.headers.get("Authorization", "")
+    if auth_header:
+        if auth_header.startswith("Bearer "):
+            raw_api_key = auth_header[7:]
+    else:
+        raw_api_key = request.headers.get("X-API-Key", "")
+        if raw_api_key:
+            auth_header = f"Bearer {raw_api_key}"
     if not auth_header:
-        api_key = request.headers.get("X-API-Key", "")
-        if api_key:
-            auth_header = f"Bearer {api_key}"
-    if not auth_header:
-        return None
+        return None, None
 
     headers = filter_proxy_headers(request.headers)
-    return headers
+    return headers, raw_api_key
+
+
+def _lookup_team_id(raw_api_key: str) -> str:
+    """Look up team_id from user_api_keys by hashing the raw API key."""
+    if not raw_api_key:
+        return "default"
+    try:
+        key_hash = hashlib.sha256(raw_api_key.encode()).hexdigest()
+        row = db.get_api_key(key_hash)
+        if row and row.get("team_id"):
+            return row["team_id"]
+    except Exception:
+        logger.warning("API key lookup failed, falling back to 'default' team")
+    return "default"
 
 
 @proxy_router.post("/v1/chat/completions")
@@ -46,11 +67,22 @@ async def chat_completions(request: Request) -> Response:
     if not ok:
         return BAD_ENCODING_RESPONSE
 
-    headers = _resolve_auth_and_headers(request)
+    headers, raw_api_key = _resolve_auth_and_headers(request)
     if headers is None:
         return JSONResponse(status_code=401, content={"error": "未授权 - 需要 API Key"})
 
+    team_id = _lookup_team_id(raw_api_key) if raw_api_key else "default"
+
     masked_body, mappings, stats, session_id, used_placeholders = gateway.mask_request(body)
+
+    # 脱敏透明度响应头（所有请求都注入）
+    total_masked = sum(v for k, v in stats.items() if k != "total")
+    masked_types = sorted(k for k, v in stats.items() if v > 0 and k != "total")
+    masking_headers = {
+        "X-Masked-Count": str(total_masked),
+        "X-Masked-Types": ",".join(masked_types),
+        "X-Masked-Session-ID": session_id,
+    }
 
     # Dry-Run 模式：添加检测结果响应头，不写 Vault
     dry_run_headers = {}
@@ -62,16 +94,27 @@ async def chat_completions(request: Request) -> Response:
             dry_run_headers["X-Dry-Run-Detected-Types"] = ",".join(detected_types)
 
     if mappings and not config.DRY_RUN_MODE:
-        db.save_mappings(session_id, mappings, data_type="unknown", team_id=None)
-        db.update_stats(stats, team_id=None)
+        db.save_mappings(session_id, mappings, data_type="unknown", team_id=team_id)
+        db.update_stats(stats, team_id=team_id)
 
     if body.get("stream", False):
         from sse_starlette.sse import EventSourceResponse
+        import json as _json
 
         async def generate():
             async for chunk in gateway.proxy_stream_request(
                 masked_body, headers, mappings, used_placeholders
             ):
+                data = chunk.get("data", "")
+                if data == "[DONE]":
+                    yield {
+                        "event": "masked",
+                        "data": _json.dumps({
+                            "count": total_masked,
+                            "types": masked_types,
+                            "session_id": session_id,
+                        }),
+                    }
                 yield chunk
 
         return EventSourceResponse(generate())
@@ -86,9 +129,11 @@ async def chat_completions(request: Request) -> Response:
             if "choices" in resp_json:
                 for choice in resp_json["choices"]:
                     if "message" in choice:
-                        choice["message"]["content"] = gateway.unmask_response(
-                            choice["message"]["content"], mappings, session_id, used_placeholders
-                        )
+                        content = choice["message"].get("content")
+                        if content is not None:
+                            choice["message"]["content"] = gateway.unmask_response(
+                                content, mappings, session_id, used_placeholders
+                            )
                 resp_body = json.dumps(resp_json).encode()
         except json.JSONDecodeError:
             pass
@@ -98,6 +143,7 @@ async def chat_completions(request: Request) -> Response:
         status_code=status_code,
         headers={
             "Content-Type": resp_headers.get("content-type", "application/json"),
+            **masking_headers,
             **dry_run_headers,
         },
     )
@@ -112,7 +158,7 @@ async def proxy_v1(request: Request, path: str) -> Response:
 
     gateway = get_gateway_core()
 
-    headers = _resolve_auth_and_headers(request)
+    headers, raw_api_key = _resolve_auth_and_headers(request)
     if headers is None:
         return JSONResponse(status_code=401, content={"error": "未授权 - 需要 API Key"})
 

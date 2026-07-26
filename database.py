@@ -167,6 +167,19 @@ class Database:
                     enabled INTEGER DEFAULT 1,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
+
+                CREATE TABLE IF NOT EXISTS user_api_keys (
+                    key_hash TEXT PRIMARY KEY,
+                    key_prefix TEXT NOT NULL,
+                    team_id TEXT NOT NULL DEFAULT 'default',
+                    tier TEXT NOT NULL DEFAULT 'free',
+                    label TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    last_used_at TIMESTAMP,
+                    is_active INTEGER NOT NULL DEFAULT 1
+                );
+
+                CREATE INDEX IF NOT EXISTS idx_api_keys_team ON user_api_keys(team_id);
             """)
 
     def _ensure_initialized(self) -> None:
@@ -610,15 +623,25 @@ class Database:
             cursor.execute(sql, all_params)
 
     def get_today_stats(self) -> Dict[str, Any]:
+        """Get aggregated stats across all teams for today."""
         today = datetime.now().strftime("%Y-%m-%d")
+        cols = [
+            "phone_count", "email_count", "idcard_count", "bankcard_count", "custom_count",
+            "person_count", "location_count", "org_count", "plate_count", "ip_count",
+            "url_count", "date_count", "amount_count", "postcode_count", "total_count",
+        ]
+        sums = ", ".join(f"SUM({c}) as {c}" for c in cols)
         with self.get_conn() as conn:
             cursor = conn.cursor()
-            cursor.execute("""
-                SELECT * FROM stats WHERE date = ?
-            """, (today,))
+            cursor.execute(f"SELECT {sums} FROM stats WHERE date = ?", (today,))
             row = cursor.fetchone()
             if row:
-                return dict(row)
+                result = dict(row)
+                # Ensure all values are non-None
+                for c in cols:
+                    result[c] = result.get(c, 0) or 0
+                result["date"] = today
+                return result
             return {
                 "date": today,
                 "phone_count": 0,
@@ -639,16 +662,211 @@ class Database:
             }
 
     def get_stats_range(self, from_date: str, to_date: str) -> List[Dict[str, Any]]:
-        """Get daily stats for a date range (inclusive).
+        """Get daily stats for a date range (inclusive), aggregated across all teams.
         Returns list of row dicts sorted by date ascending."""
+        cols = self.STATS_COLUMNS
+        sums = ", ".join(f"SUM({c}) as {c}" for c in cols)
         with self.get_conn() as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT * FROM stats WHERE date >= ? AND date <= ? ORDER BY date ASC",
+                f"SELECT date, {sums} FROM stats WHERE date >= ? AND date <= ? "
+                "GROUP BY date ORDER BY date ASC",
                 (from_date, to_date)
             )
             return [dict(row) for row in cursor.fetchall()]
 
+    # ==================== API Keys ====================
+
+    def get_api_key(self, key_hash: str):
+        with self.get_conn() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM user_api_keys WHERE key_hash = ?", (key_hash,))
+            row = cursor.fetchone()
+            return dict(row) if row else None
+
+    def create_api_key(self, key_hash: str, key_prefix: str, team_id: str = "default",
+                       tier: str = "free", label: str = None) -> None:
+        try:
+            with self.get_conn() as conn:
+                conn.execute(
+                    "INSERT OR IGNORE INTO user_api_keys (key_hash, key_prefix, team_id, tier, label) "
+                    "VALUES (?, ?, ?, ?, ?)",
+                    (key_hash, key_prefix, team_id, tier, label)
+                )
+        except Exception:
+            logger.exception("创建API密钥失败")
+
+    def update_api_key_last_used(self, key_hash: str) -> None:
+        try:
+            with self.get_conn() as conn:
+                conn.execute(
+                    "UPDATE user_api_keys SET last_used_at = datetime('now') WHERE key_hash = ?",
+                    (key_hash,)
+                )
+        except Exception:
+            logger.exception("更新API密钥使用时间失败")
+
+    def list_api_keys(self, team_id: str = None) -> list:
+        try:
+            with self.get_conn() as conn:
+                cursor = conn.cursor()
+                if team_id:
+                    cursor.execute(
+                        "SELECT key_prefix, team_id, tier, label, created_at, last_used_at, is_active "
+                        "FROM user_api_keys WHERE team_id = ? ORDER BY created_at DESC",
+                        (team_id,)
+                    )
+                else:
+                    cursor.execute(
+                        "SELECT key_prefix, team_id, tier, label, created_at, last_used_at, is_active "
+                        "FROM user_api_keys ORDER BY created_at DESC"
+                    )
+                return [dict(row) for row in cursor.fetchall()]
+        except Exception:
+            logger.exception("列出API密钥失败")
+            return []
+
+    def delete_api_key(self, key_hash: str) -> None:
+        try:
+            with self.get_conn() as conn:
+                conn.execute("UPDATE user_api_keys SET is_active = 0 WHERE key_hash = ?", (key_hash,))
+        except Exception:
+            logger.exception("删除API密钥失败")
+
+    # ==================== User Sessions ====================
+
+    def get_user_sessions(self, team_id: str, limit: int = 50, offset: int = 0) -> list:
+        """Get distinct sessions for a team from vault_mappings + audit_log."""
+        try:
+            with self.get_conn() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT DISTINCT v.session_id,
+                        COALESCE(
+                            (SELECT created_at FROM audit_log WHERE session_id = v.session_id ORDER BY id DESC LIMIT 1),
+                            v.created_at
+                        ) as created_at,
+                        COUNT(v.id) as masked_count
+                    FROM vault_mappings v
+                    WHERE v.team_id = ?
+                    GROUP BY v.session_id
+                    ORDER BY created_at DESC
+                    LIMIT ? OFFSET ?
+                """, (team_id, limit, offset))
+                return [dict(row) for row in cursor.fetchall()]
+        except Exception:
+            logger.exception("查询用户会话失败")
+            return []
+
+    def get_user_sessions_count(self, team_id: str) -> int:
+        """Get total distinct session count for a team (for pagination)."""
+        try:
+            with self.get_conn() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT COUNT(DISTINCT session_id) FROM vault_mappings WHERE team_id = ?",
+                    (team_id,)
+                )
+                row = cursor.fetchone()
+                return row[0] if row else 0
+        except Exception:
+            logger.exception("查询用户会话计数失败")
+            return 0
+
+    def get_session_audit_log(self, session_id: str, team_id: str = None, limit: int = 100) -> list:
+        try:
+            with self.get_conn() as conn:
+                cursor = conn.cursor()
+                if team_id:
+                    cursor.execute(
+                        "SELECT a.* FROM audit_log a "
+                        "JOIN vault_mappings v ON v.session_id = a.session_id "
+                        "WHERE a.session_id = ? AND v.team_id = ? "
+                        "ORDER BY a.created_at DESC LIMIT ?",
+                        (session_id, team_id, limit)
+                    )
+                else:
+                    cursor.execute(
+                        "SELECT * FROM audit_log WHERE session_id = ? ORDER BY created_at DESC LIMIT ?",
+                        (session_id, limit)
+                    )
+                return [dict(row) for row in cursor.fetchall()]
+        except Exception:
+            logger.exception("查询会话审计日志失败")
+            return []
+
+    # ==================== Team Stats ====================
+
+    STATS_COLUMNS = [
+        "phone_count", "email_count", "idcard_count", "bankcard_count", "custom_count",
+        "person_count", "location_count", "org_count", "plate_count", "ip_count",
+        "url_count", "date_count", "amount_count", "postcode_count", "total_count",
+    ]
+
+    def get_team_stats_range(self, team_id: str, days: int = 7) -> list:
+        try:
+            with self.get_conn() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT * FROM stats WHERE team_id = ? AND date >= date('now', ?) "
+                    "ORDER BY date ASC",
+                    (team_id, f"-{days} days")
+                )
+                return [dict(row) for row in cursor.fetchall()]
+        except Exception:
+            logger.exception("查询团队统计范围失败")
+            return []
+
+    def get_stats_by_team_today(self, team_id: str):
+        try:
+            today = datetime.now().strftime("%Y-%m-%d")
+            with self.get_conn() as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT * FROM stats WHERE date = ? AND team_id = ?", (today, team_id))
+                row = cursor.fetchone()
+                return dict(row) if row else None
+        except Exception:
+            logger.exception("查询团队今日统计失败")
+            return None
+
+    def get_all_teams_stats_today(self) -> list:
+        try:
+            today = datetime.now().strftime("%Y-%m-%d")
+            with self.get_conn() as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT * FROM stats WHERE date = ? ORDER BY total_count DESC", (today,))
+                return [dict(row) for row in cursor.fetchall()]
+        except Exception:
+            logger.exception("查询所有团队今日统计失败")
+            return []
+
+    # ==================== Data Retention ====================
+
+    def cleanup_expired_data(self) -> dict:
+        result = {"deleted_audit_count": 0}
+        try:
+            with self.get_conn() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    DELETE FROM audit_log WHERE id IN (
+                        SELECT a.id FROM audit_log a
+                        LEFT JOIN user_api_keys k ON k.team_id = (
+                            SELECT v.team_id FROM vault_mappings v WHERE v.session_id = a.session_id LIMIT 1
+                        )
+                        WHERE a.created_at < datetime('now',
+                            CASE
+                                WHEN k.tier = 'enterprise' THEN '-90 days'
+                                WHEN k.tier = 'team' THEN '-30 days'
+                                ELSE '-7 days'
+                            END
+                        )
+                    )
+                """)
+                result["deleted_audit_count"] = cursor.rowcount
+                logger.info("数据保留清理完成: %d 条审计记录", result["deleted_audit_count"])
+        except Exception:
+            logger.exception("数据保留清理失败")
+        return result
 
 
 db = Database()

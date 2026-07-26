@@ -1,0 +1,23 @@
+# AI Privacy Gateway
+> Open-source PII masking proxy for ChatGPT, Claude, Cursor, DeepSeek, and any LLM API.
+> Auto-detects and masks 15 types of sensitive data before it leaves your machine. 30s deploy, MIT license.
+
+## Core Documentation
+https://privacygw.pages.dev/docs/quickstart — 5-minute deployment guide
+https://privacygw.pages.dev/docs/architecture — System architecture and data flow
+https://privacygw.pages.dev/docs/config — Complete configuration reference (20+ env vars)
+https://privacygw.pages.dev/docs/api — Admin API, mask/restore endpoints, error codes
+https://privacygw.pages.dev/docs/keywords — Custom keywords and regex patterns
+https://privacygw.pages.dev/docs/deploy — Docker Compose, K8s sidecar, systemd, Nginx TLS
+
+## Key Pages
+https://privacygw.pages.dev/demo — Live PII masking demo
+https://privacygw.pages.dev/pricing — Pricing (Lite free / Enterprise)
+https://privacygw.pages.dev/download — Download for Windows, macOS, Docker, pip
+https://privacygw.pages.dev/compare — Competitive comparison (Presidio, Kiji, AI Firewall, etc.)
+https://privacygw.pages.dev/contact — Enterprise sales contact form
+https://privacygw.pages.dev/changelog — Release history v0.1.0 through v2.0.0
+
+## Optional (lazy loaded)
+https://privacygw.pages.dev/blog — Technical blog (24 articles, zh+en)
+https://github.com/gunxueqiu6/ai-privacy-gateway — GitHub repository

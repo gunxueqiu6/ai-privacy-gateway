@@ -1,0 +1,650 @@
+---
+interface Props {
+  apiUrl?: string;
+  apiKey?: string;
+}
+
+const {
+  apiUrl = import.meta.env.PUBLIC_DIFY_API_URL || '',
+  apiKey = import.meta.env.PUBLIC_DIFY_API_KEY || '',
+} = Astro.props;
+---
+
+<div id="dify-chat-root" data-api-url={apiUrl} data-api-key={apiKey}>
+  <!-- Floating button -->
+  <button id="dify-chat-toggle" class="dify-toggle" aria-label="AI Chat">
+    <svg id="dify-chat-icon" class="dify-toggle-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      <line x1="12" y1="8" x2="12" y2="14"/>
+      <line x1="9" y1="11" x2="15" y2="11"/>
+    </svg>
+    <svg id="dify-close-icon" class="dify-toggle-icon dify-hidden" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"/>
+      <line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </button>
+
+  <!-- Chat panel -->
+  <div id="dify-panel" class="dify-panel dify-hidden">
+    <!-- Header -->
+    <div class="dify-header">
+      <div class="dify-header-content">
+        <svg class="dify-header-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/>
+          <path d="M20 18v1a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/>
+          <path d="M7 18v-2a5 5 0 0 1 10 0v2"/>
+        </svg>
+        <span class="dify-header-title">AI Assistant</span>
+      </div>
+      <button id="dify-panel-close" class="dify-header-close" aria-label="Close chat">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Messages -->
+    <div id="dify-messages" class="dify-messages">
+      <div class="dify-message dify-message-ai">
+        <div class="dify-message-avatar dify-avatar-ai">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </div>
+        <div class="dify-message-content">
+          <p>Hi! I'm the AI assistant. How can I help you today?</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div class="dify-input-area">
+      <textarea
+        id="dify-input"
+        class="dify-input"
+        placeholder="Type your message..."
+        rows="1"
+      ></textarea>
+      <button id="dify-send" class="dify-send-btn" aria-label="Send message">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .dify-hidden {
+    display: none !important;
+  }
+
+  /* Toggle button */
+  .dify-toggle {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 1px solid var(--border-glow, var(--border));
+    background: linear-gradient(135deg, var(--primary-dim), var(--primary));
+    color: var(--bg-deep);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 24px var(--primary-glow);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @media (hover: hover) {
+    .dify-toggle:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 40px var(--primary-glow);
+    }
+  }
+
+  .dify-toggle:active {
+    transform: scale(0.95);
+  }
+
+  .dify-toggle-icon {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  /* Panel */
+  .dify-panel {
+    position: fixed;
+    bottom: 92px;
+    right: 24px;
+    z-index: 9998;
+    width: 380px;
+    height: 560px;
+    max-height: calc(100vh - 120px);
+    background: var(--bg-surface);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      0 0 60px rgba(134, 239, 172, 0.04),
+      inset 0 0 30px rgba(134, 239, 172, 0.02);
+    animation: dify-panel-slide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes dify-panel-slide {
+    from {
+      opacity: 0;
+      transform: translateY(16px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* Header */
+  .dify-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--glass-bg);
+    flex-shrink: 0;
+  }
+
+  .dify-header-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .dify-header-icon {
+    color: var(--primary);
+    filter: drop-shadow(0 0 4px var(--primary-glow));
+  }
+
+  .dify-header-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+  }
+
+  .dify-header-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  @media (hover: hover) {
+    .dify-header-close:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-primary);
+    }
+  }
+
+  /* Messages area */
+  .dify-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
+  }
+
+  .dify-messages::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .dify-messages::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .dify-messages::-webkit-scrollbar-thumb {
+    background: var(--border-hover);
+    border-radius: 4px;
+  }
+
+  /* Message bubbles */
+  .dify-message {
+    display: flex;
+    gap: 10px;
+    max-width: 88%;
+    animation: dify-message-in 0.25s ease;
+  }
+
+  @keyframes dify-message-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .dify-message-user {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+  }
+
+  .dify-message-ai {
+    align-self: flex-start;
+  }
+
+  .dify-message-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .dify-avatar-user {
+    background: var(--primary);
+    color: var(--bg-deep);
+  }
+
+  .dify-avatar-ai {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--primary);
+  }
+
+  .dify-message-content {
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    word-break: break-word;
+  }
+
+  .dify-message-user .dify-message-content {
+    background: var(--primary);
+    color: var(--bg-deep);
+    border-bottom-right-radius: 4px;
+  }
+
+  .dify-message-ai .dify-message-content {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    border-bottom-left-radius: 4px;
+  }
+
+  .dify-message-content p {
+    margin: 0;
+  }
+
+  .dify-message-content p + p {
+    margin-top: 8px;
+  }
+
+  /* Loading dots */
+  .dify-loading-dots {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding: 4px 0;
+  }
+
+  .dify-loading-dots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    animation: dify-dot-bounce 1.4s ease-in-out infinite;
+  }
+
+  .dify-loading-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .dify-loading-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+
+  @keyframes dify-dot-bounce {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+
+  /* Input area */
+  .dify-input-area {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    background: var(--glass-bg);
+    flex-shrink: 0;
+  }
+
+  .dify-input {
+    flex: 1;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-family: inherit;
+    line-height: 1.5;
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s ease;
+    max-height: 120px;
+  }
+
+  .dify-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary-glow);
+  }
+
+  .dify-input::placeholder {
+    color: var(--text-dim);
+  }
+
+  .dify-send-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, var(--primary-dim), var(--primary));
+    color: var(--bg-deep);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.25s ease;
+    box-shadow: 0 0 12px var(--primary-glow);
+  }
+
+  @media (hover: hover) {
+    .dify-send-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+  }
+
+  .dify-send-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .dify-send-btn:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+
+  /* Error banner */
+  .dify-error {
+    padding: 10px 14px;
+    margin: 8px 16px 0;
+    background: rgba(248, 113, 113, 0.1);
+    border: 1px solid rgba(248, 113, 113, 0.25);
+    border-radius: 10px;
+    color: var(--danger);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    flex-shrink: 0;
+  }
+
+  /* Responsive: full screen on mobile */
+  @media (max-width: 480px) {
+    .dify-toggle {
+      bottom: 16px;
+      right: 16px;
+      width: 52px;
+      height: 52px;
+    }
+
+    .dify-panel {
+      bottom: 0;
+      right: 0;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      max-height: 100vh;
+      border-radius: 0;
+      border: none;
+    }
+  }
+</style>
+
+<script is:inline>
+(function () {
+  // ---------- Config ----------
+  var root = document.getElementById('dify-chat-root');
+  var CONFIG = {
+    apiUrl: root ? root.getAttribute('data-api-url') || '' : '',
+    apiKey: root ? root.getAttribute('data-api-key') || '' : '',
+  };
+  var STORAGE_KEY = 'dify_conversation_id';
+
+  // ---------- State ----------
+  var conversationId = localStorage.getItem(STORAGE_KEY) || '';
+  var isOpen = false;
+  var isLoading = false;
+
+  // ---------- DOM refs ----------
+  var toggle = document.getElementById('dify-chat-toggle');
+  var panel = document.getElementById('dify-panel');
+  var chatIcon = document.getElementById('dify-chat-icon');
+  var closeIcon = document.getElementById('dify-close-icon');
+  var messagesEl = document.getElementById('dify-messages');
+  var inputEl = document.getElementById('dify-input');
+  var sendBtn = document.getElementById('dify-send');
+  var panelClose = document.getElementById('dify-panel-close');
+
+  if (!toggle || !panel) return;
+
+  // ---------- Toggle chat ----------
+  function openChat() {
+    isOpen = true;
+    panel.classList.remove('dify-hidden');
+    toggle.classList.add('dify-open');
+    if (chatIcon) chatIcon.classList.add('dify-hidden');
+    if (closeIcon) closeIcon.classList.remove('dify-hidden');
+    setTimeout(function () {
+      inputEl && inputEl.focus();
+      scrollToBottom();
+    }, 100);
+  }
+
+  function closeChat() {
+    isOpen = false;
+    panel.classList.add('dify-hidden');
+    toggle.classList.remove('dify-open');
+    if (chatIcon) chatIcon.classList.remove('dify-hidden');
+    if (closeIcon) closeIcon.classList.add('dify-hidden');
+  }
+
+  function toggleChat() {
+    if (isOpen) {
+      closeChat();
+    } else {
+      openChat();
+    }
+  }
+
+  toggle.addEventListener('click', function (e) {
+    e.stopPropagation();
+    toggleChat();
+  });
+
+  panelClose && panelClose.addEventListener('click', closeChat);
+
+  // ---------- Message rendering ----------
+  function addMessage(text, role) {
+    var div = document.createElement('div');
+    div.className = 'dify-message dify-message-' + role;
+
+    var avatar = document.createElement('div');
+    avatar.className = 'dify-message-avatar dify-avatar-' + role;
+    if (role === 'user') {
+      avatar.innerHTML =
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+    } else {
+      avatar.innerHTML =
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+    }
+
+    var content = document.createElement('div');
+    content.className = 'dify-message-content';
+    var p = document.createElement('p');
+    p.textContent = text;
+    content.appendChild(p);
+
+    div.appendChild(avatar);
+    div.appendChild(content);
+    messagesEl.appendChild(div);
+    scrollToBottom();
+  }
+
+  function showLoading() {
+    var div = document.createElement('div');
+    div.className = 'dify-message dify-message-ai';
+    div.id = 'dify-loading-msg';
+
+    var avatar = document.createElement('div');
+    avatar.className = 'dify-message-avatar dify-avatar-ai';
+    avatar.innerHTML =
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+
+    var content = document.createElement('div');
+    content.className = 'dify-message-content';
+    var dots = document.createElement('div');
+    dots.className = 'dify-loading-dots';
+    dots.innerHTML = '<span></span><span></span><span></span>';
+    content.appendChild(dots);
+
+    div.appendChild(avatar);
+    div.appendChild(content);
+    messagesEl.appendChild(div);
+    scrollToBottom();
+  }
+
+  function removeLoading() {
+    var loading = document.getElementById('dify-loading-msg');
+    if (loading) loading.remove();
+  }
+
+  function scrollToBottom() {
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  // ---------- API call ----------
+  function sendMessage(text) {
+    if (isLoading || !text.trim()) return;
+    if (!CONFIG.apiUrl) {
+      addMessage(
+        'Chat is not configured yet. Please set up the Dify API connection.',
+        'ai'
+      );
+      return;
+    }
+
+    isLoading = true;
+    sendBtn.disabled = true;
+
+    addMessage(text, 'user');
+    inputEl.value = '';
+    inputEl.style.height = 'auto';
+    showLoading();
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', CONFIG.apiUrl + '/chat-messages', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('Authorization', 'Bearer ' + CONFIG.apiKey);
+
+    xhr.onload = function () {
+      removeLoading();
+      isLoading = false;
+      sendBtn.disabled = false;
+
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          var data = JSON.parse(xhr.responseText);
+          var answer = data.answer || 'No response received.';
+          addMessage(answer, 'ai');
+          if (data.conversation_id) {
+            conversationId = data.conversation_id;
+            try {
+              localStorage.setItem(STORAGE_KEY, conversationId);
+            } catch (_) {}
+          }
+        } catch (e) {
+          addMessage('Sorry, I encountered an error processing the response.', 'ai');
+        }
+      } else {
+        addMessage('Sorry, I could not reach the server. Please try again later.', 'ai');
+      }
+    };
+
+    xhr.onerror = function () {
+      removeLoading();
+      isLoading = false;
+      sendBtn.disabled = false;
+      addMessage('Network error. Please check your connection and try again.', 'ai');
+    };
+
+    xhr.send(
+      JSON.stringify({
+        inputs: {},
+        query: text,
+        response_mode: 'blocking',
+        conversation_id: conversationId,
+        user: 'website-visitor',
+      })
+    );
+  }
+
+  // ---------- Input handling ----------
+  sendBtn.addEventListener('click', function () {
+    sendMessage(inputEl.value);
+  });
+
+  inputEl.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage(inputEl.value);
+    }
+  });
+
+  // Auto-resize textarea
+  inputEl.addEventListener('input', function () {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+  });
+
+  // Prevent clicks inside panel from closing
+  panel.addEventListener('click', function (e) {
+    e.stopPropagation();
+  });
+})();
+</script>

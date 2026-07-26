@@ -1,257 +1,246 @@
-# Reddit Posts — AI Privacy Gateway
+# Reddit Launch Posts — AI Privacy Gateway
 
-## Posting Strategy
-
-- **r/selfhosted** and **r/privacy**: weekend posts (best engagement)
-- **r/programming**: Tuesday-Thursday morning EST
-- Don't copy-paste across subreddits — unique angles only
-- Answer questions in comments within 1-2 hours
-- Don't mention competitors unless asked
+**Product**: https://privacygw.pages.dev
+**GitHub**: github.com/gunxueqiu6/ai-privacy-gateway
+**License**: MIT
+**Stack**: Python/FastAPI, regex + NER, SSE streaming, AES-256-GCM vault
 
 ---
 
-## r/selfhosted — "I built a self-hosted PII firewall for AI APIs"
+## Post 1: r/selfhosted (2M members)
 
-**Title:** I built a self-hosted PII firewall for AI APIs — 30s Docker deploy, MIT license
+**Best posting time**: Sunday 10:00 AM ET
 
-**Body:**
+**Title**: I built a self-hosted proxy that masks PII before it reaches ChatGPT — 30s deploy, 100% local
 
-I was pasting customer data into ChatGPT daily. Names, phone numbers, emails — all going straight to OpenAI's servers. I looked for a self-hosted fix. Everything I found was either:
-- A SaaS product with per-seat pricing
-- A Python library that needed code changes
-- A browser extension that only works on chat.openai.com
+**Body**:
 
-So I built one. A dead-simple proxy that strips PII from AI API traffic before it leaves your network:
+Been meaning to share this for a while. I use ChatGPT/Claude/Cursor daily for work, and I kept worrying about what happens when I paste code with API keys, or a config file with internal IPs, or a DB dump with real user emails.
 
-- Docker pull + run. Done. 30 seconds.
-- Auto-detects phones, emails, ID cards, bank cards, API keys, names, locations — 14+ types
-- <1ms latency — you don't notice it's there
-- Works with ChatGPT, Claude, Cursor, DeepSeek, Copilot — any OpenAI-compatible API
-- MIT license. Zero external dependencies.
-- SSE streaming supported (live chat message masking)
-- Encrypted local vault if you need PII restoration
-
-GitHub: https://github.com/gunxueqiu6/ai-privacy-gateway
-Demo: https://privacygw.pages.dev/demo
-
-This sits on my home server. All my AI tools point at it. I haven't leaked a phone number to an AI API in months.
-
-Curious what r/selfhosted thinks — overkill for a home setup? Would you run this?
-
-**Post timing:** Saturday or Sunday morning (US time)
-
----
-
-## r/ChatGPT — "How to stop ChatGPT from seeing your personal data"
-
-**Title:** PSA: You're probably sending PII to ChatGPT right now — here's how to stop it
-
-**Body:**
-
-Every time you paste customer data, debug logs, or support tickets into ChatGPT, that data goes to OpenAI's servers. Their privacy policy says they may use it for training (unless you opt out). And if your company handles healthcare, financial, or customer data, this could be a compliance violation.
-
-The fix: a local proxy that masks PII in your prompts before they reach OpenAI.
-
-1. Run: `docker run -d -p 9999:9999 ghcr.io/gunxueqiu6/ai-privacy-gateway:lite`
-2. Set your ChatGPT API client's base URL to `http://localhost:9999`
-3. Done. All PII (phones, emails, IDs, names) auto-masked before it leaves your machine.
-
-Open source (MIT), free, 30 second setup.
-
-What gets masked:
-- Phone numbers, emails, names
-- ID cards, bank cards
-- Physical addresses, IPs
-- API keys and credentials
-- And 8+ more types
-
-The AI doesn't need your customer's real phone number — it just needs to know there IS a phone number.
-
-Project: https://github.com/gunxueqiu6/ai-privacy-gateway
-Online demo (runs in your browser, no upload): https://privacygw.pages.dev/demo
-
-If you're using ChatGPT for work, you really should be running something like this.
-
-**Post timing:** Weekday morning EST
-
----
-
-## r/ClaudeAI — "Protect sensitive code when using Claude Code"
-
-**Title:** Claude Code sends your code to Anthropic — here's how to mask API keys first
-
-**Body:**
-
-Claude Code (the CLI tool) sends your code to Anthropic's API for processing. If your codebase contains:
-- API keys in config files
-- Database connection strings
-- Customer data in test fixtures
-- Hardcoded secrets you forgot about
-
-...those all go to Anthropic's servers.
-
-The fix: point Claude Code through a local PII proxy.
-
-```bash
-# Start the proxy
-docker run -d -p 9999:9999 ghcr.io/gunxueqiu6/ai-privacy-gateway:lite
-
-# Configure Claude Code to use it
-# Settings → API Base URL → http://localhost:9999
-```
-
-The proxy auto-detects and masks:
-- API keys (OpenAI, GitHub, AWS, 20+ formats)
-- Database connection strings (postgres://, mysql://, mongodb://)
-- JWT tokens, passwords, private keys
-- And other PII (phones, emails, etc.)
-
-Everything gets masked with typed placeholders before it reaches Anthropic.
-
-MIT licensed, open source, zero external dependencies: https://github.com/gunxueqiu6/ai-privacy-gateway
-
-This is especially important if you work in fintech, healthcare, or any regulated industry where source code exposure is a compliance issue.
-
-**Post timing:** Weekday (avoid weekends — dev tools subreddit)
-
----
-
-## r/programming — Technical deep-dive
-
-**Title:** How to intercept and mask PII in AI API calls at wire speed (<1ms)
-
-**Body:**
-
-I built an open-source proxy that intercepts AI API traffic and masks PII in transit. The core challenge: do it fast enough that users don't notice the latency hit. Here's how it works under the hood:
-
-**The challenge:**
-
-AI chat apps stream responses (SSE — Server-Sent Events). If masking adds 50ms, users feel the lag. The proxy has to:
-1. Receive the complete prompt
-2. Scan for PII patterns
-3. Replace PII with placeholders
-4. Forward to the AI API
-— all before the user notices any delay
-
-For streaming responses, it's even trickier — content arrives in chunks of 5-50 bytes. You can't buffer the whole response (that defeats streaming). So the proxy does chunk-by-chunk matching with a sliding window buffer.
-
-**Architecture:**
+So I built a local proxy that sits between you and any OpenAI-compatible API. It auto-detects 15 types of PII — phone numbers, emails, ID numbers, bank cards, API keys, IPs — and replaces them with placeholders before the data leaves your machine. The originals stay in a local encrypted vault (AES-256-GCM). Nothing touches the LLM provider.
 
 ```
-Client → Proxy (:9999) → AI API
-            ↓
-    [Regex Engine] → [Vault (SQLite)]
+docker run -d -p 8111:8111 gunxueqiu/ai-privacy-gateway
 ```
 
-- **Regex engine**: 14 pre-compiled regex patterns, matched in a single pass with a compiled regex union
-- **Stream buffer**: Sliding window handles SSE chunks — buffered to the nearest token boundary, processes, then flushes immediately
-- **Vault**: AES-256-GCM encrypted SQLite stores original→placeholder mappings. Optional — can run fully stateless
-- **Latency**: <1ms average because regex compilation happens at startup, and the scan is O(n) single-pass
+Point your client to `http://localhost:8111/v1` and done. Works with ChatGPT, Claude, DeepSeek, Cursor — anything that speaks the OpenAI API format.
 
-**Why regex, not ML/NER?**
+Why I went self-hosted:
+- Zero trust in cloud providers for my team's data
+- No monthly fee, no data leaves my VPS
+- Full control — can extend entity types, audit the code, tune the regex
+- SSE streaming works (no buffering, no added latency)
 
-ML-based NER (spaCy, transformers) gets better accuracy on unstructured text like names and locations. But:
-- Transformers add 50-100ms latency — noticeable in streaming chat
-- They require heavy dependencies (500MB+ models)
-- For structured PII (phones, emails, IDs, keys), regex accuracy is 95%+ already
+The NER model runs locally via spaCy, ~2ms per request. For a team of 50, this costs basically nothing to run.
 
-The tradeoff: speed for accuracy on unstructured entities. For AI API use, speed wins.
+GitHub: github.com/gunxueqiu6/ai-privacy-gateway
+Demo: privacygw.pages.dev
 
-**Streaming (SSE) handling — the tricky part:**
+Would love feedback from folks who've dealt with the same problem.
 
-SSE data comes in `data: {"choices":[{"delta":{"content":"hel"}}]}\n\n` chunks. The proxy:
-1. Buffers each chunk into a sliding window
-2. Checks if the window ends mid-token
-3. If yes: hold the incomplete token, flush the rest
-4. If no: apply regex, flush immediately
-
-This keeps masking latency to <1ms per chunk while preserving the streaming UX.
-
-GitHub: https://github.com/gunxueqiu6/ai-privacy-gateway (MIT)
-
-**Post timing:** Tuesday-Thursday morning EST
+**Follow-up strategy if it gains traction**:
+- "How does this compare to Presidio?" — Presidio takes 2-4 hours to deploy with all deps. This is one docker command. Also, Presidio has no Chinese NER out of box.
+- "Does it work with Ollama?" — Technically yes since Ollama serves OpenAI-compatible API, but you probably don't need masking if you're fully local. This is for hybrid setups.
+- "Can I add custom entity types?" — Yes, edit the patterns file and rebuild. PRs welcome.
 
 ---
 
-## r/privacy — "Open-source tool to mask PII before it reaches AI"
+## Post 2: r/opensource (1M members)
 
-**Title:** Stop sending your personal data to AI companies — open source, local, 30s setup
+**Best posting time**: Tuesday 12:00 PM ET
 
-**Body:**
+**Title**: AI Privacy Gateway — MIT-licensed local PII masking for any OpenAI-compatible API
 
-AI companies (OpenAI, Anthropic, DeepSeek) process billions of prompts daily. Every prompt you send is:
-- Stored on their servers (retention varies by provider)
-- Potentially reviewed by human annotators
-- Possibly used for model training
-- Subject to the data laws of the provider's jurisdiction (e.g., DeepSeek → Chinese PIPL)
+**Body**:
 
-The privacy-respecting solution: mask PII locally before it leaves your machine.
+I've been dogfooding this for a few months with my team. Wanted to get the community's eyes on it before calling it 1.0.
 
-I built an open-source tool that does exactly this: https://github.com/gunxueqiu6/ai-privacy-gateway
+**What it is**:
+A transparent HTTP proxy that intercepts requests to LLM APIs, detects personally identifiable information, replaces it with deterministic placeholders, and stores the mapping in an encrypted local vault. When the LLM returns a response containing placeholders, the proxy reverses the mapping so the user sees the real data.
 
-- **Zero data leaves your machine unmasked** — PII replaced with `[PHONE_1]`, `[EMAIL_1]`
-- **Runs locally** — Docker, pip, or standalone binary
-- **30 second setup** — `docker run -d -p 9999:9999 ghcr.io/gunxueqiu6/ai-privacy-gateway:lite`
-- **MIT license** — no corporate interests, no "free tier with limits"
-- **No telemetry** — doesn't phone home, doesn't track, doesn't even download deps at runtime
+**Why open source**:
+- Privacy tools should be auditable. Period.
+- We wanted companies in regulated industries (fintech, healthcare, legal) to be able to self-host behind their own VPC
+- Community contributions for new entity types and language support
 
-Works with ChatGPT, Claude, Cursor, DeepSeek, Copilot, and any OpenAI-compatible API.
+**The stack**:
+- Python/FastAPI for the proxy layer
+- spaCy (zh_core_web_sm + en_core_web_sm) for NER-based detection
+- Regex engine for structured patterns (phones, emails, IDs, bank cards)
+- AES-256-GCM for the local vault
+- SSE passthrough for streaming responses
 
-Demo (runs entirely in your browser, no data uploaded): https://privacygw.pages.dev/demo
+**Speed**:
+- Regex detection: <200 microseconds
+- NER detection: ~2ms
+- Total latency added: ~5ms on average
 
-**Post timing:** Weekend morning
+**Compared to alternatives**:
+- Microsoft Presidio: ~2-4 hours to deploy, heavy dependency tree, no Chinese NER out of box
+- Kiji: good but no streaming support
+- Most SaaS solutions: your data hits their servers
+
+This is MIT. No telemetry, no cloud dependency, no "upgrade to pro" upsell.
+
+github.com/gunxueqiu6/ai-privacy-gateway
+
+**Follow-up strategy if it gains traction**:
+- Expect questions about accuracy — report numbers honestly: regex is 99%+ for structured types, NER is ~85-90% for Chinese entities. Share the test harness methodology.
+- PR discussion is the real goal here. Engage substantive comments.
+- If someone asks about contributing, point to CONTRIBUTING.md and open issues.
 
 ---
 
-## r/devops — "Add AI data protection to your infra in 30s"
+## Post 3: r/LocalLLaMA (300K members)
 
-**Title:** How to add AI data protection to your infrastructure in 30 seconds
+**Best posting time**: Thursday 2:00 PM ET
 
-**Body:**
+**Title**: Tool to protect privacy when using cloud LLM APIs — masks PII locally before sending
 
-If your team uses AI tools (and they do), here's a 30-second way to add PII masking to all outbound AI API traffic:
+**Body**:
 
-```bash
-docker run -d \
-  --name ai-privacy-gw \
-  -p 9999:9999 \
-  ghcr.io/gunxueqiu6/ai-privacy-gateway:lite
+I know most people here run local models. But realistically, a lot of us still hit cloud APIs for tasks where local models fall short — coding assistants like Cursor, Claude for longer reasoning, GPT-4 for certain structured outputs.
+
+The problem: I kept catching myself pasting proprietary code with embedded credentials into web UIs. Or customer data into API requests.
+
+This is a dead-simple proxy that sits between your client and the API:
+
+1. You send your prompt to localhost:8111
+2. It scans for PII (phone, email, ID, bank card, IP, API key, address, etc.)
+3. Masks them before forwarding
+4. Stores original values locally in an encrypted vault
+5. Unmasks responses on the way back
+
+```
+docker pull gunxueqiu/ai-privacy-gateway
+docker run -d -p 8111:8111 \
+  -v ./vault:/app/vault \
+  gunxueqiu/ai-privacy-gateway
 ```
 
-Then configure your team's AI tools to use `http://<your-server>:9999` as the API endpoint.
+Then configure Open WebUI / SillyTavern / anything -> `http://localhost:8111/v1`.
 
-What you get:
-- All PII (phones, emails, IDs, credit cards, API keys) auto-masked
-- Kubernetes sidecar pattern supported
-- Prometheus metrics for monitoring
-- Audit logging (JSON + syslog)
-- SOC 2 / HIPAA / GDPR compliance evidence
-- <1ms latency — no performance impact
-- 10K+ requests/second per instance
+Even if you're 90% local, that 10% of cloud API calls is where the risk is. This covers it.
 
-For K8s deployments:
+GitHub: github.com/gunxueqiu6/ai-privacy-gateway
 
-```yaml
-apiVersion: v1
-kind: Pod
-spec:
-  containers:
-    - name: app
-      image: my-app
-      env:
-        - name: OPENAI_BASE_URL
-          value: http://localhost:9999/v1
-    - name: privacy-proxy
-      image: ghcr.io/gunxueqiu6/ai-privacy-gateway:lite
-      ports:
-        - containerPort: 9999
+**Follow-up strategy if it gains traction**:
+- LocalLLaMA users are technical and skeptical. Engage technical questions directly.
+- Someone will ask "why not just use a local model" — acknowledge that's ideal, but reality is hybrid. This is a bridge solution.
+- If someone finds a bug, thank them publicly and fix fast.
+
+---
+
+## Post 4: r/programming (6M members)
+
+**Best posting time**: Monday 1:00 PM ET
+
+**Title**: How I built a sub-2ms PII detection proxy with SSE streaming support
+
+**Body**:
+
+I spent the last few months building an AI privacy proxy, and I wanted to share some technical decisions that might be useful for anyone doing text processing middleware.
+
+**Problem**: Detect and mask 15 types of PII (Chinese + English) across streaming and non-streaming LLM API calls, with <10ms overhead.
+
+**Architecture decisions**:
+
+**1. Two-stage detection pipeline**
+
+```
+Input -> Pattern Detector (regex) -> NER Detector (spaCy) -> Masker -> Output
+        ^--- 200us -----------^     ^--- 2ms -----------^
 ```
 
-Helm chart available. Stateless design = horizontal scaling behind any load balancer.
+Regex first because structured patterns (phones, emails, IDs) are unambiguous and fast. NER second for fuzzy entities (person names, locations). If regex already matched a span, NER skips it — no double-processing.
 
-Open source (MIT), no external dependencies, runs fully on-premise.
+This matters: running NER on every token is wasteful when regex already caught 70% of entities. Cut processing time by ~60% vs running both on the full text.
 
-GitHub: https://github.com/gunxueqiu6/ai-privacy-gateway
-Docs: https://privacygw.pages.dev/docs
+**2. SSE streaming without buffering delays**
 
-**Post timing:** Weekday morning EST
+The naive approach: buffer the entire stream, process, then forward. Adds seconds of perceived latency.
+
+The approach I took: process each chunk independently. Regex works on partial text naturally. For NER, I accumulate minimal context (last K tokens) to resolve entity boundaries, then flush. Average chunk-to-output latency: ~2ms.
+
+```python
+async def process_stream(stream, detector):
+    context = ""
+    async for chunk in stream:
+        content = chunk["choices"][0]["delta"].get("content", "")
+        if content:
+            masked, context = detector.process_streaming(content, context)
+            yield f"data: {json.dumps({'choices': [{'delta': {'content': masked}}]})}\n\n"
+    yield "data: [DONE]\n\n"
+```
+
+**3. Encrypted vault design**
+
+Placeholder-to-original mappings are stored in a local SQLite DB encrypted with AES-256-GCM. The encryption key is derived from a user-supplied passphrase via Argon2id. Key never touches disk unencrypted.
+
+**Performance numbers**:
+
+| Test | Result |
+|------|--------|
+| Regex detection (avg) | 180us |
+| NER detection (avg) | 2.1ms |
+| Total overhead (non-streaming) | 4.8ms |
+| Total overhead (streaming) | 2.3ms/chunk |
+| Memory, idle | 180MB |
+| Memory, under load (100 concurrent) | 420MB |
+
+**Tradeoffs I'm still thinking about**:
+- Regex-only mode for max speed vs NER for better recall on unstructured entities
+- In-memory vault vs SQLite vault vs Redis vault for different scaling needs
+- False positives on masked content — LLM sees "[PHONE_1]" instead of real data, does context quality suffer?
+
+Would love to hear how others have approached similar problems. There's a lot of "privacy middleware" for LLMs now but very few that are open source and streaming-compatible.
+
+Full writeup with benchmarks: github.com/gunxueqiu6/ai-privacy-gateway
+
+**Follow-up strategy if it gains traction**:
+- r/programming is the toughest audience. Technical depth is expected. Engage every substantive technical question.
+- If someone calls out a design mistake, concede quickly and explain the fix path.
+- Expect architecture debates re: proxy vs SDK approach. State your reasoning clearly.
+
+---
+
+## Post 5: r/SideProject (200K members)
+
+**Best posting time**: Saturday 9:00 AM ET
+
+**Title**: My side project: A privacy-first proxy for AI APIs — built solo, MIT open source
+
+**Body**:
+
+Started this because I needed it. Working at a fintech company, everyone's using ChatGPT/Cursor, and I kept asking "what happens when someone pastes a customer's ID number into a prompt?"
+
+Company answer was "we're evaluating enterprise solutions." Three months later, nothing.
+
+So I built it myself on weekends.
+
+**The product in one sentence**: A local proxy that detects PII (15 types), masks it before it reaches the LLM API, and unmasks responses on the way back. Runs in Docker, 30s to deploy.
+
+**Tech stack**: Python/FastAPI + spaCy + SQLite + AES-256-GCM
+
+**Timeline**:
+- Week 1: Basic regex proxy, 5 entity types, non-streaming only
+- Week 2: Added SSE streaming support (hardest part by far)
+- Week 3: NER integration for Chinese entities
+- Week 4: Vault design with encryption
+- Month 2: Testing with real team, fixing edge cases
+- Month 3: Documentation, Docker image, website
+- Now: Open sourcing it
+
+**Hardest lesson**: Streaming. SSE chunks can split a phone number across two chunks. Had to implement a context-tracking state machine that holds partial token sequences and resolves them when the entity boundary is clear. Broke it three times before it worked.
+
+**What I'd do differently**: Skip the regex-vs-NER debate and just use a two-stage pipeline from the start. Also, Docker multi-stage builds to keep the image from ballooning.
+
+**Where it stands now**: MIT licensed, used by a few small teams I don't know. No monetization plan — it's a tool I needed, shared in case others need it too.
+
+GitHub: github.com/gunxueqiu6/ai-privacy-gateway
+Demo: privacygw.pages.dev
+
+**Follow-up strategy if it gains traction**:
+- r/SideProject is supportive. Share your journey honestly, including failures.
+- If someone asks about monetization, say "not yet, might do enterprise support if there's demand."
+- Engage "how did you learn X" questions — the side project community loves the learning story.

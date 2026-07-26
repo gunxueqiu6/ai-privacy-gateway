@@ -1,0 +1,10 @@
+JWT_SECRET not set — auto-generated random key
+VAULT_ENCRYPT_KEY not set — vault encryption is disabled
+未设置管理员密码（ADMIN_PASSWORD 为空），将生成随机密码用于本次启动
+ModuleNotFoundError: No module named 'numpy'
+onnxruntime not installed, NER model disabled
+Traceback (most recent call last):
+  File "main.py", line 60, in <module>
+  File "starlette\staticfiles.py", line 56, in __init__
+RuntimeError: Directory 'static' does not exist
+[PYI-11800:ERROR] Failed to execute script 'main' due to unhandled exception!

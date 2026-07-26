@@ -615,3 +615,114 @@ async def import_rules(request: Request) -> dict:
         "errors": errors if errors else None,
         "message": f"成功导入 {imported_count} 条规则",
     }
+
+
+# ==================== 团队管理（可见性仪表盘） ====================
+
+
+@router.get("/admin/teams")
+@limiter.limit("10/minute")
+async def admin_teams(request: Request) -> dict:
+    """列出所有团队及今日脱敏统计（管理后台全局视图）。"""
+    await require_admin(request)
+    teams = db.get_all_teams_stats_today()
+
+    # 获取所有 API key 的 team_id→tier 映射
+    all_keys = db.list_api_keys()
+    tier_map = {}
+    for k in all_keys:
+        tid = k.get("team_id", "")
+        if tid and tid not in tier_map:
+            tier_map[tid] = k.get("tier", "free")
+
+    result = []
+    for t in teams:
+        tid = t.get("team_id", "default")
+        by_type = {}
+        for key in [
+            "phone_count", "email_count", "idcard_count", "bankcard_count",
+            "person_count", "location_count", "org_count", "plate_count",
+            "ip_count", "url_count", "date_count", "amount_count", "postcode_count",
+        ]:
+            val = t.get(key, 0) or 0
+            if val > 0:
+                by_type[key.replace("_count", "")] = val
+        result.append({
+            "team_id": tid,
+            "tier": tier_map.get(tid, "free"),
+            "total_masked_today": t.get("total_count", 0) or 0,
+            "by_type": by_type,
+        })
+    return {"teams": result}
+
+
+@router.get("/admin/teams/{team_id}/stats")
+@limiter.limit("10/minute")
+async def admin_team_stats(request: Request, team_id: str) -> dict:
+    """获取单个团队的详细统计（今日 + 7 天历史）。"""
+    await require_admin(request)
+    if not team_id or len(team_id) > 128 or not team_id.replace('-', '').replace('_', '').isalnum():
+        return JSONResponse(status_code=400, content={"error": "无效的 team_id"})
+    today = db.get_stats_by_team_today(team_id)
+    history = db.get_team_stats_range(team_id, days=7)
+    sessions = db.get_user_sessions(team_id, limit=1, offset=0)
+    keys = [k for k in db.list_api_keys(team_id) if k.get("is_active", True)]
+
+    today_result = {}
+    if today:
+        today_result["total"] = today.get("total_count", 0) or 0
+        today_result["types"] = {}
+        for key in [
+            "phone_count", "email_count", "idcard_count", "bankcard_count",
+            "person_count", "location_count", "org_count", "plate_count",
+            "ip_count", "url_count", "date_count", "amount_count", "postcode_count",
+        ]:
+            val = today.get(key, 0) or 0
+            if val > 0:
+                today_result["types"][key.replace("_count", "")] = val
+
+    return {
+        "team_id": team_id,
+        "today": today_result,
+        "history": [dict(h) for h in history],
+        "active_sessions": len(sessions),
+        "api_keys_count": len(keys),
+    }
+
+
+@router.get("/admin/teams/{team_id}/sessions")
+@limiter.limit("10/minute")
+async def admin_team_sessions(request: Request, team_id: str,
+                               limit: int = Query(50, ge=1, le=200),
+                               offset: int = Query(0, ge=0)) -> dict:
+    """获取单个团队的会话列表（管理后台视图）。"""
+    await require_admin(request)
+    if not team_id or len(team_id) > 128 or not team_id.replace('-', '').replace('_', '').isalnum():
+        return JSONResponse(status_code=400, content={"error": "无效的 team_id"})
+    sessions = db.get_user_sessions(team_id, limit=limit, offset=offset)
+    return {"team_id": team_id, "sessions": sessions}
+
+
+@router.get("/admin/stats/today")
+@limiter.limit("10/minute")
+async def admin_stats_today(request: Request) -> dict:
+    """全局今日统计摘要。"""
+    await require_admin(request)
+    teams = db.get_all_teams_stats_today()
+    total_masked = sum(t.get("total_count", 0) or 0 for t in teams)
+    by_type = {}
+    for t in teams:
+        for key in [
+            "phone_count", "email_count", "idcard_count", "bankcard_count",
+            "person_count", "location_count", "org_count", "plate_count",
+            "ip_count", "url_count", "date_count", "amount_count", "postcode_count",
+        ]:
+            val = t.get(key, 0) or 0
+            if val > 0:
+                short = key.replace("_count", "")
+                by_type[short] = by_type.get(short, 0) + val
+    return {
+        "total_masked": total_masked,
+        "teams_active": len(teams),
+        "by_type": by_type,
+    }

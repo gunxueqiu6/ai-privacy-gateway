@@ -1,0 +1,256 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { getLangFromURL } from '../i18n/utils';
+
+const lang = getLangFromURL(Astro.url.pathname);
+
+const t = (zh: string, en: string) => lang === 'zh' ? zh : en;
+
+const releases = [
+  {
+    version: '2.0.0',
+    date: '2026-06-21',
+    highlights: [
+      'AES-256-GCM vault encryption',
+      'Multi-upstream load balancer (round-robin / random / least-connections)',
+      'Pub/sub audit event bus with JSON + syslog output',
+      'One-click installers (Windows .exe + macOS binary)',
+      'iOS Network Extension + Android VPN packet processor',
+      'Website v2 — dark theme, glass morphism, before/after PII demo',
+      'Rate limiting on proxy endpoint',
+    ],
+  },
+  {
+    version: '1.1.0',
+    date: '2026-06-08',
+    highlights: [
+      'NER entity recognition engine (jieba + ONNX)',
+      'AC automaton (Rust PyO3 native module)',
+      'JS/TS SDK + Chrome/Edge browser extension',
+      'Flutter/Dart + Android + iOS SDK',
+      'Prometheus metrics endpoint',
+      'Security baseline: bcrypt, rate limiting, login lockout',
+      'Docker images auto-pushed to GHCR',
+    ],
+  },
+  {
+    version: '1.0.1',
+    date: '2026-06-07',
+    highlights: [
+      'Kubernetes deployment fixes',
+      'GHCR CI build corrections',
+      'Pricing page rendering fixes',
+    ],
+  },
+  {
+    version: '1.0.0',
+    date: '2026-06-07',
+    highlights: [
+      'Core PII masking engine — 14+ entity types (regex)',
+      'HTTP reverse proxy for OpenAI-compatible APIs',
+      'SSE streaming buffer for real-time masking',
+      'Admin dashboard with interception stats + trend charts',
+      'SQLite encrypted vault with TTL-based cleanup',
+      'Docker + docker-compose + PyInstaller packaging',
+    ],
+  },
+  {
+    version: '0.1.0',
+    date: '2026-05',
+    highlights: [
+      'Initial prototype',
+      'Basic regex PII detection',
+      'Simple proxy forwarding',
+    ],
+  },
+];
+
+const title = t('更新日志 — AI Privacy Gateway', 'Changelog — AI Privacy Gateway');
+const desc = t(
+  'AI Privacy Gateway 版本更新历史 — v0.1.0 到 v2.0.0。了解最新功能、安全修复和性能改进。',
+  'AI Privacy Gateway release history — v0.1.0 through v2.0.0. New features, security fixes, and performance improvements.'
+);
+const heroTitle = t('更新日志', 'Changelog');
+const heroSub = t('从原型到 v2.0.0 的演进之路', 'The journey from prototype to v2.0.0');
+const fullLog = t('完整变更记录 (GitHub)', 'Full Changelog (GitHub)');
+const latestBadge = t('最新', 'Latest');
+---
+
+<Layout title={title} description={desc} canonicalURL="https://privacygw.pages.dev/changelog">
+  <Nav />
+
+  <section class="hero">
+    <div class="container hero-content">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        <span>{t('版本历史', 'Release History')}</span>
+      </div>
+      <h1 class="hero-title">
+        <span class="gradient-text">{heroTitle}</span>
+      </h1>
+      <p class="hero-description">{heroSub}</p>
+    </div>
+  </section>
+
+  <section class="timeline-section">
+    <div class="container">
+      <div class="timeline">
+        {releases.map((release, i) => (
+          <div class="release-card glass">
+            <div class="release-header">
+              <div class="release-version">
+                <span class="version-tag">v{release.version}</span>
+                {i === 0 && <span class="latest-badge">{latestBadge}</span>}
+              </div>
+              <span class="release-date">{release.date}</span>
+            </div>
+            <ul class="release-highlights">
+              {release.highlights.map(h => <li>{h}</li>)}
+            </ul>
+          </div>
+        ))}
+      </div>
+
+      <div class="cta-row">
+        <a href="https://github.com/gunxueqiu6/ai-privacy-gateway/blob/main/CHANGELOG.md" class="btn btn-outline">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          {fullLog}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <Footer />
+
+  <style>
+    .hero {
+      padding: 6rem 0 2rem;
+    }
+    .hero-content {
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 1rem;
+      border-radius: 100px;
+      background: var(--glass-bg);
+      border: 1px solid var(--border);
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+    }
+    .badge-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
+    .hero-title {
+      font-size: clamp(2rem, 5vw, 3rem);
+      margin-bottom: 0.75rem;
+    }
+    .hero-description {
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    .timeline-section {
+      padding: 3rem 0 5rem;
+    }
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .release-card {
+      padding: 1.75rem 2rem;
+    }
+    .release-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .release-version {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .version-tag {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--primary);
+      font-family: ui-monospace, monospace;
+    }
+    .latest-badge {
+      font-size: 0.72rem;
+      padding: 0.15rem 0.55rem;
+      border-radius: 100px;
+      background: var(--primary);
+      color: #000;
+      font-weight: 600;
+    }
+    .release-date {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-family: ui-monospace, monospace;
+    }
+    .release-highlights {
+      list-style: none;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .release-highlights li {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      padding-left: 1.25rem;
+      position: relative;
+      line-height: 1.6;
+    }
+    .release-highlights li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.6em;
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--primary-dim);
+    }
+
+    .cta-row {
+      text-align: center;
+      margin-top: 2.5rem;
+    }
+    .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.7rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-outline:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: rgba(134,239,172,0.04);
+    }
+
+    @media (max-width: 480px) {
+      .release-card { padding: 1.25rem 1rem; }
+      .hero { padding: 4rem 0 1.5rem; }
+    }
+  </style>
+</Layout>

@@ -1,0 +1,820 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { getLangFromURL } from '../i18n/utils';
+
+const lang = getLangFromURL(Astro.url.pathname);
+
+const pageTitle = lang === 'zh' ? '竞品对比 — AI Privacy Gateway' : 'Comparison — AI Privacy Gateway';
+const pageDesc = lang === 'zh'
+  ? 'AI Privacy Gateway vs Microsoft Presidio、Kiji Privacy Proxy、AI Firewall、LLM-Sentinel、Nightfall AI 全面对比。'
+  : 'AI Privacy Gateway vs Microsoft Presidio, Kiji Privacy Proxy, AI Firewall, LLM-Sentinel, Nightfall AI — a comprehensive comparison.';
+
+const heroTitle = lang === 'zh' ? 'AI 数据隐私工具对比' : 'AI Data Privacy Tools Comparison';
+const heroDesc = lang === 'zh'
+  ? '开源、中文优先、30秒部署——看看 AI Privacy Gateway 如何与众不同'
+  : 'Open-source, Chinese-first, 30-second deploy — see how AI Privacy Gateway compares';
+
+const dimensions = [
+  {
+    key: 'detection',
+    zh: '检测方式',
+    en: 'Detection Method',
+    values: ['Regex + NER 双引擎', 'Regex + ML (spaCy/FLair)', 'Regex + ML', 'AI 分类', '规则 + ML', 'ML + Regex'],
+  },
+  {
+    key: 'piiTypes',
+    zh: 'PII 类型数',
+    en: 'PII Types',
+    values: ['14 种', '30+ 种（可扩展）', '~10 种', '~15 种', '~8 种', '100+ 种'],
+  },
+  {
+    key: 'deploy',
+    zh: '部署方式',
+    en: 'Deployment',
+    values: ['Docker / 二进制 / pip', 'Docker / pip', 'Docker', 'Docker / SaaS', 'pip / Docker', 'SaaS 仅云'],
+  },
+  {
+    key: 'sse',
+    zh: '流式支持 (SSE)',
+    en: 'SSE Streaming Support',
+    values: ['full', 'no', 'yes', 'partial', 'yes', 'no'],
+  },
+  {
+    key: 'deployTime',
+    zh: '部署时间',
+    en: 'Deploy Time',
+    values: ['~30 秒', '~15 分钟', '~5 分钟', '~10 分钟', '~5 分钟', '即时（SaaS）'],
+  },
+  {
+    key: 'latency',
+    zh: 'P99 延迟',
+    en: 'P99 Latency',
+    values: ['< 2ms', '~5-10ms', '~3-5ms', '~10-20ms', '~2-5ms', '~20-50ms + 网络'],
+  },
+  {
+    key: 'license',
+    zh: '开源协议',
+    en: 'License',
+    values: ['lic_mit', 'lic_mit', 'lic_prop', 'lic_prop', 'lic_apache', 'lic_prop'],
+  },
+  {
+    key: 'local',
+    zh: '本地运行',
+    en: 'Local Run',
+    values: ['yes', 'yes', 'yes', 'yes', 'yes', 'no'],
+  },
+  {
+    key: 'chinese',
+    zh: '中文支持',
+    en: 'Chinese Support',
+    values: ['native', 'partial', 'partial', 'no', 'no', 'no'],
+  },
+  {
+    key: 'price',
+    zh: '价格',
+    en: 'Price',
+    values: ['free', 'free', 'enterprise', 'enterprise', 'freemium', 'usage'],
+  },
+];
+
+const renderCell = (value: string): string => {
+  if (value === 'yes' || value === 'full') return lang === 'zh' ? '支持' : 'Yes';
+  if (value === 'no') return lang === 'zh' ? '不支持' : 'No';
+  if (value === 'partial') return lang === 'zh' ? '部分' : 'Partial';
+  if (value === 'native') return lang === 'zh' ? '原生' : 'Native';
+  if (value === 'lic_mit') return lang === 'zh' ? 'MIT' : 'MIT';
+  if (value === 'lic_apache') return lang === 'zh' ? 'Apache 2.0' : 'Apache 2.0';
+  if (value === 'lic_prop') return lang === 'zh' ? '专有' : 'Proprietary';
+  if (value === 'free') return lang === 'zh' ? '免费' : 'Free';
+  if (value === 'enterprise') return lang === 'zh' ? '企业版' : 'Enterprise';
+  if (value === 'freemium') return lang === 'zh' ? '免费增值' : 'Freemium';
+  if (value === 'usage') return lang === 'zh' ? '按用量计费' : 'Usage-based';
+  return value;
+};
+
+const renderIcon = (value: string): string => {
+  if (value === 'yes' || value === 'full' || value === 'native' || value === 'free') return 'check';
+  if (value === 'no') return 'cross';
+  if (value === 'partial' || value === 'enterprise' || value === 'usage' || value === 'freemium') return 'warning';
+  return '';
+};
+
+const competitorNames = lang === 'zh'
+  ? ['AI Privacy Gateway', 'Microsoft Presidio', 'Kiji (Dataiku)', 'AI Firewall', 'LLM-Sentinel', 'Nightfall AI']
+  : ['AI Privacy Gateway', 'Microsoft Presidio', 'Kiji (Dataiku)', 'AI Firewall', 'LLM-Sentinel', 'Nightfall AI'];
+
+const analysisSectionTitle = lang === 'zh' ? '竞品分析' : 'Competitive Analysis';
+const analysisItems = lang === 'zh' ? [
+  {
+    name: 'Microsoft Presidio',
+    strengths: '开源且成熟，PII 类型覆盖面广（30+ 种），支持自定义 NLP 模型。微软生态集成好。',
+    weaknesses: '部署流程复杂（需安装 spaCy 模型），对中文支持有限，无原生 SSE 流式支持，配置学习曲线陡峭。',
+    bestFor: '有 NLP 专业团队的大企业，需要深度定制化 PII 检测的场景。',
+  },
+  {
+    name: 'Kiji Privacy Proxy (Dataiku)',
+    strengths: 'Dataiku 生态内无缝集成，支持结构化数据脱敏，适合数据科学工作流。',
+    weaknesses: '强依赖 Dataiku 平台，非独立产品；部署灵活性差，社区较小，中文支持有限。',
+    bestFor: '已使用 Dataiku 平台的数据科学团队。',
+  },
+  {
+    name: 'AI Firewall',
+    strengths: 'AI 分类引擎，能检测非结构化/模糊 PII，提供 SaaS 模式。',
+    weaknesses: '自部署版本延迟较高（10-20ms），SSE 支持有限，闭源且价格不透明。中文支持差。',
+    bestFor: '需要 AI 辅助分类的团队，可接受较高延迟。',
+  },
+  {
+    name: 'LLM-Sentinel',
+    strengths: 'Apache 2.0 开源，延迟较低，支持流式响应。专注于 LLM 安全。',
+    weaknesses: 'PII 类型覆盖较少（~8 种），文档不够完善，社区活跃度一般，不支持中文。',
+    bestFor: '以英文为主的 LLM 应用安全监控。',
+  },
+  {
+    name: 'Nightfall AI',
+    strengths: '最广泛的 PII 覆盖（100+ 种），ML 检测精准度高，提供企业级合规报告。',
+    weaknesses: '仅提供 SaaS 云服务，数据必须上传到 Nightfall 服务器，延迟较高（含网络开销），按用量收费成本不低。',
+    bestFor: '接受 SaaS 模式、需要最大覆盖面的合规驱动型企业。',
+  },
+] : [
+  {
+    name: 'Microsoft Presidio',
+    strengths: 'Mature open-source solution with broad PII coverage (30+ types). Supports custom NLP models. Well integrated with Microsoft ecosystem.',
+    weaknesses: 'Complex deployment (requires spaCy model installation). Limited Chinese support. No native SSE streaming. Steep learning curve.',
+    bestFor: 'Large enterprises with dedicated NLP teams needing deep PII customization.',
+  },
+  {
+    name: 'Kiji Privacy Proxy (Dataiku)',
+    strengths: 'Seamless integration within Dataiku ecosystem. Supports structured data masking. Suitable for data science workflows.',
+    weaknesses: 'Tightly coupled with Dataiku platform — not an independent product. Limited deployment flexibility. Small community. Limited Chinese support.',
+    bestFor: 'Data science teams already using the Dataiku platform.',
+  },
+  {
+    name: 'AI Firewall',
+    strengths: 'AI-powered classification engine detects unstructured/fuzzy PII. Offers SaaS deployment.',
+    weaknesses: 'Higher latency on self-hosted (10-20ms). Limited SSE support. Closed source with opaque pricing. Poor Chinese support.',
+    bestFor: 'Teams needing AI-assisted classification who can tolerate higher latency.',
+  },
+  {
+    name: 'LLM-Sentinel',
+    strengths: 'Apache 2.0 open-source. Low latency. Supports streaming responses. Focused on LLM security.',
+    weaknesses: 'Limited PII coverage (~8 types). Documentation could be better. Moderate community activity. No Chinese support.',
+    bestFor: 'English-focused LLM application security monitoring.',
+  },
+  {
+    name: 'Nightfall AI',
+    strengths: 'Broadest PII coverage (100+ types). High detection accuracy via ML. Enterprise compliance reporting.',
+    weaknesses: 'SaaS-only — data must be uploaded to Nightfall servers. Higher latency (includes network overhead). Usage-based pricing can get costly.',
+    bestFor: 'Compliance-driven enterprises comfortable with SaaS who need maximum coverage.',
+  },
+];
+
+const ctaTitle = lang === 'zh' ? '准备好保护你的 AI 数据了吗？' : 'Ready to protect your AI data?';
+const ctaDesc = lang === 'zh' ? '30 秒部署，无需信用卡，完全开源免费。' : 'Deploy in 30 seconds. No credit card. Free and open source.';
+const ctaBtn = lang === 'zh' ? '30 秒开始部署' : 'Start Deploying';
+const ctaLink = '/download';
+
+const highlightNote = lang === 'zh' ? '✓ = 支持 / ⚠️ = 部分支持 / ✗ = 不支持' : '✓ = Supported / ⚠️ = Partial / ✗ = Not Supported';
+const legendSelf = lang === 'zh' ? '我们的优势' : 'Our Strength';
+---
+
+<Layout title={pageTitle} description={pageDesc} canonicalURL="https://privacygw.pages.dev/compare">
+  <Nav />
+
+  <!-- Hero -->
+  <section class="compare-hero">
+    <div class="hero-orb-1"></div>
+    <div class="hero-orb-2"></div>
+
+    <div class="container">
+      <div class="hero-content">
+        <div class="section-label">{heroTitle}</div>
+        <h1 class="hero-title">{heroTitle}</h1>
+        <p class="hero-desc">{heroDesc}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Comparison Table -->
+  <section class="table-section">
+    <div class="container">
+      <div class="table-legend">
+        <span class="legend-note">{highlightNote}</span>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th class="dimension-header">{lang === 'zh' ? '对比维度' : 'Dimension'}</th>
+              {competitorNames.map((name, i) => (
+                <th class={`competitor-header${i === 0 ? ' self' : ''}`}>
+                  <div class="comp-name">{name}</div>
+                  {i === 0 && <div class="comp-badge">{legendSelf}</div>}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {dimensions.map((dim) => (
+              <tr class="dim-row">
+                <td class="dim-label">
+                  <span class="dim-name">{lang === 'zh' ? dim.zh : dim.en}</span>
+                </td>
+                {dim.values.map((val, i) => {
+                  const iconType = renderIcon(val);
+                  const cellText = renderCell(val);
+                  return (
+                    <td class={`comp-cell${i === 0 ? ' self' : ''}`}>
+                      {iconType && (
+                        <span class={`cell-icon icon-${iconType}`}>
+                          {iconType === 'check' && <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                          {iconType === 'warning' && <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>}
+                          {iconType === 'cross' && <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>}
+                        </span>
+                      )}
+                      <span class="cell-text">{cellText}</span>
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Key Selling Points -->
+  <section class="strengths-section">
+    <div class="container">
+      <h2 class="section-title">
+        {lang === 'zh' ? '为什么选择 AI Privacy Gateway？' : 'Why Choose AI Privacy Gateway?'}
+      </h2>
+      <p class="section-subtitle">
+        {lang === 'zh'
+          ? '在同类工具中，我们专注于解决中国开发者最关心的问题'
+          : 'Among similar tools, we focus on what matters most to Chinese developers'
+        }
+      </p>
+
+      <div class="strengths-grid">
+        <div class="strength-card glass">
+          <div class="strength-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+            </svg>
+          </div>
+          <h3>{lang === 'zh' ? '中文优先' : 'Chinese-First'}</h3>
+          <p>{lang === 'zh' ? '原生支持中文姓名、身份证号、手机号、车牌号等中国特有 PII 实体识别，无需额外配置。' : 'Native support for Chinese names, ID card numbers, phone numbers, license plates, and other China-specific PII entities. Zero configuration needed.'}</p>
+        </div>
+
+        <div class="strength-card glass">
+          <div class="strength-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+              <polyline points="17 6 23 6 23 12"/>
+            </svg>
+          </div>
+          <h3>{lang === 'zh' ? '30 秒部署' : '30-Second Deploy'}</h3>
+          <p>{lang === 'zh' ? '单文件二进制或一条 Docker 命令即可运行。无需配置数据库、无需安装模型、无需设置外部依赖。' : 'Single binary or one Docker command to run. No database setup, no model installation, no external dependencies.'}</p>
+        </div>
+
+        <div class="strength-card glass">
+          <div class="strength-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          </div>
+          <h3>{lang === 'zh' ? 'SSE 流式传输' : 'SSE Streaming'}</h3>
+          <p>{lang === 'zh' ? '完整支持 SSE 流式代理，实时脱敏与还原，零可感知延迟。不像某些方案需要等待完整响应。' : 'Full SSE streaming proxy with real-time masking and unmasking. Zero perceptible latency. Unlike solutions that require waiting for complete responses.'}</p>
+        </div>
+
+        <div class="strength-card glass">
+          <div class="strength-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <h3>{lang === 'zh' ? '100% 本地运行' : '100% Local'}</h3>
+          <p>{lang === 'zh' ? '数据永不离开你的机器。映射关系存储在本地加密 SQLite 数据库中，无需担心第三方数据泄露。' : 'Data never leaves your machine. Mappings are stored in a local encrypted SQLite vault. No third-party data exposure concerns.'}</p>
+        </div>
+
+        <div class="strength-card glass">
+          <div class="strength-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5"/>
+              <path d="M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <h3>{lang === 'zh' ? 'MIT 开源协议' : 'MIT Licensed'}</h3>
+          <p>{lang === 'zh' ? '永久免费。个人使用、商业使用、私有部署均无限制。无需注册、无需信用卡、不收集遥测数据。' : 'Free forever. No restrictions on personal use, commercial use, or self-hosting. No registration, no credit card, no telemetry.'}</p>
+        </div>
+
+        <div class="strength-card glass">
+          <div class="strength-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          <h3>{lang === 'zh' ? '超低延迟' : 'Ultra-Low Latency'}</h3>
+          <p>{lang === 'zh' ? 'P99 延迟低于 2ms。单实例处理 10,000+ QPS。正则 + NER 轻量引擎设计，无需 GPU 即可高性能运行。' : 'P99 latency under 2ms. Single instance handles 10,000+ QPS. Lightweight regex + NER engine design runs at high performance without a GPU.'}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Competitive Analysis -->
+  <section class="analysis-section">
+    <div class="container">
+      <h2 class="section-title">{analysisSectionTitle}</h2>
+      <p class="section-subtitle">
+        {lang === 'zh'
+          ? '客观看待每个工具的优劣势，选择最适合你的方案'
+          : 'An objective look at each tool\'s strengths and weaknesses'
+        }
+      </p>
+
+      <div class="analysis-grid">
+        {analysisItems.map((item) => (
+          <div class="analysis-card glass">
+            <h3 class="analysis-name">{item.name}</h3>
+            <div class="analysis-block">
+              <div class="analysis-strength-label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/>
+                </svg>
+                {lang === 'zh' ? '优势' : 'Strengths'}
+              </div>
+              <p class="analysis-text">{item.strengths}</p>
+            </div>
+            <div class="analysis-block">
+              <div class="analysis-weakness-label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3H10z"/>
+                </svg>
+                {lang === 'zh' ? '劣势' : 'Weaknesses'}
+              </div>
+              <p class="analysis-text">{item.weaknesses}</p>
+            </div>
+            <div class="analysis-block">
+              <div class="analysis-best-label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                {lang === 'zh' ? '适合场景' : 'Best For'}
+              </div>
+              <p class="analysis-text">{item.bestFor}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-card glass">
+        <h2 class="cta-title">{ctaTitle}</h2>
+        <p class="cta-desc">{ctaDesc}</p>
+        <a href={ctaLink} class="btn btn-primary cta-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+            <polyline points="17 6 23 6 23 12"/>
+          </svg>
+          {ctaBtn}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <Footer />
+
+  <style>
+    /* ========== Hero ========== */
+    .compare-hero {
+      padding: 8rem 0 3rem;
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .hero-orb-1 {
+      position: absolute;
+      top: -20%;
+      left: -10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, var(--primary-glow) 0%, rgba(134, 239, 172, 0.03) 40%, transparent 70%);
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      animation: orb-float 25s ease-in-out infinite;
+    }
+
+    .hero-orb-2 {
+      position: absolute;
+      bottom: -30%;
+      right: -10%;
+      width: 550px;
+      height: 550px;
+      background: radial-gradient(circle, var(--accent-glow) 0%, rgba(167, 139, 250, 0.03) 40%, transparent 70%);
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      animation: orb-float 30s ease-in-out infinite -10s;
+    }
+
+    @keyframes orb-float {
+      0%, 100% { transform: translate(0, 0); }
+      33% { transform: translate(30px, -30px); }
+      66% { transform: translate(-20px, 20px); }
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .hero-title {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, var(--text-primary), var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-desc {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      max-width: 600px;
+      line-height: 1.7;
+    }
+
+    /* ========== Table ========== */
+    .table-section {
+      padding: 3rem 0 4rem;
+    }
+
+    .table-legend {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 1rem;
+    }
+
+    .legend-note {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+    }
+
+    .compare-table {
+      width: 100%;
+      min-width: 700px;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    .compare-table th,
+    .compare-table td {
+      padding: 0.85rem 1rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .compare-table thead th {
+      padding: 1.25rem 1rem;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      background: var(--bg-card);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    .compare-table th:first-child,
+    .compare-table td:first-child {
+      text-align: left;
+      position: sticky;
+      left: 0;
+      z-index: 1;
+    }
+
+    .compare-table th:first-child {
+      background: var(--bg-card);
+      z-index: 3;
+    }
+
+    .compare-table td:first-child {
+      background: var(--bg-surface);
+      z-index: 1;
+    }
+
+    .dimension-header {
+      min-width: 120px;
+    }
+
+    .competitor-header {
+      min-width: 110px;
+    }
+
+    .competitor-header.self {
+      background: rgba(134, 239, 172, 0.04) !important;
+      border-left: 1px solid rgba(134, 239, 172, 0.15);
+      border-right: 1px solid rgba(134, 239, 172, 0.15);
+    }
+
+    .comp-name {
+      font-weight: 600;
+      font-size: 0.82rem;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .comp-badge {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--primary);
+      background: rgba(134, 239, 172, 0.10);
+      padding: 2px 8px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    .dim-label {
+      font-weight: 500;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .dim-name {
+      font-size: 0.85rem;
+    }
+
+    .comp-cell {
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      vertical-align: middle;
+    }
+
+    .comp-cell.self {
+      background: rgba(134, 239, 172, 0.03) !important;
+      border-left: 1px solid rgba(134, 239, 172, 0.10);
+      border-right: 1px solid rgba(134, 239, 172, 0.10);
+    }
+
+    .cell-text {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .cell-icon {
+      display: inline-flex;
+      vertical-align: middle;
+      margin-right: 0.3rem;
+    }
+
+    .cell-icon.icon-check {
+      color: var(--primary);
+    }
+
+    .cell-icon.icon-cross {
+      color: var(--danger);
+    }
+
+    .cell-icon.icon-warning {
+      color: var(--warning);
+    }
+
+    /* ========== Strengths ========== */
+    .strengths-section {
+      padding: 4rem 0;
+    }
+
+    .strengths-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+
+    .strength-card {
+      padding: 1.75rem;
+    }
+
+    .strength-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(134, 239, 172, 0.06);
+      border: 1px solid rgba(134, 239, 172, 0.12);
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    .strength-card h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+    }
+
+    .strength-card p {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    /* ========== Analysis ========== */
+    .analysis-section {
+      padding: 4rem 0;
+    }
+
+    .analysis-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+
+    .analysis-card {
+      padding: 1.75rem;
+    }
+
+    .analysis-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .analysis-block {
+      margin-bottom: 1rem;
+    }
+
+    .analysis-block:last-child {
+      margin-bottom: 0;
+    }
+
+    .analysis-strength-label,
+    .analysis-weakness-label,
+    .analysis-best-label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.3rem;
+    }
+
+    .analysis-strength-label {
+      color: var(--primary);
+    }
+
+    .analysis-weakness-label {
+      color: var(--danger);
+    }
+
+    .analysis-best-label {
+      color: var(--accent);
+    }
+
+    .analysis-text {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    /* ========== CTA ========== */
+    .cta-section {
+      padding: 3rem 0 5rem;
+    }
+
+    .cta-card {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 3rem 2.5rem;
+      text-align: center;
+    }
+
+    .cta-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--text-primary);
+    }
+
+    .cta-desc {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+      line-height: 1.7;
+    }
+
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* ========== Responsive ========== */
+    @media (max-width: 1024px) {
+      .strengths-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .analysis-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .compare-hero {
+        padding: 6rem 0 2rem;
+      }
+
+      .hero-title {
+        font-size: 2rem;
+      }
+
+      .hero-desc {
+        font-size: 1rem;
+      }
+
+      .compare-table th,
+      .compare-table td {
+        padding: 0.7rem 0.65rem;
+        font-size: 0.8rem;
+      }
+
+      .comp-name {
+        font-size: 0.75rem;
+      }
+
+      .strengths-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .analysis-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-orb-1, .hero-orb-2 {
+        width: 350px;
+        height: 350px;
+        opacity: 0.4;
+      }
+
+      .cta-card {
+        padding: 2rem 1.5rem;
+      }
+
+      .cta-title {
+        font-size: 1.35rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero-title {
+        font-size: 1.6rem;
+      }
+
+      .compare-table th,
+      .compare-table td {
+        padding: 0.6rem 0.5rem;
+        font-size: 0.75rem;
+      }
+
+      .cta-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</Layout>

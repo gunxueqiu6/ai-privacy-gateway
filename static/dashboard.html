@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+<meta charset=UTF-8>
+<meta name=viewport content="width=device-width,initial-scale=1.0">
+<title>AI Privacy Gateway — 隐私可见性仪表盘</title>
+<link rel=preconnect href=https://fonts.googleapis.com>
+<link rel=preconnect href=https://fonts.gstatic.com crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel=stylesheet>
+<script src=https://unpkg.com/vue@3/dist/vue.global.prod.js></script>
+<script src=https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js></script>
+<style>
+:root{--bg:#03030a;--bg2:#080816;--card:#0c0c1d;--card-h:#11112a;--bd:#1e1e3f;--bd-h:#2e2e5f;--ac:#86efac;--ac2:#4ade80;--pu:#a78bfa;--pu2:#8b5cf6;--er:#f87171;--wa:#fbbf24;--tx:#e2e8f0;--tx2:#94a3b8;--tx3:#64748b;--r:12px;--rs:8px;--sh:0 4px 24px rgba(0,0,0,.4)}*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Inter,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
+.layout{display:flex;min-height:100vh}
+.sb{width:220px;background:var(--card);border-right:1px solid var(--bd);padding:24px 14px;display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:all .3s}
+.sb-logo{display:flex;align-items:center;gap:8px;font-size:1.05em;font-weight:700;color:var(--ac);margin-bottom:28px;padding:0 6px}
+.sb-nav{display:flex;flex-direction:column;gap:2px;flex:1}
+.sb-nav a{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:var(--rs);color:var(--tx2);font-size:.88em;font-weight:500;transition:all .2s;text-decoration:none;cursor:pointer}
+.sb-nav a:hover{background:rgba(255,255,255,.04);color:var(--tx)}
+.sb-nav a.act{background:rgba(134,239,172,.1);color:var(--ac)}
+.sb-ft{padding-top:14px;border-top:1px solid var(--bd);font-size:.78em;color:var(--tx3);display:flex;flex-direction:column;gap:6px}
+.sb-ft .ver{color:var(--pu);font-weight:600}
+.sb-tg{display:none;position:fixed;top:14px;left:14px;z-index:200;background:var(--card);border:1px solid var(--bd);border-radius:var(--rs);padding:7px 10px;color:var(--tx);cursor:pointer}
+.sb-ov{display:none}
+.mc{flex:1;margin-left:220px;padding:28px;min-width:0}
+.ph{margin-bottom:24px}
+.ph h1{font-size:1.5em;font-weight:700;margin-bottom:4px}
+.ph p{color:var(--tx2);font-size:.88em}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.sc{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:18px 22px;transition:all .3s}
+.sc:hover{border-color:var(--bd-h);background:var(--card-h);transform:translateY(-2px);box-shadow:var(--sh)}
+.sc .l{font-size:.78em;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.sc .v{font-size:1.8em;font-weight:700;color:var(--ac);font-family:'JetBrains Mono',monospace;line-height:1.2}
+.sc .s{font-size:.78em;color:var(--tx3);margin-top:4px}
+.sc .ic{float:right;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1em}
+.sc .ic.g{background:rgba(134,239,172,.1)}
+.sc .ic.p{background:rgba(167,139,250,.1)}
+.sc .ic.a{background:rgba(251,191,36,.1)}
+.sc .ic.b{background:rgba(96,165,250,.1)}
+.cr{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:24px}
+.cc{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:18px}
+.cc h3{font-size:.88em;color:var(--tx2);margin-bottom:14px;font-weight:600}
+.cv{width:100%;height:260px}
+.tc{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin-bottom:24px}
+.th{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--bd)}
+.th h3{font-size:.92em;font-weight:600}
+.th .bdg{background:rgba(167,139,250,.12);color:var(--pu);padding:2px 10px;border-radius:20px;font-size:.74em;font-weight:600}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:10px 18px;font-size:.78em;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bd);background:rgba(255,255,255,.02)}
+td{padding:10px 18px;font-size:.88em;border-bottom:1px solid rgba(30,30,63,.5);transition:all .2s}
+tr:hover{background:rgba(255,255,255,.02)}
+tr:last-child td{border-bottom:none}
+tr{cursor:pointer}
+.eb{display:inline-block;padding:2px 7px;border-radius:4px;font-size:.74em;font-weight:500;margin:1px 2px}
+.eb.phone{background:rgba(96,165,250,.12);color:#60a5fa}
+.eb.email{background:rgba(251,191,36,.12);color:#fbbf24}
+.eb.idcard{background:rgba(167,139,250,.12);color:#a78bfa}
+.eb.bank,.eb.bankcard{background:rgba(248,113,113,.12);color:#f87171}
+.eb.person{background:rgba(52,211,153,.12);color:#34d399}
+.eb.location{background:rgba(251,146,60,.12);color:#fb923c}
+.eb.org{background:rgba(129,140,248,.12);color:#818cf8}
+.eb.plate{background:rgba(244,114,182,.12);color:#f472b6}
+.eb.ip{background:rgba(45,212,191,.12);color:#2dd4bf}
+.eb.url{background:rgba(148,163,184,.12);color:#94a3b8}
+.eb.date{background:rgba(253,186,116,.12);color:#fdba74}
+.eb.amount{background:rgba(167,243,208,.12);color:#a7f3d0}
+.eb.postcode{background:rgba(196,181,253,.12);color:#c4b5fd}
+.eb.custom{background:rgba(252,165,165,.12);color:#fca5a5}
+.er{display:none}
+.er.o{display:table-row}
+.er td{background:rgba(0,0,0,.2)}
+.ex{padding:10px 18px 10px 44px;font-size:.84em}
+.ex .di{display:flex;gap:10px;padding:3px 0}
+.ex .dk{color:var(--tx3);min-width:70px}
+.ex .dv{color:var(--tx);font-family:'JetBrains Mono',monospace;font-size:.88em}
+.em{text-align:center;padding:50px 20px;background:var(--card);border:1px solid var(--bd);border-radius:var(--r);margin-bottom:24px}
+.em .ei{font-size:2.5em;margin-bottom:14px;opacity:.5}
+.em h3{font-size:1.15em;margin-bottom:6px}
+.em p{color:var(--tx2);max-width:460px;margin:0 auto 18px;font-size:.88em;line-height:1.6}
+.em code{display:inline-block;background:rgba(0,0,0,.3);border:1px solid var(--bd);padding:8px 14px;border-radius:var(--rs);font-family:'JetBrains Mono',monospace;font-size:.78em;color:var(--ac);max-width:100%;overflow-x:auto;text-align:left}
+.af{height:340px;overflow-y:auto;padding:10px 0}
+.ai{display:flex;gap:10px;padding:6px 18px;font-size:.84em;border-left:2px solid transparent;transition:all .2s}
+.ai:hover{background:rgba(255,255,255,.02);border-left-color:var(--ac)}
+.ai .at{color:var(--tx3);font-family:'JetBrains Mono',monospace;font-size:.84em;white-space:nowrap;min-width:55px}
+.ai .aa{color:var(--pu);font-weight:500;min-width:90px}
+.ai .am{color:var(--tx2)}
+.ls{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.lc{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:36px;width:100%;max-width:380px;box-shadow:var(--sh)}
+.lc h1{font-size:1.25em;text-align:center;margin-bottom:4px}
+.lc .ls2{text-align:center;color:var(--tx2);font-size:.84em;margin-bottom:24px}
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:.84em;color:var(--tx2);margin-bottom:5px;font-weight:500}
+.fg input{width:100%;padding:9px 12px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--tx);font-family:Inter,sans-serif;font-size:.88em;transition:all .2s}
+.fg input:focus{outline:2px solid var(--ac);outline-offset:2px;border-color:var(--ac)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;border:none;border-radius:var(--rs);cursor:pointer;font-family:Inter,sans-serif;font-size:.88em;font-weight:600;transition:all .2s}
+.btn-p{background:var(--ac);color:var(--bg)}
+.btn-p:hover{background:var(--ac2);transform:translateY(-1px)}
+.btn-p:disabled{opacity:.5;cursor:default;transform:none}
+.btn-b{width:100%}
+.btn-lo{background:transparent;border:1px solid var(--bd);color:var(--tx2);padding:5px 12px;border-radius:var(--rs);cursor:pointer;font-size:.78em;transition:all .2s}
+.btn-lo:hover{border-color:var(--er);color:var(--er)}
+.tb{display:flex;gap:4px;margin-bottom:18px;background:var(--bg2);border-radius:var(--rs);padding:4px;width:fit-content}
+.tb button{padding:7px 16px;border:none;border-radius:5px;background:transparent;color:var(--tx2);cursor:pointer;font-size:.84em;font-weight:500;transition:all .2s;font-family:Inter,sans-serif}
+.tb button.act{background:var(--card);color:var(--ac);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.tb button:hover:not(.act){color:var(--tx)}
+.tc2{position:fixed;top:16px;right:16px;z-index:999;display:flex;flex-direction:column;gap:6px}
+.ti{background:var(--card);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 14px;font-size:.84em;box-shadow:var(--sh);display:flex;align-items:center;gap:6px;animation:si .3s;max-width:340px}
+.ti.e{border-left:3px solid var(--er)}
+.ti.s{border-left:3px solid var(--ac)}
+.ti.i{border-left:3px solid var(--pu)}
+@keyframes si{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.sk{background:linear-gradient(90deg,var(--card) 25%,var(--card-h) 50%,var(--card) 75%);background-size:200% 100%;animation:sh 1.5s infinite;border-radius:var(--rs)}
+@keyframes sh{0%{background-position:200% 0}to{background-position:-200% 0}}
+.er2{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.15);border-radius:var(--rs);padding:10px 14px;color:var(--er);font-size:.84em;margin-bottom:14px}
+.nb{background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.12);border-radius:var(--rs);padding:9px 14px;color:var(--pu);font-size:.78em;margin-bottom:14px}
+.sp{width:18px;height:18px;border:2px solid var(--bd);border-top-color:var(--ac);border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pg{display:flex;justify-content:center;align-items:center;gap:10px;padding:14px}
+.pg button{background:transparent;border:1px solid var(--bd);color:var(--tx2);padding:5px 10px;border-radius:var(--rs);cursor:pointer;font-size:.84em}
+.pg button:hover{border-color:var(--ac);color:var(--ac)}
+.pg button:disabled{opacity:.3;cursor:default}
+.pg .pi{color:var(--tx3);font-size:.84em}
+@media(max-width:1024px){.sg{grid-template-columns:repeat(2,1fr)}.cr{grid-template-columns:1fr}}
+@media(max-width:768px){
+.sb{transform:translateX(-100%)}
+.sb.o{transform:translateX(0)}
+.sb-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
+.sb-ov.o{display:block}
+.sb-tg{display:block}
+.mc{margin-left:0;padding:16px;padding-top:56px}
+.sg{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div id=app>
+<!-- Login -->
+<div v-if="!isLoggedIn&&viewMode==='admin'" class=ls>
+<div class=lc>
+<div style=text-align:center;margin-bottom:14px><svg width=44 height=44 viewBox="0 0 48 48" fill=none><rect width=48 height=48 rx=12 fill="rgba(134,239,172,.1)"/><path d="M24 12c-4 0-7 3-7 7v4h-2v14h18V23h-2v-4c0-4-3-7-7-7zm-4 11v-4c0-2.2 1.8-4 4-4s4 1.8 4 4v4H20z" fill=#86efac/></svg></div>
+<h1>Privacy Gateway</h1>
+<p class=ls2>管理后台登录</p>
+<div v-if=loginError class=er2>{{loginError}}</div>
+<form @submit.prevent=loginAdmin>
+<div class=fg><label>服务器地址</label><input v-model=serverUrl placeholder="http://localhost:9999"></div>
+<div class=fg><label>管理密码</label><input v-model=password type=password placeholder="输入管理密码"></div>
+<button type=submit class="btn btn-p btn-b" :disabled=loginLoading><span v-if=loginLoading class=sp></span><span v-else>登 录</span></button>
+</form></div></div>
+
+<template v-if="isLoggedIn||viewMode!=='admin'">
+<button class=sb-tg @click="sidebarOpen=!sidebarOpen"><svg width=18 height=18 viewBox="0 0 20 20" fill=none><path d="M3 5h14M3 10h14M3 15h14" stroke=currentColor stroke-width=1.5 stroke-linecap=round/></svg></button>
+<div class="sb-ov" :class="{o:sidebarOpen}" @click=sidebarOpen=false></div>
+<div class=layout>
+<aside class=sb :class="{o:sidebarOpen}">
+<div class=sb-logo><svg width=24 height=24 viewBox="0 0 48 48" fill=none><rect width=48 height=48 rx=12 fill="rgba(134,239,172,.1)"/><path d="M24 12c-4 0-7 3-7 7v4h-2v14h18V23h-2v-4c0-4-3-7-7-7zm-4 11v-4c0-2.2 1.8-4 4-4s4 1.8 4 4v4H20z" fill=#86efac/></svg> Privacy Gateway</div>
+<nav class=sb-nav>
+<a v-if="viewMode==='admin'" :class="{act:activeTab==='over'}" href="#" @click.prevent="activeTab='over';sidebarOpen=0">&#9632; 总览</a>
+<a v-if="viewMode==='admin'" :class="{act:activeTab==='team'}" href="#" @click.prevent="activeTab='team';sidebarOpen=0">&#9641; 团队</a>
+<a v-if="viewMode==='admin'" :class="{act:activeTab==='audit'}" href="#" @click.prevent="activeTab='audit';sidebarOpen=0">&#9998; 审计</a>
+<a v-if="viewMode==='me'" :class="{act:activeTab==='over'}" href="#" @click.prevent="activeTab='over';sidebarOpen=0">&#9632; 概览</a>
+<a v-if="viewMode==='me'" :class="{act:activeTab==='hist'}" href="#" @click.prevent="activeTab='hist';sidebarOpen=0">&#9716; 记录</a>
+<a v-if="viewMode==='team'" :class="{act:activeTab==='over'}" href="#" @click.prevent="activeTab='over';sidebarOpen=0">&#9632; 概览</a>
+<a v-if="viewMode==='team'" :class="{act:activeTab==='sess'}" href="#" @click.prevent="activeTab='sess';sidebarOpen=0">&#9716; 会话</a>
+</nav>
+<div class=sb-ft>
+<span class=ver>v2.0</span>
+<button v-if=viewMode==='admin' class=btn-lo @click=logoutAdmin>退出登录</button>
+<a v-if=viewMode==='me' :href="'?view=me&key='+apiKey" style=font-size:.84em;color:var(--pu)>刷新数据</a>
+<a v-if=viewMode==='team' :href="'?view=team&team_id='+teamId" style=font-size:.84em;color:var(--pu)>刷新数据</a>
+</div></aside>
+
+<main class=mc>
+<!-- ADMIN -->
+<template v-if="viewMode==='admin'&&isLoggedIn">
+<div class=ph><h1>管理员总览</h1><p>AI Privacy Gateway 全局脱敏统计与监控</p></div>
+<div v-if=adminStatsLoading class=sg>
+<div v-for=n in 4 :key=n class=sc><div class=sk style=height:56px></div></div>
+</div>
+<div v-else class=sg>
+<div class=sc><div class="ic g">&#128202;</div><div class=l>今日请求脱敏</div><div class=v>{{formatNum(adminStats.total_count||0)}}</div><div class=s>总计 {{adminStats.total_count||0}} 条</div></div>
+<div class=sc><div class="ic p">&#128737;</div><div class=l>今日脱敏类型</div><div class=v style=color:var(--pu)>{{entityTypesCount}}</div><div class=s>{{lastUpdated}}</div></div>
+<div class=sc><div class="ic a">&#128101;</div><div class=l>活跃团队</div><div class=v style=color:var(--wa)>{{teamsCount}}</div><div class=s>已注册团队</div></div>
+<div class=sc><div class="ic b">&#9889;</div><div class=l>系统状态</div><div class=v style="color:var(--ac);font-size:1.3em" :class=uptimeCls>{{uptimeTxt}}</div><div class=s>{{uptimeDtl}}</div></div>
+</div>
+<div class=cr>
+<div class=cc><h3>7 日脱敏趋势</h3><div id=tc class=cv></div></div>
+<div class=cc><h3>实体类型分布</h3><div id=pc class=cv></div></div>
+</div>
+<div v-if=activeTab==='team'>
+<div class=tc><div class=th><h3>团队列表</h3><span class=bdg>{{teamsData.length}} 个团队</span></div>
+<div v-if=teamsLoading style=padding:36px;text-align:center><div class=sp></div></div>
+<div v-else-if=teamsError style=padding:18px><div class=nb>团队功能需要后端 API 支持 (GET /admin/teams)。当前后端可能未实现此端点。</div></div>
+<div v-else-if=teamsData.length===0 style=padding:36px;text-align:center;color:var(--tx3)>暂无团队数据</div>
+<table v-else><thead><tr><th>团队 ID</th><th>层级</th><th>今日脱敏</th><th>类型分布</th></tr></thead>
+<tbody><tr v-for="t in teamsData" :key=t.team_id @click=toggleTeamExpand(t.team_id)>
+<td style=font-size:.84em>{{t.team_id}}</td>
+<td><span class=eb :class="t.tier==='premium'?'bank':'email'">{{t.tier||'free'}}</span></td>
+<td>{{formatNum(t.total_masked_today||0)}}</td>
+<td><span v-for="(v,k) in(t.by_type||{})" :key=k class=eb :class=k>{{k}}:{{v}}</span><span v-if="!t.by_type||Object.keys(t.by_type).length===0" style=color:var(--tx3);font-size:.84em>无数据</span></td>
+</tr></tbody></table></div></div>
+<div v-if=activeTab==='audit'>
+<div class=cc><div class=th style=border:none;padding:0 0 10px 0><h3>实时审计事件流</h3><span class=bdg style="background:rgba(134,239,172,.12);color:var(--ac)">&#9679; 实时</span></div>
+<div class=af ref=auditFeed>
+<div v-if=auditEvents.length===0 style=text-align:center;padding:36px;color:var(--tx3)>等待审计事件...</div>
+<div v-for="ev in auditEvents" :key=ev._ts class=ai>
+<span class=at>{{formatTime(ev._ts)}}</span>
+<span class=aa>{{ev.action}}</span>
+<span class=am>{{formatAuditDetail(ev.detail_json)}}</span>
+</div></div></div></div>
+</template>
+
+<!-- USER -->
+<template v-if=viewMode==='me'>
+<div class=ph><h1>我的脱敏概览</h1><p>查看你的 API 请求脱敏记录</p></div>
+<div v-if=userStatsLoading class=sg style=grid-template-columns:repeat(3,1fr)>
+<div v-for=n in 3 :key=n class=sc><div class=sk style=height:56px></div></div>
+</div>
+<div v-else class=sg style=grid-template-columns:repeat(3,1fr)>
+<div class=sc><div class="ic g">&#128202;</div><div class=l>我的请求数</div><div class=v>{{formatNum(userStats.today?.total||0)}}</div><div class=s>今日累计</div></div>
+<div class=sc><div class="ic p">&#128737;</div><div class=l>脱敏总条数</div><div class=v style=color:var(--pu)>{{formatNum(userStats.week?.total||0)}}</div><div class=s>本周累计</div></div>
+<div class=sc><div class="ic a">&#128203;</div><div class=l>实体类型</div><div class=v style=color:var(--wa);font-size:1.3em>{{userEntityTypesCount}}</div><div class=s>检测到的 PII 类型</div></div>
+</div>
+<div v-if=userStatsError class=nb>{{userStatsError}}<span v-if=userStatsError.includes('404')> —— 用户 API (/api/me/*) 可能尚未部署。</span></div>
+<div v-if=activeTab==='hist'>
+<div v-if=userHistLoading style=padding:36px;text-align:center><div class=sp></div></div>
+<div v-else-if="userStatsError&&!userHistData.items" class=em>
+<div class=ei>&#x1F512;</div><h3>尚未检测到 API 请求</h3>
+<p>配置 SDK 并发送第一个请求后，脱敏记录将在这里显示。</p>
+<code>curl -X POST http://localhost:9999/v1/chat/completions \<br>&nbsp;&nbsp;-H "Content-Type: application/json" \<br>&nbsp;&nbsp;-H "X-API-Key: {{apiKey}}" \<br>&nbsp;&nbsp;-d '{"model":"gpt-4","messages":[{"role":"user","content":"我的手机号是 13800138000"}]}'</code>
+</div>
+<div v-else class=tc>
+<div class=th><h3>脱敏记录</h3><span class=bdg>{{userHistData.total||0}} 条记录</span></div>
+<table><thead><tr><th>时间</th><th>会话 ID</th><th>脱敏条数</th><th>实体类型</th></tr></thead>
+<tbody><template v-for="(it,idx) in userHistData.items" :key="it.session_id||idx">
+<tr @click="toggleSessionDetail(it.session_id)">
+<td>{{it.timestamp||it.created_at||'--'}}</td>
+<td style=font-size:.84em>{{it.session_id?it.session_id.substring(0,12)+'...':'--'}}</td>
+<td>{{it.masked_count||it.total_masked||0}}</td>
+<td><span v-for="t in(it.types||[])" :key=t class=eb :class=t>{{t}}</span><span v-if="!it.types||it.types.length===0" style=color:var(--tx3);font-size:.84em>--</span></td>
+</tr>
+<tr class=er :class="{o:expandedSession===it.session_id}"><td colspan=4>
+<div class=ex>
+<div v-if=sDLoading>加载中...</div>
+<div v-else-if=currentSD>
+<div v-for="(ev,ei) in(currentSD.events||[])" :key=ei class=di>
+<span class=dk>{{ev.timestamp||''}}</span>
+<span class=dv>{{ev.action}} — {{JSON.stringify(ev.detail)}}</span></div>
+<div v-if="!currentSD.events||currentSD.events.length===0" style=color:var(--tx3)>该会话暂无详细事件。</div>
+</div>
+<div v-else style=color:var(--tx3)>暂无详情数据。</div>
+</div></td></tr>
+</template></tbody></table>
+<div v-if="userHistData.total>userHistLimit" class=pg>
+<button :disabled=userHistPage<=1 @click="userHistPage--;loadUserHist()">上一页</button>
+<span class=pi>{{userHistPage}} / {{Math.ceil((userHistData.total||1)/userHistLimit)}}</span>
+<button :disabled="(userHistPage*userHistLimit)>=(userHistData.total||0)" @click="userHistPage++;loadUserHist()">下一页</button>
+</div></div></div>
+</template>
+
+<!-- TEAM -->
+<template v-if=viewMode==='team'>
+<div class=ph><h1>团队概览</h1><p>团队 ID: <code style=color:var(--ac);font-family:'JetBrains Mono',monospace>{{teamId}}</code></p></div>
+<div v-if=teamError class=nb>{{teamError}}<span v-if=teamError.includes('404')> —— 团队 API (/admin/teams/*) 可能尚未部署。</span></div>
+<div v-if=teamStatsLoading class=sg style=grid-template-columns:repeat(3,1fr)>
+<div v-for=n in 3 :key=n class=sc><div class=sk style=height:56px></div></div>
+</div>
+<div v-else-if=teamStats class=sg style=grid-template-columns:repeat(3,1fr)>
+<div class=sc><div class="ic g">&#128737;</div><div class=l>团队脱敏</div><div class=v>{{formatNum(teamStats.today?.total||0)}}</div><div class=s>今日累计</div></div>
+<div class=sc><div class="ic p">&#128202;</div><div class=l>活跃会话</div><div class=v style=color:var(--pu)>{{teamStats.active_sessions||0}}</div><div class=s>当前进行中</div></div>
+<div class=sc><div class="ic a">&#128273;</div><div class=l>API 密钥</div><div class=v style=color:var(--wa)>{{teamStats.api_keys_count||0}}</div><div class=s>已注册密钥</div></div>
+</div>
+<div v-if="teamStats&&teamStats.history&&teamStats.history.length" class=cr style=grid-template-columns:1fr>
+<div class=cc><h3>团队 7 日脱敏趋势</h3><div id=ttc class=cv></div></div>
+</div>
+<div v-if=activeTab==='sess'>
+<div v-if=teamSessLoading style=padding:36px;text-align:center><div class=sp></div></div>
+<div v-else-if="teamSess.length===0&&!teamSessError" class=em><div class=ei>&#x1F512;</div><h3>暂无会话记录</h3><p>该团队尚未产生任何脱敏会话。</p></div>
+<div v-else-if=teamSessError class=nb>{{teamSessError}}</div>
+<div v-else class=tc>
+<div class=th><h3>会话列表</h3><span class=bdg>{{teamSess.length}} 个会话</span></div>
+<table><thead><tr><th>会话 ID</th><th>创建时间</th><th>脱敏总数</th></tr></thead>
+<tbody><tr v-for="s in teamSess" :key=s.session_id>
+<td style=font-size:.84em>{{s.session_id?s.session_id.substring(0,12)+'...':'--'}}</td>
+<td>{{s.created_at||'--'}}</td>
+<td>{{s.total_masked||0}}</td>
+</tr></tbody></table></div></div>
+</template>
+
+<div v-if=initLoading style=display:flex;align-items:center;justify-content:center;min-height:60vh>
+<div style=text-align:center><div class=sp style=width:28px;height:28px;border-width:3px;margin:0 auto 12px></div><div style=color:var(--tx3);font-size:.88em>正在连接服务器...</div></div>
+</div>
+</main></div></template>
+
+<div class=tc2><div v-for="(t,i) in toasts" :key=t.id class=ti :class=t.type>{{t.msg}}</div></div>
+</div>
+
+<script>
+const{createApp,ref,computed,onMounted,onUnmounted,nextTick}=Vue;
+const EL={phone:'手机号',email:'邮箱',idcard:'身份证',bankcard:'银行卡',custom:'自定义',person:'人名',location:'地名',org:'机构名',plate:'车牌号',ip:'IP地址',url:'URL',date:'日期',amount:'金额',postcode:'邮编'};
+createApp({setup(){
+const vm=ref('admin'),tid=ref(''),ak=ref(''),li=ref(false),au=ref(''),il=ref(true),so=ref(false),at=ref('over');
+const su=ref(window.location.origin),pw=ref(''),ll=ref(false),le=ref('');
+const asl=ref(true),as=ref({}),hd=ref({records:[],summary:{}}),us=ref({text:'检查中...',cls:'',detail:''});
+const td=ref([]),tl=ref(false),te=ref(''),aes=ref([]);
+const usl=ref(true),us2=ref({}),use=ref(''),uhl=ref(false),uhd=ref({items:[],total:0}),uhp=ref(1),uhl2=ref(20),es=ref(null),sdl=ref(false),csd=ref(null),lu=ref('--');
+const tsl=ref(true),ts2=ref(null),tse=ref(''),tsl2=ref(false),ts3=ref([]),tse2=ref('');
+const ts=ref([]);
+let rt=null,ss=null,sst=null,crh=[];
+function fn(n){return n==null?'0':Number(n).toLocaleString('zh-CN')}
+function ft(ts){if(!ts)return'--';const d=typeof ts==='number'?new Date(ts*1e3):new Date(ts);return d.toLocaleTimeString('zh-CN',{hour12:0,hour:'2-digit',minute:'2-digit',second:'2-digit'})}
+function fa(dj){if(!dj)return'';try{const d=typeof dj==='string'?JSON.parse(dj):dj;return d.message||d.ip||JSON.stringify(d).substring(0,70)}catch{return String(dj).substring(0,70)}}
+let _tid=0;function st(msg,type='i'){const id=++_tid;ts.value.push({id,msg,type});setTimeout(()=>{ts.value=ts.value.filter(t=>t.id!==id)},4000)}
+async function logAd(){ll.value=1;le.value='';try{
+const b=su.value.replace(/\/+$/,'');const r=await fetch(b+'/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw.value}),credentials:'include'});
+if(!r.ok){const e=await r.json().catch(()=>({}));le.value=e.detail||'登录失败';return}
+li.value=1;au.value='admin';at.value='over';loadAdDash()
+}catch(e){le.value='无法连接到服务器: '+e.message}finally{ll.value=0}}
+async function logOut(){try{await fetch(su.value.replace(/\/+$/,'')+'/admin/logout',{method:'POST',credentials:'include'})}catch{}li.value=0;au.value='';pw.value='';if(ss){ss.close();ss=null}if(sst){clearTimeout(sst);sst=null}if(rt){clearInterval(rt);rt=null}}
+async function fAd(url){const b=su.value.replace(/\/+$/,'');const r=await fetch(b+url,{credentials:'include'});if(r.status===401){li.value=0;throw Error('ua')}if(!r.ok){const e=await r.json().catch(()=>({detail:r.statusText}));throw Error(e.detail||`http ${r.status}`)}return r.json()}
+async function fUs(url){const b=su.value.replace(/\/+$/,'');const h={'Content-Type':'application/json'};if(ak.value)h['X-API-Key']=ak.value;const r=await fetch(b+url,{headers:h});if(r.status===404)return null;if(!r.ok){const e=await r.json().catch(()=>({detail:r.statusText}));throw Error(e.detail||`http ${r.status}`)}return r.json()}
+async function loadAdDash(){await loadAdStats();await Promise.all([loadHist(),checkHl(),loadTeams()]);startSSE();startAR()}
+async function loadAdStats(){asl.value=1;try{as.value=await fAd('/admin/stats');lu.value=new Date().toLocaleTimeString('zh-CN',{hour12:0})+' 更新'}catch(e){if(e.message==='ua')return;st('加载统计失败: '+e.message,'e')}finally{asl.value=0}}
+async function loadHist(){crh.length=0;try{hd.value=await fAd('/admin/stats/history');await nextTick();rTC();rPC()}catch(e){if(e.message==='ua')return;console.warn('hist',e)}}
+async function checkHl(){try{const b=su.value.replace(/\/+$/,'');const r=await fetch(b+'/health');if(r.ok){us.value={text:'运行正常',cls:'',detail:'所有服务在线'}}else{us.value={text:'异常',cls:'',detail:'HTTP '+r.status}}}catch{us.value={text:'离线',cls:'',detail:'无法连接'}}}
+async function loadTeams(){tl.value=1;te.value='';try{const d=await fAd('/admin/teams');td.value=d.teams||[]}catch(e){if(e.message==='ua')return;te.value=e.message;td.value=[]}finally{tl.value=0}}
+function togTeamEx(id){window.location.href='?view=team&team_id='+encodeURIComponent(id)}
+function rTC(){const el=document.getElementById('tc');if(!el)return;const c=echarts.init(el);const rec=hd.value.records||[],dt=rec.map(r=>r.date||'');const ss2=[
+{name:'手机号',k:'phone_count',c:'#60a5fa'},{name:'邮箱',k:'email_count',c:'#fbbf24'},{name:'身份证',k:'idcard_count',c:'#a78bfa'},{name:'银行卡',k:'bankcard_count',c:'#f87171'},{name:'人名',k:'person_count',c:'#34d399'},{name:'地名',k:'location_count',c:'#fb923c'},{name:'机构',k:'org_count',c:'#818cf8'},{name:'IP',k:'ip_count',c:'#2dd4bf'},{name:'URL',k:'url_count',c:'#94a3b8'},{name:'金额',k:'amount_count',c:'#a7f3d0'},{name:'车牌',k:'plate_count',c:'#f472b6'},{name:'日期',k:'date_count',c:'#fdba74'},{name:'邮编',k:'postcode_count',c:'#c4b5fd'},{name:'自定义',k:'custom_count',c:'#fca5a5'}
+].filter(s=>rec.some(r=>(r[s.k]||0)>0));
+c.setOption({tooltip:{trigger:'axis',backgroundColor:'#0c0c1d',borderColor:'#1e1e3f',textStyle:{color:'#e2e8f0',fontSize:11}},legend:{data:ss2.map(s=>s.name),textStyle:{color:'#94a3b8',fontSize:10},type:'scroll',bottom:0},grid:{left:36,right:12,top:12,bottom:44},xAxis:{type:'category',data:dt,axisLine:{lineStyle:{color:'#1e1e3f'}},axisLabel:{color:'#64748b',fontSize:10}},yAxis:{type:'value',splitLine:{lineStyle:{color:'#1e1e3f',type:'dashed'}},axisLabel:{color:'#64748b',fontSize:10}},series:ss2.map(s=>({name:s.name,type:'line',smooth:1,data:rec.map(r=>r[s.k]||0),itemStyle:{color:s.c},lineStyle:{width:2},symbol:'circle',symbolSize:4,emphasis:{focus:'series'}}))});crh.push(()=>c.resize())}
+function rPC(){const el=document.getElementById('pc');if(!el)return;const c=echarts.init(el);const s=as.value||{};const cm={phone_count:'#60a5fa',email_count:'#fbbf24',idcard_count:'#a78bfa',bankcard_count:'#f87171',custom_count:'#fca5a5',person_count:'#34d399',location_count:'#fb923c',org_count:'#818cf8',plate_count:'#f472b6',ip_count:'#2dd4bf',url_count:'#94a3b8',date_count:'#fdba74',amount_count:'#a7f3d0',postcode_count:'#c4b5fd'};const data=Object.entries(EL).map(([k,n])=>({name:n,value:s[k+'_count']||0})).filter(d=>d.value>0);if(!data.length){c.setOption({title:{text:'暂无数据',textStyle:{color:'#64748b',fontSize:13},left:'center',top:'center'}});crh.push(()=>c.resize());return}
+c.setOption({tooltip:{trigger:'item',backgroundColor:'#0c0c1d',borderColor:'#1e1e3f',textStyle:{color:'#e2e8f0',fontSize:11},formatter:'{b}: {c} ({d}%)'},series:[{type:'pie',radius:['38%','68%'],center:['50%','50%'],avoidLabelOverlap:1,padAngle:2,itemStyle:{borderRadius:5},label:{show:1,formatter:'{b}\n{d}%',color:'#94a3b8',fontSize:9},labelLine:{lineStyle:{color:'#1e1e3f'}},data:data.map(d=>({...d,itemStyle:{color:cm[Object.keys(cm).find(k=>EL[k.replace('_count','')]===d.name)]||'#a78bfa'}}))}]});crh.push(()=>c.resize())}
+function rTTC(){const el=document.getElementById('ttc');if(!el||!ts2.value?.history)return;const c=echarts.init(el);const rec=ts2.value.history;c.setOption({tooltip:{trigger:'axis',backgroundColor:'#0c0c1d',borderColor:'#1e1e3f',textStyle:{color:'#e2e8f0',fontSize:11}},grid:{left:36,right:12,top:12,bottom:20},xAxis:{type:'category',data:rec.map(r=>r.date||''),axisLine:{lineStyle:{color:'#1e1e3f'}},axisLabel:{color:'#64748b',fontSize:10}},yAxis:{type:'value',splitLine:{lineStyle:{color:'#1e1e3f',type:'dashed'}},axisLabel:{color:'#64748b',fontSize:10}},series:[{type:'line',smooth:1,data:rec.map(r=>r.total||r.total_count||0),itemStyle:{color:'#a78bfa'},areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(167,139,250,.3)'},{offset:1,color:'rgba(167,139,250,0)'}])},lineStyle:{width:2},symbol:'circle',symbolSize:4}]});crh.push(()=>c.resize())}
+function hr(){crh.forEach(f=>f())}
+function startSSE(){if(ss)ss.close();try{const b=su.value.replace(/\/+$/,'');ss=new EventSource(b+'/admin/audit/stream',{withCredentials:1});ss.onmessage=ev=>{try{const d=JSON.parse(ev.data);aes.value.unshift(d);if(aes.value.length>100)aes.value.length=100}catch{}};ss.onerror=()=>{sst=setTimeout(startSSE,3000)}}catch{}}
+function startAR(){if(rt)clearInterval(rt);rt=setInterval(()=>{loadAdStats();loadHist();checkHl();loadTeams()},30000)}
+async function loadUsStats(){usl.value=1;use.value='';try{const d=await fUs('/api/me/stats');us2.value=d||{};lu.value=new Date().toLocaleTimeString('zh-CN',{hour12:0})+' 更新'}catch(e){use.value=e.message;us2.value={}}finally{usl.value=0}}
+async function loadUserHist(){uhl.value=1;try{const d=await fUs(`/api/me/history?page=${uhp.value}&limit=${uhl2.value}`);uhd.value=d||{items:[],total:0}}catch(e){uhd.value={items:[],total:0};if(!use.value)st('加载历史失败: '+e.message,'e')}finally{uhl.value=0}}
+async function toggleSD(sid){if(es.value===sid){es.value=null;csd.value=null;return}es.value=sid;sdl.value=1;csd.value=null;try{csd.value=await fUs(`/api/me/session/${sid}`)}catch{csd.value=null;st('加载会话详情失败','e')}finally{sdl.value=0}}
+async function loadTeamStats(){tsl.value=1;tse.value='';try{const d=await fAd(`/admin/teams/${tid.value}/stats`);ts2.value=d;lu.value=new Date().toLocaleTimeString('zh-CN',{hour12:0})+' 更新';await nextTick();rTTC()}catch(e){if(e.message==='ua')return;tse.value=e.message;ts2.value=null}finally{tsl.value=0}}
+async function loadTeamSess(){tsl2.value=1;tse2.value='';try{const d=await fAd(`/admin/teams/${tid.value}/sessions`);ts3.value=d?.sessions||[]}catch(e){if(e.message==='ua')return;tse2.value=e.message;ts3.value=[]}finally{tsl2.value=0}}
+onMounted(async()=>{
+const p=new URLSearchParams(window.location.search),v=p.get('view'),k=p.get('key'),t=p.get('team_id');
+if(k){ak.value=k;try{sessionStorage.setItem('pg_key',k)}catch{}}else{try{ak.value=sessionStorage.getItem('pg_key')||''}catch{}}
+if(v==='me'){vm.value='me';il.value=0;at.value='hist';await Promise.all([loadUsStats(),loadUserHist()])}
+else if(v==='team'&&t){vm.value='team';tid.value=t;il.value=0;await Promise.all([loadTeamStats(),loadTeamSess()])}
+else{vm.value='admin';try{const b=su.value.replace(/\/+$/,'');const r=await fetch(b+'/admin/stats',{credentials:'include'});if(r.ok){li.value=1;au.value='admin';il.value=0;await loadAdDash()}else{il.value=0}}catch{il.value=0}}
+});
+onUnmounted(()=>{if(rt)clearInterval(rt);if(sst)clearTimeout(sst);if(ss)ss.close()});
+window.addEventListener('resize',hr);
+return{
+viewMode:vm,teamId:tid,apiKey:ak,isLoggedIn:li,adminUser:au,initLoading:il,sidebarOpen:so,activeTab:at,
+serverUrl:su,password:pw,loginLoading:ll,loginError:le,
+adminStatsLoading:asl,adminStats:as,historyData:hd,uptimeStatus:us,
+teamsData:td,teamsLoading:tl,teamsError:te,
+auditEvents:aes,
+userStatsLoading:usl,userStats:us2,userStatsError:use,
+userHistLoading:uhl,userHistData:uhd,userHistPage:uhp,userHistLimit:uhl2,
+expandedSession:es,sDLoading:sdl,currentSD:csd,
+teamStatsLoading:tsl,teamStats:ts2,teamError:tse,
+teamSessLoading:tsl2,teamSess:ts3,teamSessError:tse2,
+toasts:ts,
+entityTypesCount:computed(()=>{if(!as.value)return 0;const t=['phone_count','email_count','idcard_count','bankcard_count','custom_count','person_count','location_count','org_count','plate_count','ip_count','url_count','date_count','amount_count','postcode_count'];return t.filter(k=>(as.value[k]||0)>0).length}),
+teamsCount:computed(()=>td.value.length),
+lastUpdated:lu,
+uptimeTxt:computed(()=>us.value.text),uptimeCls:computed(()=>us.value.cls),uptimeDtl:computed(()=>us.value.detail),
+userEntityTypesCount:computed(()=>{const t=us2.value.today?.types||{};return Object.keys(t).filter(k=>t[k]>0).length||0}),
+formatNum:fn,formatTime:ft,formatAuditDetail:fa,
+loginAdmin:logAd,logoutAdmin:logOut,loadTeams,loadHist,toggleTeamExpand:togTeamEx,
+loadUserHist,loadUserStats:loadUsStats,toggleSessionDetail:toggleSD,
+loadTeamStats,loadTeamSess,
+refreshUserHist:loadUserHist
+}}).mount('#app');
+</script>
+</body>
+</html>

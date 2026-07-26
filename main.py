@@ -74,6 +74,17 @@ async def lifespan(app: FastAPI):
             except Exception:
                 pass
 
+    # --- 后台数据保留清理任务：每天凌晨清理过期审计记录 ---
+    async def data_retention_loop():
+        while True:
+            await asyncio.sleep(86400)
+            try:
+                result = db.cleanup_expired_data()
+                logger.info("数据保留清理: 删除了 %d 条过期审计记录",
+                            result.get("deleted_audit_count", 0))
+            except Exception:
+                logger.exception("数据保留清理失败")
+
     # --- 启动时数据库完整性检查 ---
     try:
         if db.check_integrity():
@@ -85,8 +96,10 @@ async def lifespan(app: FastAPI):
 
     cleanup_task = asyncio.create_task(cleanup_loop())
     metrics_task = asyncio.create_task(metrics_loop())
+    retention_task = asyncio.create_task(data_retention_loop())
     logger.info("已启动 vault_mappings 定时清理任务 (间隔 24h)")
     logger.info("已启动上游健康指标更新任务 (间隔 15s)")
+    logger.info("已启动数据保留清理任务 (间隔 24h)")
     yield
     # --- 优雅关闭 ---
     logger.info("正在优雅关闭...")
@@ -95,9 +108,11 @@ async def lifespan(app: FastAPI):
 
     cleanup_task.cancel()
     metrics_task.cancel()
+    retention_task.cancel()
     try:
         await cleanup_task
         await metrics_task
+        await retention_task
     except asyncio.CancelledError:
         pass
 
@@ -317,6 +332,22 @@ async def admin_panel_slash():
     if _env_exists():
         return RedirectResponse(url="/admin/static/index.html")
     return RedirectResponse(url="/admin/static/setup.html")
+
+
+# ==================== 可见性仪表盘 ====================
+
+@app.get("/dashboard")
+async def dashboard():
+    """可见性仪表盘 — 管理后台 + 用户自查看 + 团队视图。"""
+    from fastapi.responses import FileResponse
+    static_dir = os.path.join(_app_dir, "static")
+    return FileResponse(os.path.join(static_dir, "dashboard.html"))
+
+
+@app.get("/dashboard/")
+async def dashboard_slash():
+    """重定向 /dashboard/ 到 /dashboard。"""
+    return RedirectResponse(url="/dashboard")
 
 
 # 注册所有路由模块（必须在 /admin 之后，否则 /admin/* API 路由优先）

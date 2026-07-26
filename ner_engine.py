@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 from typing import List, Dict, Tuple, Optional
 from enum import Enum
 
@@ -128,13 +129,9 @@ class NEREngine:
         return entities
     
     def _detect_chinese_names(self, text: str) -> List[NEREntity]:
-        """检测中文人名（基于规则）"""
+        """检测中文人名（基于规则 + jieba）"""
         entities: list[NEREntity] = []
-        if not HAS_JIEBA:
-            return entities
-        
-        tokens, positions = self._tokenize(text)
-        
+
         surname_list = set([
             '赵', '钱', '孙', '李', '周', '吴', '郑', '王', '冯', '陈',
             '褚', '卫', '蒋', '沈', '韩', '杨', '朱', '秦', '尤', '许',
@@ -147,6 +144,30 @@ class NEREngine:
             '乐', '于', '时', '傅', '皮', '卞', '齐', '康', '伍', '余',
             '元', '卜', '顾', '孟', '平', '黄', '和', '穆', '萧', '尹'
         ])
+
+        # Fallback: regex-based detection for Chinese names (surname + 1-2 given name chars).
+        # Uses non-greedy matching to prefer 2-char names (surname + 1 given) first.
+        # CJK range uses \\u escapes to avoid Windows GBK encoding issues.
+        surname_pattern = '[' + ''.join(surname_list) + ']'
+        pattern = re.compile(surname_pattern + r'[\u4e00-\u9fff]{1,2}?')
+        for match in pattern.finditer(text):
+            token = match.group()
+            start = match.start()
+            end = match.end()
+            # Exclude matches that are part of longer location-like compounds.
+            if any(loc in token for loc in ['北京', '上海', '天津', '重庆', '省', '市', '区', '县', '路', '街']):
+                continue
+            entities.append(NEREntity(
+                entity_type=NEREntityType.PERSON,
+                value=token,
+                start=start,
+                end=end
+            ))
+
+        if not HAS_JIEBA:
+            return self._dedup_entities(entities)
+
+        tokens, positions = self._tokenize(text)
         
         for i, (token, pos) in enumerate(zip(tokens, positions)):
             if len(token) == 1 and token in surname_list:
@@ -227,6 +248,17 @@ class NEREngine:
         entities = self._remove_overlaps(entities)
         return entities
     
+    def _dedup_entities(self, entities: List[NEREntity]) -> List[NEREntity]:
+        """Remove duplicate entities (same value and position)."""
+        seen: set[tuple[int, int, str]] = set()
+        result: list[NEREntity] = []
+        for e in entities:
+            key = (e.start, e.end, e.value)
+            if key not in seen:
+                seen.add(key)
+                result.append(e)
+        return result
+
     def _remove_overlaps(self, entities: List[NEREntity]) -> List[NEREntity]:
         """移除重叠的实体（保留较长的）"""
         if not entities:
