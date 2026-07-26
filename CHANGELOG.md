@@ -7,18 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased]
+## [2.0.1] - 2026-07-27
 
 ### Added
 
-- Multi-language translations for the website (i18n support)
-- Japanese and Korean entity detection patterns
+- **Website: /contact, /compare, /changelog pages** — bilingual zh/en, full content
+- **Website: DifyChat AI assistant widget** — floating chat bubble on all pages
+- **SEO infrastructure** — sitemap.xml, robots.txt, _headers, OG tags, JSON-LD, llms.txt
+- **GitHub community files** — SECURITY.md, CODE_OF_CONDUCT.md, dependabot.yml
+- **Knowledge base seed document** — structured for Dify RAG upload
+- **Marketing materials** — Product Hunt launch kit, Reddit/HN posts, Chinese community posts, video scripts, blog distribution plan, investor one-pager
 
 ### Fixed
 
-- CI branch trigger alignment (main -> master)
-- Node.js CI version bump to 22 for Astro v6 compatibility
-- Test timeout configuration and JS SDK jest module compatibility
+- **Blog page** — 24 articles now rendering correctly (content collection schema fix)
+- **7 missing VS/integrations pages** — Presidio, Kiji, AI Firewall, LLM-Sentinel, Cursor, VS Code, ChatGPT
+- **NER engine** — Chinese person name detection on Windows GBK environments (CJK range + regex fallback)
+- **Docs canonical URL** — /docs page pointing to site root
+- **Homepage title punctuation** — removed awkward period
+- **For/role page titles** — keyword-stuffed titles replaced with natural language
+- **English pages og:locale** — VS/for/integrations pages now set en_US
+- **License consistency** — all 30+ files synced from MIT to PolyForm Shield
+- **English docs parity** — config.md, api.md, keywords.md aligned with Chinese versions
+
+### Changed
+
+- License: PolyForm Shield 1.0.0 (noncommercial free, commercial requires permission)
 
 ---
 
