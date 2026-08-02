@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.2] - 2026-08-02
+
+### Fixed
+
+- **Windows startup crash** — `slowapi` `.env` encoding error on Chinese Windows (GBK vs UTF-8)
+- **Windows console garbled text** — `stdout.reconfigure(encoding="utf-8")` + `PYTHONUTF8=1` in all start scripts
+- **`start.bat` Virtualenv hard requirement** — now auto-detects system Python when `.venv` is absent
+- **Python 3.14 compatibility** — `datetime.utcnow()` → `datetime.now(UTC)` throughout
+- **Upstream health check** — accepts 403 as a valid response (Anthropic API)
+
 ## [2.0.1] - 2026-07-27
 
 ### Added
