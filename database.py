@@ -288,7 +288,7 @@ class Database:
             if session_id not in self._memory_mappings:
                 self._memory_mappings[session_id] = {}
             self._memory_mappings[session_id].update(encrypted)
-            self._memory_mapping_times[session_id] = datetime.utcnow()
+            self._memory_mapping_times[session_id] = datetime.now(UTC)
             logger.info(f"[无状态] 保存 {len(encrypted)} 条映射记录到内存")
             return
 
@@ -305,11 +305,11 @@ class Database:
         """清理超过保留时长的映射记录（使用 self.mapping_ttl 秒数）"""
         # 使用 self.mapping_ttl（秒）换算为小时作为默认值
         hours = retention_hours if retention_hours is not None else max(1, self.mapping_ttl // 3600)
-        cutoff = (datetime.utcnow() - timedelta(hours=hours)).strftime("%Y-%m-%d %H:%M:%S")
+        cutoff = (datetime.now(UTC) - timedelta(hours=hours)).strftime("%Y-%m-%d %H:%M:%S")
 
         # 清理过期内存映射
         if self._memory_mappings and self.mapping_ttl > 0:
-            mem_cutoff = datetime.utcnow() - timedelta(seconds=self.mapping_ttl)
+            mem_cutoff = datetime.now(UTC) - timedelta(seconds=self.mapping_ttl)
             expired_sessions = [
                 sid for sid in self._memory_mappings
                 if self._memory_mapping_times.get(sid, datetime.min) < mem_cutoff

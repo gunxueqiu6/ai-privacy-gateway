@@ -29,12 +29,37 @@ slowapi 默认使用内存存储，每个 uvicorn worker 拥有独立的计数�
 
 配置变量: RATE_LIMIT_STORAGE（见 config.py）
 """
+import os as _os
 from datetime import UTC, datetime, timedelta
 from typing import Any, Dict, Optional, Set
 
 from fastapi import Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 from jose import JWTError, jwt
+
+# ── Fix: slowapi.Limiter internally uses starlette.config.Config which reads
+# .env files with the system default encoding (GBK on Chinese Windows),
+# crashing on UTF-8 content. Monkey-patch _read_file to always use UTF-8. ──
+import starlette.config as _starlette_config
+
+_read_file_original = _starlette_config.Config._read_file
+
+
+def _read_file_utf8(self, file_name: str | _os.PathLike) -> dict[str, str]:
+    file_values: dict[str, str] = {}
+    with open(file_name, encoding="utf-8") as input_file:
+        for line in input_file.readlines():
+            line = line.strip()
+            if "=" in line and not line.startswith("#"):
+                key, value = line.split("=", 1)
+                key = key.strip()
+                value = value.strip().strip("\"'")
+                file_values[key] = value
+    return file_values
+
+
+_starlette_config.Config._read_file = _read_file_utf8
+
 from slowapi import Limiter
 
 from config import config

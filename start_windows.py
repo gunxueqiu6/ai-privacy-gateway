@@ -43,6 +43,7 @@ def open_admin_page():
 def start_server():
     """启动服务器"""
     os.environ['LISTEN_PORT'] = '9999'
+    os.environ['PYTHONUTF8'] = '1'
 
     # 启动 main.py
     proc = subprocess.Popen([sys.executable, 'main.py'])

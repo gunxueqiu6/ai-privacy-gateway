@@ -128,6 +128,7 @@ echo ""
 # shellcheck disable=SC1091
 source .venv/bin/activate
 export PYTHONIOENCODING=utf-8
+export PYTHONUTF8=1
 
 # If arguments were passed, forward to start.py
 if [ $# -gt 0 ]; then

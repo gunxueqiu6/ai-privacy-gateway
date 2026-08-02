@@ -33,7 +33,7 @@ def setup_logging() -> None:
         LOG_FORMAT: 日志格式，json 或 text（默认: json）
         LOG_LEVEL:  日志级别（默认: INFO）
     """
-    log_format = os.environ.get("LOG_FORMAT", "json").lower()
+    log_format = os.environ.get("LOG_FORMAT", "text").lower()
     log_level = os.environ.get("LOG_LEVEL", "INFO").upper()
 
     root = logging.getLogger()

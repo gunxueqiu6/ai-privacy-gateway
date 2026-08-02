@@ -140,4 +140,4 @@ class TestGatewayCoreProxyGeneric:
 
         result = asyncio.run(run())
         # No healthy upstream or real API responds with auth error
-        assert result[0] in [502, 200, 401]
+        assert result[0] in [502, 200, 401, 403]

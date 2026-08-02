@@ -1,128 +1,83 @@
 @echo off
-chcp 65001 >nul
+chcp 65001 >nul 2>&1
 title AI Privacy Gateway
-
-:: Switch to script directory
 cd /d "%~dp0"
-
-:: ── Colors ──────────────────────────────────────────────────
-set "GREEN=[92m"
-set "CYAN=[96m"
-set "YELLOW=[93m"
-set "RED=[91m"
-set "BOLD=[1m"
-set "RESET=[0m"
 
 :: ── Banner ──────────────────────────────────────────────────
 echo ============================================================
-echo   AI Privacy Gateway
+echo   AI Privacy Gateway v2.0.0
 echo ============================================================
 echo.
 
-:: ── Step 1: Check if venv exists ────────────────────────────
-if not exist ".venv\Scripts\activate.bat" (
-    echo   [%YELLOW%WARN%RESET%] 未检测到虚拟环境 (.venv)
-    echo.
-    echo   请先运行 install.bat 完成安装:
-    echo    双击 install.bat
-    echo.
-    echo   或手动创建:
-    echo     python -m venv .venv
-    echo     .venv\Scripts\pip install -r requirements.txt
-    echo.
-    pause
-    exit /b 1
+:: ── Find Python ─────────────────────────────────────────────
+set "PYTHON_CMD="
+
+:: 1) Try venv first
+if exist ".venv\Scripts\python.exe" (
+    set "PYTHON_CMD=.venv\Scripts\python.exe"
+    echo [OK] Using virtual environment
+    goto :check_deps
 )
 
-:: ── Step 2: Check Python ────────────────────────────────────
-set "PYTHON_CMD="
-where python >nul 2>nul && set "PYTHON_CMD=python" && goto :found
-where python3 >nul 2>nul && set "PYTHON_CMD=python3" && goto :found
-where py >nul 2>nul && set "PYTHON_CMD=py" && goto :found
+:: 2) Try system python
+where python >nul 2>&1 && set "PYTHON_CMD=python" && goto :check_deps
+where python3 >nul 2>&1 && set "PYTHON_CMD=python3" && goto :check_deps
+where py >nul 2>&1 && set "PYTHON_CMD=py" && goto :check_deps
 
-echo   [%RED%ERROR%RESET%] 未检测到 Python，请先安装:
+echo [ERROR] Python not found. Install Python 3.8+ first:
 echo   https://www.python.org/downloads/
-echo.
-echo   安装时务必勾选 "Add Python to PATH"
 pause
 exit /b 1
 
-:found
-
-:: ── Step 3: Check if port 9999 is in use ──────────────────
-echo   [1/3] 检查端口 9999...
-
-netstat -ano | findstr ":9999 " >nul 2>nul
+:check_deps
+:: ── Check dependencies ──────────────────────────────────────
+echo [1/3] Checking dependencies...
+%PYTHON_CMD% -c "import fastapi, uvicorn, httpx" 2>nul
 if errorlevel 1 (
-    echo   [%GREEN%OK%RESET%] 端口 9999 可用
-) else (
-    echo   [%YELLOW%WARN%RESET%] 端口 9999 已被占用
-    echo.
-    echo   可能已经有 Privacy Gateway 在运行，或其它程序占用了端口。
-    echo.
-    echo   如需更换端口，编辑 .env 文件中的 LISTEN_PORT。
-    echo.
-    choice /c YN /m "是否继续尝试启动 "
-    if errorlevel 2 exit /b 1
-)
-echo.
-
-:: ── Step 4: Check .env exists ──────────────────────────────
-echo   [2/3] 检查配置文件...
-if exist ".env" (
-    echo   [%GREEN%OK%RESET%] .env 配置文件已找到
-) else (
-    echo   [%YELLOW%WARN%RESET%] .env 文件不存在
-    echo.
-    echo   正在从 .env.example 生成最小配置...
-    if exist ".env.example" (
-        copy .env.example .env >nul
-        python -c "import secrets; pw=secrets.token_urlsafe(12); f=open('.env','a'); f.write(f'ADMIN_PASSWORD={pw}\nJWT_SECRET={secrets.token_hex(32)}\n'); print(f'  生成的管理员密码: {pw}')"
-        echo.
-        echo   配置已生成，可以继续启动。
-    ) else (
-        echo.
-        echo   请先运行 install.bat 完成配置。
+    echo [WARN] Dependencies missing, installing...
+    %PYTHON_CMD% -m pip install -r requirements.txt -q
+    if errorlevel 1 (
+        echo [ERROR] Failed to install dependencies
         pause
         exit /b 1
     )
 )
+echo [OK] Dependencies ready
 echo.
 
-:: ── Step 5: Start Gateway ───────────────────────────────────
-echo   [3/3] 启动网关...
+:: ── Check .env ──────────────────────────────────────────────
+echo [2/3] Checking configuration...
+if not exist ".env" (
+    echo [WARN] .env not found, generating from .env.example...
+    if exist ".env.example" (
+        copy /y .env.example .env >nul
+        %PYTHON_CMD% -c "import secrets; f=open('.env','a',encoding='utf-8'); f.write(f'ADMIN_PASSWORD={secrets.token_urlsafe(12)}\nJWT_SECRET={secrets.token_hex(32)}\n'); f.close()"
+    ) else (
+        %PYTHON_CMD% -c "import secrets; f=open('.env','w',encoding='utf-8'); f.write(f'TARGET_LLM=https://api.openai.com\nLISTEN_PORT=9999\nADMIN_PASSWORD={secrets.token_urlsafe(12)}\nJWT_SECRET={secrets.token_hex(32)}\nDB_TYPE=sqlite\nDB_PATH=./vault_data/privacy_vault.db\nMASK_ENGINE_TYPE=regex\n'); f.close()"
+    )
+    echo [OK] Configuration generated
+) else (
+    echo [OK] Configuration found
+)
+echo.
+
+:: ── Start ───────────────────────────────────────────────────
+echo [3/3] Starting gateway...
 echo.
 echo ============================================================
-echo   %GREEN%正在启动...%RESET%
+echo   Starting...
 echo ============================================================
-echo.
-echo   管理后台: http://localhost:9999
-echo   健康检查: http://localhost:9999/health
-echo.
-echo   按 Ctrl+C 停止服务
-echo.
+echo   Admin panel:  http://localhost:9999/admin
+echo   API endpoint: http://localhost:9999/v1
+echo   Press Ctrl+C to stop
 echo ============================================================
 echo.
 
 set PYTHONIOENCODING=utf-8
+set PYTHONUTF8=1
+set LOG_FORMAT=text
+set LOG_LEVEL=INFO
 
-:: Activate venv and start
-call .venv\Scripts\activate.bat
-python main.py
-
-:: If start.py wrapper is preferred, uncomment the line below and comment the one above:
-:: python start.py
-
-if %ERRORLEVEL% NEQ 0 (
-    echo.
-    echo   [%RED%ERROR%RESET%] 网关已停止
-    echo.
-    echo   可能的原因：
-    echo     1. 端口 9999 已被占用 — 修改 .env 中的 LISTEN_PORT
-    echo     2. Python 依赖未安装 — 运行 install.bat
-    echo     3. .env 配置有误 — 检查 .env 文件
-    echo.
-    echo   如需帮助，请查看: https://github.com/gunxueqiu6/ai-privacy-gateway
-)
+%PYTHON_CMD% main.py
 
 pause
