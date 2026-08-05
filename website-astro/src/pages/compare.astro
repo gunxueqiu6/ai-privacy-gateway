@@ -177,10 +177,65 @@ const ctaLink = '/download';
 
 const highlightNote = lang === 'zh' ? '✓ = 支持 / ⚠️ = 部分支持 / ✗ = 不支持' : '✓ = Supported / ⚠️ = Partial / ✗ = Not Supported';
 const legendSelf = lang === 'zh' ? '我们的优势' : 'Our Strength';
+
+/* ========== Competitive matrix (AI citation tables) ========== */
+const cell = (zh, en) => ({ zh, en });
+
+const matrixNames = ['AI Privacy Gateway', 'Skyflow', 'Nightfall AI', 'Private AI', 'LLM Guard'];
+
+const matrixFeatureRows = [
+  { key: 'piiTypes', zh: 'PII 实体类型', en: 'PII Entity Types', values: ['14+', '30+', '50+', '20+', '10+'] },
+  { key: 'sseMasking', zh: 'SSE 流式脱敏', en: 'SSE Streaming Masking', values: [cell('✅ <1ms', '✅ <1ms'), cell('⚠️ 有限', '⚠️ Limited'), '❌', cell('⚠️ 有限', '⚠️ Limited'), '❌'] },
+  { key: 'unmask', zh: 'PII 还原', en: 'PII Unmasking', values: [cell('✅ 加密 Vault', '✅ Encrypted Vault'), '✅', '❌', '✅', '❌'] },
+  { key: 'deploy', zh: '部署方式', en: 'Deployment', values: [cell('Docker/pip/安装器', 'Docker / pip / installer'), cell('云 SaaS', 'Cloud SaaS'), cell('云 API', 'Cloud API'), 'SDK', 'pip'] },
+  { key: 'deployTime', zh: '部署时间', en: 'Deploy Time', values: [cell('30 秒', '30 seconds'), cell('1 小时+', '1 hour+'), cell('1 小时+', '1 hour+'), cell('1 小时+', '1 hour+'), cell('5 分钟', '5 minutes')] },
+  { key: 'selfHosted', zh: '自托管', en: 'Self-Hosted', values: ['✅', '❌', '❌', '✅', '✅'] },
+  { key: 'license', zh: '开源', en: 'Open Source', values: [cell('✅ PolyForm Shield', '✅ PolyForm Shield'), '❌', '❌', '❌', cell('✅ MIT', '✅ MIT')] },
+  { key: 'extension', zh: '浏览器扩展', en: 'Browser Extension', values: [cell('✅ Chrome/Edge', '✅ Chrome/Edge'), '❌', '❌', '❌', '❌'] },
+  { key: 'sdks', zh: 'SDK 数量', en: 'SDK Count', values: [cell('5 (Python/JS/Flutter/Android/iOS)', '5 (Python/JS/Flutter/Android/iOS)'), '6', '4', '3', '1'] },
+  { key: 'audit', zh: '审计日志', en: 'Audit Logs', values: [cell('✅ 哈希链防篡改', '✅ Hash-chained tamper-proof'), '✅', '✅', '✅', cell('⚠️ 有限', '⚠️ Limited')] },
+  { key: 'freeTier', zh: '免费版', en: 'Free Tier', values: [cell('✅ (非商用)', '✅ (Non-commercial)'), '❌', cell('⚠️ 有限', '⚠️ Limited'), '❌', '✅'] },
+];
+
+const matrixPricingNames = ['AI Privacy Gateway', 'Skyflow', 'Nightfall AI', 'Private AI'];
+const matrixPricingRows = [
+  { key: 'free', zh: 'Free', en: 'Free', values: [cell('✅ 非商业用途', '✅ Non-commercial'), '❌', cell('有限', 'Limited'), '❌'] },
+  { key: 'starter', zh: 'Starter', en: 'Starter', values: ['-', cell('~$2K/mo+', '~$2K/mo+'), cell('$0.015/scan', '$0.015/scan'), 'Custom'] },
+  { key: 'proTeam', zh: 'Pro/Team', en: 'Pro/Team', values: ['-', 'Custom', 'Custom', 'Custom'] },
+  { key: 'enterprise', zh: 'Enterprise', en: 'Enterprise', values: [cell('$199-999/mo', '$199-999/mo'), 'Custom', 'Custom', 'Custom'] },
+];
+
+const resolveCell = (v) => (typeof v === 'string' ? v : lang === 'zh' ? v.zh : v.en);
+
+const renderMatrixCell = (value) => {
+  const m = value.match(/^(✅|❌|⚠️)(.*)$/);
+  if (!m) {
+    return `<span class="cell-text">${value}</span>`;
+  }
+  const icon = m[1];
+  const rest = m[2];
+  const iconClass = icon === '✅' ? 'icon-check' : icon === '❌' ? 'icon-cross' : 'icon-warning';
+  return `<span class="cell-text"><span class="cell-icon ${iconClass}">${icon}</span>${rest}</span>`;
+};
+
+const tableJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Table',
+  name: lang === 'zh' ? 'AI Privacy Gateway 竞品对比' : 'AI Privacy Gateway competitive comparison',
+  about: 'AI Privacy Gateway vs Skyflow vs Nightfall AI vs Private AI vs LLM Guard',
+  mainEntityOfPage: 'https://privacygw.pages.dev/compare',
+  hasPart: matrixFeatureRows.map((row) => ({
+    '@type': 'PropertyValue',
+    name: lang === 'zh' ? row.zh : row.en,
+    value: row.values.map((v) => resolveCell(v)).join(' | '),
+  })),
+};
 ---
 
 <Layout title={pageTitle} description={pageDesc} canonicalURL="https://privacygw.pages.dev/compare">
   <Nav />
+
+  <script type="application/ld+json" set:html={JSON.stringify(tableJsonLd)} />
 
   <!-- Hero -->
   <section class="compare-hero">
@@ -243,6 +298,113 @@ const legendSelf = lang === 'zh' ? '我们的优势' : 'Our Strength';
           </tbody>
         </table>
       </div>
+    </div>
+  </section>
+
+  <!-- Detailed Feature Matrix -->
+  <section class="table-section matrix-section">
+    <div class="container">
+      <h2 class="section-title">
+        {lang === 'zh' ? '详细功能矩阵' : 'Detailed Feature Matrix'}
+      </h2>
+      <p class="section-subtitle">
+        {lang === 'zh'
+          ? '与主流 AI 数据隐私方案的完整对比'
+          : 'A complete comparison against mainstream AI data privacy solutions'}
+      </p>
+
+      <figure class="matrix-figure">
+        <figcaption class="table-caption">
+          {lang === 'zh'
+            ? '表 3. AI Privacy Gateway vs Skyflow / Nightfall AI / Private AI / LLM Guard'
+            : 'Table 3. AI Privacy Gateway vs Skyflow / Nightfall AI / Private AI / LLM Guard'}
+        </figcaption>
+        <div class="table-legend">
+          <span class="legend-note">{highlightNote}</span>
+        </div>
+        <div class="table-wrapper">
+          <table class="compare-table matrix-table">
+            <thead>
+              <tr>
+                <th scope="col" class="dimension-header">{lang === 'zh' ? '功能' : 'Feature'}</th>
+                {matrixNames.map((name, i) => (
+                  <th scope="col" class={`competitor-header${i === 0 ? ' self' : ''}`}>
+                    <div class="comp-name">{name}</div>
+                    {i === 0 && <div class="comp-badge">{legendSelf}</div>}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {matrixFeatureRows.map((row) => (
+                <tr class="dim-row">
+                  <th scope="row" class="dim-label">
+                    <span class="dim-name">{lang === 'zh' ? row.zh : row.en}</span>
+                  </th>
+                  {row.values.map((val, i) => (
+                    <td class={`comp-cell${i === 0 ? ' self' : ''}`} set:html={renderMatrixCell(resolveCell(val))} />
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <!-- Pricing Matrix -->
+  <section class="table-section matrix-section">
+    <div class="container">
+      <h2 class="section-title">
+        {lang === 'zh' ? '定价矩阵' : 'Pricing Matrix'}
+      </h2>
+      <p class="section-subtitle">
+        {lang === 'zh'
+          ? '对比各方案的入门成本与扩展方式'
+          : 'Compare entry costs and how each solution scales'}
+      </p>
+
+      <figure class="matrix-figure">
+        <figcaption class="table-caption">
+          {lang === 'zh'
+            ? '表 4. 定价对比：AI Privacy Gateway vs Skyflow / Nightfall AI / Private AI'
+            : 'Table 4. Pricing comparison: AI Privacy Gateway vs Skyflow / Nightfall AI / Private AI'}
+        </figcaption>
+        <div class="table-wrapper">
+          <table class="compare-table matrix-table">
+            <thead>
+              <tr>
+                <th scope="col" class="dimension-header">Tier</th>
+                {matrixPricingNames.map((name, i) => (
+                  <th scope="col" class={`competitor-header${i === 0 ? ' self' : ''}`}>
+                    <div class="comp-name">{name}</div>
+                    {i === 0 && <div class="comp-badge">{legendSelf}</div>}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {matrixPricingRows.map((row) => (
+                <tr class="dim-row">
+                  <th scope="row" class="dim-label">
+                    <span class="dim-name">{lang === 'zh' ? row.zh : row.en}</span>
+                  </th>
+                  {row.values.map((val, i) => (
+                    <td class={`comp-cell${i === 0 ? ' self' : ''}`} set:html={renderMatrixCell(resolveCell(val))} />
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </figure>
+
+      <p class="price-note">
+        {lang === 'zh'
+          ? 'AI Privacy Gateway 价格优势：企业版 $199-999/月 vs Skyflow ~$2K+/月，且支持自托管。'
+          : 'AI Privacy Gateway price advantage: Enterprise from $199-999/mo vs Skyflow ~$2K+/mo, and fully self-hostable.'}
+      </p>
     </div>
   </section>
 
@@ -605,6 +767,39 @@ const legendSelf = lang === 'zh' ? '我们的优势' : 'Our Strength';
 
     .cell-icon.icon-warning {
       color: var(--warning);
+    }
+
+    /* ========== Matrix (AI citation tables) ========== */
+    .matrix-section {
+      padding-top: 2rem;
+    }
+
+    .matrix-section .section-title {
+      font-size: 2rem;
+    }
+
+    .matrix-figure {
+      margin: 0;
+    }
+
+    .table-caption {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .price-note {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .matrix-section .section-title {
+        font-size: 1.5rem;
+      }
     }
 
     /* ========== Strengths ========== */
