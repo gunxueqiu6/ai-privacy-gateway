@@ -91,32 +91,90 @@ const orgDesc = 'Open-source AI API privacy gateway that auto-detects and masks 
   <script type="application/ld+json" set:html={JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'Organization',
+    '@id': 'https://privacygw.pages.dev/#organization',
     name: 'AI Privacy Gateway',
+    alternateName: 'AI数据隐私隔离',
     url: 'https://privacygw.pages.dev',
     logo: 'https://privacygw.pages.dev/favicon.svg',
+    slogan: '你的 AI 数据正在裸奔。30 秒装上防火墙。',
     description: orgDesc,
+    foundingDate: '2025',
     sameAs: [
       'https://github.com/gunxueqiu6/ai-privacy-gateway'
-    ]
+    ],
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'Open Source Support',
+      url: 'https://github.com/gunxueqiu6/ai-privacy-gateway'
+    },
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+      description: 'Free non-commercial license (PolyForm Shield)'
+    },
+    areaServed: 'Worldwide'
   })} />
 
   <script type="application/ld+json" set:html={JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
+    '@id': 'https://privacygw.pages.dev/#software',
     name: 'AI Privacy Gateway',
-    applicationCategory: 'SecurityApplication',
-    operatingSystem: 'Linux, Windows, macOS',
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'CNY',
-      description: 'Lite edition — free forever, open source'
-    },
+    alternateName: 'AI数据隐私隔离',
+    applicationCategory: ['Security', 'AI Privacy', 'DeveloperApplication'],
+    applicationSubCategory: 'PII masking reverse proxy for LLM APIs',
+    operatingSystem: ['Windows', 'macOS', 'Linux', 'Docker', 'Kubernetes'],
+    url: 'https://privacygw.pages.dev',
+    downloadUrl: 'https://github.com/gunxueqiu6/ai-privacy-gateway',
+    installUrl: 'https://github.com/gunxueqiu6/ai-privacy-gateway',
+    softwareVersion: '1.x',
+    license: 'PolyForm Shield 1.0.0 (non-commercial) / Commercial license for enterprise',
+    isAccessibleForFree: true,
     description: description,
-    url: canonicalURL,
-    author: {
+    offers: {
+      '@type': 'AggregateOffer',
+      lowPrice: '0',
+      highPrice: '999',
+      priceCurrency: 'USD',
+      offerCount: 2,
+      offers: [
+        {
+          '@type': 'Offer',
+          name: 'Community',
+          price: '0',
+          priceCurrency: 'USD',
+          description: 'Free under PolyForm Shield non-commercial license'
+        },
+        {
+          '@type': 'Offer',
+          name: 'Enterprise',
+          price: '199',
+          priceCurrency: 'USD',
+          description: 'Enterprise license, from $199/month to $999/month'
+        }
+      ]
+    },
+    featureList: [
+      'Detects 14+ PII entity types in under 1 millisecond',
+      'SSE streaming-aware masking with round-trip PII reconstruction',
+      'AES-256-GCM encrypted SQLite vault',
+      '30-second deployment with zero config and zero code changes',
+      'Fully local / on-premise, no data leaves your network',
+      'Hash-chained tamper-proof audit logs',
+      'Multi-upstream load balancer',
+      '5 SDKs: Python, JS/TS, Flutter, Android, iOS',
+      'Chrome and Edge browser extension',
+      'Windows and macOS one-click installers'
+    ],
+    softwareHelp: {
+      '@type': 'WebPage',
+      url: 'https://privacygw.pages.dev/docs'
+    },
+    publisher: {
       '@type': 'Organization',
-      name: 'AI Privacy Gateway'
+      name: 'AI Privacy Gateway Project',
+      url: 'https://privacygw.pages.dev'
     }
   })} />
 
