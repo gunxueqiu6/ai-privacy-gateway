@@ -22,7 +22,7 @@ except ImportError:
 KNOWN_ENTITY_TYPES = frozenset({
     "phone", "email", "idcard", "bankcard", "plate", "coordinates",
     "ip", "url", "date", "amount", "postcode",
-    "passport", "ssn", "credit_code", "mac",
+    "passport", "ssn", "credit_code", "mac", "api_key",
     "person", "location", "organization", "custom",
 })
 
@@ -200,6 +200,25 @@ class RegexMaskEngine(MaskEngineInterface):
         "idcard": re.compile(r'(?<!\d)([1-9]\d{5}(?:19|20)\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])\d{3}[\dXx])(?!\d)'),
         "bankcard": re.compile(r'(?<!\d)([1-9]\d{15,18})(?!\d)'),
         "plate": re.compile(r'[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z][A-Z0-9]{5}'),
+        # API Key — 20+ known provider formats (OpenAI/Anthropic/GitHub/AWS/Slack/etc.)
+        "api_key": re.compile(
+            r'\b('
+            r'sk-(?:proj-|ant-)?[A-Za-z0-9]{15,}'                # OpenAI project / Anthropic
+            r'|gh[pousr]_[A-Za-z0-9]{36,}'                       # GitHub personal/OAuth/user/server/refresh tokens
+            r'|AKIA[0-9A-Z]{16}'                                  # AWS IAM access key
+            r'|xox[abp]-[0-9]{10,13}-[0-9]{10,13}-[A-Za-z0-9]{24,}'  # Slack bot/user tokens
+            r'|hf_[A-Za-z0-9]{25,}'                               # HuggingFace
+            r'|glpat-[A-Za-z0-9\-_]{20,}'                         # GitLab personal access token
+            r'|AIza[0-9A-Za-z\-_]{35}'                            # Google API key
+            r'|SG\.[A-Za-z0-9\-_]{22,}\.[A-Za-z0-9\-_]{22,}'     # SendGrid
+            r'|s[ck]_(?:live|test)_[0-9A-Za-z]{24,}'             # Stripe secret/publishable keys
+            r'|rk_(?:live|test)_[0-9A-Za-z]{24,}'                 # Stripe restricted keys
+            r'|ya29\.[0-9A-Za-z\-_]{50,}'                         # Google OAuth access token
+            r'|acct[0-9A-Fa-f]{32}'                               # Twilio account SID (hex)
+            r'|key-[A-Za-z0-9\-_]{20,}'                           # Generic API key prefix
+            r'|sk-[A-Za-z0-9]{15,}'                               # Generic sk- prefix (catch-all)
+            r')\b'
+        ),
         "coordinates": re.compile(r'(?<!\d)(\d{1,3}\.\d{4,}\s*[,，\s]\s*\d{1,3}\.\d{4,})(?!\d)'),
         "ip": re.compile(r'(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'),
         "url": re.compile(r'https?://[^\s]+'),
@@ -233,6 +252,7 @@ class RegexMaskEngine(MaskEngineInterface):
         "credit_code": "PII_CREDIT_CODE",
         "mac": "PII_MAC",
         "coordinates": "PII_COORDINATES",
+        "api_key": "PII_APIKEY",
     }
 
     def __init__(self):
@@ -301,7 +321,7 @@ class RegexMaskEngine(MaskEngineInterface):
         stats: Dict[str, int] = {
             "phone": 0, "email": 0, "idcard": 0, "bankcard": 0,
             "plate": 0, "coordinates": 0, "ip": 0, "url": 0, "date": 0, "amount": 0, "postcode": 0,
-            "passport": 0, "ssn": 0, "credit_code": 0, "mac": 0,
+            "passport": 0, "ssn": 0, "credit_code": 0, "mac": 0, "api_key": 0,
             "person": 0, "location": 0, "organization": 0, "custom": 0
         }
 
@@ -346,7 +366,7 @@ class RegexMaskEngine(MaskEngineInterface):
         # 4. 内置规则（银行卡需跳过11位手机号误匹配）
         _not_bankcard = lambda m: len(m) == 11 and m.startswith('1')
         for rule_key in ("phone", "email", "idcard", "bankcard", "plate",
-                          "coordinates", "ip", "url", "date", "amount", "postcode",
+                          "coordinates", "ip", "url", "date", "api_key", "amount", "postcode",
                           "passport", "ssn", "credit_code", "mac"):
             filter_fn = _not_bankcard if rule_key == "bankcard" else None
             result = self._apply_rule(result, rule_key, mappings, stats, filter_fn)

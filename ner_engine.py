@@ -36,6 +36,7 @@ class NEREntityType(Enum):
     DATE = "DATE"            # 日期
     AMOUNT = "AMOUNT"        # 金额
     POSTCODE = "POSTCODE"    # 邮编
+    APIKEY = "APIKEY"        # API 密钥
 
 
 class NEREntity:
@@ -113,8 +114,24 @@ class NEREngine:
             NEREntityType.IP: r'(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)',
             NEREntityType.URL: r'https?://[^\s]+',
             NEREntityType.DATE: r'\d{4}[-/年](?:0?[1-9]|1[0-2])[-/月](?:0?[1-9]|[12]\d|3[01])日?',
-            NEREntityType.AMOUNT: r'(?:¥|￥|\\$|\\$)?\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?',
+            NEREntityType.AMOUNT: r'(?:¥|￥|\$)\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?',
             NEREntityType.POSTCODE: r'(?<!\d)([1-9]\d{5})(?!\d)',
+            NEREntityType.APIKEY: (
+                r'\b(?:sk-(?:proj-|ant-)?[A-Za-z0-9]{15,}'
+                r'|gh[pousr]_[A-Za-z0-9]{36,}'
+                r'|AKIA[0-9A-Z]{16}'
+                r'|xox[abp]-[0-9]{10,13}-[0-9]{10,13}-[A-Za-z0-9]{24,}'
+                r'|hf_[A-Za-z0-9]{25,}'
+                r'|glpat-[A-Za-z0-9\-_]{20,}'
+                r'|AIza[0-9A-Za-z\-_]{35}'
+                r'|SG\.[A-Za-z0-9\-_]{22,}\.[A-Za-z0-9\-_]{22,}'
+                r'|s[ck]_(?:live|test)_[0-9A-Za-z]{24,}'
+                r'|rk_(?:live|test)_[0-9A-Za-z]{24,}'
+                r'|ya29\.[0-9A-Za-z\-_]{50,}'
+                r'|acct[0-9A-Fa-f]{32}'
+                r'|key-[A-Za-z0-9\-_]{20,}'
+                r')\b'
+            ),
         }
         
         for entity_type, pattern in patterns.items():

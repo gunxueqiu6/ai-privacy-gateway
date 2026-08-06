@@ -45,7 +45,7 @@ import starlette.config as _starlette_config
 _read_file_original = _starlette_config.Config._read_file
 
 
-def _read_file_utf8(self, file_name: str | _os.PathLike) -> dict[str, str]:
+def _read_file_utf8(self, file_name: str | _os.PathLike, encoding: str = "utf-8") -> dict[str, str]:
     file_values: dict[str, str] = {}
     with open(file_name, encoding="utf-8") as input_file:
         for line in input_file.readlines():
