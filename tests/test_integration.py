@@ -240,6 +240,24 @@ class TestIntegrationChatCompletion:
 
             assert response.status_code == 200
 
+    def test_proxy_rejects_unknown_api_key(self, client):
+        """Unknown API keys are rejected with 401 (open-proxy fix)."""
+        with patch('routers.proxy.get_gateway_core') as mock_gateway:
+            mock_core = Mock()
+            mock_gateway.return_value = mock_core
+
+            response = client.post(
+                "/v1/chat/completions",
+                json={
+                    "model": "gpt-3.5-turbo",
+                    "messages": [{"role": "user", "content": "hello"}]
+                },
+                headers={"Authorization": "Bearer definitely-unknown-key-123456"}
+            )
+
+            # The request must be rejected before any upstream proxy call.
+            assert response.status_code == 401
+
 
 class TestIntegrationAdminAuth:
     """Admin 鉴权集成测试"""

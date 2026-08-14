@@ -384,32 +384,11 @@ class TestDatabase:
     def test_update_stats(self):
         """更新统计数据（重建表以获得新 schema）"""
         from database import db
-        # 确保 stats 表有全部列
+        # 使用生产动态建表方法，确保 stats 表有全部列
         with db.get_conn() as conn:
-            conn.execute("DROP TABLE IF EXISTS stats")
-            conn.execute("""
-                CREATE TABLE stats (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    date TEXT NOT NULL,
-                    team_id TEXT DEFAULT 'default',
-                    phone_count INTEGER DEFAULT 0,
-                    email_count INTEGER DEFAULT 0,
-                    idcard_count INTEGER DEFAULT 0,
-                    bankcard_count INTEGER DEFAULT 0,
-                    custom_count INTEGER DEFAULT 0,
-                    person_count INTEGER DEFAULT 0,
-                    location_count INTEGER DEFAULT 0,
-                    org_count INTEGER DEFAULT 0,
-                    plate_count INTEGER DEFAULT 0,
-                    ip_count INTEGER DEFAULT 0,
-                    url_count INTEGER DEFAULT 0,
-                    date_count INTEGER DEFAULT 0,
-                    amount_count INTEGER DEFAULT 0,
-                    postcode_count INTEGER DEFAULT 0,
-                    total_count INTEGER DEFAULT 0,
-                    UNIQUE(date, team_id)
-                )
-            """)
+            cursor = conn.cursor()
+            cursor.execute("DROP TABLE IF EXISTS stats")
+            db._create_stats_table(cursor)
         stats = {"phone": 2, "email": 1}
         db.update_stats(stats)
 
@@ -433,12 +412,12 @@ class TestMaskEngineRegexFallback:
         mask_engine.HAS_NER = False
         try:
             engine = RegexMaskEngine()
-            text = "手机13812345678 邮箱 test@example.com 身份证110101199001011234 银行卡6222021234567890123 车牌京A12345 IP192.168.1.1 网址 https://example.com 日期2024-01-15 金额¥1,234.56 邮编100081"
+            text = "手机13812345678 邮箱 test@example.com 身份证110101199001011234 银行卡4111111111111111 车牌京A12345 IP192.168.1.1 网址 https://example.com 日期2024-01-15 金额¥1,234.56 邮编100081"
             masked, mappings, stats = engine.mask(text)
             assert "13812345678" not in masked
             assert "test@example.com" not in masked
             assert "110101199001011234" not in masked
-            assert "6222021234567890123" not in masked
+            assert "4111111111111111" not in masked
             assert "京A12345" not in masked
             assert "192.168.1.1" not in masked
             assert "https://example.com" not in masked

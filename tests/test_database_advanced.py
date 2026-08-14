@@ -162,10 +162,16 @@ class TestDatabaseEncryption:
             import vault_crypto
             vault_crypto._crypto_instance = None
 
-    def test_encryption_off_plaintext_storage(self):
-        """When VAULT_ENCRYPT_KEY is empty, values are stored as plaintext."""
+    def test_encryption_off_plaintext_storage(self, monkeypatch):
+        """When VAULT_ENCRYPT_KEY is empty AND ALLOW_PLAINTEXT_VAULT=true, values are stored as plaintext.
+
+        Plaintext storage is now opt-in; without ALLOW_PLAINTEXT_VAULT=true the
+        config auto-generates an encryption key instead of silently disabling it.
+        """
         from database import Database
         import tempfile
+        # Explicitly opt into plaintext storage for this test.
+        monkeypatch.setenv("ALLOW_PLAINTEXT_VAULT", "1")
         # Ensure vault crypto is disabled for this test
         import vault_crypto
         vault_crypto._crypto_instance = None

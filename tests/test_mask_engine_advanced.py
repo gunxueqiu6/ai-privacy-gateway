@@ -168,7 +168,7 @@ class TestMaskEngineAdvancedEdgeCases:
             "手机13812345678 "
             "邮箱test@example.com "
             "身份证110101199001011234 "
-            "银行卡6222021234567890123 "
+            "银行卡4111111111111111 "
             "车牌京A12345 "
             "IP192.168.1.1 "
             "网址https://example.com "
@@ -189,6 +189,7 @@ class TestMaskEngineAdvancedEdgeCases:
         assert stats["email"] >= 1
         assert stats["idcard"] >= 1
         assert stats["bankcard"] >= 1
+        assert stats["credit_code"] >= 1
 
     def test_unmask_with_partial_mappings(self):
         from mask_engine import get_mask_engine

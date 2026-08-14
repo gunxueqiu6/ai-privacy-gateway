@@ -44,12 +44,12 @@ class TestE2EMaskEndpoints:
         """ID card and bank card numbers are masked"""
         response = client.post(
             "/api/mask",
-            json={"text": "身份证110101199001011234 银行卡6222021234567890123"}
+            json={"text": "身份证110101199001011234 银行卡4111111111111111"}
         )
         assert response.status_code == 200
         data = response.json()
         assert "110101199001011234" not in data["masked_text"]
-        assert "6222021234567890123" not in data["masked_text"]
+        assert "4111111111111111" not in data["masked_text"]
 
     def test_mask_with_custom_keywords(self, client):
         """Custom keywords supplied in request body are used for masking"""

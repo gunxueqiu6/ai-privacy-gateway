@@ -32,3 +32,18 @@ def _mock_upstream_health():
     patcher.start()
     yield
     patcher.stop()
+
+
+@pytest.fixture(autouse=True, scope="session")
+def _ensure_test_api_key():
+    """Ensure a valid API key exists for proxy tests (Authorization: Bearer test-key).
+
+    Proxy routes now validate API keys strictly (open-proxy fix); tests that use
+    'test-key' need it registered in the user_api_keys table.
+    """
+    import hashlib
+    from database import db
+
+    key_hash = hashlib.sha256(b"test-key").hexdigest()
+    db.create_api_key(key_hash, key_prefix="test-key", team_id="default", tier="free")
+    yield
