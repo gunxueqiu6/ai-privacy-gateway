@@ -87,3 +87,12 @@ website-astro/site.zip
 # 支付二维码（本地文件，不提交）
 website-astro/public/wechat-pay-qr.jpg
 website-astro/public/wechat-qr-alt.jpg
+
+# ===== 付费/企业版源码（只进 private 仓库，绝不进公开 origin）=====
+# 开源策略：免费版开源 + 付费版私有。以下文件仅在私有仓库存在。
+license.py
+audit_signer.py
+routers/enterprise.py
+
+# 临时调试脚本（草稿目录，不应进仓库；存量已跟踪文件需 git rm --cached 清理）
+.temp/

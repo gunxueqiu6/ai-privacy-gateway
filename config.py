@@ -91,6 +91,8 @@ class Config:
 
     # 脱敏引擎配置
     MASK_ENGINE_TYPE: str = os.environ.get("MASK_ENGINE_TYPE", "regex")
+    # 数据驱动实体目录路径（含实体类型/正则/合规分级/启用开关）
+    ENTITY_CATALOG_PATH: str = os.environ.get("ENTITY_CATALOG_PATH", "./entity_catalog.json")
 
     # 管理员密码（明文，用于首次生成哈希）
     ADMIN_PASSWORD: str = os.environ.get("ADMIN_PASSWORD", "")
@@ -103,6 +105,15 @@ class Config:
 
     # Vault 加密密钥（为空时加密功能禁用）
     VAULT_ENCRYPT_KEY: str = os.environ.get("VAULT_ENCRYPT_KEY", "")
+
+    # 允许 Vault 明文模式（仅当显式设置 ALLOW_PLAINTEXT_VAULT=true，否则密钥缺失时自动生成）
+    ALLOW_PLAINTEXT_VAULT: bool = os.environ.get("ALLOW_PLAINTEXT_VAULT", "0") == "1"
+
+    # License 授权 — 企业版专属，见私有仓库 license.py / audit_signer.py / routers/enterprise.py。
+    # 公开（免费）版不包含授权码逻辑，config.tier 恒为 "lite"。
+
+    # 允许匿名代理（未知 API Key 回退 default 团队；仅当显式设置 ALLOW_ANONYMOUS=true）
+    ALLOW_ANONYMOUS: bool = os.environ.get("ALLOW_ANONYMOUS", "0") == "1"
 
     # 映射 TTL 秒数（0 = 请求完成即删除，默认 259200 = 72h）
     MAPPING_TTL: int = int(os.environ.get("MAPPING_TTL", "259200"))
@@ -141,12 +152,22 @@ class Config:
                 persisted["jwt_secret"] = self.JWT_SECRET
                 logger.warning("JWT_SECRET not set — auto-generated and persisted")
 
-        # Vault encryption key
+        # Vault encryption key — never silently store PII in plaintext.
+        # If missing, auto-generate and persist a random 32-byte key.
         if not self.VAULT_ENCRYPT_KEY:
             if persisted.get("vault_encrypt_key"):
                 self.VAULT_ENCRYPT_KEY = persisted["vault_encrypt_key"]
         if not self.VAULT_ENCRYPT_KEY:
-            logger.warning("VAULT_ENCRYPT_KEY not set — vault encryption is disabled")
+            if self.ALLOW_PLAINTEXT_VAULT:
+                logger.warning(
+                    "VAULT_ENCRYPT_KEY not set AND ALLOW_PLAINTEXT_VAULT=true — "
+                    "Vault PII is stored in PLAINTEXT (INSECURE)"
+                )
+            else:
+                self.VAULT_ENCRYPT_KEY = secrets.token_urlsafe(32)
+                persisted["vault_encrypt_key"] = self.VAULT_ENCRYPT_KEY
+                os.environ["VAULT_ENCRYPT_KEY"] = self.VAULT_ENCRYPT_KEY
+                logger.warning("VAULT_ENCRYPT_KEY not set — auto-generated and persisted")
 
         # 模型路由映射解析
         try:
@@ -163,15 +184,20 @@ class Config:
         if not self.ADMIN_PASSWORD_HASH:
             if persisted.get("admin_password_hash"):
                 self.ADMIN_PASSWORD_HASH = persisted["admin_password_hash"]
-                self.ADMIN_PASSWORD = persisted.get("admin_password", "")
             else:
+                # Only the bcrypt hash is persisted — never the plaintext.
                 random_pw = secrets.token_urlsafe(12)
                 self.ADMIN_PASSWORD = random_pw
                 salt = bcrypt.gensalt()
                 self.ADMIN_PASSWORD_HASH = bcrypt.hashpw(random_pw.encode(), salt).decode()
                 persisted["admin_password_hash"] = self.ADMIN_PASSWORD_HASH
-                persisted["admin_password"] = random_pw
-                logger.warning("ADMIN_PASSWORD not set — auto-generated: %s", random_pw)
+                logger.warning(
+                    "ADMIN_PASSWORD not set — auto-generated admin password hash; "
+                    "set ADMIN_PASSWORD or complete the setup wizard to choose a known password"
+                )
+
+        # Never persist the plaintext admin password (drop any legacy copy).
+        persisted.pop("admin_password", None)
 
         # Persist any new secrets
         _save_persisted_secrets(persisted)
@@ -191,6 +217,7 @@ class Config:
         self.DB_PATH = os.environ.get("DB_PATH", "./vault_data/privacy_vault.db")
         self.DB_TYPE = os.environ.get("DB_TYPE", "sqlite")
         self.MASK_ENGINE_TYPE = os.environ.get("MASK_ENGINE_TYPE", "regex")
+        self.ENTITY_CATALOG_PATH = os.environ.get("ENTITY_CATALOG_PATH", "./entity_catalog.json")
         self.MAPPING_TTL = int(os.environ.get("MAPPING_TTL", "259200"))
         self.STATELESS_MODE = os.environ.get("STATELESS_MODE", "0") == "1"
         self.MAX_CONCURRENT_REQUESTS = int(os.environ.get("MAX_CONCURRENT_REQUESTS", "50"))

@@ -232,8 +232,9 @@ async def clear_mappings(request: Request) -> dict:
 
 
 @router.get("/admin/audit/stream")
-async def audit_stream():
-    """实时审计事件流 (SSE)"""
+async def audit_stream(request: Request):
+    """实时审计事件流 (SSE) - 需要认证"""
+    await require_admin(request)
     from audit import audit_bus
 
     async def event_generator():
@@ -257,6 +258,9 @@ async def audit_stream():
         }
     )
 
+
+# 企业版端点（/admin/audit/export 签名导出、/admin/license 授权码）已抽离至
+# routers/enterprise.py，仅在私有（付费）仓库存在。公开版不含此逻辑。
 
 # ==================== Admin Custom Regex Rules ====================
 

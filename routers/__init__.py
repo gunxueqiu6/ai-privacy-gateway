@@ -14,3 +14,12 @@ def register_routers(app):
     app.include_router(auth_router)
     app.include_router(admin_router)
     app.include_router(setup_router)
+
+    # 企业版（付费）路由 — 仅私有仓库存在 routers/enterprise.py 时注册。
+    # 公开（免费）版无此文件，这里安全跳过，保证公开版可独立运行。
+    try:
+        from .enterprise import router as enterprise_router
+    except ImportError:
+        enterprise_router = None
+    if enterprise_router is not None:
+        app.include_router(enterprise_router)
