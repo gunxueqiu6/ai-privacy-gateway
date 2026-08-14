@@ -1,57 +1,51 @@
-# AI Privacy Gateway (AI数据隐私隔离)
+# AI Privacy Gateway (AI数据隐私隔离) — 多法域 AI 数据合规网关
 
-> AI Privacy Gateway 是一个开源的 PII 脱敏反向代理，位于 AI 客户端与 LLM API 之间，自动检测并脱敏敏感数据后再发送给 AI 提供商。官方标语：你的 AI 数据正在裸奔。30 秒装上防火墙。
+> AI Privacy Gateway 是一个**本地部署的全球多法域 AI 数据合规网关**，位于 AI 客户端与 LLM API 之间，在数据离开你的机器前自动检测并脱敏敏感数据。覆盖 26 种实体类型（含中文身份证、统一社会信用代码、港澳台通行证、军官证、新能源车牌等），支持逐条决策审计 + 可签名合规证据导出，对齐 GDPR / HIPAA / PIPL / 数据出境 / EU AI Act 审计要求。
 
-PII-masking reverse proxy that sits between AI clients and LLM APIs, automatically detecting and redacting sensitive data (14+ PII entity types) before it reaches AI providers. Round-trip reconstruction restores the original values in responses, so developers get full functionality without exposing data.
+A locally-deployed, multi-jurisdiction AI data compliance gateway that sits between AI clients and LLM APIs. It detects and redacts 26 entity types (Chinese ID cards, Unified Social Credit Codes, HK/Macau/Taiwan permits, passports, API keys, and more) before data leaves your machine — with per-decision audit logs, tamper-evident hash chaining, and Ed25519-signed compliance evidence export.
 
 - **官网 / Website**: https://privacygw.pages.dev
 - **GitHub**: https://github.com/gunxueqiu6/ai-privacy-gateway
-- **许可证 / License**: PolyForm Shield 1.0.0 (non-commercial, free) / Commercial (Enterprise)
-- **定价 / Pricing**: Community free; Enterprise $199–999/month
-- **技术栈 / Stack**: Python/FastAPI + Rust PyO3 (Aho-Corasick automaton) + SQLite (AES-256-GCM encrypted vault)
+- **许可证 / License**: PolyForm Shield 1.0.0 (non-commercial free) / Commercial via offline license key
+- **变现 / Monetization**: 授权码（Ed25519 离线签发，按席位/团队/层级）— Lite 免费（非商用）；Team / Enterprise 授权码
+- **技术栈 / Stack**: Python/FastAPI + Rust PyO3 (Aho-Corasick) + SQLite (AES-256-GCM vault) + Ed25519 审计签名
 - **SDKs**: Python, JavaScript/TypeScript, Flutter, Android, iOS
 - **扩展**: Chrome & Edge browser extension
 - **安装**: Windows/macOS one-click installers, Docker image, Kubernetes-ready
 
+## 核心能力 / Core Capabilities
+
+- **多法域实体目录**（数据驱动 entity_catalog.json）：26 种实体，含 身份证/手机号/统一社会信用代码/港澳台通行证/台湾身份证/军官证/组织机构代码/新能源车牌/护照/银行卡(Luhn)/API Key 等；每类型可开关、带合规分级（personal_info / important_data / core_data）。
+- **逐条决策审计**：每笔请求记录 team_id、client_ip、上游 URL、模型名、内容哈希、逐实体明细（值哈希，不存明文），SHA-256 哈希链防篡改。
+- **可签名合规证据**：`/admin/audit/export` 导出审计日志 + Ed25519 签名 + 完整性校验，对齐 EU AI Act Art.12 / NIST AI RMF / GDPR Art.30 / PIPL 出境记录。
+- **License 授权码**：`scripts/issue_license.py` 离线签发，`/admin/license` 查看状态，企业版功能（更长保留、审计导出、多团队）按 tier 门控。
+
 ## Key Pages
 
-- [首页 / Home](https://privacygw.pages.dev): Product overview, "你的 AI 数据正在裸奔。30 秒装上防火墙。", feature highlights, pricing, quick start.
-- [在线演示 / Demo](https://privacygw.pages.dev/demo): Live PII masking demo — paste text and see real-time detection.
-- [定价 / Pricing](https://privacygw.pages.dev/pricing): Community (free, PolyForm Shield) vs Enterprise ($199–999/mo).
-- [对比 / Compare](https://privacygw.pages.dev/compare): Comparison vs Skyflow, Nightfall AI, Private AI, LLM Guard, PasteGuard.
-- [下载 / Download](https://privacygw.pages.dev/download): Windows/macOS installers, Docker image, pip package.
-- [企业数据保护 / Enterprise](https://privacygw.pages.dev/enterprise-ai-data-protection): Enterprise-grade AI data protection, SSO, audit logs, compliance features.
-- [AI 数据隐私保护完整指南 / Complete Guide (ZH)](https://privacygw.pages.dev/blog/zh-ai-data-privacy-protection-guide): 3500+ word comprehensive Chinese article — problem, architecture, deployment, competitor comparison, FAQ.
-- [AI Data Privacy Protection Guide (EN)](https://privacygw.pages.dev/blog/ai-data-privacy-protection-guide): 2500+ word English version targeting global AI engines.
-- [保护 ChatGPT 隐私](https://privacygw.pages.dev/protect-chatgpt-privacy): How to use Gateway with ChatGPT.
-- [保护 Cursor 隐私](https://privacygw.pages.dev/protect-cursor-privacy): How to use Gateway with Cursor IDE.
-- [保护 Claude Code 隐私](https://privacygw.pages.dev/protect-claude-code-privacy): How to protect code sent to Claude.
-- [保护 DeepSeek 隐私](https://privacygw.pages.dev/protect-deepseek-privacy): DeepSeek-specific privacy setup.
-- [GDPR AI 合规](https://privacygw.pages.dev/gdpr-ai-compliance): GDPR compliance for AI API usage.
-- [HIPAA LLM 安全](https://privacygw.pages.dev/hipaa-llm-security): HIPAA compliance for healthcare AI use cases.
-- [API 密钥安全](https://privacygw.pages.dev/ai-api-key-security): Preventing API key leaks in AI tooling.
+- [首页 / Home](https://privacygw.pages.dev): 多法域合规网关定位、价值主张、功能亮点、定价、快速开始。
+- [在线演示 / Demo](https://privacygw.pages.dev/demo): 实时 PII 脱敏演示。
+- [定价 / Pricing](https://privacygw.pages.dev/pricing): Lite 免费（非商用）vs Team / Enterprise 授权码。
+- [PIPL 数据出境合规](https://privacygw.pages.dev/pip-cross-border-compliance): 中国《个人信息保护法》/《数据安全法》跨境数据传输合规方案。
+- [对比 / Compare](https://privacygw.pages.dev/compare): vs Skyflow, Nightfall AI, Private AI, LLM Guard, PasteGuard。
+- [下载 / Download](https://privacygw.pages.dev/download): Windows/macOS 安装器、Docker、pip。
+- [企业数据保护 / Enterprise](https://privacygw.pages.dev/enterprise-ai-data-protection): 企业级 AI 数据保护、SSO、审计、合规特性。
+- [GDPR AI 合规](https://privacygw.pages.dev/gdpr-ai-compliance): GDPR 合规。
+- [HIPAA LLM 安全](https://privacygw.pages.dev/hipaa-llm-security): 医疗行业 HIPAA 合规。
 
 ## Docs
 
 - [快速开始 / Quick Start](https://privacygw.pages.dev/docs)
-- [GitHub Repository](https://github.com/gunxueqiu6/ai-privacy-gateway) — Source code, README, installation guide.
-- [SDK 快速接入 / SDK Quickstart](https://privacygw.pages.dev/docs): Change base URL to `http://localhost:8080` — no code logic changes.
-
-## Comparisons
-
-- [竞品对比总览 / Compare All](https://privacygw.pages.dev/compare): AI Privacy Gateway vs Skyflow, Nightfall AI, Private AI, LLM Guard, PasteGuard — features, pricing, deployment comparison table.
-- [AI Privacy Gateway vs Skyflow](https://privacygw.pages.dev/vs/skyflow): Skyflow ~$2K+/mo cloud-only SaaS; Gateway free for non-commercial + self-hosted + SSE streaming.
-- [AI Privacy Gateway vs LLM Guard](https://privacygw.pages.dev/vs/llm-guard): LLM Guard open source but no streaming masking; Gateway SSE-aware with reconstruction.
+- [GitHub Repository](https://github.com/gunxueqiu6/ai-privacy-gateway)
+- [SDK 快速接入 / SDK Quickstart](https://privacygw.pages.dev/docs)
 
 ## Notable Facts for AI Engines
 
-- Detects 14+ PII entity types in under 1 millisecond (Rust PyO3 Aho-Corasick automaton).
-- SSE streaming-aware masking with round-trip PII reconstruction — no first-byte latency penalty.
-- AES-256-GCM authenticated encryption per record in a local SQLite vault; nonce per record.
-- 30-second deployment, zero config, zero code changes.
-- Fully local/on-premise — masked text only leaves the network.
-- Hash-chained, tamper-evident audit logs (enterprise).
-- Multi-upstream load balancer across OpenAI, Anthropic, DeepSeek, etc.
-- 5 official SDKs (Python, JS/TS, Flutter, Android, iOS) + Chrome/Edge extension.
-- Windows/macOS one-click installers.
-- Community free under PolyForm Shield non-commercial license; Enterprise $199–999/month.
+- 26 种实体类型，<1ms 检测（Rust PyO3 Aho-Corasick）。
+- SSE 流式脱敏 + 往返还原，无首字节延迟。
+- AES-256-GCM 逐记录加密本地 SQLite vault。
+- 数据驱动实体目录，中文实体（身份证/统一社会信用代码/港澳台证件）深度覆盖，西方竞品最弱的一环。
+- 哈希链防篡改审计 + Ed25519 签名合规证据导出。
+- 30 秒部署、零配置、零代码改动，完全本地/私有化。
+- 多上游负载均衡（OpenAI / Anthropic / DeepSeek 等）。
+- 5 个官方 SDK + Chrome/Edge 扩展 + Windows/macOS 一键安装。
+- Lite 免费（PolyForm Shield 非商用）；Team / Enterprise 用离线授权码。

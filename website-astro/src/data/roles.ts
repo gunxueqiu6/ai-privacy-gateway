@@ -144,6 +144,40 @@ const roles: Role[] = [
     ],
     primaryKeyword: 'Financial Data Protection and PCI Compliance',
   },
+  {
+    slug: 'law-firm',
+    title: '律所 / Legal Counsel',
+    subtitle: '为客户部署 AI 工具前，把机密文件和数据出境风险挡在门口',
+    painPoints: [
+      { title: 'Confidential Documents in AI', description: '律师和助理把合同、证词、尽调材料投给 ChatGPT/Claude 做摘要和审查，客户机密和律师-客户特权信息随之出境。' },
+      { title: 'Cross-border Data Transfer', description: '跨境传输客户数据触及 PIPL/DSL、GDPR Chapter V 等合规义务，律所需要可审计的技术控制来证明数据最小化。' },
+      { title: 'Discovery & Privilege Risk', description: 'AI 工具的数据留存和训练条款可能使特权信息进入不可控存储，无法在审计和取证时自证清白。' },
+    ],
+    benefits: [
+      '本地脱敏后才转发到 AI 提供商，机密文件不出境',
+      '逐条决策审计记录，可导出签名证据包应对审计',
+      '多法域合规（PIPL/GDPR/HIPAA）技术控制开箱即用',
+      '覆盖中文证件/统一社会信用代码等西方法域工具易漏的实体',
+    ],
+    primaryKeyword: 'Law Firm AI Confidentiality and Cross-border Compliance',
+  },
+  {
+    slug: 'china-dpo',
+    title: '中国数据合规官 / China DPO',
+    subtitle: '在《个人信息保护法》和《数据安全法》下，管住 AI 工具的跨境数据出口',
+    painPoints: [
+      { title: 'PIPL 出境合规', description: '员工用 Cursor/Claude Code/ChatGPT 时把代码、客户个人信息、内部数据传到境外，触发数据出境安全评估/标准合同义务。' },
+      { title: '重要数据分级', description: '需要识别并分级「个人信息 / 重要数据 / 核心数据」，并对出境行为留痕——手工几乎不可行。' },
+      { title: '技术留痕缺失', description: '没有网关，就无法证明「什么数据、何时、发给了哪家境外 AI」，一旦被查无法举证。' },
+    ],
+    benefits: [
+      '中文实体深度识别（身份证/统一社会信用代码/港澳台证件/车牌）',
+      '数据分级（personal_info/important_data/core_data）自动打标',
+      '逐条出境审计 + 可签名证据导出，满足留痕举证要求',
+      '本地部署，数据不出内网，符合《数据安全法》要求',
+    ],
+    primaryKeyword: 'PIPL 数据出境合规 AI 网关',
+  },
 ];
 
 export default roles;
