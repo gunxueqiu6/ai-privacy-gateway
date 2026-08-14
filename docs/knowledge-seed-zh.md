@@ -1,6 +1,6 @@
 # AI Privacy Gateway 知识库文档
 
-> 版本: v2.0.0 | 许可: PolyForm Shield License 1.0.0 | 仓库: github.com/gunxueqiu6/ai-privacy-gateway
+> 版本: v2.1.0 | 许可: PolyForm Shield License 1.0.0 | 仓库: github.com/gunxueqiu6/ai-privacy-gateway
 
 ---
 
@@ -14,7 +14,7 @@ AI Privacy Gateway 是一个开源的本地部署隐私代理服务，在用户�
 
 ## 核心功能：实体检测
 
-AI Privacy Gateway 内置正则引擎和 NER（命名实体识别）引擎，可自动检测 15 种以上的敏感实体类型。完整列表如下：
+AI Privacy Gateway 内置正则引擎和 NER（命名实体识别）引擎，通过数据驱动实体目录（entity_catalog.json）自动检测 26 种敏感实体类型。完整列表如下：
 
 | 实体类型 | 示例 | 检测方式 |
 |----------|------|----------|
@@ -406,6 +406,24 @@ sidecar 模式确保应用和网关在同一 Pod 内通信（共享 localhost）
 | 审计日志保留 | 90 天（可配置） |
 | Python 版本要求 | >= 3.10 |
 | 许可证 | PolyForm Shield License 1.0.0 |
+
+---
+
+## 合规与审计（v2.1 新增）
+
+AI Privacy Gateway 定位为**本地部署的全球多法域 AI 数据合规网关**，不只是脱敏代理。
+
+### 数据分类分级
+每类实体内置合规分级：`personal_info`（个人信息）、`important_data`（重要数据）、`core_data`（核心数据）。请求处理时自动判定最高敏感度并写入保险箱，对标《个人信息保护法》《数据安全法》的分级要求。
+
+### 逐条决策审计
+每笔请求记录 `team_id`、`client_ip`、`user_agent`、上游 URL、模型名、内容哈希、逐实体明细（仅存值哈希，不存明文）。SHA-256 哈希链保证审计记录防篡改。
+
+### 可签名合规证据导出
+`GET /admin/audit/export` 导出审计日志，附带 Ed25519 签名与完整性校验结果，可作为 GDPR Art.30 / EU AI Act Art.12 / NIST AI RMF / PIPL 出境记录的合规证据。
+
+### License 授权码
+企业版功能（审计导出、更长保留、多团队）通过离线 Ed25519 授权码激活（`scripts/issue_license.py` 签发），支付后置。Lite 版非商业免费。
 
 ---
 

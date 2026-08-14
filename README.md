@@ -1,9 +1,9 @@
 # AI Privacy Gateway
 
-> Open-source PII masking proxy for ChatGPT, Claude, Cursor, DeepSeek, and any LLM API.
-> Install a firewall for your AI data in 30 seconds. [PolyForm Shield | Free for Noncommercial Use]
+> Local, multi-jurisdiction AI data compliance gateway for ChatGPT, Claude, Cursor, DeepSeek, and any LLM API.
+> Install a compliance firewall for your AI data in 30 seconds. [PolyForm Shield | Free for Noncommercial Use]
 
-**v2.0.0** — A high-performance reverse proxy that automatically detects and masks sensitive data (phone numbers, ID cards, emails, bank cards, names, locations, API keys, and 14+ entity types) in AI API requests and responses. Protects PII before it leaves your machine. New in v2.0: AES-256-GCM vault encryption, multi-upstream load balancer, pub/sub audit bus, browser extension SDK, Windows/macOS installers.
+**v2.1.0** — A high-performance reverse proxy that automatically detects and masks sensitive data (Chinese ID cards, Unified Social Credit Codes, HK/Macau/Taiwan permits, phone numbers, bank cards, names, API keys, and 26 entity types) in AI API requests and responses before it leaves your machine. Data-driven entity catalog with compliance classification (personal_info / important_data / core_data), per-decision audit logs with Ed25519-signed evidence export, and offline license-key activation. New: AES-256-GCM vault encryption, multi-upstream load balancer, pub/sub audit bus, browser extension SDK, Windows/macOS installers.
 
 <p align="center">
   <a href="https://privacygw.pages.dev"><strong>Website</strong></a> ·
@@ -16,7 +16,7 @@
   <img src="https://img.shields.io/github/stars/gunxueqiu6/ai-privacy-gateway?style=social" alt="GitHub Stars">
   <img src="https://img.shields.io/badge/license-PolyForm%20Shield-brightgreen" alt="PolyForm Shield">
   <img src="https://img.shields.io/badge/language-Python-blue" alt="Python">
-  <img src="https://img.shields.io/badge/PII%20Entities-14%2B-brightgreen" alt="14+ PII Entities">
+  <img src="https://img.shields.io/badge/PII%20Entities-26-brightgreen" alt="26 PII Entities">
   <img src="https://img.shields.io/badge/docker-ready-2496ED?logo=docker" alt="Docker Ready">
   <img src="https://img.shields.io/badge/latency-%3C1ms-86efac" alt="<1ms Latency">
 </p>
@@ -176,11 +176,17 @@ flowchart LR
 | Phone | 1[3-9]\d{9} | 13812345678 |
 | ID Card | 18 digits | 110101199001011234 |
 | Email | Standard format | user@example.com |
-| Bank Card | 16-19 digits (Luhn check) | 6222021234567890123 |
+| Bank Card | 16-19 digits (Luhn check) | 4111111111111111 |
+| Unified Social Credit Code | 18 chars | 91310000306245892U |
+| Passport | E + 8 digits | E12345678 |
+| HK/Macau Permit | C + 8 digits | C12345678 |
+| Taiwan Permit | L + 8 digits | L12345678 |
+| Taiwan ID | Letter + 9 digits | A123456789 |
+| Org Code | 8 chars + hyphen + 1 | 12345678-X |
 | Person Name | Chinese + English names | 张三 |
 | Location | Cities, districts, provinces | 北京市海淀区 |
 | Organization | Company names | 北京科技有限公司 |
-| Plate Number | Chinese format | 京A12345 |
+| Plate Number | Standard + new-energy | 京A12345 / 京AD12345 |
 | IP Address | IPv4 / IPv6 | 192.168.1.100 |
 | URL | HTTP/HTTPS | https://example.com |
 | Date | Various formats | 2024年1月15日 |
@@ -190,6 +196,15 @@ flowchart LR
 | Custom | User-defined regex | Passport numbers, SSN, etc. |
 
 ---
+
+## Compliance & Audit
+
+AI Privacy Gateway is a **multi-jurisdiction AI data compliance gateway**, not just a masking proxy.
+
+- **Data classification** — every entity is tagged `personal_info` / `important_data` / `core_data` (aligned with PIPL/DSL classification). The highest-sensitivity tag of each request is stored in the vault for export assessment.
+- **Per-decision audit** — every request records `team_id`, `client_ip`, `user_agent`, upstream URL, model name, content hash, and per-entity detail (value hash only, never plaintext). SHA-256 hash chaining makes the trail tamper-evident.
+- **Signed evidence export** — `GET /admin/audit/export` returns the audit log with an Ed25519 signature + integrity check, suitable for GDPR Art. 30 / EU AI Act Art. 12 / NIST AI RMF / PIPL cross-border transfer records.
+- **License-key activation** — enterprise features (audit export, long retention, multi-team) are unlocked via an offline Ed25519 license key (`scripts/issue_license.py`), payment-deferred.
 
 ## Deployment
 
@@ -344,6 +359,8 @@ python main.py
 ## License
 
 PolyForm Shield License 1.0.0. See [LICENSE](LICENSE) for details.
+
+Free for non-commercial use. Commercial use requires an offline license key — generate one with `python scripts/issue_license.py` and activate via the `LICENSE_PUBLIC_KEY` / `LICENSE_KEY` environment variables.
 
 ## Links
 

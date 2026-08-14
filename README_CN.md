@@ -1,10 +1,10 @@
 # AI Privacy Gateway
 
-> 你的 AI 数据正在裸奔。30 秒装上防火墙。
+> 本地部署的全球多法域 AI 数据合规网关。30 秒装上合规防火墙。
 
-**v2.0.0** — 开源 AI API 隐私网关。在数据离开你机器之前自动脱敏。v2.0 新增：AES-256-GCM Vault 加密、多上游负载均衡、发布/订阅审计总线、浏览器扩展 SDK、Windows/macOS 安装程序。
+**v2.1.0** — 本地部署的多法域 AI 数据合规网关，在数据离开你机器之前自动脱敏。v2.1 新增：数据驱动实体目录（26 种实体 + 合规分级）、逐条决策审计 + Ed25519 签名证据导出、离线授权码激活。
 
-高性能反向代理，自动脱敏 AI API 请求/响应中的敏感数据（手机号、身份证、邮箱、银行卡、人名、地名等），支持所有 OpenAI 兼容服务，包括 DeepSeek、Claude、ChatGPT 和 Cursor。
+高性能反向代理，自动脱敏 AI API 请求/响应中的敏感数据（身份证、统一社会信用代码、港澳台通行证、手机号、银行卡、人名、地名等 26 种实体），支持所有 OpenAI 兼容服务，包括 DeepSeek、Claude、ChatGPT 和 Cursor。
 
 <p align="center">
   <a href="https://privacygw.pages.dev"><strong>官网</strong></a> ·
@@ -17,7 +17,7 @@
   <img src="https://img.shields.io/github/stars/gunxueqiu6/ai-privacy-gateway?style=social" alt="GitHub Stars">
   <img src="https://img.shields.io/badge/license-PolyForm%20Shield-brightgreen" alt="PolyForm Shield">
   <img src="https://img.shields.io/badge/language-Python-blue" alt="Python">
-  <img src="https://img.shields.io/badge/PII%20实体-14%2B-brightgreen" alt="14+ PII 实体">
+  <img src="https://img.shields.io/badge/PII%20实体-26-brightgreen" alt="26 PII 实体">
   <img src="https://img.shields.io/badge/docker-就绪-2496ED?logo=docker" alt="Docker 就绪">
   <img src="https://img.shields.io/badge/延迟-%3C1ms-86efac" alt="<1ms 延迟">
 </p>
