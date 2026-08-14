@@ -4,6 +4,8 @@
 """
 import re
 import hashlib
+import json
+import os
 import threading
 import logging
 from abc import ABC, abstractmethod
@@ -19,12 +21,46 @@ except ImportError:
     logger.warning("NER engine not available, using regex only")
 
 
-KNOWN_ENTITY_TYPES = frozenset({
+# 基础实体类型（catalog 缺失时的回退白名单）
+_FALLBACK_ENTITY_TYPES = frozenset({
     "phone", "email", "idcard", "bankcard", "plate", "coordinates",
     "ip", "url", "date", "amount", "postcode",
     "passport", "ssn", "credit_code", "mac", "api_key",
     "person", "location", "organization", "custom",
 })
+
+
+def _load_entity_catalog() -> Optional[Dict[str, Any]]:
+    """从 entity_catalog.json 加载实体目录（数据驱动）。
+
+    目录缺失或损坏时返回 None，引擎回退到内置 BUILTIN_RULES。
+    """
+    path = os.environ.get("ENTITY_CATALOG_PATH", "./entity_catalog.json")
+    if not os.path.exists(path):
+        logger.warning("实体目录不存在: %s，使用内置回退规则", path)
+        return None
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+        entities = data.get("entities", [])
+        return {e["key"]: e for e in entities if isinstance(e, dict) and e.get("key")}
+    except Exception as e:
+        logger.warning("加载实体目录失败: %s，使用内置回退规则", e)
+        return None
+
+
+ENTITY_CATALOG: Optional[Dict[str, Any]] = _load_entity_catalog()
+
+KNOWN_ENTITY_TYPES = frozenset(ENTITY_CATALOG.keys()) if ENTITY_CATALOG else _FALLBACK_ENTITY_TYPES
+
+
+# NER 引擎返回的实体类型缩写 → 目录 key 的映射
+_NER_TYPE_TO_KEY = {
+    "PER": "person", "LOC": "location", "ORG": "organization",
+    "PHONE": "phone", "EMAIL": "email", "IDCARD": "idcard", "BANKCARD": "bankcard",
+    "PLATE": "plate", "IP": "ip", "URL": "url", "DATE": "date", "AMOUNT": "amount",
+    "POSTCODE": "postcode", "APIKEY": "api_key",
+}
 
 
 class AhoCorasickAutomaton:
@@ -255,6 +291,14 @@ class RegexMaskEngine(MaskEngineInterface):
         "api_key": "PII_APIKEY",
     }
 
+    # 内置规则匹配顺序（specific 优先于 generic；改动需谨慎）。
+    # 未在此列表中的 regex 实体按 key 排序追加在末尾。
+    BUILTIN_RULE_ORDER = (
+        "phone", "email", "credit_code", "idcard", "bankcard", "plate", "coordinates",
+        "ip", "url", "date", "api_key", "amount", "postcode", "passport", "ssn", "mac",
+        "hkmo_pass", "taiwan_pass", "taiwan_id", "org_code", "hkmo_resident", "military_id",
+    )
+
     def __init__(self):
         self.custom_keywords: List[str] = []
         self._automaton = AhoCorasickAutomaton()
@@ -263,6 +307,37 @@ class RegexMaskEngine(MaskEngineInterface):
         self._ner_engine = None
         if HAS_NER:
             self._ner_engine = get_ner_engine()
+
+        # 数据驱动实体目录（从 entity_catalog.json 加载，缺失时回退内置规则）
+        self._builtin_rules: Dict[str, re.Pattern] = {}
+        self._entity_map: Dict[str, str] = {}
+        self._entity_meta: Dict[str, Dict[str, Any]] = {}
+        self._enabled_entities: set = set()
+        self._reload_builtin_rules()
+
+    def _reload_builtin_rules(self) -> None:
+        """从 ENTITY_CATALOG 构建内置规则/实体映射/启用开关。"""
+        if ENTITY_CATALOG:
+            for key, e in ENTITY_CATALOG.items():
+                self._entity_meta[key] = e
+                self._entity_map[key] = e.get("placeholder_token") or f"PII_{key.upper()}"
+                if e.get("enabled", True):
+                    self._enabled_entities.add(key)
+                if e.get("detector") == "regex" and e.get("pattern"):
+                    try:
+                        self._builtin_rules[key] = re.compile(e["pattern"])
+                    except re.error as err:
+                        logger.warning("实体 '%s' 正则无效，已跳过: %s", key, err)
+        else:
+            self._builtin_rules = dict(self.BUILTIN_RULES)
+            self._entity_map = dict(self.ENTITY_TYPE_MAP)
+            self._enabled_entities = set(self.BUILTIN_RULES.keys()) | {"person", "location", "organization", "custom"}
+            for key, token in self._entity_map.items():
+                detector = "ner" if key in ("person", "location", "organization") else "regex"
+                self._entity_meta[key] = {
+                    "key": key, "placeholder_token": token, "detector": detector,
+                    "enabled": True, "compliance_tag": "personal_info",
+                }
 
     @staticmethod
     def _to_alpha_id(n: int) -> str:
@@ -276,6 +351,21 @@ class RegexMaskEngine(MaskEngineInterface):
             result.append(chr(ord('A') + (n % 26)))
             n //= 26
         return ''.join(reversed(result))
+
+    @staticmethod
+    def _luhn_valid(number: str) -> bool:
+        """Luhn 校验（银行卡等卡号的校验位验证）。"""
+        if not number.isdigit():
+            return False
+        total = 0
+        for i, ch in enumerate(number[::-1]):
+            d = int(ch)
+            if i % 2 == 1:
+                d *= 2
+                if d > 9:
+                    d -= 9
+            total += d
+        return total % 10 == 0
 
     @classmethod
     def _get_next_sequence(cls) -> str:
@@ -297,7 +387,7 @@ class RegexMaskEngine(MaskEngineInterface):
         The optional filter_fn(match) should return True to skip the match.
         """
         replacements = []
-        for match in self.BUILTIN_RULES[rule_key].finditer(result):
+        for match in self._builtin_rules[rule_key].finditer(result):
             match_str = match.group(0)
             if filter_fn and filter_fn(match_str):
                 continue
@@ -318,12 +408,7 @@ class RegexMaskEngine(MaskEngineInterface):
         """
         result = text
         mappings: Dict[str, str] = {}
-        stats: Dict[str, int] = {
-            "phone": 0, "email": 0, "idcard": 0, "bankcard": 0,
-            "plate": 0, "coordinates": 0, "ip": 0, "url": 0, "date": 0, "amount": 0, "postcode": 0,
-            "passport": 0, "ssn": 0, "credit_code": 0, "mac": 0, "api_key": 0,
-            "person": 0, "location": 0, "organization": 0, "custom": 0
-        }
+        stats: Dict[str, int] = {key: 0 for key in self._entity_map}
 
         # 1. 自定义关键词优先处理（使用 Aho-Corasick 自动机，位置替换）
         kw_matches = self._automaton.search(result)
@@ -356,19 +441,27 @@ class RegexMaskEngine(MaskEngineInterface):
         if self._ner_engine:
             entities = self._ner_engine.detect(result)
             for entity in entities:
-                entity_type = entity.entity_type.value.lower()
-                if entity_type in stats:
+                entity_type = _NER_TYPE_TO_KEY.get(
+                    entity.entity_type.value, entity.entity_type.value.lower()
+                )
+                if entity_type in stats and entity_type in self._enabled_entities:
                     placeholder = self._create_placeholder(entity_type, entity.value)
                     result = result.replace(entity.value, placeholder)
                     mappings[placeholder] = entity.value
                     stats[entity_type] += 1
 
-        # 4. 内置规则（银行卡需跳过11位手机号误匹配）
-        _not_bankcard = lambda m: len(m) == 11 and m.startswith('1')
-        for rule_key in ("phone", "email", "idcard", "bankcard", "plate",
-                          "coordinates", "ip", "url", "date", "api_key", "amount", "postcode",
-                          "passport", "ssn", "credit_code", "mac"):
-            filter_fn = _not_bankcard if rule_key == "bankcard" else None
+        # 4. 内置规则（按 BUILTIN_RULE_ORDER 顺序，specific 优先；银行卡需跳过11位手机号并做 Luhn 校验）
+        def _bankcard_filter(m: str) -> bool:
+            if len(m) == 11 and m.startswith('1'):
+                return True  # 跳过手机号
+            return not RegexMaskEngine._luhn_valid(m)  # 跳过非 Luhn 卡号
+
+        ordered = [k for k in self.BUILTIN_RULE_ORDER
+                   if k in self._builtin_rules and k in self._enabled_entities]
+        ordered += [k for k in sorted(self._builtin_rules.keys())
+                    if k not in ordered and k in self._enabled_entities]
+        for rule_key in ordered:
+            filter_fn = _bankcard_filter if rule_key == "bankcard" else None
             result = self._apply_rule(result, rule_key, mappings, stats, filter_fn)
 
         return result, mappings, stats
@@ -454,6 +547,61 @@ class RegexMaskEngine(MaskEngineInterface):
             self._disabled_custom_regex_rules.add(name)
         logger.info(f"{'启用' if enabled else '禁用'}自定义正则规则: name={name}")
         return True
+
+    def get_entity_catalog(self) -> List[Dict[str, Any]]:
+        """返回实体目录元数据（供 /api/entities 等使用）。"""
+        result = []
+        for key, meta in self._entity_meta.items():
+            result.append({
+                "type": meta.get("placeholder_token") or f"PII_{key.upper()}",
+                "key": key,
+                "name": meta.get("name_zh") or meta.get("name_en", key),
+                "name_en": meta.get("name_en", key),
+                "description": meta.get("name_en", ""),
+                "enabled": key in self._enabled_entities,
+                "engine": meta.get("detector", "regex"),
+                "compliance_tag": meta.get("compliance_tag", "personal_info"),
+            })
+        return result
+
+
+def placeholder_to_token(placeholder: str) -> str:
+    """从占位符解析实体 token（如 [PII_BANKCARD_A] → PII_BANK）。"""
+    m = re.match(r'\[PII_(\w+)_([A-Z]+)\]', placeholder)
+    if not m:
+        return "unknown"
+    key_upper = m.group(1)
+    catalog = ENTITY_CATALOG
+    if catalog:
+        for key, meta in catalog.items():
+            if key.upper() == key_upper:
+                return meta.get("placeholder_token") or f"PII_{key.upper()}"
+    return "unknown"
+
+
+def compliance_tag_for_key(key: str) -> str:
+    """返回实体 key 的合规分级（personal_info/important_data/core_data）。"""
+    catalog = ENTITY_CATALOG
+    if catalog and key in catalog:
+        return catalog[key].get("compliance_tag", "personal_info")
+    return "personal_info"
+
+
+_COMPLIANCE_PRIORITY = {"personal_info": 1, "important_data": 2, "core_data": 3}
+
+
+def dominant_compliance_tag(stats: Dict[str, int]) -> str:
+    """从统计 dict 推导最高敏感度的数据分级。"""
+    best = "personal_info"
+    best_p = 1
+    for key, count in stats.items():
+        if key == "total" or count <= 0:
+            continue
+        tag = compliance_tag_for_key(key)
+        p = _COMPLIANCE_PRIORITY.get(tag, 1)
+        if p > best_p:
+            best, best_p = tag, p
+    return best
 
 
 def create_mask_engine() -> MaskEngineInterface:

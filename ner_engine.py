@@ -57,6 +57,20 @@ class NEREntity:
         }
 
 
+# 常见词停用表：单字姓 + 1~2 字会误判的常用词，规则引擎据此降误报。
+_COMMON_WORD_STOPLIST = frozenset({
+    '安全', '任何', '因为', '所以', '包含', '没有', '文本', '普通', '信息', '通过',
+    '进行', '什么', '这个', '那个', '应该', '可以', '就是', '还是', '但是', '然后',
+    '以及', '关于', '对于', '由于', '根据', '按照', '经过', '其他', '一些', '这样',
+    '那样', '等等', '我们', '你们', '他们', '自己', '已经', '正在', '如果', '虽然',
+})
+
+
+def _filter_common_words(entities: List[NEREntity]) -> List[NEREntity]:
+    """过滤被误判为实体的常见词。"""
+    return [e for e in entities if e.value not in _COMMON_WORD_STOPLIST]
+
+
 class NEREngine:
     """NER 命名实体识别引擎"""
     
@@ -80,11 +94,27 @@ class NEREngine:
         return self._is_enabled
     
     def _load_model(self):
-        """加载 ONNX NER 模型"""
+        """加载 ONNX NER 模型（接入真实模型的集成点）。
+
+        预期模型接口（标准 BERT 类 NER ONNX 导出）:
+          - 输入: input_ids (int64 [batch, seq]), attention_mask (int64 [batch, seq])
+          - 输出: logits (float [batch, seq, num_labels])
+        需配套同 vocab 的分词器（BERT WordPiece 类），将文本映射为 subword id，
+        再按 subword→char 对齐把标签还原为实体区间。
+
+        当前未捆绑模型文件；detect() 始终走规则回退（_detect_by_regex /
+        _detect_chinese_names / _detect_locations / _detect_organizations）。
+        提供 NER_MODEL_PATH 指向模型文件并实现 _run_onnx() 后即可启用推理。
+        """
         if os.path.exists(self._model_path):
-            self._session = ort.InferenceSession(self._model_path)
+            try:
+                self._session = ort.InferenceSession(self._model_path)
+                logger.info(f"已加载 NER 模型: {self._model_path}")
+            except Exception as e:
+                logger.warning(f"NER 模型加载失败: {e}，回退规则模式")
+                self._session = None
         else:
-            logger.info(f"NER 模型文件不存在: {self._model_path}，将使用轻量级模式")
+            logger.info(f"NER 模型文件不存在: {self._model_path}，将使用轻量级规则模式")
     
     def _tokenize(self, text: str) -> Tuple[List[str], List[Tuple[int, int]]]:
         """分词并保留位置信息"""
@@ -162,6 +192,23 @@ class NEREngine:
             '元', '卜', '顾', '孟', '平', '黄', '和', '穆', '萧', '尹'
         ])
 
+        # 复姓（compound surnames）优先检测，避免与单字姓逻辑冲突
+        compound_surnames = [
+            '欧阳', '司马', '上官', '诸葛', '东方', '西门', '南宫', '轩辕',
+            '令狐', '皇甫', '宇文', '长孙', '慕容', '公孙', '尉迟', '夏侯',
+            '司徒', '司空', '端木', '呼延', '钟离', '百里', '东郭', '羊舌',
+            '宗政', '濮阳', '独孤', '鲜于', '闾丘', '太史', '万俟', '闻人',
+        ]
+        compound_pattern = re.compile('(' + '|'.join(compound_surnames) + r')[一-鿿]{1,2}')
+        for match in compound_pattern.finditer(text):
+            token = match.group()
+            entities.append(NEREntity(
+                entity_type=NEREntityType.PERSON,
+                value=token,
+                start=match.start(),
+                end=match.end()
+            ))
+
         # Fallback: regex-based detection for Chinese names (surname + 1-2 given name chars).
         # Uses non-greedy matching to prefer 2-char names (surname + 1 given) first.
         # CJK range uses \\u escapes to avoid Windows GBK encoding issues.
@@ -182,7 +229,7 @@ class NEREngine:
             ))
 
         if not HAS_JIEBA:
-            return self._dedup_entities(entities)
+            return self._dedup_entities(_filter_common_words(entities))
 
         tokens, positions = self._tokenize(text)
         
@@ -211,9 +258,9 @@ class NEREngine:
                     start=pos[0],
                     end=pos[1]
                 ))
-        
-        return entities
-    
+
+        return _filter_common_words(entities)
+
     def _detect_locations(self, text: str) -> List[NEREntity]:
         """检测地名（基于规则）"""
         entities = []
@@ -239,7 +286,7 @@ class NEREngine:
                 ))
         
         tokens, positions = self._tokenize(text)
-        
+
         for token, pos in zip(tokens, positions):
             if any(suffix in token for suffix in city_suffixes + area_suffixes):
                 entities.append(NEREntity(
@@ -248,20 +295,47 @@ class NEREngine:
                     start=pos[0],
                     end=pos[1]
                 ))
-        
+
         return entities
-    
-    def detect(self, text: str) -> List[NEREntity]:
-        """检测文本中的实体"""
+
+    def _detect_organizations(self, text: str) -> List[NEREntity]:
+        """检测机构名（基于规则：名称 + 机构后缀）。"""
         entities = []
-        
-        if self._session:
-            pass
-        else:
-            entities.extend(self._detect_by_regex(text))
-            entities.extend(self._detect_chinese_names(text))
-            entities.extend(self._detect_locations(text))
-        
+        # 后缀按长度降序，避免短后缀（'公司'）在长后缀（'有限公司'）之前匹配
+        org_suffixes = sorted([
+            '股份有限公司', '有限责任公司', '有限公司', '集团公司',
+            '公司', '集团', '银行', '大学', '学院', '医院', '研究院',
+            '研究所', '事务所', '中心', '协会', '委员会', '基金会',
+            '合作社', '学校', '出版社', '电视台', '证券', '保险',
+        ], key=len, reverse=True)
+        pattern = re.compile(r'([一-鿿]{2,12}?)(?:' + '|'.join(org_suffixes) + ')')
+        for match in pattern.finditer(text):
+            name = match.group(1)
+            full = match.group()
+            if len(name) < 2:
+                continue
+            # 排除明显非机构名（名称全是地名常见字/方位词）
+            if all(ch in '东西南北中上下左右前后' for ch in name):
+                continue
+            entities.append(NEREntity(
+                entity_type=NEREntityType.ORGANIZATION,
+                value=full,
+                start=match.start(),
+                end=match.end()
+            ))
+        return entities
+
+    def detect(self, text: str) -> List[NEREntity]:
+        """检测文本中的实体（纯规则模式）。
+
+        ONNX 模型仅作未来扩展预留；当前未捆绑模型文件，检测始终走规则回退。
+        """
+        entities = []
+        entities.extend(self._detect_by_regex(text))
+        entities.extend(self._detect_chinese_names(text))
+        entities.extend(self._detect_locations(text))
+        entities.extend(self._detect_organizations(text))
+
         entities = self._remove_overlaps(entities)
         return entities
     

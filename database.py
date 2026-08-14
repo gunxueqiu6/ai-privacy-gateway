@@ -16,11 +16,15 @@ logger = logging.getLogger(__name__)
 
 DB_PATH = os.environ.get("DB_PATH", "./vault_data/privacy_vault.db")
 
-ALLOWED_STATS_COLUMNS = frozenset({
+# 统计实体列（对齐 entity_catalog.json；organization 归并为 org）
+STATS_ENTITY_COLUMNS = [
     "phone", "email", "idcard", "bankcard", "custom",
-    "person", "location", "org", "plate", "ip",
-    "url", "date", "amount", "postcode", "total",
-})
+    "person", "location", "org", "plate", "ip", "url", "date", "amount", "postcode",
+    "coordinates", "passport", "ssn", "credit_code", "mac", "api_key",
+    "hkmo_pass", "taiwan_pass", "taiwan_id", "org_code", "hkmo_resident", "military_id",
+]
+
+ALLOWED_STATS_COLUMNS = frozenset(STATS_ENTITY_COLUMNS) | {"total"}
 
 class Database:
     def __init__(self, db_path: Optional[str] = None, mapping_ttl: Optional[int] = None) -> None:
@@ -111,30 +115,6 @@ class Database:
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
 
-                CREATE TABLE IF NOT EXISTS stats (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    date TEXT NOT NULL,
-                    team_id TEXT DEFAULT 'default',
-                    phone_count INTEGER DEFAULT 0,
-                    email_count INTEGER DEFAULT 0,
-                    idcard_count INTEGER DEFAULT 0,
-                    bankcard_count INTEGER DEFAULT 0,
-                    custom_count INTEGER DEFAULT 0,
-                    person_count INTEGER DEFAULT 0,
-                    location_count INTEGER DEFAULT 0,
-                    org_count INTEGER DEFAULT 0,
-                    plate_count INTEGER DEFAULT 0,
-                    ip_count INTEGER DEFAULT 0,
-                    url_count INTEGER DEFAULT 0,
-                    date_count INTEGER DEFAULT 0,
-                    amount_count INTEGER DEFAULT 0,
-                    postcode_count INTEGER DEFAULT 0,
-                    total_count INTEGER DEFAULT 0,
-                    UNIQUE(date, team_id)
-                );
-
-                CREATE INDEX IF NOT EXISTS idx_stats_team_date ON stats(team_id, date);
-
                 CREATE TABLE IF NOT EXISTS audit_log (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     session_id TEXT,
@@ -181,6 +161,31 @@ class Database:
 
                 CREATE INDEX IF NOT EXISTS idx_api_keys_team ON user_api_keys(team_id);
             """)
+            self._create_stats_table(cursor)
+            self._migrate_stats_columns(cursor)
+
+    def _create_stats_table(self, cursor) -> None:
+        """动态创建 stats 表（列对齐 STATS_ENTITY_COLUMNS）。"""
+        cols = ", ".join(f"{c}_count INTEGER DEFAULT 0" for c in STATS_ENTITY_COLUMNS)
+        cursor.execute(f"""
+            CREATE TABLE IF NOT EXISTS stats (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                date TEXT NOT NULL,
+                team_id TEXT DEFAULT 'default',
+                {cols},
+                total_count INTEGER DEFAULT 0,
+                UNIQUE(date, team_id)
+            )
+        """)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_stats_team_date ON stats(team_id, date)")
+
+    def _migrate_stats_columns(self, cursor) -> None:
+        """为旧库补齐缺失的统计列（ALTER TABLE ADD COLUMN）。"""
+        existing = {row[1] for row in cursor.execute("PRAGMA table_info(stats)")}
+        for c in STATS_ENTITY_COLUMNS + ["total"]:
+            col = f"{c}_count"
+            if col not in existing:
+                cursor.execute(f'ALTER TABLE stats ADD COLUMN "{col}" INTEGER DEFAULT 0')
 
     def _ensure_initialized(self) -> None:
         """Health check: verify the database is accessible and tables exist.
@@ -588,8 +593,7 @@ class Database:
 
             # 构建更新语句
             set_clauses = []
-            old_fields = ["phone", "email", "idcard", "bankcard", "custom"]
-            new_fields = ["person", "location", "org", "plate", "ip", "url", "date", "amount", "postcode"]
+            fields = STATS_ENTITY_COLUMNS
 
             update_params = []
             for data_type, count in normalized_stats.items():
@@ -607,15 +611,15 @@ class Database:
 
             # nosec B608 — columns from ALLOWED_STATS_COLUMNS allowlist
             sql = f"""
-                INSERT INTO stats (date, team_id, {', '.join([f"{f}_count" for f in old_fields + new_fields])}, total_count)
-                VALUES (?, ?, {', '.join(['?'] * (len(old_fields + new_fields) + 1))})
+                INSERT INTO stats (date, team_id, {', '.join([f"{f}_count" for f in fields])}, total_count)
+                VALUES (?, ?, {', '.join(['?'] * (len(fields) + 1))})
                 ON CONFLICT(date, team_id) DO UPDATE SET
                 {', '.join(set_clauses)},
                 total_count = total_count + ?
             """
 
             insert_values: List[Any] = [today, team_id or "default"]
-            for f in old_fields + new_fields:
+            for f in fields:
                 insert_values.append(normalized_stats.get(f, 0))
             insert_values.append(sum(normalized_stats.values()))
 
@@ -625,41 +629,16 @@ class Database:
     def get_today_stats(self) -> Dict[str, Any]:
         """Get aggregated stats across all teams for today."""
         today = datetime.now().strftime("%Y-%m-%d")
-        cols = [
-            "phone_count", "email_count", "idcard_count", "bankcard_count", "custom_count",
-            "person_count", "location_count", "org_count", "plate_count", "ip_count",
-            "url_count", "date_count", "amount_count", "postcode_count", "total_count",
-        ]
+        cols = [f"{c}_count" for c in STATS_ENTITY_COLUMNS] + ["total_count"]
         sums = ", ".join(f"SUM({c}) as {c}" for c in cols)
         with self.get_conn() as conn:
             cursor = conn.cursor()
             cursor.execute(f"SELECT {sums} FROM stats WHERE date = ?", (today,))
             row = cursor.fetchone()
-            if row:
-                result = dict(row)
-                # Ensure all values are non-None
-                for c in cols:
-                    result[c] = result.get(c, 0) or 0
-                result["date"] = today
-                return result
-            return {
-                "date": today,
-                "phone_count": 0,
-                "email_count": 0,
-                "idcard_count": 0,
-                "bankcard_count": 0,
-                "custom_count": 0,
-                "person_count": 0,
-                "location_count": 0,
-                "org_count": 0,
-                "plate_count": 0,
-                "ip_count": 0,
-                "url_count": 0,
-                "date_count": 0,
-                "amount_count": 0,
-                "postcode_count": 0,
-                "total_count": 0
-            }
+            result = {"date": today}
+            for c in cols:
+                result[c] = row[c] if row and row[c] is not None else 0
+            return result
 
     def get_stats_range(self, from_date: str, to_date: str) -> List[Dict[str, Any]]:
         """Get daily stats for a date range (inclusive), aggregated across all teams.
@@ -683,6 +662,25 @@ class Database:
             cursor.execute("SELECT * FROM user_api_keys WHERE key_hash = ?", (key_hash,))
             row = cursor.fetchone()
             return dict(row) if row else None
+
+    def verify_api_key(self, key_hash: str) -> Optional[Dict[str, Any]]:
+        """Verify an API key hash exists and is active.
+
+        Returns the row dict for an active key, or *None* if the key is
+        unknown or has been deactivated.
+        """
+        try:
+            with self.get_conn() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT * FROM user_api_keys WHERE key_hash = ? AND is_active = 1",
+                    (key_hash,)
+                )
+                row = cursor.fetchone()
+                return dict(row) if row else None
+        except Exception:
+            logger.exception("验证API密钥失败")
+            return None
 
     def create_api_key(self, key_hash: str, key_prefix: str, team_id: str = "default",
                        tier: str = "free", label: str = None) -> None:
@@ -795,13 +793,50 @@ class Database:
             logger.exception("查询会话审计日志失败")
             return []
 
+    # ==================== Audit Export ====================
+
+    def get_audit_log(self, team_id: Optional[str] = None, limit: int = 1000, offset: int = 0) -> List[Dict[str, Any]]:
+        """分页获取审计日志（可按 team_id 过滤；team_id 存在 detail_json 中）。"""
+        try:
+            with self.get_conn() as conn:
+                cursor = conn.cursor()
+                if team_id:
+                    cursor.execute(
+                        "SELECT * FROM audit_log WHERE detail_json LIKE ? "
+                        "ORDER BY id DESC LIMIT ? OFFSET ?",
+                        (f'%"team_id": "{team_id}"%', limit, offset)
+                    )
+                else:
+                    cursor.execute(
+                        "SELECT * FROM audit_log ORDER BY id DESC LIMIT ? OFFSET ?",
+                        (limit, offset)
+                    )
+                return [dict(row) for row in cursor.fetchall()]
+        except Exception:
+            logger.exception("查询审计日志失败")
+            return []
+
+    def count_audit_log(self, team_id: Optional[str] = None) -> int:
+        """统计审计日志条数。"""
+        try:
+            with self.get_conn() as conn:
+                cursor = conn.cursor()
+                if team_id:
+                    cursor.execute(
+                        "SELECT COUNT(*) FROM audit_log WHERE detail_json LIKE ?",
+                        (f'%"team_id": "{team_id}"%',)
+                    )
+                else:
+                    cursor.execute("SELECT COUNT(*) FROM audit_log")
+                row = cursor.fetchone()
+                return row[0] if row else 0
+        except Exception:
+            logger.exception("统计审计日志失败")
+            return 0
+
     # ==================== Team Stats ====================
 
-    STATS_COLUMNS = [
-        "phone_count", "email_count", "idcard_count", "bankcard_count", "custom_count",
-        "person_count", "location_count", "org_count", "plate_count", "ip_count",
-        "url_count", "date_count", "amount_count", "postcode_count", "total_count",
-    ]
+    STATS_COLUMNS = [f"{c}_count" for c in STATS_ENTITY_COLUMNS] + ["total_count"]
 
     def get_team_stats_range(self, team_id: str, days: int = 7) -> list:
         try:
@@ -855,8 +890,8 @@ class Database:
                         )
                         WHERE a.created_at < datetime('now',
                             CASE
-                                WHEN k.tier = 'enterprise' THEN '-90 days'
-                                WHEN k.tier = 'team' THEN '-30 days'
+                                WHEN k.tier = 'enterprise' THEN '-3650 days'
+                                WHEN k.tier = 'team' THEN '-90 days'
                                 ELSE '-7 days'
                             END
                         )

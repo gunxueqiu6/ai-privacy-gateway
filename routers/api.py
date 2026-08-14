@@ -6,8 +6,8 @@ import json
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import JSONResponse
 
-from mask_engine import get_mask_engine, HAS_NER
-from database import db
+from mask_engine import get_mask_engine, HAS_NER, placeholder_to_token
+from database import db, STATS_ENTITY_COLUMNS
 
 from .dependencies import safe_json, BAD_ENCODING_RESPONSE, limiter
 from .auth import verify_api_key
@@ -16,17 +16,7 @@ api_router = APIRouter(tags=["api"])
 
 
 def _entity_type_from_placeholder(placeholder: str) -> str:
-    mapping = {
-        "PHONE": "PII_PHONE", "EMAIL": "PII_EMAIL", "IDCARD": "PII_IDCARD",
-        "BANK": "PII_BANK", "PER": "PII_PER", "LOC": "PII_LOC", "ORG": "PII_ORG",
-        "PLATE": "PII_PLATE", "IP": "PII_IP", "URL": "PII_URL",
-        "DATE": "PII_DATE", "AMOUNT": "PII_AMOUNT", "POSTCODE": "PII_POSTCODE",
-        "CUST": "PII_CUST",
-    }
-    for key, entity in mapping.items():
-        if key in placeholder:
-            return entity
-    return "unknown"
+    return placeholder_to_token(placeholder)
 
 
 @api_router.post("/api/mask")
@@ -122,33 +112,15 @@ async def api_mask_batch(request: Request):
 
 @api_router.get("/api/entities")
 async def api_get_entities(request: Request) -> dict:
-    """获取支持的实体类型列表"""
-    entities = [
-        {"type": "PII_PHONE", "name": "手机号", "description": "中国大陆手机号", "enabled": True, "engine": "regex"},
-        {"type": "PII_EMAIL", "name": "邮箱", "description": "电子邮箱地址", "enabled": True, "engine": "regex"},
-        {"type": "PII_IDCARD", "name": "身份证", "description": "中国身份证号码", "enabled": True, "engine": "regex"},
-        {"type": "PII_BANK", "name": "银行卡", "description": "银行卡号码", "enabled": True, "engine": "regex"},
-        {"type": "PII_PER", "name": "人名", "description": "中文人名", "enabled": HAS_NER, "engine": "ner" if HAS_NER else "unavailable"},
-        {"type": "PII_LOC", "name": "地名", "description": "省份、城市、区县等", "enabled": HAS_NER, "engine": "ner" if HAS_NER else "unavailable"},
-        {"type": "PII_ORG", "name": "机构名", "description": "公司、组织名称", "enabled": HAS_NER, "engine": "ner" if HAS_NER else "unavailable"},
-        {"type": "PII_PLATE", "name": "车牌号", "description": "中国车牌号", "enabled": True, "engine": "regex"},
-        {"type": "PII_IP", "name": "IP地址", "description": "IPv4 地址", "enabled": True, "engine": "regex"},
-        {"type": "PII_URL", "name": "URL", "description": "网址链接", "enabled": True, "engine": "regex"},
-        {"type": "PII_DATE", "name": "日期", "description": "日期格式", "enabled": True, "engine": "regex"},
-        {"type": "PII_AMOUNT", "name": "金额", "description": "货币金额", "enabled": True, "engine": "regex"},
-        {"type": "PII_POSTCODE", "name": "邮编", "description": "邮政编码", "enabled": True, "engine": "regex"},
-        {"type": "PII_CUST", "name": "自定义", "description": "自定义敏感词", "enabled": True, "engine": "regex"},
-    ]
+    """获取支持的实体类型列表（数据驱动）"""
+    engine = get_mask_engine()
+    entities = engine.get_entity_catalog()
     return {"entities": entities, "total": len(entities), "version": "Lite", "ner_available": HAS_NER}
 
 
 # ==================== 用户可见性仪表盘 ====================
 
-STATS_TYPE_KEYS = [
-    "phone_count", "email_count", "idcard_count", "bankcard_count", "custom_count",
-    "person_count", "location_count", "org_count", "plate_count", "ip_count",
-    "url_count", "date_count", "amount_count", "postcode_count",
-]
+STATS_TYPE_KEYS = [f"{c}_count" for c in STATS_ENTITY_COLUMNS]
 
 
 def _strip_count_suffix(stats_row: dict) -> dict:

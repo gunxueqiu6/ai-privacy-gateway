@@ -5,13 +5,14 @@ import hashlib
 import json
 import logging
 
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 
 from routers.dependencies import BAD_ENCODING_RESPONSE, filter_proxy_headers, limiter, safe_json
 from gateway_core import get_gateway_core
 from database import db
 from config import config
+from mask_engine import dominant_compliance_tag
 
 logger = logging.getLogger(__name__)
 
@@ -21,9 +22,11 @@ ALLOWED_V1_PROXY_PATHS = {"models", "embeddings", "moderations", "messages", "im
 
 
 def _resolve_auth_and_headers(request: Request):
-    """Extract auth header, raw API key, and build forwarding headers.
+    """Extract auth header, validate the API key, and build forwarding headers.
 
-    Returns (headers_dict, raw_api_key) or (None, None) if unauthorized.
+    Returns (headers_dict, raw_api_key, team_id).
+
+    Raises HTTPException(401) if the API key is missing or not registered.
 
     Backward-compatible: checks Authorization first, then falls back
     to X-API-Key for older SDKs that haven't migrated yet.
@@ -38,24 +41,41 @@ def _resolve_auth_and_headers(request: Request):
         if raw_api_key:
             auth_header = f"Bearer {raw_api_key}"
     if not auth_header:
-        return None, None
+        raise HTTPException(status_code=401, detail="未授权 - 需要 API Key")
 
+    team_id = _lookup_team_id(raw_api_key)
     headers = filter_proxy_headers(request.headers)
-    return headers, raw_api_key
+    return headers, raw_api_key, team_id
 
 
 def _lookup_team_id(raw_api_key: str) -> str:
-    """Look up team_id from user_api_keys by hashing the raw API key."""
+    """Look up team_id from user_api_keys by hashing the raw API key.
+
+    Unknown keys are rejected with 401 unless ALLOW_ANONYMOUS=true, in
+    which case they fall back to the 'default' team.
+    """
     if not raw_api_key:
-        return "default"
+        return _anonymous_or_reject()
     try:
         key_hash = hashlib.sha256(raw_api_key.encode()).hexdigest()
-        row = db.get_api_key(key_hash)
-        if row and row.get("team_id"):
-            return row["team_id"]
+        row = db.verify_api_key(key_hash)
+        if row:
+            try:
+                db.update_api_key_last_used(key_hash)
+            except Exception:
+                logger.warning("Failed to update API key last_used", exc_info=True)
+            return row.get("team_id") or "default"
     except Exception:
-        logger.warning("API key lookup failed, falling back to 'default' team")
-    return "default"
+        logger.warning("API key lookup failed", exc_info=True)
+    return _anonymous_or_reject()
+
+
+def _anonymous_or_reject() -> str:
+    """Return 'default' when anonymous access is enabled, otherwise reject with 401."""
+    if config.ALLOW_ANONYMOUS:
+        logger.warning("未知 API Key，ALLOW_ANONYMOUS=true 回退到 default 团队")
+        return "default"
+    raise HTTPException(status_code=401, detail="未授权 - 无效的 API Key")
 
 
 @proxy_router.post("/v1/chat/completions")
@@ -67,13 +87,16 @@ async def chat_completions(request: Request) -> Response:
     if not ok:
         return BAD_ENCODING_RESPONSE
 
-    headers, raw_api_key = _resolve_auth_and_headers(request)
-    if headers is None:
-        return JSONResponse(status_code=401, content={"error": "未授权 - 需要 API Key"})
+    headers, raw_api_key, team_id = _resolve_auth_and_headers(request)
 
-    team_id = _lookup_team_id(raw_api_key) if raw_api_key else "default"
+    audit_ctx = {
+        "team_id": team_id,
+        "key_hash": hashlib.sha256(raw_api_key.encode()).hexdigest() if raw_api_key else None,
+        "client_ip": request.client.host if request.client else None,
+        "user_agent": request.headers.get("user-agent"),
+    }
 
-    masked_body, mappings, stats, session_id, used_placeholders = gateway.mask_request(body)
+    masked_body, mappings, stats, session_id, used_placeholders = gateway.mask_request(body, audit_ctx)
 
     # 脱敏透明度响应头（所有请求都注入）
     total_masked = sum(v for k, v in stats.items() if k != "total")
@@ -94,7 +117,7 @@ async def chat_completions(request: Request) -> Response:
             dry_run_headers["X-Dry-Run-Detected-Types"] = ",".join(detected_types)
 
     if mappings and not config.DRY_RUN_MODE:
-        db.save_mappings(session_id, mappings, data_type="unknown", team_id=team_id)
+        db.save_mappings(session_id, mappings, data_type=dominant_compliance_tag(stats), team_id=team_id)
         db.update_stats(stats, team_id=team_id)
 
     if body.get("stream", False):
@@ -103,7 +126,7 @@ async def chat_completions(request: Request) -> Response:
 
         async def generate():
             async for chunk in gateway.proxy_stream_request(
-                masked_body, headers, mappings, used_placeholders
+                masked_body, headers, mappings, used_placeholders, session_id, audit_ctx
             ):
                 data = chunk.get("data", "")
                 if data == "[DONE]":
@@ -120,7 +143,7 @@ async def chat_completions(request: Request) -> Response:
         return EventSourceResponse(generate())
 
     status_code, resp_body, resp_headers = await gateway.proxy_request(
-        masked_body, headers, mappings, session_id
+        masked_body, headers, mappings, session_id, audit_ctx
     )
 
     if isinstance(resp_body, bytes):
@@ -158,9 +181,7 @@ async def proxy_v1(request: Request, path: str) -> Response:
 
     gateway = get_gateway_core()
 
-    headers, raw_api_key = _resolve_auth_and_headers(request)
-    if headers is None:
-        return JSONResponse(status_code=401, content={"error": "未授权 - 需要 API Key"})
+    headers, _raw_api_key, _team_id = _resolve_auth_and_headers(request)
 
     method = request.method
     body_bytes = await request.body() if method in ["POST", "PUT", "PATCH"] else None

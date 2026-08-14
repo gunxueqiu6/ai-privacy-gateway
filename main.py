@@ -375,9 +375,8 @@ if __name__ == "__main__":
         f"  API:          http://localhost:{config.LISTEN_PORT}/v1",
         f"  Admin:        http://localhost:{config.LISTEN_PORT}/admin",
         f"  Target:       {config.TARGET_LLM}",
-        f"  Admin PW:     {config.ADMIN_PASSWORD}",
+        "  Admin account configured. Login at /admin/login",
         "-" * 56,
-        "  [!] Save the admin password above immediately!",
         "  Configure your AI client to use the API URL above.",
         "=" * 56,
     ]

@@ -77,7 +77,11 @@ def get_vault_crypto() -> Optional[VaultCrypto]:
 
     key_str = app_config.VAULT_ENCRYPT_KEY
     if not key_str:
-        logger.info("VAULT_ENCRYPT_KEY is empty — vault encryption disabled")
+        logger.warning(
+            "VAULT_ENCRYPT_KEY is empty — Vault PII is stored in PLAINTEXT (INSECURE). "
+            "Refusing plaintext is the default; set ALLOW_PLAINTEXT_VAULT=true only if "
+            "you explicitly accept unencrypted PII at rest."
+        )
         return None
 
     key_bytes = key_str.encode("utf-8")

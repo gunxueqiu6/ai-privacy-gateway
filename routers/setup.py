@@ -11,10 +11,15 @@ from pathlib import Path
 from typing import Optional
 
 import httpx
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 
-from .dependencies import safe_json, BAD_ENCODING_RESPONSE
+from .dependencies import (
+    BAD_ENCODING_RESPONSE,
+    get_current_user_token,
+    require_admin,
+    safe_json,
+)
 from config import _save_persisted_secrets, _load_persisted_secrets
 
 import bcrypt
@@ -108,8 +113,44 @@ def _write_env(env_dict: dict[str, str]) -> None:
 
 
 # ---------------------------------------------------------------------------
-#  Validation helpers
+#  Auth
 # ---------------------------------------------------------------------------
+
+
+def _admin_configured() -> bool:
+    """Whether the gateway has been configured with an admin (non-empty .env)."""
+    env_path = _get_env_path()
+    return env_path.exists() and env_path.stat().st_size > 0
+
+
+# One-time bootstrap token for first-run setup access (printed to console).
+_bootstrap_token: Optional[str] = None
+if not _admin_configured():
+    _bootstrap_token = secrets.token_urlsafe(32)
+    logger.warning("=" * 64)
+    logger.warning("FIRST-RUN SETUP BOOTSTRAP TOKEN: %s", _bootstrap_token)
+    logger.warning("Pass it as 'Authorization: Bearer <token>' to /api/setup endpoints.")
+    logger.warning("This token is valid only until the gateway is configured.")
+    logger.warning("=" * 64)
+
+
+async def _require_setup_token(request: Request) -> str:
+    """Protect setup routes.
+
+    - Once an admin is configured, requires a valid admin JWT (require_admin).
+    - On first run (no admin configured), requires the one-time bootstrap token
+      printed to the console at startup.
+    """
+    if _admin_configured():
+        return await require_admin(request)
+
+    token = await get_current_user_token(request)
+    if not token:
+        raise HTTPException(status_code=401, detail="未授权 - 需要设置令牌")
+    if not _bootstrap_token or not secrets.compare_digest(token, _bootstrap_token):
+        raise HTTPException(status_code=401, detail="无效的设置令牌")
+    return token
+
 
 # ---------------------------------------------------------------------------
 #  Routes
@@ -117,7 +158,10 @@ def _write_env(env_dict: dict[str, str]) -> None:
 
 
 @router.post("/api/setup")
-async def setup_config(request: Request) -> JSONResponse:
+async def setup_config(
+    request: Request,
+    _auth: str = Depends(_require_setup_token),
+) -> JSONResponse:
     """
     Save setup configuration and write .env file.
 
@@ -231,7 +275,7 @@ async def setup_config(request: Request) -> JSONResponse:
         env_config["ADMIN_PASSWORD"] = admin_password
         env_config["ADMIN_PASSWORD_HASH"] = pw_hash
         secrets_dict["admin_password_hash"] = pw_hash
-        secrets_dict["admin_password"] = admin_password
+        # Only the bcrypt hash is persisted — never the plaintext admin password.
 
     # ------------------------------------------------------------------
     #  Persist to disk
@@ -273,7 +317,7 @@ async def setup_config(request: Request) -> JSONResponse:
 
 
 @router.get("/api/setup/status")
-async def setup_status() -> JSONResponse:
+async def setup_status(_auth: str = Depends(_require_setup_token)) -> JSONResponse:
     """Check whether the gateway has been configured (.env exists with content)."""
     env_path = _get_env_path()
     configured = env_path.exists() and env_path.stat().st_size > 0
@@ -281,7 +325,10 @@ async def setup_status() -> JSONResponse:
 
 
 @router.post("/api/setup/test-connection")
-async def test_connection(request: Request) -> JSONResponse:
+async def test_connection(
+    request: Request,
+    _auth: str = Depends(_require_setup_token),
+) -> JSONResponse:
     """
     Test an API key against a provider endpoint (server-side, no CORS).
     Accepts JSON body:

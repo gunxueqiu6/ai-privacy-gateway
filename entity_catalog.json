@@ -1,0 +1,261 @@
+{
+  "version": "1.0",
+  "entities": [
+    {
+      "key": "phone",
+      "name_zh": "手机号",
+      "name_en": "Phone Number",
+      "detector": "regex",
+      "enabled": true,
+      "compliance_tag": "personal_info",
+      "placeholder_token": "PII_PHONE",
+      "pattern": "(?<!\\d)(1[3-9]\\d{9})(?!\\d)"
+    },
+    {
+      "key": "email",
+      "name_zh": "邮箱",
+      "name_en": "Email",
+      "detector": "regex",
+      "enabled": true,
+      "compliance_tag": "personal_info",
+      "placeholder_token": "PII_EMAIL",
+      "pattern": "\\b([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})\\b"
+    },
+    {
+      "key": "idcard",
+      "name_zh": "身份证号",
+      "name_en": "China ID Card",
+      "detector": "regex",
+      "enabled": true,
+      "compliance_tag": "personal_info",
+      "placeholder_token": "PII_IDCARD",
+      "pattern": "(?<!\\d)([1-9]\\d{5}(?:19|20)\\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\\d|3[01])\\d{3}[\\dXx])(?!\\d)"
+    },
+    {
+      "key": "bankcard",
+      "name_zh": "银行卡号",
+      "name_en": "Bank Card",
+      "detector": "regex",
+      "enabled": true,
+      "compliance_tag": "personal_info",
+      "placeholder_token": "PII_BANK",
+      "pattern": "(?<!\\d)([1-9]\\d{15,18})(?!\\d)"
+    },
+    {
+      "key": "plate",
+      "name_zh": "车牌号",
+      "name_en": "License Plate",
+      "detector": "regex",
+      "enabled": true,
+      "compliance_tag": "personal_info",
+      "placeholder_token": "PII_PLATE",
+      "pattern": "[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z][A-Z0-9]{5,6}"
+    },
+    {
+      "key": "coordinates",
+      "name_zh": "经纬度坐标",
+      "name_en": "Coordinates",
+      "detector": "regex",
+      "enabled": true,
+      "compliance_tag": "important_data",
+      "placeholder_token": "PII_COORDINATES",
+      "pattern": "(?<!\\d)(\\d{1,3}\\.\\d{4,}\\s*[,，\\s]\\s*\\d{1,3}\\.\\d{4,})(?!\\d)"
+    },
+    {
+      "key": "ip",
+      "name_zh": "IP地址",
+      "name_en": "IP Address",
+      "detector": "regex",
+      "enabled": true,
+      "compliance_tag": "personal_info",
+      "placeholder_token": "PII_IP",
+      "pattern": "(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
+    },
+    {
+      "key": "url",
+      "name_zh": "URL链接",
+      "name_en": "URL",
+      "detector": "regex",
+      "enabled": true,
+      "compliance_tag": "personal_info",
+      "placeholder_token": "PII_URL",
+      "pattern": "https?://[^\\s]+"
+    },
+    {
+      "key": "date",
+      "name_zh": "日期",
+      "name_en": "Date",
+      "detector": "regex",
+      "enabled": true,
+      "compliance_tag": "personal_info",
+      "placeholder_token": "PII_DATE",
+      "pattern": "\\d{4}[-/年](?:0?[1-9]|1[0-2])[-/月](?:0?[1-9]|[12]\\d|3[01])日?"
+    },
+    {
+      "key": "amount",
+      "name_zh": "金额",
+      "name_en": "Amount",
+      "detector": "regex",
+      "enabled": true,
+      "compliance_tag": "personal_info",
+      "placeholder_token": "PII_AMOUNT",
+      "pattern": "(?:¥|￥|\\$)\\d{1,3}(?:,\\d{3})*(?:\\.\\d{1,2})?"
+    },
+    {
+      "key": "postcode",
+      "name_zh": "邮编",
+      "name_en": "Postcode",
+      "detector": "regex",
+      "enabled": true,
+      "compliance_tag": "personal_info",
+      "placeholder_token": "PII_POSTCODE",
+      "pattern": "(?<!\\d)([1-9]\\d{5})(?!\\d)"
+    },
+    {
+      "key": "passport",
+      "name_zh": "护照号",
+      "name_en": "Passport",
+      "detector": "regex",
+      "enabled": true,
+      "compliance_tag": "personal_info",
+      "placeholder_token": "PII_PASSPORT",
+      "pattern": "(?<![A-Z])(E\\d{8})(?!\\d)"
+    },
+    {
+      "key": "ssn",
+      "name_zh": "美国社保号",
+      "name_en": "US SSN",
+      "detector": "regex",
+      "enabled": true,
+      "compliance_tag": "personal_info",
+      "placeholder_token": "PII_SSN",
+      "pattern": "(?<!\\d)(\\d{3}-\\d{2}-\\d{4})(?!\\d)"
+    },
+    {
+      "key": "credit_code",
+      "name_zh": "统一社会信用代码",
+      "name_en": "Unified Social Credit Code",
+      "detector": "regex",
+      "enabled": true,
+      "compliance_tag": "important_data",
+      "placeholder_token": "PII_CREDIT_CODE",
+      "pattern": "(?<![A-Z0-9])([0-9A-HJ-NPQRTUWXY]{2}\\d{6}[0-9A-HJ-NPQRTUWXY]{10})(?![A-Z0-9])"
+    },
+    {
+      "key": "mac",
+      "name_zh": "MAC地址",
+      "name_en": "MAC Address",
+      "detector": "regex",
+      "enabled": true,
+      "compliance_tag": "personal_info",
+      "placeholder_token": "PII_MAC",
+      "pattern": "(?i)(?<![0-9A-F])([0-9A-F]{2}[:-][0-9A-F]{2}[:-][0-9A-F]{2}[:-][0-9A-F]{2}[:-][0-9A-F]{2}[:-][0-9A-F]{2})(?![0-9A-F])"
+    },
+    {
+      "key": "api_key",
+      "name_zh": "API密钥",
+      "name_en": "API Key",
+      "detector": "regex",
+      "enabled": true,
+      "compliance_tag": "important_data",
+      "placeholder_token": "PII_APIKEY",
+      "pattern": "\\b(sk-(?:proj-|ant-)?[A-Za-z0-9]{15,}|gh[pousr]_[A-Za-z0-9]{36,}|AKIA[0-9A-Z]{16}|xox[abp]-[0-9]{10,13}-[0-9]{10,13}-[A-Za-z0-9]{24,}|hf_[A-Za-z0-9]{25,}|glpat-[A-Za-z0-9\\-_]{20,}|AIza[0-9A-Za-z\\-_]{35}|SG\\.[A-Za-z0-9\\-_]{22,}\\.[A-Za-z0-9\\-_]{22,}|s[ck]_(?:live|test)_[0-9A-Za-z]{24,}|rk_(?:live|test)_[0-9A-Za-z]{24,}|ya29\\.[0-9A-Za-z\\-_]{50,}|acct[0-9A-Fa-f]{32}|key-[A-Za-z0-9\\-_]{20,}|sk-[A-Za-z0-9]{15,})\\b"
+    },
+    {
+      "key": "hkmo_pass",
+      "name_zh": "港澳通行证",
+      "name_en": "HK/Macau Exit-Entry Permit",
+      "detector": "regex",
+      "enabled": true,
+      "compliance_tag": "personal_info",
+      "placeholder_token": "PII_HKMO_PASS",
+      "pattern": "(?<![A-Z])(C\\d{8})(?!\\d)"
+    },
+    {
+      "key": "taiwan_pass",
+      "name_zh": "台湾通行证",
+      "name_en": "Taiwan Travel Permit",
+      "detector": "regex",
+      "enabled": true,
+      "compliance_tag": "personal_info",
+      "placeholder_token": "PII_TW_PASS",
+      "pattern": "(?<![A-Z])(L\\d{8})(?!\\d)"
+    },
+    {
+      "key": "taiwan_id",
+      "name_zh": "台湾身份证",
+      "name_en": "Taiwan ID",
+      "detector": "regex",
+      "enabled": true,
+      "compliance_tag": "personal_info",
+      "placeholder_token": "PII_TW_ID",
+      "pattern": "(?<![A-Z0-9])([A-Z][12]\\d{8})(?![0-9])"
+    },
+    {
+      "key": "org_code",
+      "name_zh": "组织机构代码",
+      "name_en": "Organization Code",
+      "detector": "regex",
+      "enabled": true,
+      "compliance_tag": "important_data",
+      "placeholder_token": "PII_ORG_CODE",
+      "pattern": "(?<![A-Z0-9])([0-9A-HJ-NPQRTUWXY]{8}-[0-9A-HJ-NPQRTUWXY])(?![A-Z0-9])"
+    },
+    {
+      "key": "hkmo_resident",
+      "name_zh": "港澳台居民居住证",
+      "name_en": "HK/Macau/Taiwan Resident Permit",
+      "detector": "regex",
+      "enabled": false,
+      "compliance_tag": "personal_info",
+      "placeholder_token": "PII_HKMO_RESIDENT",
+      "pattern": "(?<!\\d)(8[1-3]\\d{16})(?!\\d)"
+    },
+    {
+      "key": "military_id",
+      "name_zh": "军官证",
+      "name_en": "Military Officer ID",
+      "detector": "regex",
+      "enabled": false,
+      "compliance_tag": "personal_info",
+      "placeholder_token": "PII_MILITARY_ID",
+      "pattern": "(?<![A-Za-z0-9])(军字第?\\d{6,8}号?)(?!\\d)"
+    },
+    {
+      "key": "person",
+      "name_zh": "人名",
+      "name_en": "Person Name",
+      "detector": "ner",
+      "enabled": false,
+      "compliance_tag": "personal_info",
+      "placeholder_token": "PII_PER"
+    },
+    {
+      "key": "location",
+      "name_zh": "地名",
+      "name_en": "Location",
+      "detector": "ner",
+      "enabled": false,
+      "compliance_tag": "personal_info",
+      "placeholder_token": "PII_LOC"
+    },
+    {
+      "key": "organization",
+      "name_zh": "机构名",
+      "name_en": "Organization",
+      "detector": "ner",
+      "enabled": false,
+      "compliance_tag": "personal_info",
+      "placeholder_token": "PII_ORG"
+    },
+    {
+      "key": "custom",
+      "name_zh": "自定义敏感词",
+      "name_en": "Custom Keyword",
+      "detector": "custom",
+      "enabled": true,
+      "compliance_tag": "personal_info",
+      "placeholder_token": "PII_CUST"
+    }
+  ]
+}
