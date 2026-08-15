@@ -164,6 +164,9 @@ jobs:
 
   publish-js-sdk:
     runs-on: ubuntu-latest
+    env:
+      # Secrets cannot be referenced in if: conditionals; pass through env
+      NPM_PUBLISH_ENABLED: ${{ secrets.NPM_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -192,7 +195,7 @@ jobs:
 
       - name: Publish to npm
         # Skip when the repo has no NPM_TOKEN secret configured
-        if: ${{ secrets.NPM_TOKEN != '' }}
+        if: env.NPM_PUBLISH_ENABLED == 'true'
         run: npm publish
         working-directory: sdk/js
         env:
