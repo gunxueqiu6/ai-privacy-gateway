@@ -195,6 +195,18 @@ class TestProxyError:
                 return status, body, headers
 
             result = asyncio.run(run())
+            if result[0] not in [502, 504]:
+                # CI diagnostics — dump gateway state to see why the upstream
+                # resolved to the real endpoint instead of the local closed port.
+                import sys
+                import gateway_core as gc_mod
+                print("DIAG result status:", result[0])
+                print("DIAG config.TARGET_LLM:", config.TARGET_LLM)
+                print("DIAG gc_mod.config is config:", gc_mod.config is config)
+                print("DIAG gc_mod.config.TARGET_LLM:", gc_mod.config.TARGET_LLM)
+                print("DIAG gw.target_url:", gw.target_url)
+                print("DIAG load_balancer nodes:", [n.url for n in gw.load_balancer._nodes])
+                print("DIAG sys.modules config id:", id(sys.modules["config"]), "local id:", id(config))
             # 502 = connection refused / 504 = timeout
             assert result[0] in [502, 504]
         finally:
