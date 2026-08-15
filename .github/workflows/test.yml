@@ -186,4 +186,4 @@ jobs:
 
       - name: Run bandit (SAST)
         run: |
-          bandit -r . --exclude ./tests,./website-astro,./sdk --level medium
+          bandit -r . --exclude ./tests,./website-astro,./sdk --severity-level medium
