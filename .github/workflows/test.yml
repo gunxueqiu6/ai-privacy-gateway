@@ -23,7 +23,13 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest tests/ -v --tb=short --cov=. --cov-report=xml
+          set -o pipefail
+          pytest tests/ -v --tb=short --cov=. --cov-report=xml 2>&1 | tee pytest_output.txt
+          EXIT_CODE=${PIPESTATUS[0]}
+          if [ $EXIT_CODE -ne 0 ]; then
+            tail -80 pytest_output.txt | while IFS= read -r line; do echo "::error::$line"; done
+            exit $EXIT_CODE
+          fi
 
       - name: Upload coverage
         if: success()
@@ -47,8 +53,13 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run tests
+        shell: pwsh
         run: |
-          pytest tests/ -v --tb=short
+          python -m pytest tests/ -v --tb=short 2>&1 | Tee-Object -Variable pytestOut
+          if ($LASTEXITCODE -ne 0) {
+            ($pytestOut | Select-Object -Last 80) | ForEach-Object { Write-Output "::error::$_" }
+            exit $LASTEXITCODE
+          }
 
   js-sdk:
     runs-on: ubuntu-latest
@@ -86,7 +97,13 @@ jobs:
 
       - name: Check code style (Black)
         run: |
-          black --check --diff .
+          set -o pipefail
+          black --check --diff . 2>&1 | tee black_diff.txt
+          EXIT_CODE=${PIPESTATUS[0]}
+          if [ $EXIT_CODE -ne 0 ]; then
+            head -60 black_diff.txt | while IFS= read -r line; do echo "::error::$line"; done
+            exit $EXIT_CODE
+          fi
 
       - name: Run flake8
         run: |

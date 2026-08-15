@@ -208,18 +208,7 @@ jobs:
       - name: Extract release notes from CHANGELOG
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
-          python <<EOF
-import re, sys
-changelog = open('CHANGELOG.md').read()
-version = '${VERSION}'
-pattern = r'## \[' + re.escape(version) + r'\].*?\n(.*?)(?=\n## \[|\n---|\Z)'
-match = re.search(pattern, changelog, re.DOTALL)
-if match:
-    print(match.group(1).strip())
-else:
-    print(f'Release notes for version {version} not found in CHANGELOG.md', file=sys.stderr)
-    exit(1)
-EOF > release_body.md
+          python .github/scripts/release_notes.py "$VERSION" > release_body.md
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
