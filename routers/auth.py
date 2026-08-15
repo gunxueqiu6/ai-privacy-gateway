@@ -1,6 +1,7 @@
 """
 认证路由 — Lite 版本（管理员登录在 admin.py，团队/OAuth 在 Pro 版本中）。
 """
+
 import hashlib
 import logging
 
@@ -37,8 +38,10 @@ async def verify_api_key(x_api_key: str = Header(None, alias="X-API-Key")):
 @auth_router.get("/auth/status")
 async def auth_status(request: Request) -> JSONResponse:
     """认证状态 — Lite 版本仅支持管理员认证（见 /admin/login）"""
-    return JSONResponse({
-        "tier": config.tier,
-        "auth_methods": ["admin_login", "api_key"],
-        "message": "Lite版本支持管理员密码认证 + API Key",
-    })
+    return JSONResponse(
+        {
+            "tier": config.tier,
+            "auth_methods": ["admin_login", "api_key"],
+            "message": "Lite版本支持管理员密码认证 + API Key",
+        }
+    )

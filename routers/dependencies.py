@@ -29,6 +29,7 @@ slowapi 默认使用内存存储，每个 uvicorn worker 拥有独立的计数�
 
 配置变量: RATE_LIMIT_STORAGE（见 config.py）
 """
+
 import os as _os
 from datetime import UTC, datetime, timedelta
 from typing import Any, Dict, Optional, Set
@@ -45,7 +46,9 @@ import starlette.config as _starlette_config
 _read_file_original = _starlette_config.Config._read_file
 
 
-def _read_file_utf8(self, file_name: str | _os.PathLike, encoding: str = "utf-8") -> dict[str, str]:
+def _read_file_utf8(
+    self, file_name: str | _os.PathLike, encoding: str = "utf-8"
+) -> dict[str, str]:
     file_values: dict[str, str] = {}
     with open(file_name, encoding="utf-8") as input_file:
         for line in input_file.readlines():
@@ -63,7 +66,6 @@ _starlette_config.Config._read_file = _read_file_utf8
 from slowapi import Limiter
 
 from config import config
-
 
 # ==================== Encoding Error Handler ====================
 
@@ -86,6 +88,7 @@ async def safe_json(request: Request):
 
 
 # ==================== Rate Limiter ====================
+
 
 def _get_client_ip(request: Request) -> str:
     if request.client:
@@ -115,7 +118,9 @@ ALLOWED_PROXY_HEADERS = {"content-type", "authorization"}
 
 
 def filter_proxy_headers(headers: Any) -> Dict[str, str]:
-    return {k.lower(): v for k, v in headers.items() if k.lower() in ALLOWED_PROXY_HEADERS}
+    return {
+        k.lower(): v for k, v in headers.items() if k.lower() in ALLOWED_PROXY_HEADERS
+    }
 
 
 ALLOWED_V1_PROXY_PATHS = {"models", "embeddings", "moderations"}
@@ -127,6 +132,7 @@ _token_blacklist: Set[str] = set()
 
 
 # ==================== JWT Auth ====================
+
 
 def create_jwt_token() -> str:
     """创建 JWT 令牌 — 1 小时有效"""

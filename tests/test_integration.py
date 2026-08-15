@@ -1,6 +1,7 @@
 """
 集成测试 - AI Privacy Gateway
 """
+
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import Mock, patch, AsyncMock
@@ -15,16 +16,14 @@ class TestIntegrationMask:
         """创建测试客户端"""
         try:
             from main import app
+
             return TestClient(app)
         except ImportError:
             pytest.skip("main module not available")
 
     def test_mask_api_basic(self, client):
         """测试基本脱敏 API"""
-        response = client.post(
-            "/api/mask",
-            json={"text": "我的手机号是13812345678"}
-        )
+        response = client.post("/api/mask", json={"text": "我的手机号是13812345678"})
 
         assert response.status_code == 200
         data = response.json()
@@ -38,7 +37,9 @@ class TestIntegrationMask:
         """测试多实体脱敏"""
         response = client.post(
             "/api/mask",
-            json={"text": "张三的手机13812345678，邮箱test@example.com，身份证110101199001011234"}
+            json={
+                "text": "张三的手机13812345678，邮箱test@example.com，身份证110101199001011234"
+            },
         )
 
         assert response.status_code == 200
@@ -50,20 +51,14 @@ class TestIntegrationMask:
 
     def test_mask_api_empty_text(self, client):
         """测试空文本"""
-        response = client.post(
-            "/api/mask",
-            json={"text": ""}
-        )
+        response = client.post("/api/mask", json={"text": ""})
 
         # 应返回错误或空结果
         assert response.status_code in [400, 200]
 
     def test_mask_api_no_entities(self, client):
         """测试无敏感信息文本"""
-        response = client.post(
-            "/api/mask",
-            json={"text": "这是一段普通文本"}
-        )
+        response = client.post("/api/mask", json={"text": "这是一段普通文本"})
 
         assert response.status_code == 200
         data = response.json()
@@ -81,6 +76,7 @@ class TestIntegrationRestore:
         """创建测试客户端"""
         try:
             from main import app
+
             return TestClient(app)
         except ImportError:
             pytest.skip("main module not available")
@@ -88,10 +84,7 @@ class TestIntegrationRestore:
     def test_restore_api_basic(self, client):
         """测试基本还原 API"""
         # 先脱敏
-        mask_response = client.post(
-            "/api/mask",
-            json={"text": "手机号13812345678"}
-        )
+        mask_response = client.post("/api/mask", json={"text": "手机号13812345678"})
         mask_data = mask_response.json()
 
         # 再还原
@@ -99,8 +92,10 @@ class TestIntegrationRestore:
             "/api/restore",
             json={
                 "text": mask_data["masked_text"],
-                "mappings": {e["placeholder"]: e["value"] for e in mask_data["entities"]}
-            }
+                "mappings": {
+                    e["placeholder"]: e["value"] for e in mask_data["entities"]
+                },
+            },
         )
 
         assert restore_response.status_code == 200
@@ -112,8 +107,7 @@ class TestIntegrationRestore:
     def test_restore_api_empty_mappings(self, client):
         """测试空映射还原"""
         response = client.post(
-            "/api/restore",
-            json={"text": "普通文本", "mappings": {}}
+            "/api/restore", json={"text": "普通文本", "mappings": {}}
         )
 
         assert response.status_code == 200
@@ -129,6 +123,7 @@ class TestIntegrationBatch:
         """创建测试客户端"""
         try:
             from main import app
+
             return TestClient(app)
         except ImportError:
             pytest.skip("main module not available")
@@ -137,7 +132,13 @@ class TestIntegrationBatch:
         """测试批量脱敏"""
         response = client.post(
             "/api/mask/batch",
-            json={"texts": ["手机13812345678", "邮箱test@example.com", "身份证110101199001011234"]}
+            json={
+                "texts": [
+                    "手机13812345678",
+                    "邮箱test@example.com",
+                    "身份证110101199001011234",
+                ]
+            },
         )
 
         assert response.status_code == 200
@@ -151,20 +152,14 @@ class TestIntegrationBatch:
         # 超过50条
         texts = [f"文本{i}" for i in range(60)]
 
-        response = client.post(
-            "/api/mask/batch",
-            json={"texts": texts}
-        )
+        response = client.post("/api/mask/batch", json={"texts": texts})
 
         # 应返回错误
         assert response.status_code == 400
 
     def test_batch_mask_api_empty(self, client):
         """测试空批量"""
-        response = client.post(
-            "/api/mask/batch",
-            json={"texts": []}
-        )
+        response = client.post("/api/mask/batch", json={"texts": []})
 
         assert response.status_code == 400
 
@@ -177,6 +172,7 @@ class TestIntegrationEntities:
         """创建测试客户端"""
         try:
             from main import app
+
             return TestClient(app)
         except ImportError:
             pytest.skip("main module not available")
@@ -206,26 +202,34 @@ class TestIntegrationChatCompletion:
         """创建测试客户端"""
         try:
             from main import app
+
             return TestClient(app)
         except ImportError:
             pytest.skip("main module not available")
 
     def test_chat_completion_proxy(self, client):
         """测试 Chat Completion 代理"""
-        with patch('routers.proxy.get_gateway_core') as mock_gateway:
+        with patch("routers.proxy.get_gateway_core") as mock_gateway:
             mock_core = Mock()
             mock_core.mask_request.return_value = (
-                {"model": "gpt-3.5-turbo", "messages": [{"role": "user", "content": "手机号[PII_PHONE_00000001]"}]},
+                {
+                    "model": "gpt-3.5-turbo",
+                    "messages": [
+                        {"role": "user", "content": "手机号[PII_PHONE_00000001]"}
+                    ],
+                },
                 {},
                 {},
                 "test-session",
-                set()
+                set(),
             )
-            mock_core.proxy_request = AsyncMock(return_value=(
-                200,
-                b'{"id":"test-id","choices":[{"message":{"content":"\xe5\x9b\x9e\xe5\xa4\x8d\xe5\x86\x85\xe5\xae\xb9"}}]}',
-                {"content-type": "application/json"}
-            ))
+            mock_core.proxy_request = AsyncMock(
+                return_value=(
+                    200,
+                    b'{"id":"test-id","choices":[{"message":{"content":"\xe5\x9b\x9e\xe5\xa4\x8d\xe5\x86\x85\xe5\xae\xb9"}}]}',
+                    {"content-type": "application/json"},
+                )
+            )
             mock_core.unmask_response = Mock(return_value="回复内容")
             mock_gateway.return_value = mock_core
 
@@ -233,16 +237,16 @@ class TestIntegrationChatCompletion:
                 "/v1/chat/completions",
                 json={
                     "model": "gpt-3.5-turbo",
-                    "messages": [{"role": "user", "content": "手机号13812345678"}]
+                    "messages": [{"role": "user", "content": "手机号13812345678"}],
                 },
-                headers={"Authorization": "Bearer test-key"}
+                headers={"Authorization": "Bearer test-key"},
             )
 
             assert response.status_code == 200
 
     def test_proxy_rejects_unknown_api_key(self, client):
         """Unknown API keys are rejected with 401 (open-proxy fix)."""
-        with patch('routers.proxy.get_gateway_core') as mock_gateway:
+        with patch("routers.proxy.get_gateway_core") as mock_gateway:
             mock_core = Mock()
             mock_gateway.return_value = mock_core
 
@@ -250,9 +254,9 @@ class TestIntegrationChatCompletion:
                 "/v1/chat/completions",
                 json={
                     "model": "gpt-3.5-turbo",
-                    "messages": [{"role": "user", "content": "hello"}]
+                    "messages": [{"role": "user", "content": "hello"}],
                 },
-                headers={"Authorization": "Bearer definitely-unknown-key-123456"}
+                headers={"Authorization": "Bearer definitely-unknown-key-123456"},
             )
 
             # The request must be rejected before any upstream proxy call.
@@ -267,6 +271,7 @@ class TestIntegrationAdminAuth:
         """创建测试客户端"""
         try:
             from main import app
+
             return TestClient(app)
         except ImportError:
             pytest.skip("main module not available")
@@ -281,8 +286,7 @@ class TestIntegrationAdminAuth:
     def test_admin_wrong_password(self, client):
         """测试错误密码登录"""
         response = client.post(
-            "/admin/login",
-            json={"username": "admin", "password": "wrongpassword"}
+            "/admin/login", json={"username": "admin", "password": "wrongpassword"}
         )
 
         # 应返回 401
@@ -290,10 +294,7 @@ class TestIntegrationAdminAuth:
 
     def test_admin_correct_login(self, client):
         """测试正确登录"""
-        response = client.post(
-            "/admin/login",
-            json={"password": "test_admin_pw_123"}
-        )
+        response = client.post("/admin/login", json={"password": "test_admin_pw_123"})
 
         assert response.status_code == 200
         data = response.json()
@@ -305,8 +306,7 @@ class TestIntegrationAdminAuth:
         """测试带 Cookie 访问"""
         # 先登录获取 cookie
         login_response = client.post(
-            "/admin/login",
-            json={"password": "test_admin_pw_123"}
+            "/admin/login", json={"password": "test_admin_pw_123"}
         )
         session_cookie = login_response.cookies.get("session_token")
 
@@ -325,6 +325,7 @@ class TestIntegrationRateLimit:
         """创建测试客户端"""
         try:
             from main import app
+
             return TestClient(app)
         except ImportError:
             pytest.skip("main module not available")
@@ -332,14 +333,12 @@ class TestIntegrationRateLimit:
     def test_rate_limit_mask(self, client):
         """测试脱敏 API 速率限制"""
         from routers.dependencies import reset_limiter
+
         reset_limiter()  # Isolate from other tests that share the in-memory limiter
         responses = []
         try:
             for i in range(70):
-                response = client.post(
-                    "/api/mask",
-                    json={"text": f"测试{i}"}
-                )
+                response = client.post("/api/mask", json={"text": f"测试{i}"})
                 responses.append(response.status_code)
         finally:
             reset_limiter()  # Restore budget for subsequent tests
@@ -355,6 +354,7 @@ class TestIntegrationFullPipeline:
         """创建测试客户端"""
         try:
             from main import app
+
             return TestClient(app)
         except ImportError:
             pytest.skip("main module not available")
@@ -364,10 +364,7 @@ class TestIntegrationFullPipeline:
         original_text = "张三的手机号是13812345678，邮箱test@example.com"
 
         # 1. 脱敏
-        mask_response = client.post(
-            "/api/mask",
-            json={"text": original_text}
-        )
+        mask_response = client.post("/api/mask", json={"text": original_text})
         assert mask_response.status_code == 200
         mask_data = mask_response.json()
 
@@ -379,7 +376,7 @@ class TestIntegrationFullPipeline:
         mappings = {e["placeholder"]: e["value"] for e in mask_data["entities"]}
         restore_response = client.post(
             "/api/restore",
-            json={"text": mask_data["masked_text"], "mappings": mappings}
+            json={"text": mask_data["masked_text"], "mappings": mappings},
         )
         assert restore_response.status_code == 200
         restore_data = restore_response.json()

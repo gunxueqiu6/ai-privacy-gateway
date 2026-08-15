@@ -2,12 +2,13 @@
 Generate Chrome Web Store promotional tile images.
 Produces 440x280, 920x680, 1400x560 PNGs with the AI Privacy Gateway branding.
 """
+
 import os
 from PIL import Image, ImageDraw, ImageFont
 
 BG_DARK = (10, 10, 15, 255)
-PRIMARY = (134, 239, 172, 255)   # #86efac
-ACCENT = (167, 139, 250, 255)    # #a78bfa
+PRIMARY = (134, 239, 172, 255)  # #86efac
+ACCENT = (167, 139, 250, 255)  # #a78bfa
 BORDER = (60, 60, 70, 255)
 TEXT_WHITE = (240, 240, 245, 255)
 TEXT_GRAY = (160, 160, 170, 255)
@@ -40,17 +41,23 @@ def _draw_shield(draw, cx, cy, size):
     line_w = max(1, int(size // 20))
     draw.arc(
         [x0, y0 - arc_r * 0.25, x1, y0 + arc_r * 1.15],
-        start=200, end=340,
-        fill=PRIMARY, width=line_w,
+        start=200,
+        end=340,
+        fill=PRIMARY,
+        width=line_w,
     )
-    draw.line([(x0 + w * 0.12, arc_top), (x0 + w * 0.12, y1)],
-              fill=PRIMARY, width=line_w)
-    draw.line([(x1 - w * 0.12, arc_top), (x1 - w * 0.12, y1)],
-              fill=PRIMARY, width=line_w)
+    draw.line(
+        [(x0 + w * 0.12, arc_top), (x0 + w * 0.12, y1)], fill=PRIMARY, width=line_w
+    )
+    draw.line(
+        [(x1 - w * 0.12, arc_top), (x1 - w * 0.12, y1)], fill=PRIMARY, width=line_w
+    )
     draw.arc(
         [x0 + w * 0.12, y1 - radius * 2, x1 - w * 0.12, y1 + radius * 0.4],
-        start=0, end=180,
-        fill=PRIMARY, width=line_w,
+        start=0,
+        end=180,
+        fill=PRIMARY,
+        width=line_w,
     )
 
     # Lock icon inside
@@ -66,16 +73,23 @@ def _draw_shield(draw, cx, cy, size):
     )
     shackle_r = max(1, int(size // 18))
     draw.arc(
-        [cx - lock_w * 0.28, ly0 - lock_h * 0.22,
-         cx + lock_w * 0.28, ly0 + lock_h * 0.5],
-        start=180, end=360,
-        fill=PRIMARY, width=shackle_r,
+        [
+            cx - lock_w * 0.28,
+            ly0 - lock_h * 0.22,
+            cx + lock_w * 0.28,
+            ly0 + lock_h * 0.5,
+        ],
+        start=180,
+        end=360,
+        fill=PRIMARY,
+        width=shackle_r,
     )
 
 
 def _draw_decorative_circles(draw, w, h):
     """Draw subtle decorative gradient circles in background."""
     import math
+
     # Accent glow top-right
     for i in range(30, 0, -1):
         alpha = int(8 * (1 - i / 30))
@@ -122,7 +136,9 @@ def create_promo(width, height):
 
     # Subtitle
     subtitle = "保护 AI 对话隐私，自动脱敏敏感信息"
-    draw.text((width * 0.38, height * 0.42), subtitle, fill=TEXT_GRAY, font=subtitle_font)
+    draw.text(
+        (width * 0.38, height * 0.42), subtitle, fill=TEXT_GRAY, font=subtitle_font
+    )
 
     # Feature bullets
     features = [
@@ -156,7 +172,9 @@ def create_promo(width, height):
         y = y_start + i * line_spacing
         # Draw colored bullet separately
         draw.text((x_start, y), "▸", fill=PRIMARY, font=bullet_font)
-        draw.text((x_start + bullet_size * 1.5, y), line[3:], fill=TEXT_GRAY, font=bullet_font)
+        draw.text(
+            (x_start + bullet_size * 1.5, y), line[3:], fill=TEXT_GRAY, font=bullet_font
+        )
 
     # Bottom tagline
     tag_size = max(8, bullet_size - 1)

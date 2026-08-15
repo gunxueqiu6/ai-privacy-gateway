@@ -2,6 +2,7 @@
 Setup router — first-run configuration wizard endpoint.
 Writes .env and persisted secrets so the gateway is ready on next start.
 """
+
 import json
 import logging
 import secrets
@@ -129,7 +130,9 @@ if not _admin_configured():
     _bootstrap_token = secrets.token_urlsafe(32)
     logger.warning("=" * 64)
     logger.warning("FIRST-RUN SETUP BOOTSTRAP TOKEN: %s", _bootstrap_token)
-    logger.warning("Pass it as 'Authorization: Bearer <token>' to /api/setup endpoints.")
+    logger.warning(
+        "Pass it as 'Authorization: Bearer <token>' to /api/setup endpoints."
+    )
     logger.warning("This token is valid only until the gateway is configured.")
     logger.warning("=" * 64)
 
@@ -190,9 +193,7 @@ async def setup_config(
     # ---- api_key ----
     api_key = (body.get("api_key") or "").strip()
     if not api_key:
-        return JSONResponse(
-            status_code=400, content={"error": "API key is required"}
-        )
+        return JSONResponse(status_code=400, content={"error": "API key is required"})
     if len(api_key) < 8:
         return JSONResponse(
             status_code=400,
@@ -261,7 +262,9 @@ async def setup_config(
     elif secrets_dict.get("jwt_secret"):
         env_config["JWT_SECRET"] = secrets_dict["jwt_secret"]
 
-    if not env_config.get("VAULT_ENCRYPT_KEY") and not secrets_dict.get("vault_encrypt_key"):
+    if not env_config.get("VAULT_ENCRYPT_KEY") and not secrets_dict.get(
+        "vault_encrypt_key"
+    ):
         vault_key = secrets.token_hex(32)
         env_config["VAULT_ENCRYPT_KEY"] = vault_key
         secrets_dict["vault_encrypt_key"] = vault_key
@@ -305,15 +308,17 @@ async def setup_config(
 
     final_port = port_int or int(env_config.get("LISTEN_PORT", "9999"))
 
-    return JSONResponse({
-        "success": True,
-        "message": "Configuration saved successfully",
-        "gateway_url": f"http://localhost:{final_port}/v1/chat/completions",
-        "admin_url": f"http://localhost:{final_port}/admin",
-        "port": final_port,
-        "provider": provider,
-        "endpoint": base_url,
-    })
+    return JSONResponse(
+        {
+            "success": True,
+            "message": "Configuration saved successfully",
+            "gateway_url": f"http://localhost:{final_port}/v1/chat/completions",
+            "admin_url": f"http://localhost:{final_port}/admin",
+            "port": final_port,
+            "provider": provider,
+            "endpoint": base_url,
+        }
+    )
 
 
 @router.get("/api/setup/status")
@@ -354,7 +359,10 @@ async def test_connection(
         if not base_url:
             return JSONResponse(
                 status_code=400,
-                content={"success": False, "error": "Base URL is required for custom provider"},
+                content={
+                    "success": False,
+                    "error": "Base URL is required for custom provider",
+                },
             )
     elif provider in PROVIDER_URLS:
         base_url = PROVIDER_URLS[provider]
@@ -378,35 +386,47 @@ async def test_connection(
             )
 
         if resp.status_code == 200:
-            return JSONResponse({
-                "success": True,
-                "message": "Connection successful — API key is valid",
-            })
+            return JSONResponse(
+                {
+                    "success": True,
+                    "message": "Connection successful — API key is valid",
+                }
+            )
         elif resp.status_code == 401:
-            return JSONResponse({
-                "success": False,
-                "error": "Unauthorized — API key is invalid or expired",
-                "status_code": 401,
-            })
+            return JSONResponse(
+                {
+                    "success": False,
+                    "error": "Unauthorized — API key is invalid or expired",
+                    "status_code": 401,
+                }
+            )
         else:
-            return JSONResponse({
-                "success": False,
-                "error": f"Server returned HTTP {resp.status_code}",
-                "status_code": resp.status_code,
-            })
+            return JSONResponse(
+                {
+                    "success": False,
+                    "error": f"Server returned HTTP {resp.status_code}",
+                    "status_code": resp.status_code,
+                }
+            )
     except httpx.TimeoutException:
-        return JSONResponse({
-            "success": False,
-            "error": "Connection timed out — check the endpoint URL",
-        })
+        return JSONResponse(
+            {
+                "success": False,
+                "error": "Connection timed out — check the endpoint URL",
+            }
+        )
     except httpx.ConnectError:
-        return JSONResponse({
-            "success": False,
-            "error": "Could not connect — check the endpoint URL",
-        })
+        return JSONResponse(
+            {
+                "success": False,
+                "error": "Could not connect — check the endpoint URL",
+            }
+        )
     except Exception as exc:
         logger.warning("Test connection error: %s", exc)
-        return JSONResponse({
-            "success": False,
-            "error": f"Connection failed: {exc}",
-        })
+        return JSONResponse(
+            {
+                "success": False,
+                "error": f"Connection failed: {exc}",
+            }
+        )

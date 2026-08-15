@@ -1,6 +1,7 @@
 """
 配置模块 - 环境变量管理 + 密钥持久化。
 """
+
 import json
 import logging
 import secrets
@@ -18,7 +19,7 @@ def _load_dotenv() -> None:
     """Load .env file into os.environ if it exists (no extra dependency)."""
     # When frozen by PyInstaller, .env lives next to the exe (CWD).
     # When running from source, .env lives in the project root.
-    if getattr(sys, 'frozen', False):
+    if getattr(sys, "frozen", False):
         env_path = Path.cwd() / ".env"
     else:
         env_path = Path(__file__).resolve().parent / ".env"
@@ -80,7 +81,9 @@ class Config:
     # 多上游 LLM 负载均衡配置
     UPSTREAM_LLM_URLS: str = os.environ.get("UPSTREAM_LLM_URLS", "")
     UPSTREAM_LB_STRATEGY: str = os.environ.get("UPSTREAM_LB_STRATEGY", "round_robin")
-    UPSTREAM_HEALTH_CHECK_INTERVAL: int = int(os.environ.get("UPSTREAM_HEALTH_CHECK_INTERVAL", "30"))
+    UPSTREAM_HEALTH_CHECK_INTERVAL: int = int(
+        os.environ.get("UPSTREAM_HEALTH_CHECK_INTERVAL", "30")
+    )
 
     # 模型路由映射（JSON 格式: {"模型名": "上游URL", "*": "默认上游"}）
     UPSTREAM_MODEL_MAP_RAW: str = os.environ.get("UPSTREAM_MODEL_MAP", "{}")
@@ -92,7 +95,9 @@ class Config:
     # 脱敏引擎配置
     MASK_ENGINE_TYPE: str = os.environ.get("MASK_ENGINE_TYPE", "regex")
     # 数据驱动实体目录路径（含实体类型/正则/合规分级/启用开关）
-    ENTITY_CATALOG_PATH: str = os.environ.get("ENTITY_CATALOG_PATH", "./entity_catalog.json")
+    ENTITY_CATALOG_PATH: str = os.environ.get(
+        "ENTITY_CATALOG_PATH", "./entity_catalog.json"
+    )
 
     # 管理员密码（明文，用于首次生成哈希）
     ADMIN_PASSWORD: str = os.environ.get("ADMIN_PASSWORD", "")
@@ -131,7 +136,9 @@ class Config:
     # 优雅关闭超时秒数
     SHUTDOWN_TIMEOUT: int = int(os.environ.get("SHUTDOWN_TIMEOUT", "30"))
     # 请求体大小限制（默认 10MB）
-    MAX_REQUEST_BODY_SIZE: int = int(os.environ.get("MAX_REQUEST_BODY_SIZE", "10485760"))
+    MAX_REQUEST_BODY_SIZE: int = int(
+        os.environ.get("MAX_REQUEST_BODY_SIZE", "10485760")
+    )
     # TLS/SSL 配置（空字符串 = 不启用 TLS）
     SSL_CERTFILE: str = os.environ.get("SSL_CERTFILE", "")
     SSL_KEYFILE: str = os.environ.get("SSL_KEYFILE", "")
@@ -167,11 +174,15 @@ class Config:
                 self.VAULT_ENCRYPT_KEY = secrets.token_urlsafe(32)
                 persisted["vault_encrypt_key"] = self.VAULT_ENCRYPT_KEY
                 os.environ["VAULT_ENCRYPT_KEY"] = self.VAULT_ENCRYPT_KEY
-                logger.warning("VAULT_ENCRYPT_KEY not set — auto-generated and persisted")
+                logger.warning(
+                    "VAULT_ENCRYPT_KEY not set — auto-generated and persisted"
+                )
 
         # 模型路由映射解析
         try:
-            self.UPSTREAM_MODEL_MAP: Dict[str, str] = json.loads(self.UPSTREAM_MODEL_MAP_RAW)
+            self.UPSTREAM_MODEL_MAP: Dict[str, str] = json.loads(
+                self.UPSTREAM_MODEL_MAP_RAW
+            )
         except json.JSONDecodeError:
             logger.warning("UPSTREAM_MODEL_MAP 不是有效的 JSON，将使用空映射")
             self.UPSTREAM_MODEL_MAP: Dict[str, str] = {}
@@ -179,7 +190,9 @@ class Config:
         # Admin password
         if not self.ADMIN_PASSWORD_HASH and self.ADMIN_PASSWORD:
             salt = bcrypt.gensalt()
-            self.ADMIN_PASSWORD_HASH = bcrypt.hashpw(self.ADMIN_PASSWORD.encode(), salt).decode()
+            self.ADMIN_PASSWORD_HASH = bcrypt.hashpw(
+                self.ADMIN_PASSWORD.encode(), salt
+            ).decode()
 
         if not self.ADMIN_PASSWORD_HASH:
             if persisted.get("admin_password_hash"):
@@ -189,7 +202,9 @@ class Config:
                 random_pw = secrets.token_urlsafe(12)
                 self.ADMIN_PASSWORD = random_pw
                 salt = bcrypt.gensalt()
-                self.ADMIN_PASSWORD_HASH = bcrypt.hashpw(random_pw.encode(), salt).decode()
+                self.ADMIN_PASSWORD_HASH = bcrypt.hashpw(
+                    random_pw.encode(), salt
+                ).decode()
                 persisted["admin_password_hash"] = self.ADMIN_PASSWORD_HASH
                 logger.warning(
                     "ADMIN_PASSWORD not set — auto-generated admin password hash; "
@@ -212,17 +227,27 @@ class Config:
         self.TARGET_LLM = os.environ.get("TARGET_LLM", "https://api.openai.com")
         self.UPSTREAM_API_KEY = os.environ.get("UPSTREAM_API_KEY", "")
         self.UPSTREAM_LLM_URLS = os.environ.get("UPSTREAM_LLM_URLS", "")
-        self.UPSTREAM_LB_STRATEGY = os.environ.get("UPSTREAM_LB_STRATEGY", "round_robin")
-        self.UPSTREAM_HEALTH_CHECK_INTERVAL = int(os.environ.get("UPSTREAM_HEALTH_CHECK_INTERVAL", "30"))
+        self.UPSTREAM_LB_STRATEGY = os.environ.get(
+            "UPSTREAM_LB_STRATEGY", "round_robin"
+        )
+        self.UPSTREAM_HEALTH_CHECK_INTERVAL = int(
+            os.environ.get("UPSTREAM_HEALTH_CHECK_INTERVAL", "30")
+        )
         self.DB_PATH = os.environ.get("DB_PATH", "./vault_data/privacy_vault.db")
         self.DB_TYPE = os.environ.get("DB_TYPE", "sqlite")
         self.MASK_ENGINE_TYPE = os.environ.get("MASK_ENGINE_TYPE", "regex")
-        self.ENTITY_CATALOG_PATH = os.environ.get("ENTITY_CATALOG_PATH", "./entity_catalog.json")
+        self.ENTITY_CATALOG_PATH = os.environ.get(
+            "ENTITY_CATALOG_PATH", "./entity_catalog.json"
+        )
         self.MAPPING_TTL = int(os.environ.get("MAPPING_TTL", "259200"))
         self.STATELESS_MODE = os.environ.get("STATELESS_MODE", "0") == "1"
-        self.MAX_CONCURRENT_REQUESTS = int(os.environ.get("MAX_CONCURRENT_REQUESTS", "50"))
+        self.MAX_CONCURRENT_REQUESTS = int(
+            os.environ.get("MAX_CONCURRENT_REQUESTS", "50")
+        )
         self.SHUTDOWN_TIMEOUT = int(os.environ.get("SHUTDOWN_TIMEOUT", "30"))
-        self.MAX_REQUEST_BODY_SIZE = int(os.environ.get("MAX_REQUEST_BODY_SIZE", "10485760"))
+        self.MAX_REQUEST_BODY_SIZE = int(
+            os.environ.get("MAX_REQUEST_BODY_SIZE", "10485760")
+        )
         self.UPSTREAM_MODEL_MAP_RAW = os.environ.get("UPSTREAM_MODEL_MAP", "{}")
         try:
             self.UPSTREAM_MODEL_MAP = json.loads(self.UPSTREAM_MODEL_MAP_RAW)
@@ -255,32 +280,50 @@ class Config:
             urls = [u.strip() for u in self.UPSTREAM_LLM_URLS.split(",") if u.strip()]
             for url in urls:
                 if not (url.startswith("http://") or url.startswith("https://")):
-                    logger.error("UPSTREAM_LLM_URLS 中的 URL 格式无效: %s，必须以 http:// 或 https:// 开头", url)
+                    logger.error(
+                        "UPSTREAM_LLM_URLS 中的 URL 格式无效: %s，必须以 http:// 或 https:// 开头",
+                        url,
+                    )
                     has_error = True
             strategy = self.UPSTREAM_LB_STRATEGY
             if strategy not in ("round_robin", "random", "least_connections"):
-                logger.error("UPSTREAM_LB_STRATEGY 无效: %s，仅支持 round_robin/random/least_connections", strategy)
+                logger.error(
+                    "UPSTREAM_LB_STRATEGY 无效: %s，仅支持 round_robin/random/least_connections",
+                    strategy,
+                )
                 has_error = True
 
         # TARGET_LLM URL 格式校验（仅当未配置 UPSTREAM_LLM_URLS 时）
         if not self.UPSTREAM_LLM_URLS:
-            if not (self.TARGET_LLM.startswith("http://") or self.TARGET_LLM.startswith("https://")):
-                logger.error("TARGET_LLM URL 格式无效: %s，必须以 http:// 或 https:// 开头", self.TARGET_LLM)
+            if not (
+                self.TARGET_LLM.startswith("http://")
+                or self.TARGET_LLM.startswith("https://")
+            ):
+                logger.error(
+                    "TARGET_LLM URL 格式无效: %s，必须以 http:// 或 https:// 开头",
+                    self.TARGET_LLM,
+                )
                 has_error = True
 
         # LISTEN_PORT 端口号校验
         if not 1 <= self.LISTEN_PORT <= 65535:
-            logger.error("LISTEN_PORT 端口号超出范围: %d，有效范围 1-65535", self.LISTEN_PORT)
+            logger.error(
+                "LISTEN_PORT 端口号超出范围: %d，有效范围 1-65535", self.LISTEN_PORT
+            )
             has_error = True
 
         # DB_TYPE 校验
         if self.DB_TYPE and self.DB_TYPE not in ("sqlite", "postgresql"):
-            logger.error("DB_TYPE 不支持: %s，仅支持 sqlite 或 postgresql", self.DB_TYPE)
+            logger.error(
+                "DB_TYPE 不支持: %s，仅支持 sqlite 或 postgresql", self.DB_TYPE
+            )
             has_error = True
 
         # MASK_ENGINE_TYPE 校验
         if self.MASK_ENGINE_TYPE != "regex":
-            logger.error("MASK_ENGINE_TYPE 不支持: %s，目前仅支持 regex", self.MASK_ENGINE_TYPE)
+            logger.error(
+                "MASK_ENGINE_TYPE 不支持: %s，目前仅支持 regex", self.MASK_ENGINE_TYPE
+            )
             has_error = True
 
         # 警告项
@@ -300,6 +343,7 @@ class Config:
             sys.exit(1)
         else:
             logger.info("配置校验通过")
+
 
 # 全局配置实例
 config = Config()

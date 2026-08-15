@@ -1,4 +1,5 @@
 """vault_crypto.py — AES-256-GCM 加密/解密测试"""
+
 import os
 import pytest
 from vault_crypto import VaultCrypto
@@ -60,6 +61,7 @@ class TestEncryptDecrypt:
     def test_encrypted_is_base64(self, vc):
         encrypted = vc.encrypt("hello")
         import base64
+
         # should be valid base64
         base64.b64decode(encrypted)
 
@@ -73,6 +75,7 @@ class TestDecryptErrors:
 
     def test_tampered_data_fails(self, vc):
         import base64
+
         encrypted = vc.encrypt("secret")
         # decode, flip a byte in the ciphertext, re-encode
         payload = bytearray(base64.b64decode(encrypted))

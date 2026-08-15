@@ -57,10 +57,10 @@ def _build_ico(sizes: list[int]) -> bytes:
     """Build a true multi-resource .ico file with embedded PNG data."""
     frames = [_make_frame(s) for s in sizes]
 
-    header = struct.pack("<HHH", 0, 1, len(frames))   # reserved, type=ico, count
+    header = struct.pack("<HHH", 0, 1, len(frames))  # reserved, type=ico, count
     dir_entries = b""
     image_data = b""
-    offset = 6 + 16 * len(frames)                       # header + all dir entries
+    offset = 6 + 16 * len(frames)  # header + all dir entries
 
     for i, img in enumerate(frames):
         buf = BytesIO()
@@ -72,10 +72,10 @@ def _build_ico(sizes: list[int]) -> bytes:
             "<BBBBHHII",
             w if w < 256 else 0,
             h if h < 256 else 0,
-            0,      # color palette (unused)
-            0,      # reserved
-            1,      # color planes
-            32,     # bits per pixel
+            0,  # color palette (unused)
+            0,  # reserved
+            1,  # color planes
+            32,  # bits per pixel
             len(png_data),
             offset,
         )

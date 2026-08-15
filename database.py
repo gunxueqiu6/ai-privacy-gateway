@@ -18,18 +18,45 @@ DB_PATH = os.environ.get("DB_PATH", "./vault_data/privacy_vault.db")
 
 # 统计实体列（对齐 entity_catalog.json；organization 归并为 org）
 STATS_ENTITY_COLUMNS = [
-    "phone", "email", "idcard", "bankcard", "custom",
-    "person", "location", "org", "plate", "ip", "url", "date", "amount", "postcode",
-    "coordinates", "passport", "ssn", "credit_code", "mac", "api_key",
-    "hkmo_pass", "taiwan_pass", "taiwan_id", "org_code", "hkmo_resident", "military_id",
+    "phone",
+    "email",
+    "idcard",
+    "bankcard",
+    "custom",
+    "person",
+    "location",
+    "org",
+    "plate",
+    "ip",
+    "url",
+    "date",
+    "amount",
+    "postcode",
+    "coordinates",
+    "passport",
+    "ssn",
+    "credit_code",
+    "mac",
+    "api_key",
+    "hkmo_pass",
+    "taiwan_pass",
+    "taiwan_id",
+    "org_code",
+    "hkmo_resident",
+    "military_id",
 ]
 
 ALLOWED_STATS_COLUMNS = frozenset(STATS_ENTITY_COLUMNS) | {"total"}
 
+
 class Database:
-    def __init__(self, db_path: Optional[str] = None, mapping_ttl: Optional[int] = None) -> None:
+    def __init__(
+        self, db_path: Optional[str] = None, mapping_ttl: Optional[int] = None
+    ) -> None:
         self.db_path = db_path or DB_PATH
-        self.mapping_ttl = mapping_ttl if mapping_ttl is not None else app_config.MAPPING_TTL
+        self.mapping_ttl = (
+            mapping_ttl if mapping_ttl is not None else app_config.MAPPING_TTL
+        )
         # 无状态模式使用内存存储映射
         self._memory_mappings: Dict[str, Dict[str, str]] = {}
         # 记录每个 session 的创建时间以便基于 TTL 清理内存映射
@@ -73,7 +100,12 @@ class Database:
                 conn.close()
                 if "database is locked" in str(e) and attempt < max_retries:
                     delay = 0.1 + random.uniform(0, 0.05)
-                    logger.warning("数据库锁定，重试 %d/%d (等待 %.2fs)", attempt, max_retries, delay)
+                    logger.warning(
+                        "数据库锁定，重试 %d/%d (等待 %.2fs)",
+                        attempt,
+                        max_retries,
+                        delay,
+                    )
                     _time.sleep(delay)
                     continue
                 if "database is locked" in str(e):
@@ -177,7 +209,9 @@ class Database:
                 UNIQUE(date, team_id)
             )
         """)
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_stats_team_date ON stats(team_id, date)")
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_stats_team_date ON stats(team_id, date)"
+        )
 
     def _migrate_stats_columns(self, cursor) -> None:
         """为旧库补齐缺失的统计列（ALTER TABLE ADD COLUMN）。"""
@@ -185,7 +219,9 @@ class Database:
         for c in STATS_ENTITY_COLUMNS + ["total"]:
             col = f"{c}_count"
             if col not in existing:
-                cursor.execute(f'ALTER TABLE stats ADD COLUMN "{col}" INTEGER DEFAULT 0')
+                cursor.execute(
+                    f'ALTER TABLE stats ADD COLUMN "{col}" INTEGER DEFAULT 0'
+                )
 
     def _ensure_initialized(self) -> None:
         """Health check: verify the database is accessible and tables exist.
@@ -284,7 +320,13 @@ class Database:
         logger.info("从 %s 恢复 Vault 成功", path)
         return True
 
-    def save_mappings(self, session_id: str, mappings: Dict[str, str], data_type: str = "unknown", team_id: Optional[str] = None) -> None:
+    def save_mappings(
+        self,
+        session_id: str,
+        mappings: Dict[str, str],
+        data_type: str = "unknown",
+        team_id: Optional[str] = None,
+    ) -> None:
         # Encrypt values if vault encryption is active
         encrypted = {k: self._encrypt_value(v) for k, v in mappings.items()}
 
@@ -302,28 +344,37 @@ class Database:
             for placeholder, real_value in encrypted.items():
                 cursor.execute(
                     "INSERT INTO vault_mappings (session_id, placeholder, real_value, data_type, team_id) VALUES (?, ?, ?, ?, COALESCE(?, 'default'))",
-                    (session_id, placeholder, real_value, data_type, team_id)
+                    (session_id, placeholder, real_value, data_type, team_id),
                 )
         logger.info(f"保存 {len(encrypted)} 条映射记录")
 
     def cleanup_expired_mappings(self, retention_hours: Optional[int] = None) -> int:
         """清理超过保留时长的映射记录（使用 self.mapping_ttl 秒数）"""
         # 使用 self.mapping_ttl（秒）换算为小时作为默认值
-        hours = retention_hours if retention_hours is not None else max(1, self.mapping_ttl // 3600)
-        cutoff = (datetime.now(UTC) - timedelta(hours=hours)).strftime("%Y-%m-%d %H:%M:%S")
+        hours = (
+            retention_hours
+            if retention_hours is not None
+            else max(1, self.mapping_ttl // 3600)
+        )
+        cutoff = (datetime.now(UTC) - timedelta(hours=hours)).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
 
         # 清理过期内存映射
         if self._memory_mappings and self.mapping_ttl > 0:
             mem_cutoff = datetime.now(UTC) - timedelta(seconds=self.mapping_ttl)
             expired_sessions = [
-                sid for sid in self._memory_mappings
+                sid
+                for sid in self._memory_mappings
                 if self._memory_mapping_times.get(sid, datetime.min) < mem_cutoff
             ]
             for sid in expired_sessions:
                 self._memory_mappings.pop(sid, None)
                 self._memory_mapping_times.pop(sid, None)
             if expired_sessions:
-                logger.info(f"[内存] 清理了 {len(expired_sessions)} 条过期映射 (保留 {hours} 小时)")
+                logger.info(
+                    f"[内存] 清理了 {len(expired_sessions)} 条过期映射 (保留 {hours} 小时)"
+                )
 
         with self.get_conn() as conn:
             cursor = conn.cursor()
@@ -346,19 +397,26 @@ class Database:
             cursor.execute("SELECT placeholder, real_value FROM vault_mappings")
             for row in cursor.fetchall():
                 if row["placeholder"] not in mappings:
-                    mappings[row["placeholder"]] = self._try_decrypt_value(row["real_value"])
+                    mappings[row["placeholder"]] = self._try_decrypt_value(
+                        row["real_value"]
+                    )
         return mappings
 
     def get_mapping(self, session_id: str, placeholder: str) -> Optional[str]:
         # 优先检查内存映射（无状态模式下 SQLite 没有映射数据）
-        if session_id in self._memory_mappings and placeholder in self._memory_mappings[session_id]:
-            return self._try_decrypt_value(self._memory_mappings[session_id][placeholder])
+        if (
+            session_id in self._memory_mappings
+            and placeholder in self._memory_mappings[session_id]
+        ):
+            return self._try_decrypt_value(
+                self._memory_mappings[session_id][placeholder]
+            )
 
         with self.get_conn() as conn:
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT real_value FROM vault_mappings WHERE session_id = ? AND placeholder = ?",
-                (session_id, placeholder)
+                (session_id, placeholder),
             )
             row = cursor.fetchone()
             return self._try_decrypt_value(row["real_value"]) if row else None
@@ -369,13 +427,17 @@ class Database:
         self._memory_mapping_times.pop(session_id, None)
         with self.get_conn() as conn:
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM vault_mappings WHERE session_id = ?", (session_id,))
+            cursor.execute(
+                "DELETE FROM vault_mappings WHERE session_id = ?", (session_id,)
+            )
 
     def add_custom_keyword(self, keyword: str) -> bool:
         try:
             with self.get_conn() as conn:
                 cursor = conn.cursor()
-                cursor.execute("INSERT INTO custom_keywords (keyword) VALUES (?)", (keyword,))
+                cursor.execute(
+                    "INSERT INTO custom_keywords (keyword) VALUES (?)", (keyword,)
+                )
             return True
         except sqlite3.IntegrityError:
             return False
@@ -404,7 +466,7 @@ class Database:
                 cursor = conn.cursor()
                 cursor.execute(
                     "INSERT INTO custom_regex_rules (name, pattern, entity_type) VALUES (?, ?, ?)",
-                    (name, pattern, entity_type)
+                    (name, pattern, entity_type),
                 )
                 return cursor.lastrowid or -1
         except sqlite3.IntegrityError:
@@ -433,7 +495,7 @@ class Database:
             cursor = conn.cursor()
             cursor.execute(
                 "UPDATE custom_regex_rules SET enabled = ? WHERE id = ?",
-                (1 if enabled else 0, rule_id)
+                (1 if enabled else 0, rule_id),
             )
             return cursor.rowcount > 0
 
@@ -444,7 +506,12 @@ class Database:
             cursor = conn.cursor()
             cursor.execute("DELETE FROM vault_mappings")
 
-    def log_audit(self, session_id: Optional[str], action: str, detail: Optional[Dict[str, Any]] = None) -> None:
+    def log_audit(
+        self,
+        session_id: Optional[str],
+        action: str,
+        detail: Optional[Dict[str, Any]] = None,
+    ) -> None:
         """记录审计日志（哈希链完整性保护）"""
         with self.get_conn() as conn:
             cursor = conn.cursor()
@@ -458,21 +525,24 @@ class Database:
             last = cursor.fetchone()
 
             if last:
-                prev_content = "|".join(str(v) for v in [
-                    last['prev_hash'] or '',
-                    last['session_id'] or '',
-                    last['action'],
-                    last['detail_json'] or '',
-                    last['created_at'] or ''
-                ])
-                prev_hash = hashlib.sha256(prev_content.encode('utf-8')).hexdigest()
+                prev_content = "|".join(
+                    str(v)
+                    for v in [
+                        last["prev_hash"] or "",
+                        last["session_id"] or "",
+                        last["action"],
+                        last["detail_json"] or "",
+                        last["created_at"] or "",
+                    ]
+                )
+                prev_hash = hashlib.sha256(prev_content.encode("utf-8")).hexdigest()
             else:
                 prev_hash = None
 
             now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
             cursor.execute(
                 "INSERT INTO audit_log (session_id, action, detail_json, created_at, prev_hash) VALUES (?, ?, ?, ?, ?)",
-                (session_id, action, detail_json, now, prev_hash)
+                (session_id, action, detail_json, now, prev_hash),
             )
         logger.debug(f"审计日志: action={action}, session_id={session_id}")
 
@@ -494,17 +564,22 @@ class Database:
                 prev = rows[i - 1]
                 curr = rows[i]
 
-                prev_content = "|".join(str(v) for v in [
-                    prev['prev_hash'] or '',
-                    prev['session_id'] or '',
-                    prev['action'],
-                    prev['detail_json'] or '',
-                    prev['created_at'] or ''
-                ])
-                expected_hash = hashlib.sha256(prev_content.encode('utf-8')).hexdigest()
+                prev_content = "|".join(
+                    str(v)
+                    for v in [
+                        prev["prev_hash"] or "",
+                        prev["session_id"] or "",
+                        prev["action"],
+                        prev["detail_json"] or "",
+                        prev["created_at"] or "",
+                    ]
+                )
+                expected_hash = hashlib.sha256(prev_content.encode("utf-8")).hexdigest()
 
-                if curr['prev_hash'] is not None and curr['prev_hash'] != expected_hash:
-                    logger.warning(f"审计日志哈希链断裂: id={curr['id']} prev_hash 不匹配")
+                if curr["prev_hash"] is not None and curr["prev_hash"] != expected_hash:
+                    logger.warning(
+                        f"审计日志哈希链断裂: id={curr['id']} prev_hash 不匹配"
+                    )
                     intact = False
 
             if intact:
@@ -521,7 +596,9 @@ class Database:
         """
         with self._exclusive_conn() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM login_attempts WHERE ip_address = ?", (ip_address,))
+            cursor.execute(
+                "SELECT * FROM login_attempts WHERE ip_address = ?", (ip_address,)
+            )
             row = cursor.fetchone()
 
             now = datetime.now()
@@ -550,14 +627,15 @@ class Database:
             now = datetime.now()
 
             # 在同一个 IMMEDIATE 事务中读取并写入，防止竞态条件
-            cursor.execute("SELECT * FROM login_attempts WHERE ip_address = ?", (ip_address,))
+            cursor.execute(
+                "SELECT * FROM login_attempts WHERE ip_address = ?", (ip_address,)
+            )
             row = cursor.fetchone()
 
             if success:
                 if row:
                     cursor.execute(
-                        "DELETE FROM login_attempts WHERE ip_address = ?",
-                        (ip_address,)
+                        "DELETE FROM login_attempts WHERE ip_address = ?", (ip_address,)
                     )
             else:
                 if row:
@@ -566,26 +644,30 @@ class Database:
                         locked_until = (now + timedelta(minutes=15)).isoformat()
                         cursor.execute(
                             "UPDATE login_attempts SET attempt_count = ?, locked_until = ?, updated_at = ? WHERE ip_address = ?",
-                            (new_count, locked_until, now.isoformat(), ip_address)
+                            (new_count, locked_until, now.isoformat(), ip_address),
                         )
                     else:
                         cursor.execute(
                             "UPDATE login_attempts SET attempt_count = ?, updated_at = ? WHERE ip_address = ?",
-                            (new_count, now.isoformat(), ip_address)
+                            (new_count, now.isoformat(), ip_address),
                         )
                 else:
                     cursor.execute(
                         "INSERT INTO login_attempts (ip_address, attempt_count) VALUES (?, 1)",
-                        (ip_address,)
+                        (ip_address,),
                     )
 
-    def update_stats(self, stats: Dict[str, int], team_id: Optional[str] = "default") -> None:
+    def update_stats(
+        self, stats: Dict[str, int], team_id: Optional[str] = "default"
+    ) -> None:
         today = datetime.now().strftime("%Y-%m-%d")
 
         # 处理 organization 到 org 的映射
         normalized_stats = stats.copy()
         if "organization" in normalized_stats:
-            normalized_stats["org"] = normalized_stats.get("org", 0) + normalized_stats["organization"]
+            normalized_stats["org"] = (
+                normalized_stats.get("org", 0) + normalized_stats["organization"]
+            )
             del normalized_stats["organization"]
 
         with self.get_conn() as conn:
@@ -623,7 +705,9 @@ class Database:
                 insert_values.append(normalized_stats.get(f, 0))
             insert_values.append(sum(normalized_stats.values()))
 
-            all_params = insert_values + update_params + [sum(normalized_stats.values())]
+            all_params = (
+                insert_values + update_params + [sum(normalized_stats.values())]
+            )
             cursor.execute(sql, all_params)
 
     def get_today_stats(self) -> Dict[str, Any]:
@@ -650,7 +734,7 @@ class Database:
             cursor.execute(
                 f"SELECT date, {sums} FROM stats WHERE date >= ? AND date <= ? "
                 "GROUP BY date ORDER BY date ASC",
-                (from_date, to_date)
+                (from_date, to_date),
             )
             return [dict(row) for row in cursor.fetchall()]
 
@@ -659,7 +743,9 @@ class Database:
     def get_api_key(self, key_hash: str):
         with self.get_conn() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM user_api_keys WHERE key_hash = ?", (key_hash,))
+            cursor.execute(
+                "SELECT * FROM user_api_keys WHERE key_hash = ?", (key_hash,)
+            )
             row = cursor.fetchone()
             return dict(row) if row else None
 
@@ -674,7 +760,7 @@ class Database:
                 cursor = conn.cursor()
                 cursor.execute(
                     "SELECT * FROM user_api_keys WHERE key_hash = ? AND is_active = 1",
-                    (key_hash,)
+                    (key_hash,),
                 )
                 row = cursor.fetchone()
                 return dict(row) if row else None
@@ -682,14 +768,20 @@ class Database:
             logger.exception("验证API密钥失败")
             return None
 
-    def create_api_key(self, key_hash: str, key_prefix: str, team_id: str = "default",
-                       tier: str = "free", label: str = None) -> None:
+    def create_api_key(
+        self,
+        key_hash: str,
+        key_prefix: str,
+        team_id: str = "default",
+        tier: str = "free",
+        label: str = None,
+    ) -> None:
         try:
             with self.get_conn() as conn:
                 conn.execute(
                     "INSERT OR IGNORE INTO user_api_keys (key_hash, key_prefix, team_id, tier, label) "
                     "VALUES (?, ?, ?, ?, ?)",
-                    (key_hash, key_prefix, team_id, tier, label)
+                    (key_hash, key_prefix, team_id, tier, label),
                 )
         except Exception:
             logger.exception("创建API密钥失败")
@@ -699,7 +791,7 @@ class Database:
             with self.get_conn() as conn:
                 conn.execute(
                     "UPDATE user_api_keys SET last_used_at = datetime('now') WHERE key_hash = ?",
-                    (key_hash,)
+                    (key_hash,),
                 )
         except Exception:
             logger.exception("更新API密钥使用时间失败")
@@ -712,7 +804,7 @@ class Database:
                     cursor.execute(
                         "SELECT key_prefix, team_id, tier, label, created_at, last_used_at, is_active "
                         "FROM user_api_keys WHERE team_id = ? ORDER BY created_at DESC",
-                        (team_id,)
+                        (team_id,),
                     )
                 else:
                     cursor.execute(
@@ -727,7 +819,10 @@ class Database:
     def delete_api_key(self, key_hash: str) -> None:
         try:
             with self.get_conn() as conn:
-                conn.execute("UPDATE user_api_keys SET is_active = 0 WHERE key_hash = ?", (key_hash,))
+                conn.execute(
+                    "UPDATE user_api_keys SET is_active = 0 WHERE key_hash = ?",
+                    (key_hash,),
+                )
         except Exception:
             logger.exception("删除API密钥失败")
 
@@ -738,7 +833,8 @@ class Database:
         try:
             with self.get_conn() as conn:
                 cursor = conn.cursor()
-                cursor.execute("""
+                cursor.execute(
+                    """
                     SELECT DISTINCT v.session_id,
                         COALESCE(
                             (SELECT created_at FROM audit_log WHERE session_id = v.session_id ORDER BY id DESC LIMIT 1),
@@ -750,7 +846,9 @@ class Database:
                     GROUP BY v.session_id
                     ORDER BY created_at DESC
                     LIMIT ? OFFSET ?
-                """, (team_id, limit, offset))
+                """,
+                    (team_id, limit, offset),
+                )
                 return [dict(row) for row in cursor.fetchall()]
         except Exception:
             logger.exception("查询用户会话失败")
@@ -763,7 +861,7 @@ class Database:
                 cursor = conn.cursor()
                 cursor.execute(
                     "SELECT COUNT(DISTINCT session_id) FROM vault_mappings WHERE team_id = ?",
-                    (team_id,)
+                    (team_id,),
                 )
                 row = cursor.fetchone()
                 return row[0] if row else 0
@@ -771,7 +869,9 @@ class Database:
             logger.exception("查询用户会话计数失败")
             return 0
 
-    def get_session_audit_log(self, session_id: str, team_id: str = None, limit: int = 100) -> list:
+    def get_session_audit_log(
+        self, session_id: str, team_id: str = None, limit: int = 100
+    ) -> list:
         try:
             with self.get_conn() as conn:
                 cursor = conn.cursor()
@@ -781,12 +881,12 @@ class Database:
                         "JOIN vault_mappings v ON v.session_id = a.session_id "
                         "WHERE a.session_id = ? AND v.team_id = ? "
                         "ORDER BY a.created_at DESC LIMIT ?",
-                        (session_id, team_id, limit)
+                        (session_id, team_id, limit),
                     )
                 else:
                     cursor.execute(
                         "SELECT * FROM audit_log WHERE session_id = ? ORDER BY created_at DESC LIMIT ?",
-                        (session_id, limit)
+                        (session_id, limit),
                     )
                 return [dict(row) for row in cursor.fetchall()]
         except Exception:
@@ -795,7 +895,9 @@ class Database:
 
     # ==================== Audit Export ====================
 
-    def get_audit_log(self, team_id: Optional[str] = None, limit: int = 1000, offset: int = 0) -> List[Dict[str, Any]]:
+    def get_audit_log(
+        self, team_id: Optional[str] = None, limit: int = 1000, offset: int = 0
+    ) -> List[Dict[str, Any]]:
         """分页获取审计日志（可按 team_id 过滤；team_id 存在 detail_json 中）。"""
         try:
             with self.get_conn() as conn:
@@ -804,12 +906,12 @@ class Database:
                     cursor.execute(
                         "SELECT * FROM audit_log WHERE detail_json LIKE ? "
                         "ORDER BY id DESC LIMIT ? OFFSET ?",
-                        (f'%"team_id": "{team_id}"%', limit, offset)
+                        (f'%"team_id": "{team_id}"%', limit, offset),
                     )
                 else:
                     cursor.execute(
                         "SELECT * FROM audit_log ORDER BY id DESC LIMIT ? OFFSET ?",
-                        (limit, offset)
+                        (limit, offset),
                     )
                 return [dict(row) for row in cursor.fetchall()]
         except Exception:
@@ -824,7 +926,7 @@ class Database:
                 if team_id:
                     cursor.execute(
                         "SELECT COUNT(*) FROM audit_log WHERE detail_json LIKE ?",
-                        (f'%"team_id": "{team_id}"%',)
+                        (f'%"team_id": "{team_id}"%',),
                     )
                 else:
                     cursor.execute("SELECT COUNT(*) FROM audit_log")
@@ -845,7 +947,7 @@ class Database:
                 cursor.execute(
                     "SELECT * FROM stats WHERE team_id = ? AND date >= date('now', ?) "
                     "ORDER BY date ASC",
-                    (team_id, f"-{days} days")
+                    (team_id, f"-{days} days"),
                 )
                 return [dict(row) for row in cursor.fetchall()]
         except Exception:
@@ -857,7 +959,10 @@ class Database:
             today = datetime.now().strftime("%Y-%m-%d")
             with self.get_conn() as conn:
                 cursor = conn.cursor()
-                cursor.execute("SELECT * FROM stats WHERE date = ? AND team_id = ?", (today, team_id))
+                cursor.execute(
+                    "SELECT * FROM stats WHERE date = ? AND team_id = ?",
+                    (today, team_id),
+                )
                 row = cursor.fetchone()
                 return dict(row) if row else None
         except Exception:
@@ -869,7 +974,10 @@ class Database:
             today = datetime.now().strftime("%Y-%m-%d")
             with self.get_conn() as conn:
                 cursor = conn.cursor()
-                cursor.execute("SELECT * FROM stats WHERE date = ? ORDER BY total_count DESC", (today,))
+                cursor.execute(
+                    "SELECT * FROM stats WHERE date = ? ORDER BY total_count DESC",
+                    (today,),
+                )
                 return [dict(row) for row in cursor.fetchall()]
         except Exception:
             logger.exception("查询所有团队今日统计失败")
@@ -898,11 +1006,12 @@ class Database:
                     )
                 """)
                 result["deleted_audit_count"] = cursor.rowcount
-                logger.info("数据保留清理完成: %d 条审计记录", result["deleted_audit_count"])
+                logger.info(
+                    "数据保留清理完成: %d 条审计记录", result["deleted_audit_count"]
+                )
         except Exception:
             logger.exception("数据保留清理失败")
         return result
 
 
 db = Database()
-

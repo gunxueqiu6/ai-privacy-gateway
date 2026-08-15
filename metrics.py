@@ -1,7 +1,14 @@
 """
 Prometheus 指标模块 - 网关监控指标定义。
 """
-from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
+
+from prometheus_client import (
+    Counter,
+    Histogram,
+    Gauge,
+    generate_latest,
+    CONTENT_TYPE_LATEST,
+)
 
 # 请求计数 (by endpoint, method, status code)
 request_count = Counter(
@@ -15,7 +22,20 @@ request_latency_seconds = Histogram(
     "gateway_request_latency_seconds",
     "Request latency in seconds by endpoint",
     ["endpoint"],
-    buckets=(0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, float("inf")),
+    buckets=(
+        0.005,
+        0.01,
+        0.025,
+        0.05,
+        0.1,
+        0.25,
+        0.5,
+        1.0,
+        2.5,
+        5.0,
+        10.0,
+        float("inf"),
+    ),
 )
 
 # PII 检测计数 (by entity type)

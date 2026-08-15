@@ -6,6 +6,7 @@ import json
 DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
 BASE_URL = os.environ.get("TARGET_LLM", "https://api.deepseek.com")
 
+
 def test_deepseek_api():
     """测试 DeepSeek API 连通性"""
     if not DEEPSEEK_API_KEY:
@@ -18,24 +19,19 @@ def test_deepseek_api():
 
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {DEEPSEEK_API_KEY}"
+        "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
     }
 
     payload = {
         "model": "deepseek-chat",
-        "messages": [
-            {"role": "user", "content": "请回复一句话测试"}
-        ],
+        "messages": [{"role": "user", "content": "请回复一句话测试"}],
         "stream": False,
-        "max_tokens": 100
+        "max_tokens": 100,
     }
 
     try:
         response = requests.post(
-            f"{BASE_URL}/v1/chat/completions",
-            headers=headers,
-            json=payload,
-            timeout=30
+            f"{BASE_URL}/v1/chat/completions", headers=headers, json=payload, timeout=30
         )
         print(f"\n✅ API 请求成功，状态码: {response.status_code}")
 
@@ -52,6 +48,7 @@ def test_deepseek_api():
     except Exception as e:
         print(f"\n❌ 请求失败: {e}")
         return False
+
 
 if __name__ == "__main__":
     test_deepseek_api()

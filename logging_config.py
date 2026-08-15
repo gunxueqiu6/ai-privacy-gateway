@@ -1,6 +1,7 @@
 """
 结构化日志配置模块 — JSON 格式日志输出，支持通过环境变量切换为文本格式。
 """
+
 import json
 import logging
 import os

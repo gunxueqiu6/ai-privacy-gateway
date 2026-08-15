@@ -1,6 +1,7 @@
 """
 独立 API 路由 — 脱敏/还原/批量/实体类型查询。
 """
+
 import json
 
 from fastapi import APIRouter, Depends, Query, Request
@@ -32,7 +33,9 @@ async def api_mask(request: Request):
     if not text:
         return JSONResponse(status_code=400, content={"error": "text 参数不能为空"})
     if len(text) > 102400:
-        return JSONResponse(status_code=413, content={"error": "输入文本过长，最大支持 100KB"})
+        return JSONResponse(
+            status_code=413, content={"error": "输入文本过长，最大支持 100KB"}
+        )
 
     engine = get_mask_engine()
 
@@ -54,12 +57,14 @@ async def api_mask(request: Request):
 
     entities = []
     for placeholder, value in mappings.items():
-        entities.append({
-            "type": _entity_type_from_placeholder(placeholder),
-            "value": value,
-            "placeholder": placeholder,
-            "position": text.find(value),
-        })
+        entities.append(
+            {
+                "type": _entity_type_from_placeholder(placeholder),
+                "value": value,
+                "placeholder": placeholder,
+                "position": text.find(value),
+            }
+        )
 
     return {"masked_text": masked_text, "entities": entities, "stats": stats}
 
@@ -76,7 +81,9 @@ async def api_restore(request: Request):
     if not masked_text:
         return JSONResponse(status_code=400, content={"error": "text 参数不能为空"})
     if len(masked_text) > 102400:
-        return JSONResponse(status_code=413, content={"error": "输入文本过长，最大支持 100KB"})
+        return JSONResponse(
+            status_code=413, content={"error": "输入文本过长，最大支持 100KB"}
+        )
 
     engine = get_mask_engine()
     original_text = engine.unmask(masked_text, mappings)
@@ -94,18 +101,38 @@ async def api_mask_batch(request: Request):
     if not isinstance(texts, list) or len(texts) == 0:
         return JSONResponse(status_code=400, content={"error": "texts 必须是非空数组"})
     if len(texts) > 50:
-        return JSONResponse(status_code=400, content={"error": "单次批量处理最多 50 条"})
+        return JSONResponse(
+            status_code=400, content={"error": "单次批量处理最多 50 条"}
+        )
 
     for i, t in enumerate(texts):
         if len(t) > 102400:
-            return JSONResponse(status_code=413, content={"error": f"第 {i+1} 条文本过长，最大支持 100KB"})
+            return JSONResponse(
+                status_code=413,
+                content={"error": f"第 {i+1} 条文本过长，最大支持 100KB"},
+            )
 
     engine = get_mask_engine()
     results = []
     for text in texts:
         masked_text, mappings, stats = engine.mask(text)
-        entities = [{"type": _entity_type_from_placeholder(p), "value": v, "placeholder": p, "position": text.find(v)} for p, v in mappings.items()]
-        results.append({"original": text, "masked": masked_text, "entities": entities, "stats": stats})
+        entities = [
+            {
+                "type": _entity_type_from_placeholder(p),
+                "value": v,
+                "placeholder": p,
+                "position": text.find(v),
+            }
+            for p, v in mappings.items()
+        ]
+        results.append(
+            {
+                "original": text,
+                "masked": masked_text,
+                "entities": entities,
+                "stats": stats,
+            }
+        )
 
     return {"results": results, "total_count": len(results)}
 
@@ -115,7 +142,12 @@ async def api_get_entities(request: Request) -> dict:
     """获取支持的实体类型列表（数据驱动）"""
     engine = get_mask_engine()
     entities = engine.get_entity_catalog()
-    return {"entities": entities, "total": len(entities), "version": "Lite", "ner_available": HAS_NER}
+    return {
+        "entities": entities,
+        "total": len(entities),
+        "version": "Lite",
+        "ner_available": HAS_NER,
+    }
 
 
 # ==================== 用户可见性仪表盘 ====================
@@ -167,12 +199,14 @@ async def me_history(
 
     items = []
     for s in sessions:
-        items.append({
-            "session_id": s.get("session_id"),
-            "timestamp": s.get("created_at"),
-            "masked_count": s.get("masked_count", 0) or 0,
-            "types": [],
-        })
+        items.append(
+            {
+                "session_id": s.get("session_id"),
+                "timestamp": s.get("created_at"),
+                "masked_count": s.get("masked_count", 0) or 0,
+                "types": [],
+            }
+        )
 
     return {"items": items, "total": total, "page": page, "limit": limit}
 
@@ -197,7 +231,9 @@ async def me_sessions(request: Request, api_key: dict = Depends(verify_api_key))
 
 @api_router.get("/api/me/session/{session_id}")
 @limiter.limit("30/minute")
-async def me_session_detail(request: Request, session_id: str, api_key: dict = Depends(verify_api_key)):
+async def me_session_detail(
+    request: Request, session_id: str, api_key: dict = Depends(verify_api_key)
+):
     """单个 session 的详细审计链。"""
     if not session_id or len(session_id) > 128:
         return JSONResponse(status_code=400, content={"error": "无效的 session_id"})

@@ -108,7 +108,8 @@ jobs:
 
       - name: Install lint tools
         run: |
-          pip install flake8 black mypy
+          # black pinned to the version validated locally (formatting rules change between releases)
+          pip install flake8 black==26.5.1 mypy
 
       - name: Check code style (Black)
         run: |

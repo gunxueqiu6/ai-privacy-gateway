@@ -1,6 +1,7 @@
 """
 测试用例 - AI Privacy Gateway Lite
 """
+
 import pytest
 import asyncio
 from unittest.mock import Mock, patch, AsyncMock
@@ -74,6 +75,7 @@ class TestMaskEngine:
     def test_custom_keyword_add_duplicate(self):
         """添加重复自定义敏感词返回 False"""
         from mask_engine import get_mask_engine
+
         engine = get_mask_engine()
         kw = "重复词"
         assert engine.add_custom_keyword(kw) is True
@@ -83,18 +85,21 @@ class TestMaskEngine:
     def test_custom_keyword_remove_nonexistent(self):
         """删除不存在的敏感词返回 False"""
         from mask_engine import get_mask_engine
+
         engine = get_mask_engine()
         assert engine.remove_custom_keyword("不存在的词") is False
 
     def test_custom_keyword_add_empty(self):
         """空关键词不添加"""
         from mask_engine import get_mask_engine
+
         engine = get_mask_engine()
         assert engine.add_custom_keyword("") is False
 
     def test_get_custom_keywords(self):
         """获取自定义敏感词列表返回副本"""
         from mask_engine import get_mask_engine
+
         engine = get_mask_engine()
         engine.add_custom_keyword("测试词")
         keywords = engine.get_custom_keywords()
@@ -107,6 +112,7 @@ class TestMaskEngine:
     def test_plate_mask(self):
         """测试车牌号脱敏"""
         from mask_engine import get_mask_engine
+
         engine = get_mask_engine()
         text = "车牌号是京A12345"
         masked, mappings, stats = engine.mask(text)
@@ -115,6 +121,7 @@ class TestMaskEngine:
     def test_ip_mask(self):
         """测试IP地址脱敏"""
         from mask_engine import get_mask_engine
+
         engine = get_mask_engine()
         text = "IP是192.168.1.1"
         masked, mappings, stats = engine.mask(text)
@@ -123,6 +130,7 @@ class TestMaskEngine:
     def test_url_mask(self):
         """测试URL脱敏"""
         from mask_engine import get_mask_engine
+
         engine = get_mask_engine()
         text = "访问 https://example.com/page 查看"
         masked, mappings, stats = engine.mask(text)
@@ -131,6 +139,7 @@ class TestMaskEngine:
     def test_date_mask(self):
         """测试日期脱敏"""
         from mask_engine import get_mask_engine
+
         engine = get_mask_engine()
         text = "日期是2024-01-15"
         masked, mappings, stats = engine.mask(text)
@@ -139,6 +148,7 @@ class TestMaskEngine:
     def test_amount_mask(self):
         """测试金额脱敏"""
         from mask_engine import get_mask_engine
+
         engine = get_mask_engine()
         text = "金额¥1,234.56元"
         masked, mappings, stats = engine.mask(text)
@@ -147,6 +157,7 @@ class TestMaskEngine:
     def test_postcode_mask(self):
         """测试邮编脱敏"""
         from mask_engine import get_mask_engine
+
         engine = get_mask_engine()
         text = "邮编100081"
         masked, mappings, stats = engine.mask(text)
@@ -155,6 +166,7 @@ class TestMaskEngine:
     def test_unmask_no_mappings(self):
         """无映射还原返回原文本"""
         from mask_engine import get_mask_engine
+
         engine = get_mask_engine()
         result = engine.unmask("[PII_PHONE_xxx]", {})
         assert "[PII_PHONE_xxx]" in result
@@ -172,7 +184,7 @@ class TestStreamBuffer:
         buffer.feed("Hello ")
         buffer.feed("World")
 
-        full_text = ''.join([chunk.raw for chunk in buffer.chunks])
+        full_text = "".join([chunk.raw for chunk in buffer.chunks])
         assert "Hello " in full_text
         assert "World" in full_text
 
@@ -204,8 +216,8 @@ class TestStreamBuffer:
 
         assert buffer.state == StreamState.DONE
         assert len(chunks) == 1
-        assert chunks[0].event == 'done'
-        assert chunks[0].data == '[DONE]'
+        assert chunks[0].event == "done"
+        assert chunks[0].data == "[DONE]"
 
     def test_feed_comment_skip(self):
         """: 开头的注释行被忽略"""
@@ -232,8 +244,18 @@ class TestStreamBuffer:
         buffer = StreamBuffer()
         buffer.mappings = {"[PII_PHONE_x]": "13812345678"}
 
-        chunk = StreamChunk(event='message', data='call [PII_PHONE_x]', raw='data: call [PII_PHONE_x]', index=0)
-        result = buffer.process_chunk(chunk, unmask_func=lambda data, mappings: data.replace("[PII_PHONE_x]", mappings["[PII_PHONE_x]"]))
+        chunk = StreamChunk(
+            event="message",
+            data="call [PII_PHONE_x]",
+            raw="data: call [PII_PHONE_x]",
+            index=0,
+        )
+        result = buffer.process_chunk(
+            chunk,
+            unmask_func=lambda data, mappings: data.replace(
+                "[PII_PHONE_x]", mappings["[PII_PHONE_x]"]
+            ),
+        )
 
         assert result.data == "call 13812345678"
 
@@ -242,11 +264,11 @@ class TestStreamBuffer:
         from stream_buffer import StreamBuffer, StreamChunk
 
         buffer = StreamBuffer()
-        chunk = StreamChunk(event='done', data='[DONE]', raw='data: [DONE]', index=0)
+        chunk = StreamChunk(event="done", data="[DONE]", raw="data: [DONE]", index=0)
         result = buffer.process_chunk(chunk, unmask_func=lambda d, m: d)
 
-        assert result.event == 'done'
-        assert result.data == '[DONE]'
+        assert result.event == "done"
+        assert result.data == "[DONE]"
 
     def test_flush_returns_full_data(self):
         """flush 返回完整拼接数据"""
@@ -356,6 +378,7 @@ class TestDatabase:
     def test_add_duplicate_keyword(self):
         """重复添加自定义敏感词不抛异常"""
         from database import db
+
         kw = "重复敏感词"
         db.add_custom_keyword(kw)
         # 重复添加应返回 False 且不抛异常
@@ -366,6 +389,7 @@ class TestDatabase:
     def test_clear_all_mappings(self):
         """清除所有映射"""
         from database import db
+
         db.save_mappings("test_clear", {"[TEST_x]": "val"}, "test")
         # 确认有数据
         mappings = db.get_all_mappings()
@@ -375,6 +399,7 @@ class TestDatabase:
     def test_get_all_mappings(self):
         """获取所有映射返回字典"""
         from database import db
+
         db.save_mappings("test_all", {"[TEST_y]": "hello"}, "test")
         mappings = db.get_all_mappings()
         assert "[TEST_y]" in mappings
@@ -384,6 +409,7 @@ class TestDatabase:
     def test_update_stats(self):
         """更新统计数据（重建表以获得新 schema）"""
         from database import db
+
         # 使用生产动态建表方法，确保 stats 表有全部列
         with db.get_conn() as conn:
             cursor = conn.cursor()
@@ -395,6 +421,7 @@ class TestDatabase:
     def test_get_today_stats_with_data(self):
         """获取今日统计数据（有数据时）"""
         from database import db
+
         db.update_stats({"phone": 1})
         stats = db.get_today_stats()
         assert "phone_count" in stats
@@ -408,6 +435,7 @@ class TestMaskEngineRegexFallback:
         """NER 不可用时正则引擎覆盖所有实体类型"""
         import mask_engine
         from mask_engine import RegexMaskEngine
+
         saved = mask_engine.HAS_NER
         mask_engine.HAS_NER = False
         try:
@@ -473,6 +501,7 @@ class TestDatabaseEdge:
     def test_check_login_attempt_new_ip(self):
         """新 IP 检查登录返回不锁定"""
         from database import db
+
         is_locked, remaining = db.check_login_attempt("192.168.99.1")
         assert not is_locked
         assert remaining == 5
@@ -480,6 +509,7 @@ class TestDatabaseEdge:
     def test_record_failed_login(self):
         """记录失败登录增加计数"""
         from database import db
+
         ip = "192.168.88.1"
         db.record_login_attempt(ip, success=False)
         try:
@@ -493,6 +523,7 @@ class TestDatabaseEdge:
     def test_record_login_success_clears_attempts(self):
         """登录成功后清除尝试记录"""
         from database import db
+
         ip = "192.168.77.1"
         db.record_login_attempt(ip, success=False)
         db.record_login_attempt(ip, success=True)
@@ -503,6 +534,7 @@ class TestDatabaseEdge:
     def test_log_audit(self):
         """审计日志写入"""
         from database import db
+
         db.log_audit("test_session_audit", "mask", {"count": 42})
         # 不抛异常即成功
 

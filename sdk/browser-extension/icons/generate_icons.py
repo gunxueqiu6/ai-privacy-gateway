@@ -2,14 +2,15 @@
 Generate browser extension PNG icons using Pillow.
 Produces 16/48/128 px shield icons with gradient background.
 """
+
 import os
 
 from PIL import Image, ImageDraw, ImageFont
 
 # Color palette matching the website dark theme
 BG_DARK = (10, 10, 15, 255)
-PRIMARY = (134, 239, 172, 255)   # #86efac — green accent
-ACCENT = (167, 139, 250, 255)    # #a78bfa — purple accent
+PRIMARY = (134, 239, 172, 255)  # #86efac — green accent
+ACCENT = (167, 139, 250, 255)  # #a78bfa — purple accent
 BORDER = (60, 60, 70, 255)
 
 

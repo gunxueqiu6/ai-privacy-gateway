@@ -1,6 +1,7 @@
 """
 Advanced mask engine tests — custom regex rules, edge cases, Aho-Corasick.
 """
+
 import pytest
 import re
 
@@ -10,6 +11,7 @@ class TestCustomRegexRules:
 
     def test_add_custom_regex_rule(self):
         from mask_engine import RegexMaskEngine
+
         engine = RegexMaskEngine()
         assert engine.add_custom_regex_rule("my_test_rule", r"\bSECRET_\w+\b", "custom")
         rules = engine.get_custom_regex_rules()
@@ -19,6 +21,7 @@ class TestCustomRegexRules:
 
     def test_add_duplicate_rule_returns_false(self):
         from mask_engine import RegexMaskEngine
+
         engine = RegexMaskEngine()
         engine.add_custom_regex_rule("dup_rule", r"\d+", "custom")
         assert engine.add_custom_regex_rule("dup_rule", r"\w+", "custom") is False
@@ -26,23 +29,27 @@ class TestCustomRegexRules:
 
     def test_add_invalid_regex_raises(self):
         from mask_engine import RegexMaskEngine
+
         engine = RegexMaskEngine()
         with pytest.raises(ValueError, match="无效的正则表达式"):
             engine.add_custom_regex_rule("bad", r"[invalid", "custom")
 
     def test_add_unknown_entity_type_raises(self):
         from mask_engine import RegexMaskEngine
+
         engine = RegexMaskEngine()
         with pytest.raises(ValueError, match="未知实体类型"):
             engine.add_custom_regex_rule("bad_type", r"\d+", "nonexistent_type")
 
     def test_remove_nonexistent_rule_returns_false(self):
         from mask_engine import RegexMaskEngine
+
         engine = RegexMaskEngine()
         assert engine.remove_custom_regex_rule("i_dont_exist") is False
 
     def test_remove_rule_stops_masking(self):
         from mask_engine import RegexMaskEngine
+
         engine = RegexMaskEngine()
         engine.add_custom_regex_rule("secret_tag", r"TOP_SECRET", "custom")
         masked, _, stats = engine.mask("This is TOP_SECRET data")
@@ -53,23 +60,30 @@ class TestCustomRegexRules:
 
     def test_toggle_rule_disables_it(self):
         from mask_engine import RegexMaskEngine
+
         engine = RegexMaskEngine()
         engine.add_custom_regex_rule("tog_rule", r"VISIBLE", "custom")
         engine.toggle_custom_regex_rule("tog_rule", enabled=False)
-        rule_info = [r for r in engine.get_custom_regex_rules() if r["name"] == "tog_rule"]
+        rule_info = [
+            r for r in engine.get_custom_regex_rules() if r["name"] == "tog_rule"
+        ]
         assert len(rule_info) == 1
         assert rule_info[0]["enabled"] is False
         engine.remove_custom_regex_rule("tog_rule")
 
     def test_toggle_nonexistent_returns_false(self):
         from mask_engine import RegexMaskEngine
+
         engine = RegexMaskEngine()
         assert engine.toggle_custom_regex_rule("no_such_rule", True) is False
 
     def test_custom_regex_masks_actual_text(self):
         from mask_engine import RegexMaskEngine
+
         engine = RegexMaskEngine()
-        engine.add_custom_regex_rule("credit_card", r"\b4\d{3}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b", "custom")
+        engine.add_custom_regex_rule(
+            "credit_card", r"\b4\d{3}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b", "custom"
+        )
         masked, mappings, stats = engine.mask("My card: 4111-1111-1111-1111")
         assert "4111-1111-1111-1111" not in masked
         assert stats["custom"] >= 1
@@ -81,6 +95,7 @@ class TestAhoCorasickEdgeCases:
 
     def test_empty_text(self):
         from mask_engine import AhoCorasickAutomaton
+
         ac = AhoCorasickAutomaton()
         ac.add_word("test")
         matches = ac.search("")
@@ -88,12 +103,14 @@ class TestAhoCorasickEdgeCases:
 
     def test_no_keywords_added(self):
         from mask_engine import AhoCorasickAutomaton
+
         ac = AhoCorasickAutomaton()
         matches = ac.search("anything here")
         assert len(matches) == 0
 
     def test_add_empty_word(self):
         from mask_engine import AhoCorasickAutomaton
+
         ac = AhoCorasickAutomaton()
         ac.add_word("")  # should not raise (early return, no-op)
         assert ac._word_count == 0  # not incremented for empty word
@@ -103,6 +120,7 @@ class TestAhoCorasickEdgeCases:
 
     def test_overlapping_keywords_longest_first(self):
         from mask_engine import AhoCorasickAutomaton
+
         ac = AhoCorasickAutomaton()
         ac.add_word("apple")
         ac.add_word("app")
@@ -115,6 +133,7 @@ class TestAhoCorasickEdgeCases:
 
     def test_chinese_keywords(self):
         from mask_engine import AhoCorasickAutomaton
+
         ac = AhoCorasickAutomaton()
         ac.add_word("密码")
         ac.add_word("验证码")
@@ -126,6 +145,7 @@ class TestAhoCorasickEdgeCases:
 
     def test_duplicate_matches_deduped(self):
         from mask_engine import AhoCorasickAutomaton
+
         ac = AhoCorasickAutomaton()
         ac.add_word("test")
         matches = ac.search("test test test")
@@ -139,6 +159,7 @@ class TestMaskEngineAdvancedEdgeCases:
 
     def test_empty_text(self):
         from mask_engine import get_mask_engine
+
         engine = get_mask_engine()
         masked, mappings, stats = engine.mask("")
         assert masked == ""
@@ -147,6 +168,7 @@ class TestMaskEngineAdvancedEdgeCases:
 
     def test_text_with_no_pii(self):
         from mask_engine import get_mask_engine
+
         engine = get_mask_engine()
         text = "这是一段完全普通的文本，没有任何敏感信息。"
         masked, mappings, stats = engine.mask(text)
@@ -155,6 +177,7 @@ class TestMaskEngineAdvancedEdgeCases:
 
     def test_very_long_text(self):
         from mask_engine import get_mask_engine
+
         engine = get_mask_engine()
         long_payload = "用户手机号是13812345678，请勿泄露。" * 500
         masked, mappings, stats = engine.mask(long_payload)
@@ -163,6 +186,7 @@ class TestMaskEngineAdvancedEdgeCases:
 
     def test_all_pii_types_mixed(self):
         from mask_engine import get_mask_engine
+
         engine = get_mask_engine()
         text = (
             "手机13812345678 "
@@ -193,6 +217,7 @@ class TestMaskEngineAdvancedEdgeCases:
 
     def test_unmask_with_partial_mappings(self):
         from mask_engine import get_mask_engine
+
         engine = get_mask_engine()
         text = "手机13812345678和邮箱test@example.com"
         masked, mappings, stats = engine.mask(text)
@@ -205,20 +230,24 @@ class TestMaskEngineAdvancedEdgeCases:
     def test_placeholder_contains_no_digits(self):
         """Alpha-only placeholders prevent NER regex false matches"""
         from mask_engine import RegexMaskEngine
+
         engine = RegexMaskEngine()
         masked, _, _ = engine.mask("13812345678")
         import re
-        placeholders = re.findall(r'\[PII_\w+_\w+\]', masked)
+
+        placeholders = re.findall(r"\[PII_\w+_\w+\]", masked)
         for ph in placeholders:
             suffix = ph.split("_")[-1].rstrip("]")
             assert not any(c.isdigit() for c in suffix)
 
     def test_add_custom_keyword_empty(self):
         from mask_engine import get_mask_engine
+
         engine = get_mask_engine()
         assert engine.add_custom_keyword("") is False
 
     def test_add_custom_keyword_nonexistent_remove(self):
         from mask_engine import get_mask_engine
+
         engine = get_mask_engine()
         assert engine.remove_custom_keyword("不存在的关键词") is False

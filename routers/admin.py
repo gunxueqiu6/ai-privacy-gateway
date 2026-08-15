@@ -57,7 +57,9 @@ async def admin_login(request: Request) -> JSONResponse:
         if not bcrypt.checkpw(password_bytes, hash_bytes):
             db.record_login_attempt(client_ip, success=False)
             _, remaining = db.check_login_attempt(client_ip)
-            logger.warning(f"管理员登录失败 (IP: {client_ip}), 剩余尝试次数: {remaining}")
+            logger.warning(
+                f"管理员登录失败 (IP: {client_ip}), 剩余尝试次数: {remaining}"
+            )
             raise HTTPException(status_code=401, detail="密码错误")
     except HTTPException:
         raise
@@ -72,7 +74,14 @@ async def admin_login(request: Request) -> JSONResponse:
     token = create_jwt_token()
 
     response = JSONResponse({"status": "ok", "message": "登录成功"})
-    response.set_cookie(key="session_token", value=token, httponly=True, secure=request.url.scheme == "https", samesite="strict", max_age=86400)
+    response.set_cookie(
+        key="session_token",
+        value=token,
+        httponly=True,
+        secure=request.url.scheme == "https",
+        samesite="strict",
+        max_age=86400,
+    )
     return response
 
 
@@ -131,7 +140,9 @@ async def add_keyword(request: Request):
         return JSONResponse(status_code=400, content={"error": "关键词不能为空"})
 
     if len(keyword) > 200:
-        return JSONResponse(status_code=400, content={"error": "关键词长度不能超过 200 个字符"})
+        return JSONResponse(
+            status_code=400, content={"error": "关键词长度不能超过 200 个字符"}
+        )
 
     if not keyword.isprintable():
         return JSONResponse(status_code=400, content={"error": "关键词包含不可见字符"})
@@ -217,7 +228,7 @@ async def check_integrity(request: Request) -> dict:
     return {
         "available": True,
         "last_result": {"status": status},
-        "message": "所有检查通过" if status == "ok" else "; ".join(issues)
+        "message": "所有检查通过" if status == "ok" else "; ".join(issues),
     }
 
 
@@ -255,7 +266,7 @@ async def audit_stream(request: Request):
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
             "X-Accel-Buffering": "no",
-        }
+        },
     )
 
 
@@ -292,27 +303,40 @@ async def admin_add_regex_rule(request: Request):
     if not name:
         return JSONResponse(status_code=400, content={"error": "规则名称不能为空"})
     if len(name) > 100:
-        return JSONResponse(status_code=400, content={"error": "规则名称不能超过 100 个字符"})
+        return JSONResponse(
+            status_code=400, content={"error": "规则名称不能超过 100 个字符"}
+        )
     if not pattern:
         return JSONResponse(status_code=400, content={"error": "正则表达式不能为空"})
     if entity_type not in KNOWN_ENTITY_TYPES:
-        return JSONResponse(status_code=400, content={"error": f"未知实体类型: {entity_type}，支持的实体类型: {', '.join(sorted(KNOWN_ENTITY_TYPES))}"})
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": f"未知实体类型: {entity_type}，支持的实体类型: {', '.join(sorted(KNOWN_ENTITY_TYPES))}"
+            },
+        )
 
     try:
         re.compile(pattern)
     except re.error as e:
-        return JSONResponse(status_code=400, content={"error": f"无效的正则表达式: {e}"})
+        return JSONResponse(
+            status_code=400, content={"error": f"无效的正则表达式: {e}"}
+        )
 
     rule_id = db.add_custom_regex_rule(name, pattern, entity_type)
     if rule_id == -1:
-        return JSONResponse(status_code=409, content={"error": f"规则名称 '{name}' 已存在"})
+        return JSONResponse(
+            status_code=409, content={"error": f"规则名称 '{name}' 已存在"}
+        )
 
     engine = get_mask_engine()
     try:
         engine.add_custom_regex_rule(name, pattern, entity_type)
     except (ValueError, re.error) as e:
         db.delete_custom_regex_rule(rule_id)
-        return JSONResponse(status_code=500, content={"error": f"引擎添加规则失败: {e}"})
+        return JSONResponse(
+            status_code=500, content={"error": f"引擎添加规则失败: {e}"}
+        )
 
     logger.info(f"管理员添加自定义正则规则: {name} (type={entity_type})")
     return {"status": "ok", "id": rule_id, "message": f"规则 '{name}' 已添加"}
@@ -327,7 +351,9 @@ async def admin_delete_regex_rule(request: Request, rule_id: int):
     rules = db.get_custom_regex_rules()
     target = next((r for r in rules if r["id"] == rule_id), None)
     if target is None:
-        return JSONResponse(status_code=404, content={"error": f"规则 ID {rule_id} 不存在"})
+        return JSONResponse(
+            status_code=404, content={"error": f"规则 ID {rule_id} 不存在"}
+        )
 
     if not db.delete_custom_regex_rule(rule_id):
         return JSONResponse(status_code=500, content={"error": "数据库删除失败"})
@@ -348,7 +374,9 @@ async def admin_toggle_regex_rule(request: Request, rule_id: int):
     rules = db.get_custom_regex_rules()
     target = next((r for r in rules if r["id"] == rule_id), None)
     if target is None:
-        return JSONResponse(status_code=404, content={"error": f"规则 ID {rule_id} 不存在"})
+        return JSONResponse(
+            status_code=404, content={"error": f"规则 ID {rule_id} 不存在"}
+        )
 
     new_enabled = not target["enabled"]
 
@@ -360,7 +388,12 @@ async def admin_toggle_regex_rule(request: Request, rule_id: int):
 
     status_text = "启用" if new_enabled else "禁用"
     logger.info(f"管理员{status_text}自定义正则规则: {target['name']} (id={rule_id})")
-    return {"status": "ok", "id": rule_id, "enabled": new_enabled, "message": f"规则 '{target['name']}' 已{status_text}"}
+    return {
+        "status": "ok",
+        "id": rule_id,
+        "enabled": new_enabled,
+        "message": f"规则 '{target['name']}' 已{status_text}",
+    }
 
 
 # ==================== Vault Backup & Recovery ====================
@@ -438,7 +471,11 @@ async def toggle_dry_run(request: Request):
     status_text = "启用" if config.DRY_RUN_MODE else "禁用"
     logger.info("管理员%s Dry-Run 模式", status_text)
     db.log_audit(None, "dry_run_toggle", {"dry_run": config.DRY_RUN_MODE})
-    return {"status": "ok", "dry_run": config.DRY_RUN_MODE, "message": f"Dry-Run 模式已{status_text}"}
+    return {
+        "status": "ok",
+        "dry_run": config.DRY_RUN_MODE,
+        "message": f"Dry-Run 模式已{status_text}",
+    }
 
 
 # ==================== Config Hot-Reload ====================
@@ -477,6 +514,7 @@ async def config_reload(request: Request) -> dict:
     config.reload()
 
     from gateway_core import get_gateway_core
+
     core = get_gateway_core()
     await core.reload_config()
 
@@ -509,9 +547,23 @@ async def get_stats_history(
 
     summary = {}
     if records:
-        for col in ("phone", "email", "idcard", "bankcard", "custom",
-                     "person", "location", "org", "plate", "ip",
-                     "url", "date", "amount", "postcode", "total"):
+        for col in (
+            "phone",
+            "email",
+            "idcard",
+            "bankcard",
+            "custom",
+            "person",
+            "location",
+            "org",
+            "plate",
+            "ip",
+            "url",
+            "date",
+            "amount",
+            "postcode",
+            "total",
+        ):
             summary[col] = sum(r.get(f"{col}_count", 0) for r in records)
 
     return {
@@ -644,19 +696,31 @@ async def admin_teams(request: Request) -> dict:
         tid = t.get("team_id", "default")
         by_type = {}
         for key in [
-            "phone_count", "email_count", "idcard_count", "bankcard_count",
-            "person_count", "location_count", "org_count", "plate_count",
-            "ip_count", "url_count", "date_count", "amount_count", "postcode_count",
+            "phone_count",
+            "email_count",
+            "idcard_count",
+            "bankcard_count",
+            "person_count",
+            "location_count",
+            "org_count",
+            "plate_count",
+            "ip_count",
+            "url_count",
+            "date_count",
+            "amount_count",
+            "postcode_count",
         ]:
             val = t.get(key, 0) or 0
             if val > 0:
                 by_type[key.replace("_count", "")] = val
-        result.append({
-            "team_id": tid,
-            "tier": tier_map.get(tid, "free"),
-            "total_masked_today": t.get("total_count", 0) or 0,
-            "by_type": by_type,
-        })
+        result.append(
+            {
+                "team_id": tid,
+                "tier": tier_map.get(tid, "free"),
+                "total_masked_today": t.get("total_count", 0) or 0,
+                "by_type": by_type,
+            }
+        )
     return {"teams": result}
 
 
@@ -665,7 +729,11 @@ async def admin_teams(request: Request) -> dict:
 async def admin_team_stats(request: Request, team_id: str) -> dict:
     """获取单个团队的详细统计（今日 + 7 天历史）。"""
     await require_admin(request)
-    if not team_id or len(team_id) > 128 or not team_id.replace('-', '').replace('_', '').isalnum():
+    if (
+        not team_id
+        or len(team_id) > 128
+        or not team_id.replace("-", "").replace("_", "").isalnum()
+    ):
         return JSONResponse(status_code=400, content={"error": "无效的 team_id"})
     today = db.get_stats_by_team_today(team_id)
     history = db.get_team_stats_range(team_id, days=7)
@@ -677,9 +745,19 @@ async def admin_team_stats(request: Request, team_id: str) -> dict:
         today_result["total"] = today.get("total_count", 0) or 0
         today_result["types"] = {}
         for key in [
-            "phone_count", "email_count", "idcard_count", "bankcard_count",
-            "person_count", "location_count", "org_count", "plate_count",
-            "ip_count", "url_count", "date_count", "amount_count", "postcode_count",
+            "phone_count",
+            "email_count",
+            "idcard_count",
+            "bankcard_count",
+            "person_count",
+            "location_count",
+            "org_count",
+            "plate_count",
+            "ip_count",
+            "url_count",
+            "date_count",
+            "amount_count",
+            "postcode_count",
         ]:
             val = today.get(key, 0) or 0
             if val > 0:
@@ -696,12 +774,19 @@ async def admin_team_stats(request: Request, team_id: str) -> dict:
 
 @router.get("/admin/teams/{team_id}/sessions")
 @limiter.limit("10/minute")
-async def admin_team_sessions(request: Request, team_id: str,
-                               limit: int = Query(50, ge=1, le=200),
-                               offset: int = Query(0, ge=0)) -> dict:
+async def admin_team_sessions(
+    request: Request,
+    team_id: str,
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+) -> dict:
     """获取单个团队的会话列表（管理后台视图）。"""
     await require_admin(request)
-    if not team_id or len(team_id) > 128 or not team_id.replace('-', '').replace('_', '').isalnum():
+    if (
+        not team_id
+        or len(team_id) > 128
+        or not team_id.replace("-", "").replace("_", "").isalnum()
+    ):
         return JSONResponse(status_code=400, content={"error": "无效的 team_id"})
     sessions = db.get_user_sessions(team_id, limit=limit, offset=offset)
     return {"team_id": team_id, "sessions": sessions}
@@ -717,9 +802,19 @@ async def admin_stats_today(request: Request) -> dict:
     by_type = {}
     for t in teams:
         for key in [
-            "phone_count", "email_count", "idcard_count", "bankcard_count",
-            "person_count", "location_count", "org_count", "plate_count",
-            "ip_count", "url_count", "date_count", "amount_count", "postcode_count",
+            "phone_count",
+            "email_count",
+            "idcard_count",
+            "bankcard_count",
+            "person_count",
+            "location_count",
+            "org_count",
+            "plate_count",
+            "ip_count",
+            "url_count",
+            "date_count",
+            "amount_count",
+            "postcode_count",
         ]:
             val = t.get(key, 0) or 0
             if val > 0:

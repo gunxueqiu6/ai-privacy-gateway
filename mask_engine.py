@@ -2,6 +2,7 @@
 脱敏引擎模块 - 正则表达式脱敏引擎
 支持 NER 命名实体识别，覆盖 13 种实体类型
 """
+
 import re
 import hashlib
 import json
@@ -15,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 try:
     from ner_engine import get_ner_engine, NEREntityType
+
     HAS_NER = True
 except ImportError:
     HAS_NER = False
@@ -22,12 +24,30 @@ except ImportError:
 
 
 # 基础实体类型（catalog 缺失时的回退白名单）
-_FALLBACK_ENTITY_TYPES = frozenset({
-    "phone", "email", "idcard", "bankcard", "plate", "coordinates",
-    "ip", "url", "date", "amount", "postcode",
-    "passport", "ssn", "credit_code", "mac", "api_key",
-    "person", "location", "organization", "custom",
-})
+_FALLBACK_ENTITY_TYPES = frozenset(
+    {
+        "phone",
+        "email",
+        "idcard",
+        "bankcard",
+        "plate",
+        "coordinates",
+        "ip",
+        "url",
+        "date",
+        "amount",
+        "postcode",
+        "passport",
+        "ssn",
+        "credit_code",
+        "mac",
+        "api_key",
+        "person",
+        "location",
+        "organization",
+        "custom",
+    }
+)
 
 
 def _load_entity_catalog() -> Optional[Dict[str, Any]]:
@@ -51,15 +71,27 @@ def _load_entity_catalog() -> Optional[Dict[str, Any]]:
 
 ENTITY_CATALOG: Optional[Dict[str, Any]] = _load_entity_catalog()
 
-KNOWN_ENTITY_TYPES = frozenset(ENTITY_CATALOG.keys()) if ENTITY_CATALOG else _FALLBACK_ENTITY_TYPES
+KNOWN_ENTITY_TYPES = (
+    frozenset(ENTITY_CATALOG.keys()) if ENTITY_CATALOG else _FALLBACK_ENTITY_TYPES
+)
 
 
 # NER 引擎返回的实体类型缩写 → 目录 key 的映射
 _NER_TYPE_TO_KEY = {
-    "PER": "person", "LOC": "location", "ORG": "organization",
-    "PHONE": "phone", "EMAIL": "email", "IDCARD": "idcard", "BANKCARD": "bankcard",
-    "PLATE": "plate", "IP": "ip", "URL": "url", "DATE": "date", "AMOUNT": "amount",
-    "POSTCODE": "postcode", "APIKEY": "api_key",
+    "PER": "person",
+    "LOC": "location",
+    "ORG": "organization",
+    "PHONE": "phone",
+    "EMAIL": "email",
+    "IDCARD": "idcard",
+    "BANKCARD": "bankcard",
+    "PLATE": "plate",
+    "IP": "ip",
+    "URL": "url",
+    "DATE": "date",
+    "AMOUNT": "amount",
+    "POSTCODE": "postcode",
+    "APIKEY": "api_key",
 }
 
 
@@ -73,7 +105,8 @@ class AhoCorasickAutomaton:
 
     class _Node:
         """Trie 节点"""
-        __slots__ = ('children', 'fail', 'output')
+
+        __slots__ = ("children", "fail", "output")
 
         def __init__(self):
             self.children = {}
@@ -101,6 +134,7 @@ class AhoCorasickAutomaton:
     def _build(self) -> None:
         """构建失败链接（fail pointers）— BFS 层序遍历"""
         from collections import deque
+
         self._root.fail = self._root
         queue: deque = deque()
 
@@ -231,41 +265,55 @@ class RegexMaskEngine(MaskEngineInterface):
     _sequence_lock = threading.Lock()
 
     BUILTIN_RULES = {
-        "phone": re.compile(r'(?<!\d)(1[3-9]\d{9})(?!\d)'),
-        "email": re.compile(r'\b([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b'),
-        "idcard": re.compile(r'(?<!\d)([1-9]\d{5}(?:19|20)\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])\d{3}[\dXx])(?!\d)'),
-        "bankcard": re.compile(r'(?<!\d)([1-9]\d{15,18})(?!\d)'),
-        "plate": re.compile(r'[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z][A-Z0-9]{5}'),
+        "phone": re.compile(r"(?<!\d)(1[3-9]\d{9})(?!\d)"),
+        "email": re.compile(r"\b([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b"),
+        "idcard": re.compile(
+            r"(?<!\d)([1-9]\d{5}(?:19|20)\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])\d{3}[\dXx])(?!\d)"
+        ),
+        "bankcard": re.compile(r"(?<!\d)([1-9]\d{15,18})(?!\d)"),
+        "plate": re.compile(
+            r"[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z][A-Z0-9]{5}"
+        ),
         # API Key — 20+ known provider formats (OpenAI/Anthropic/GitHub/AWS/Slack/etc.)
         "api_key": re.compile(
-            r'\b('
-            r'sk-(?:proj-|ant-)?[A-Za-z0-9]{15,}'                # OpenAI project / Anthropic
-            r'|gh[pousr]_[A-Za-z0-9]{36,}'                       # GitHub personal/OAuth/user/server/refresh tokens
-            r'|AKIA[0-9A-Z]{16}'                                  # AWS IAM access key
-            r'|xox[abp]-[0-9]{10,13}-[0-9]{10,13}-[A-Za-z0-9]{24,}'  # Slack bot/user tokens
-            r'|hf_[A-Za-z0-9]{25,}'                               # HuggingFace
-            r'|glpat-[A-Za-z0-9\-_]{20,}'                         # GitLab personal access token
-            r'|AIza[0-9A-Za-z\-_]{35}'                            # Google API key
-            r'|SG\.[A-Za-z0-9\-_]{22,}\.[A-Za-z0-9\-_]{22,}'     # SendGrid
-            r'|s[ck]_(?:live|test)_[0-9A-Za-z]{24,}'             # Stripe secret/publishable keys
-            r'|rk_(?:live|test)_[0-9A-Za-z]{24,}'                 # Stripe restricted keys
-            r'|ya29\.[0-9A-Za-z\-_]{50,}'                         # Google OAuth access token
-            r'|acct[0-9A-Fa-f]{32}'                               # Twilio account SID (hex)
-            r'|key-[A-Za-z0-9\-_]{20,}'                           # Generic API key prefix
-            r'|sk-[A-Za-z0-9]{15,}'                               # Generic sk- prefix (catch-all)
-            r')\b'
+            r"\b("
+            r"sk-(?:proj-|ant-)?[A-Za-z0-9]{15,}"  # OpenAI project / Anthropic
+            r"|gh[pousr]_[A-Za-z0-9]{36,}"  # GitHub personal/OAuth/user/server/refresh tokens
+            r"|AKIA[0-9A-Z]{16}"  # AWS IAM access key
+            r"|xox[abp]-[0-9]{10,13}-[0-9]{10,13}-[A-Za-z0-9]{24,}"  # Slack bot/user tokens
+            r"|hf_[A-Za-z0-9]{25,}"  # HuggingFace
+            r"|glpat-[A-Za-z0-9\-_]{20,}"  # GitLab personal access token
+            r"|AIza[0-9A-Za-z\-_]{35}"  # Google API key
+            r"|SG\.[A-Za-z0-9\-_]{22,}\.[A-Za-z0-9\-_]{22,}"  # SendGrid
+            r"|s[ck]_(?:live|test)_[0-9A-Za-z]{24,}"  # Stripe secret/publishable keys
+            r"|rk_(?:live|test)_[0-9A-Za-z]{24,}"  # Stripe restricted keys
+            r"|ya29\.[0-9A-Za-z\-_]{50,}"  # Google OAuth access token
+            r"|acct[0-9A-Fa-f]{32}"  # Twilio account SID (hex)
+            r"|key-[A-Za-z0-9\-_]{20,}"  # Generic API key prefix
+            r"|sk-[A-Za-z0-9]{15,}"  # Generic sk- prefix (catch-all)
+            r")\b"
         ),
-        "coordinates": re.compile(r'(?<!\d)(\d{1,3}\.\d{4,}\s*[,，\s]\s*\d{1,3}\.\d{4,})(?!\d)'),
-        "ip": re.compile(r'(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'),
-        "url": re.compile(r'https?://[^\s]+'),
-        "date": re.compile(r'\d{4}[-/年](?:0?[1-9]|1[0-2])[-/月](?:0?[1-9]|[12]\d|3[01])日?'),
-        "amount": re.compile(r'(?:¥|￥|\$)\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?'),
+        "coordinates": re.compile(
+            r"(?<!\d)(\d{1,3}\.\d{4,}\s*[,，\s]\s*\d{1,3}\.\d{4,})(?!\d)"
+        ),
+        "ip": re.compile(
+            r"(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
+        ),
+        "url": re.compile(r"https?://[^\s]+"),
+        "date": re.compile(
+            r"\d{4}[-/年](?:0?[1-9]|1[0-2])[-/月](?:0?[1-9]|[12]\d|3[01])日?"
+        ),
+        "amount": re.compile(r"(?:¥|￥|\$)\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?"),
         # 邮编 - 注意：可能误匹配6位连续数字（如订单号、快递单号等）
-        "postcode": re.compile(r'(?<!\d)([1-9]\d{5})(?!\d)'),
-        "passport": re.compile(r'(?<![A-Z])(E\d{8})(?!\d)'),
-        "ssn": re.compile(r'(?<!\d)(\d{3}-\d{2}-\d{4})(?!\d)'),
-        "credit_code": re.compile(r'(?<![A-Z0-9])([0-9A-HJ-NPQRTUWXY]{2}\d{6}[0-9A-HJ-NPQRTUWXY]{10})(?![A-Z0-9])'),
-        "mac": re.compile(r'(?i)(?<![0-9A-F])([0-9A-F]{2}[:-][0-9A-F]{2}[:-][0-9A-F]{2}[:-][0-9A-F]{2}[:-][0-9A-F]{2}[:-][0-9A-F]{2})(?![0-9A-F])'),
+        "postcode": re.compile(r"(?<!\d)([1-9]\d{5})(?!\d)"),
+        "passport": re.compile(r"(?<![A-Z])(E\d{8})(?!\d)"),
+        "ssn": re.compile(r"(?<!\d)(\d{3}-\d{2}-\d{4})(?!\d)"),
+        "credit_code": re.compile(
+            r"(?<![A-Z0-9])([0-9A-HJ-NPQRTUWXY]{2}\d{6}[0-9A-HJ-NPQRTUWXY]{10})(?![A-Z0-9])"
+        ),
+        "mac": re.compile(
+            r"(?i)(?<![0-9A-F])([0-9A-F]{2}[:-][0-9A-F]{2}[:-][0-9A-F]{2}[:-][0-9A-F]{2}[:-][0-9A-F]{2}[:-][0-9A-F]{2})(?![0-9A-F])"
+        ),
     }
 
     ENTITY_TYPE_MAP = {
@@ -294,9 +342,28 @@ class RegexMaskEngine(MaskEngineInterface):
     # 内置规则匹配顺序（specific 优先于 generic；改动需谨慎）。
     # 未在此列表中的 regex 实体按 key 排序追加在末尾。
     BUILTIN_RULE_ORDER = (
-        "phone", "email", "credit_code", "idcard", "bankcard", "plate", "coordinates",
-        "ip", "url", "date", "api_key", "amount", "postcode", "passport", "ssn", "mac",
-        "hkmo_pass", "taiwan_pass", "taiwan_id", "org_code", "hkmo_resident", "military_id",
+        "phone",
+        "email",
+        "credit_code",
+        "idcard",
+        "bankcard",
+        "plate",
+        "coordinates",
+        "ip",
+        "url",
+        "date",
+        "api_key",
+        "amount",
+        "postcode",
+        "passport",
+        "ssn",
+        "mac",
+        "hkmo_pass",
+        "taiwan_pass",
+        "taiwan_id",
+        "org_code",
+        "hkmo_resident",
+        "military_id",
     )
 
     def __init__(self):
@@ -320,7 +387,9 @@ class RegexMaskEngine(MaskEngineInterface):
         if ENTITY_CATALOG:
             for key, e in ENTITY_CATALOG.items():
                 self._entity_meta[key] = e
-                self._entity_map[key] = e.get("placeholder_token") or f"PII_{key.upper()}"
+                self._entity_map[key] = (
+                    e.get("placeholder_token") or f"PII_{key.upper()}"
+                )
                 if e.get("enabled", True):
                     self._enabled_entities.add(key)
                 if e.get("detector") == "regex" and e.get("pattern"):
@@ -331,12 +400,22 @@ class RegexMaskEngine(MaskEngineInterface):
         else:
             self._builtin_rules = dict(self.BUILTIN_RULES)
             self._entity_map = dict(self.ENTITY_TYPE_MAP)
-            self._enabled_entities = set(self.BUILTIN_RULES.keys()) | {"person", "location", "organization", "custom"}
+            self._enabled_entities = set(self.BUILTIN_RULES.keys()) | {
+                "person",
+                "location",
+                "organization",
+                "custom",
+            }
             for key, token in self._entity_map.items():
-                detector = "ner" if key in ("person", "location", "organization") else "regex"
+                detector = (
+                    "ner" if key in ("person", "location", "organization") else "regex"
+                )
                 self._entity_meta[key] = {
-                    "key": key, "placeholder_token": token, "detector": detector,
-                    "enabled": True, "compliance_tag": "personal_info",
+                    "key": key,
+                    "placeholder_token": token,
+                    "detector": detector,
+                    "enabled": True,
+                    "compliance_tag": "personal_info",
                 }
 
     @staticmethod
@@ -348,9 +427,9 @@ class RegexMaskEngine(MaskEngineInterface):
         result = []
         while n > 0:
             n -= 1
-            result.append(chr(ord('A') + (n % 26)))
+            result.append(chr(ord("A") + (n % 26)))
             n //= 26
-        return ''.join(reversed(result))
+        return "".join(reversed(result))
 
     @staticmethod
     def _luhn_valid(number: str) -> bool:
@@ -377,9 +456,14 @@ class RegexMaskEngine(MaskEngineInterface):
         sequence = self._get_next_sequence()
         return f"[PII_{entity_type.upper()}_{sequence}]"
 
-    def _apply_rule(self, result: str, rule_key: str,
-                    mappings: Dict[str, str], stats: Dict[str, int],
-                    filter_fn=None) -> str:
+    def _apply_rule(
+        self,
+        result: str,
+        rule_key: str,
+        mappings: Dict[str, str],
+        stats: Dict[str, int],
+        filter_fn=None,
+    ) -> str:
         """Apply a single built-in regex rule to the text.
 
         Uses position-based replacement to avoid over-replacing when
@@ -423,18 +507,25 @@ class RegexMaskEngine(MaskEngineInterface):
             result = result[:start] + placeholder + result[end:]
 
         # 2. 自定义正则规则（位置替换）
-        for rule_name, (compiled_regex, entity_type) in self._custom_regex_rules.items():
+        for rule_name, (
+            compiled_regex,
+            entity_type,
+        ) in self._custom_regex_rules.items():
             if rule_name in self._disabled_custom_regex_rules:
                 continue
             rule_replacements = []
             for match in compiled_regex.finditer(result):
                 match_str = match.group(0)
                 placeholder = self._create_placeholder(entity_type, match_str)
-                rule_replacements.append((match.start(), match.end(), placeholder, match_str))
+                rule_replacements.append(
+                    (match.start(), match.end(), placeholder, match_str)
+                )
                 mappings[placeholder] = match_str
                 if entity_type in stats:
                     stats[entity_type] += 1
-            for start, end, placeholder, _ in sorted(rule_replacements, key=lambda x: -x[0]):
+            for start, end, placeholder, _ in sorted(
+                rule_replacements, key=lambda x: -x[0]
+            ):
                 result = result[:start] + placeholder + result[end:]
 
         # 3. NER 引擎检测人名、地名、机构名
@@ -452,14 +543,20 @@ class RegexMaskEngine(MaskEngineInterface):
 
         # 4. 内置规则（按 BUILTIN_RULE_ORDER 顺序，specific 优先；银行卡需跳过11位手机号并做 Luhn 校验）
         def _bankcard_filter(m: str) -> bool:
-            if len(m) == 11 and m.startswith('1'):
+            if len(m) == 11 and m.startswith("1"):
                 return True  # 跳过手机号
             return not RegexMaskEngine._luhn_valid(m)  # 跳过非 Luhn 卡号
 
-        ordered = [k for k in self.BUILTIN_RULE_ORDER
-                   if k in self._builtin_rules and k in self._enabled_entities]
-        ordered += [k for k in sorted(self._builtin_rules.keys())
-                    if k not in ordered and k in self._enabled_entities]
+        ordered = [
+            k
+            for k in self.BUILTIN_RULE_ORDER
+            if k in self._builtin_rules and k in self._enabled_entities
+        ]
+        ordered += [
+            k
+            for k in sorted(self._builtin_rules.keys())
+            if k not in ordered and k in self._enabled_entities
+        ]
         for rule_key in ordered:
             filter_fn = _bankcard_filter if rule_key == "bankcard" else None
             result = self._apply_rule(result, rule_key, mappings, stats, filter_fn)
@@ -529,12 +626,14 @@ class RegexMaskEngine(MaskEngineInterface):
         """获取自定义正则规则列表（含启用状态）"""
         rules = []
         for name, (compiled, entity_type) in self._custom_regex_rules.items():
-            rules.append({
-                "name": name,
-                "pattern": compiled.pattern,
-                "entity_type": entity_type,
-                "enabled": name not in self._disabled_custom_regex_rules,
-            })
+            rules.append(
+                {
+                    "name": name,
+                    "pattern": compiled.pattern,
+                    "entity_type": entity_type,
+                    "enabled": name not in self._disabled_custom_regex_rules,
+                }
+            )
         return rules
 
     def toggle_custom_regex_rule(self, name: str, enabled: bool) -> bool:
@@ -552,22 +651,24 @@ class RegexMaskEngine(MaskEngineInterface):
         """返回实体目录元数据（供 /api/entities 等使用）。"""
         result = []
         for key, meta in self._entity_meta.items():
-            result.append({
-                "type": meta.get("placeholder_token") or f"PII_{key.upper()}",
-                "key": key,
-                "name": meta.get("name_zh") or meta.get("name_en", key),
-                "name_en": meta.get("name_en", key),
-                "description": meta.get("name_en", ""),
-                "enabled": key in self._enabled_entities,
-                "engine": meta.get("detector", "regex"),
-                "compliance_tag": meta.get("compliance_tag", "personal_info"),
-            })
+            result.append(
+                {
+                    "type": meta.get("placeholder_token") or f"PII_{key.upper()}",
+                    "key": key,
+                    "name": meta.get("name_zh") or meta.get("name_en", key),
+                    "name_en": meta.get("name_en", key),
+                    "description": meta.get("name_en", ""),
+                    "enabled": key in self._enabled_entities,
+                    "engine": meta.get("detector", "regex"),
+                    "compliance_tag": meta.get("compliance_tag", "personal_info"),
+                }
+            )
         return result
 
 
 def placeholder_to_token(placeholder: str) -> str:
     """从占位符解析实体 token（如 [PII_BANKCARD_A] → PII_BANK）。"""
-    m = re.match(r'\[PII_(\w+)_([A-Z]+)\]', placeholder)
+    m = re.match(r"\[PII_(\w+)_([A-Z]+)\]", placeholder)
     if not m:
         return "unknown"
     key_upper = m.group(1)
@@ -610,6 +711,7 @@ def create_mask_engine() -> MaskEngineInterface:
     engine = RegexMaskEngine()
     try:
         from database import db
+
         keywords = db.get_custom_keywords()
         for kw in keywords:
             engine.add_custom_keyword(kw)
@@ -620,11 +722,15 @@ def create_mask_engine() -> MaskEngineInterface:
         rules = db.get_custom_regex_rules()
         for rule in rules:
             try:
-                engine.add_custom_regex_rule(rule["name"], rule["pattern"], rule["entity_type"])
+                engine.add_custom_regex_rule(
+                    rule["name"], rule["pattern"], rule["entity_type"]
+                )
                 if not rule["enabled"]:
                     engine.toggle_custom_regex_rule(rule["name"], False)
             except (ValueError, re.error) as e:
-                logger.warning(f"跳过无效的自定义正则规则 '{rule.get('name', '?')}': {e}")
+                logger.warning(
+                    f"跳过无效的自定义正则规则 '{rule.get('name', '?')}': {e}"
+                )
         if rules:
             logger.info(f"从数据库加载了 {len(rules)} 个自定义正则规则")
     except Exception as e:

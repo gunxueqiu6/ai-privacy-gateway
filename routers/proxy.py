@@ -1,6 +1,7 @@
 """
 核心代理路由 — chat/completions + v1 通用代理。
 """
+
 import hashlib
 import json
 import logging
@@ -8,7 +9,12 @@ import logging
 from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 
-from routers.dependencies import BAD_ENCODING_RESPONSE, filter_proxy_headers, limiter, safe_json
+from routers.dependencies import (
+    BAD_ENCODING_RESPONSE,
+    filter_proxy_headers,
+    limiter,
+    safe_json,
+)
 from gateway_core import get_gateway_core
 from database import db
 from config import config
@@ -18,7 +24,14 @@ logger = logging.getLogger(__name__)
 
 proxy_router = APIRouter(tags=["proxy"])
 
-ALLOWED_V1_PROXY_PATHS = {"models", "embeddings", "moderations", "messages", "images", "audio"}
+ALLOWED_V1_PROXY_PATHS = {
+    "models",
+    "embeddings",
+    "moderations",
+    "messages",
+    "images",
+    "audio",
+}
 
 
 def _resolve_auth_and_headers(request: Request):
@@ -91,12 +104,16 @@ async def chat_completions(request: Request) -> Response:
 
     audit_ctx = {
         "team_id": team_id,
-        "key_hash": hashlib.sha256(raw_api_key.encode()).hexdigest() if raw_api_key else None,
+        "key_hash": (
+            hashlib.sha256(raw_api_key.encode()).hexdigest() if raw_api_key else None
+        ),
         "client_ip": request.client.host if request.client else None,
         "user_agent": request.headers.get("user-agent"),
     }
 
-    masked_body, mappings, stats, session_id, used_placeholders = gateway.mask_request(body, audit_ctx)
+    masked_body, mappings, stats, session_id, used_placeholders = gateway.mask_request(
+        body, audit_ctx
+    )
 
     # 脱敏透明度响应头（所有请求都注入）
     total_masked = sum(v for k, v in stats.items() if k != "total")
@@ -117,7 +134,12 @@ async def chat_completions(request: Request) -> Response:
             dry_run_headers["X-Dry-Run-Detected-Types"] = ",".join(detected_types)
 
     if mappings and not config.DRY_RUN_MODE:
-        db.save_mappings(session_id, mappings, data_type=dominant_compliance_tag(stats), team_id=team_id)
+        db.save_mappings(
+            session_id,
+            mappings,
+            data_type=dominant_compliance_tag(stats),
+            team_id=team_id,
+        )
         db.update_stats(stats, team_id=team_id)
 
     if body.get("stream", False):
@@ -132,11 +154,13 @@ async def chat_completions(request: Request) -> Response:
                 if data == "[DONE]":
                     yield {
                         "event": "masked",
-                        "data": _json.dumps({
-                            "count": total_masked,
-                            "types": masked_types,
-                            "session_id": session_id,
-                        }),
+                        "data": _json.dumps(
+                            {
+                                "count": total_masked,
+                                "types": masked_types,
+                                "session_id": session_id,
+                            }
+                        ),
                     }
                 yield chunk
 
@@ -172,7 +196,9 @@ async def chat_completions(request: Request) -> Response:
     )
 
 
-@proxy_router.api_route("/v1/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+@proxy_router.api_route(
+    "/v1/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"]
+)
 async def proxy_v1(request: Request, path: str) -> Response:
     """通用 v1 路由代理（仅白名单路径）"""
     if path not in ALLOWED_V1_PROXY_PATHS:

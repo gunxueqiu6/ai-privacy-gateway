@@ -1,6 +1,7 @@
 """
 负载均衡模块 — 多上游 LLM 健康检查 + 负载均衡。
 """
+
 import asyncio
 import itertools
 import logging
@@ -17,6 +18,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class UpstreamNode:
     """上游节点状态"""
+
     url: str
     healthy: bool = True
     last_health_check: float = 0.0
@@ -78,7 +80,8 @@ class LoadBalancer:
                 node.healthy = False
                 logger.warning(
                     "[负载均衡] 节点 %s 已标记为不健康 (连续 %d 次失败)",
-                    url, node.consecutive_failures
+                    url,
+                    node.consecutive_failures,
                 )
 
     def release(self, url: str) -> None:
@@ -122,13 +125,13 @@ class LoadBalancer:
                             node.healthy = True
                             node.consecutive_failures = 0
                             node.last_health_check = time.time()
-                            logger.info(
-                                "[负载均衡] 节点 %s 已恢复健康", node.url
-                            )
-                    except (httpx.TimeoutException, httpx.ConnectError, httpx.RequestError) as e:
-                        logger.debug(
-                            "[负载均衡] 节点 %s 健康检查失败: %s", node.url, e
-                        )
+                            logger.info("[负载均衡] 节点 %s 已恢复健康", node.url)
+                    except (
+                        httpx.TimeoutException,
+                        httpx.ConnectError,
+                        httpx.RequestError,
+                    ) as e:
+                        logger.debug("[负载均衡] 节点 %s 健康检查失败: %s", node.url, e)
 
     # ---- Stats ----
 

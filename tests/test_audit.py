@@ -1,4 +1,5 @@
 """audit.py — AuditBus pub/sub 测试"""
+
 import asyncio
 import pytest
 from audit import AuditBus

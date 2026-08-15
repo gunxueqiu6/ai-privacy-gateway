@@ -2,12 +2,13 @@
 Generate og-image.png (1200×630) for social sharing previews.
 Matches the promo tile branding.
 """
+
 import os
 from PIL import Image, ImageDraw, ImageFont
 
 BG_DARK = (10, 10, 15, 255)
-PRIMARY = (134, 239, 172, 255)   # #86efac
-ACCENT = (167, 139, 250, 255)    # #a78bfa
+PRIMARY = (134, 239, 172, 255)  # #86efac
+ACCENT = (167, 139, 250, 255)  # #a78bfa
 TEXT_WHITE = (240, 240, 245, 255)
 TEXT_GRAY = (160, 160, 170, 255)
 
@@ -27,7 +28,8 @@ def _draw_shield(draw, cx, cy, size):
     # Shield body
     draw.rounded_rectangle(
         [x0 + w * 0.12, arc_top, x1 - w * 0.12, y1],
-        radius=radius, fill=BG_DARK,
+        radius=radius,
+        fill=BG_DARK,
     )
     draw.rectangle(
         [x0 + w * 0.12, arc_top, x1 - w * 0.12, y1 - radius],
@@ -36,15 +38,23 @@ def _draw_shield(draw, cx, cy, size):
     # Outline
     draw.arc(
         [x0, y0 - arc_r * 0.25, x1, y0 + arc_r * 1.15],
-        start=200, end=340, fill=PRIMARY, width=line_w,
+        start=200,
+        end=340,
+        fill=PRIMARY,
+        width=line_w,
     )
-    draw.line([(x0 + w * 0.12, arc_top), (x0 + w * 0.12, y1)],
-              fill=PRIMARY, width=line_w)
-    draw.line([(x1 - w * 0.12, arc_top), (x1 - w * 0.12, y1)],
-              fill=PRIMARY, width=line_w)
+    draw.line(
+        [(x0 + w * 0.12, arc_top), (x0 + w * 0.12, y1)], fill=PRIMARY, width=line_w
+    )
+    draw.line(
+        [(x1 - w * 0.12, arc_top), (x1 - w * 0.12, y1)], fill=PRIMARY, width=line_w
+    )
     draw.arc(
         [x0 + w * 0.12, y1 - radius * 2, x1 - w * 0.12, y1 + radius * 0.4],
-        start=0, end=180, fill=PRIMARY, width=line_w,
+        start=0,
+        end=180,
+        fill=PRIMARY,
+        width=line_w,
     )
     # Lock
     lock_w = size * 0.16
@@ -53,13 +63,21 @@ def _draw_shield(draw, cx, cy, size):
     lx1, ly1 = cx + lock_w / 2, cy + lock_h * 0.9
     draw.rounded_rectangle(
         [lx0, ly0 + lock_h * 0.08, lx1, ly1],
-        radius=max(1, int(size * 0.05)), fill=PRIMARY,
+        radius=max(1, int(size * 0.05)),
+        fill=PRIMARY,
     )
     shackle_r = max(1, int(size // 18))
     draw.arc(
-        [cx - lock_w * 0.28, ly0 - lock_h * 0.22,
-         cx + lock_w * 0.28, ly0 + lock_h * 0.5],
-        start=180, end=360, fill=PRIMARY, width=shackle_r,
+        [
+            cx - lock_w * 0.28,
+            ly0 - lock_h * 0.22,
+            cx + lock_w * 0.28,
+            ly0 + lock_h * 0.5,
+        ],
+        start=180,
+        end=360,
+        fill=PRIMARY,
+        width=shackle_r,
     )
 
 
@@ -102,10 +120,19 @@ except (OSError, IOError):
     tag_font = ImageFont.load_default()
 
 draw.text((W * 0.48, H * 0.28), "AI Privacy Gateway", fill=TEXT_WHITE, font=title_font)
-draw.text((W * 0.48, H * 0.42), "保护 AI 对话隐私，自动脱敏敏感信息", fill=TEXT_GRAY, font=subtitle_font)
+draw.text(
+    (W * 0.48, H * 0.42),
+    "保护 AI 对话隐私，自动脱敏敏感信息",
+    fill=TEXT_GRAY,
+    font=subtitle_font,
+)
 
 # Feature bullets
-features = ["▸ 6 大 AI 平台全覆盖", "▸ 13+ 种敏感实体自动检测", "▸ 一键脱敏，完全本地运行"]
+features = [
+    "▸ 6 大 AI 平台全覆盖",
+    "▸ 13+ 种敏感实体自动检测",
+    "▸ 一键脱敏，完全本地运行",
+]
 try:
     bullet_font = ImageFont.truetype("C:/Windows/Fonts/msyh.ttc", 22)
 except (OSError, IOError):
@@ -125,7 +152,15 @@ draw.text(
 )
 
 # Output to website-astro/public/
-output_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "website-astro", "public", "og-image.png")
+output_path = os.path.join(
+    os.path.dirname(__file__),
+    "..",
+    "..",
+    "..",
+    "website-astro",
+    "public",
+    "og-image.png",
+)
 output_path = os.path.normpath(output_path)
 img.save(output_path, "PNG")
 print(f"Created {output_path} ({W}x{H})")

@@ -2,6 +2,7 @@
 流式缓冲区状态机 - 处理 SSE 流式响应
 支持分块传输、缓冲区管理、状态追踪
 """
+
 import logging
 from enum import Enum
 from typing import Dict, Optional, List, Generator
@@ -12,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 class StreamState(Enum):
     """流式状态"""
+
     IDLE = "idle"
     RECEIVING = "receiving"
     BUFFERING = "buffering"
@@ -23,6 +25,7 @@ class StreamState(Enum):
 @dataclass
 class StreamChunk:
     """流式数据块"""
+
     event: str
     data: str
     raw: str
@@ -68,44 +71,47 @@ class StreamBuffer:
     def _parse_sse(self, data: str) -> List[StreamChunk]:
         """解析 SSE 格式数据"""
         chunks = []
-        lines = data.split('\n')
+        lines = data.split("\n")
 
         for line in lines:
             if not line:
                 continue
 
-            if line.startswith('data: '):
+            if line.startswith("data: "):
                 raw_data = line[6:]
-                if raw_data == '[DONE]':
+                if raw_data == "[DONE]":
                     self.state = StreamState.DONE
-                    chunks.append(StreamChunk(
-                        event='done',
-                        data='[DONE]',
-                        raw=line,
-                        index=self.current_index
-                    ))
+                    chunks.append(
+                        StreamChunk(
+                            event="done",
+                            data="[DONE]",
+                            raw=line,
+                            index=self.current_index,
+                        )
+                    )
                 else:
-                    chunks.append(StreamChunk(
-                        event='message',
-                        data=raw_data,
-                        raw=line,
-                        index=self.current_index
-                    ))
+                    chunks.append(
+                        StreamChunk(
+                            event="message",
+                            data=raw_data,
+                            raw=line,
+                            index=self.current_index,
+                        )
+                    )
                     self.current_index += 1
-            elif line.startswith('event: '):
+            elif line.startswith("event: "):
                 # 事件类型行
                 pass
-            elif line.startswith(':'):
+            elif line.startswith(":"):
                 # 注释行，忽略
                 pass
             else:
                 # 其他数据
-                chunks.append(StreamChunk(
-                    event='raw',
-                    data=line,
-                    raw=line,
-                    index=self.current_index
-                ))
+                chunks.append(
+                    StreamChunk(
+                        event="raw", data=line, raw=line, index=self.current_index
+                    )
+                )
 
         return chunks
 
@@ -113,17 +119,14 @@ class StreamBuffer:
         """
         处理单个数据块，执行还原
         """
-        if chunk.event == 'done':
+        if chunk.event == "done":
             return chunk
 
         # 还原敏感信息
         unmasked_data = unmask_func(chunk.data, self.mappings)
 
         return StreamChunk(
-            event=chunk.event,
-            data=unmasked_data,
-            raw=chunk.raw,
-            index=chunk.index
+            event=chunk.event, data=unmasked_data, raw=chunk.raw, index=chunk.index
         )
 
     def flush(self) -> str:
@@ -131,7 +134,7 @@ class StreamBuffer:
         刷新缓冲区，返回完整数据
         """
         self.state = StreamState.FLUSHING
-        result = '\n'.join([chunk.raw for chunk in self.chunks])
+        result = "\n".join([chunk.raw for chunk in self.chunks])
         self.state = StreamState.DONE
         return result
 
@@ -156,7 +159,9 @@ class StreamProcessor:
         self.unmask_func = unmask_func
         self.buffer = StreamBuffer()
 
-    def process_stream(self, stream: Generator[str, None, None]) -> Generator[str, None, None]:
+    def process_stream(
+        self, stream: Generator[str, None, None]
+    ) -> Generator[str, None, None]:
         """
         处理流式数据
         """
@@ -168,12 +173,12 @@ class StreamProcessor:
             for chunk in chunks:
                 processed = self.buffer.process_chunk(chunk, self.unmask_func)
 
-                if processed.event == 'done':
-                    yield 'data: [DONE]\n\n'
-                elif processed.event == 'message':
-                    yield f'data: {processed.data}\n\n'
+                if processed.event == "done":
+                    yield "data: [DONE]\n\n"
+                elif processed.event == "message":
+                    yield f"data: {processed.data}\n\n"
                 else:
-                    yield f'{processed.raw}\n'
+                    yield f"{processed.raw}\n"
 
             if self.buffer.is_done():
                 break

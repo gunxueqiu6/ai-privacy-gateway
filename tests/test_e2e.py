@@ -4,6 +4,7 @@ End-to-end integration test — full PII masking pipeline.
 Tests the complete flow from API request through masking, proxying,
 unmasking, and admin endpoints.
 """
+
 import pytest
 import json
 from unittest.mock import Mock, patch, AsyncMock, ANY
@@ -22,6 +23,7 @@ class TestE2EMaskEndpoints:
     def client(self):
         try:
             from main import app
+
             return TestClient(app)
         except ImportError:
             pytest.skip("main module not available")
@@ -29,8 +31,7 @@ class TestE2EMaskEndpoints:
     def test_mask_phone_and_email(self, client):
         """PII phone and email are masked in request text"""
         response = client.post(
-            "/api/mask",
-            json={"text": "请联系手机13812345678或邮箱test@example.com"}
+            "/api/mask", json={"text": "请联系手机13812345678或邮箱test@example.com"}
         )
         assert response.status_code == 200
         data = response.json()
@@ -44,7 +45,7 @@ class TestE2EMaskEndpoints:
         """ID card and bank card numbers are masked"""
         response = client.post(
             "/api/mask",
-            json={"text": "身份证110101199001011234 银行卡4111111111111111"}
+            json={"text": "身份证110101199001011234 银行卡4111111111111111"},
         )
         assert response.status_code == 200
         data = response.json()
@@ -57,8 +58,8 @@ class TestE2EMaskEndpoints:
             "/api/mask",
             json={
                 "text": "This is my API_KEY_12345 value",
-                "custom_keywords": ["API_KEY_12345"]
-            }
+                "custom_keywords": ["API_KEY_12345"],
+            },
         )
         assert response.status_code == 200
         data = response.json()
@@ -67,19 +68,13 @@ class TestE2EMaskEndpoints:
 
     def test_mask_empty_text_returns_400(self, client):
         """Empty text returns 400 error"""
-        response = client.post(
-            "/api/mask",
-            json={"text": ""}
-        )
+        response = client.post("/api/mask", json={"text": ""})
         assert response.status_code == 400
 
     def test_mask_very_long_text(self, client):
         """Very long text is handled properly"""
         long_text = "手机13812345678 " * 1000
-        response = client.post(
-            "/api/mask",
-            json={"text": long_text}
-        )
+        response = client.post("/api/mask", json={"text": long_text})
         assert response.status_code == 200
         data = response.json()
         assert "13812345678" not in data["masked_text"]
@@ -88,18 +83,19 @@ class TestE2EMaskEndpoints:
         """Text with no PII is returned unchanged"""
         response = client.post(
             "/api/mask",
-            json={"text": "Hello, this is normal text with no sensitive data."}
+            json={"text": "Hello, this is normal text with no sensitive data."},
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["masked_text"] == "Hello, this is normal text with no sensitive data."
+        assert (
+            data["masked_text"] == "Hello, this is normal text with no sensitive data."
+        )
         assert len(data["entities"]) == 0
 
     def test_mask_chinese_no_pii(self, client):
         """Chinese text with no PII is returned unchanged"""
         response = client.post(
-            "/api/mask",
-            json={"text": "这是一段普通的中文文本，不包含敏感信息。"}
+            "/api/mask", json={"text": "这是一段普通的中文文本，不包含敏感信息。"}
         )
         assert response.status_code == 200
         data = response.json()
@@ -117,6 +113,7 @@ class TestE2ERestoreEndpoints:
     def client(self):
         try:
             from main import app
+
             return TestClient(app)
         except ImportError:
             pytest.skip("main module not available")
@@ -136,7 +133,7 @@ class TestE2ERestoreEndpoints:
         # Restore
         restore_resp = client.post(
             "/api/restore",
-            json={"text": mask_data["masked_text"], "mappings": mappings}
+            json={"text": mask_data["masked_text"], "mappings": mappings},
         )
         assert restore_resp.status_code == 200
         restore_data = restore_resp.json()
@@ -144,17 +141,13 @@ class TestE2ERestoreEndpoints:
 
     def test_restore_empty_text_returns_400(self, client):
         """Empty text returns 400"""
-        response = client.post(
-            "/api/restore",
-            json={"text": "", "mappings": {}}
-        )
+        response = client.post("/api/restore", json={"text": "", "mappings": {}})
         assert response.status_code == 400
 
     def test_restore_no_mappings(self, client):
         """Restore with no mappings returns text unchanged"""
         response = client.post(
-            "/api/restore",
-            json={"text": "some text", "mappings": {}}
+            "/api/restore", json={"text": "some text", "mappings": {}}
         )
         assert response.status_code == 200
         data = response.json()
@@ -172,6 +165,7 @@ class TestE2EBatchMask:
     def client(self):
         try:
             from main import app
+
             return TestClient(app)
         except ImportError:
             pytest.skip("main module not available")
@@ -180,11 +174,7 @@ class TestE2EBatchMask:
         """Batch mask handles multiple texts"""
         response = client.post(
             "/api/mask/batch",
-            json={"texts": [
-                "手机13812345678",
-                "邮箱test@example.com",
-                "普通文本"
-            ]}
+            json={"texts": ["手机13812345678", "邮箱test@example.com", "普通文本"]},
         )
         assert response.status_code == 200
         data = response.json()
@@ -207,10 +197,7 @@ class TestE2EBatchMask:
     def test_batch_mask_single_text_too_long(self, client):
         """Single text over 100KB returns 413"""
         long_text = "x" * 200000
-        response = client.post(
-            "/api/mask/batch",
-            json={"texts": [long_text]}
-        )
+        response = client.post("/api/mask/batch", json={"texts": [long_text]})
         assert response.status_code == 413
 
 
@@ -225,6 +212,7 @@ class TestE2EEntities:
     def client(self):
         try:
             from main import app
+
             return TestClient(app)
         except ImportError:
             pytest.skip("main module not available")
@@ -254,6 +242,7 @@ class TestE2EChatCompletions:
     def client(self):
         try:
             from main import app
+
             return TestClient(app)
         except ImportError:
             pytest.skip("main module not available")
@@ -262,29 +251,41 @@ class TestE2EChatCompletions:
         """Request without auth returns 401"""
         response = client.post(
             "/v1/chat/completions",
-            json={"model": "gpt-3.5", "messages": [{"role": "user", "content": "hello"}]}
+            json={
+                "model": "gpt-3.5",
+                "messages": [{"role": "user", "content": "hello"}],
+            },
         )
         assert response.status_code == 401
 
     def test_chat_completion_with_auth_proxies(self, client):
         """Request with auth is proxied (masked then forwarded)"""
-        with patch('routers.proxy.get_gateway_core') as mock_gw:
+        with patch("routers.proxy.get_gateway_core") as mock_gw:
             mock_core = Mock()
             mock_core.mask_request.return_value = (
-                {"model": "gpt-3.5", "messages": [{"role": "user", "content": "[PII_PHONE_A]"}]},
+                {
+                    "model": "gpt-3.5",
+                    "messages": [{"role": "user", "content": "[PII_PHONE_A]"}],
+                },
                 {"[PII_PHONE_A]": "13812345678"},
                 {"phone": 1},
                 "test-sess-e2e",
-                {"[PII_PHONE_A]"}
+                {"[PII_PHONE_A]"},
             )
-            mock_core.proxy_request = AsyncMock(return_value=(
-                200,
-                json.dumps({
-                    "id": "chatcmpl-e2e",
-                    "choices": [{"message": {"content": "回复内容 [PII_PHONE_A]"}}]
-                }).encode(),
-                {"content-type": "application/json"}
-            ))
+            mock_core.proxy_request = AsyncMock(
+                return_value=(
+                    200,
+                    json.dumps(
+                        {
+                            "id": "chatcmpl-e2e",
+                            "choices": [
+                                {"message": {"content": "回复内容 [PII_PHONE_A]"}}
+                            ],
+                        }
+                    ).encode(),
+                    {"content-type": "application/json"},
+                )
+            )
             mock_core.unmask_response = Mock(return_value="回复内容 13812345678")
             mock_gw.return_value = mock_core
 
@@ -292,9 +293,11 @@ class TestE2EChatCompletions:
                 "/v1/chat/completions",
                 json={
                     "model": "gpt-3.5-turbo",
-                    "messages": [{"role": "user", "content": "我的手机号是13812345678"}]
+                    "messages": [
+                        {"role": "user", "content": "我的手机号是13812345678"}
+                    ],
                 },
-                headers={"Authorization": "Bearer test-key"}
+                headers={"Authorization": "Bearer test-key"},
             )
 
             assert response.status_code == 200
@@ -304,18 +307,23 @@ class TestE2EChatCompletions:
 
     def test_chat_completion_streaming_mocks(self, client):
         """Streaming chat completion is handled correctly"""
-        with patch('routers.proxy.get_gateway_core') as mock_gw:
+        with patch("routers.proxy.get_gateway_core") as mock_gw:
             mock_core = Mock()
             mock_core.mask_request.return_value = (
-                {"model": "gpt-3.5", "messages": [{"role": "user", "content": "[PII_PHONE_A]"}]},
+                {
+                    "model": "gpt-3.5",
+                    "messages": [{"role": "user", "content": "[PII_PHONE_A]"}],
+                },
                 {"[PII_PHONE_A]": "13812345678"},
                 {"phone": 1},
                 "test-sess-stream",
-                {"[PII_PHONE_A]"}
+                {"[PII_PHONE_A]"},
             )
 
             async def mock_stream(*args, **kwargs):
-                yield {"data": json.dumps({"choices": [{"delta": {"content": "你好"}}]})}
+                yield {
+                    "data": json.dumps({"choices": [{"delta": {"content": "你好"}}]})
+                }
                 yield {"data": "[DONE]"}
 
             mock_core.proxy_stream_request = mock_stream
@@ -325,10 +333,12 @@ class TestE2EChatCompletions:
                 "/v1/chat/completions",
                 json={
                     "model": "gpt-3.5-turbo",
-                    "messages": [{"role": "user", "content": "我的手机号是13812345678"}],
-                    "stream": True
+                    "messages": [
+                        {"role": "user", "content": "我的手机号是13812345678"}
+                    ],
+                    "stream": True,
                 },
-                headers={"Authorization": "Bearer test-key"}
+                headers={"Authorization": "Bearer test-key"},
             )
 
             assert response.status_code == 200
@@ -336,52 +346,58 @@ class TestE2EChatCompletions:
 
     def test_chat_completion_empty_messages(self, client):
         """Request with empty messages is handled"""
-        with patch('routers.proxy.get_gateway_core') as mock_gw:
+        with patch("routers.proxy.get_gateway_core") as mock_gw:
             mock_core = Mock()
             mock_core.mask_request.return_value = (
                 {"model": "gpt-3.5", "messages": []},
                 {},
                 {},
                 "test-sess-empty",
-                set()
+                set(),
             )
-            mock_core.proxy_request = AsyncMock(return_value=(
-                200,
-                json.dumps({
-                    "id": "chatcmpl-empty",
-                    "choices": [{"message": {"content": "Hello"}}]
-                }).encode(),
-                {"content-type": "application/json"}
-            ))
+            mock_core.proxy_request = AsyncMock(
+                return_value=(
+                    200,
+                    json.dumps(
+                        {
+                            "id": "chatcmpl-empty",
+                            "choices": [{"message": {"content": "Hello"}}],
+                        }
+                    ).encode(),
+                    {"content-type": "application/json"},
+                )
+            )
             mock_core.unmask_response = Mock(return_value="Hello")
             mock_gw.return_value = mock_core
 
             response = client.post(
                 "/v1/chat/completions",
-                json={
-                    "model": "gpt-3.5",
-                    "messages": []
-                },
-                headers={"Authorization": "Bearer test-key"}
+                json={"model": "gpt-3.5", "messages": []},
+                headers={"Authorization": "Bearer test-key"},
             )
             assert response.status_code == 200
 
     def test_chat_completion_proxy_502(self, client):
         """When upstream is down, returns 502"""
-        with patch('routers.proxy.get_gateway_core') as mock_gw:
+        with patch("routers.proxy.get_gateway_core") as mock_gw:
             mock_core = Mock()
             mock_core.mask_request.return_value = (
-                {"model": "gpt-3.5", "messages": [{"role": "user", "content": "hello"}]},
+                {
+                    "model": "gpt-3.5",
+                    "messages": [{"role": "user", "content": "hello"}],
+                },
                 {},
                 {},
                 "test-sess-502",
-                set()
+                set(),
             )
-            mock_core.proxy_request = AsyncMock(return_value=(
-                502,
-                json.dumps({"error": "No healthy upstream available"}).encode(),
-                {}
-            ))
+            mock_core.proxy_request = AsyncMock(
+                return_value=(
+                    502,
+                    json.dumps({"error": "No healthy upstream available"}).encode(),
+                    {},
+                )
+            )
             mock_core.unmask_response = Mock(return_value="hello")
             mock_gw.return_value = mock_core
 
@@ -389,9 +405,9 @@ class TestE2EChatCompletions:
                 "/v1/chat/completions",
                 json={
                     "model": "gpt-3.5",
-                    "messages": [{"role": "user", "content": "hello"}]
+                    "messages": [{"role": "user", "content": "hello"}],
                 },
-                headers={"Authorization": "Bearer test-key"}
+                headers={"Authorization": "Bearer test-key"},
             )
             assert response.status_code == 502
 
@@ -407,6 +423,7 @@ class TestE2EAdmin:
     def client(self):
         try:
             from main import app
+
             return TestClient(app)
         except ImportError:
             pytest.skip("main module not available")
@@ -414,19 +431,13 @@ class TestE2EAdmin:
     def test_admin_login_and_stats(self, client):
         """Admin login then access stats"""
         # Login
-        login_resp = client.post(
-            "/admin/login",
-            json={"password": "test_admin_pw_123"}
-        )
+        login_resp = client.post("/admin/login", json={"password": "test_admin_pw_123"})
         assert login_resp.status_code == 200
         assert "session_token" in login_resp.cookies
 
         # Access stats with session cookie
         cookie_value = login_resp.cookies["session_token"]
-        response = client.get(
-            "/admin/stats",
-            cookies={"session_token": cookie_value}
-        )
+        response = client.get("/admin/stats", cookies={"session_token": cookie_value})
         assert response.status_code == 200
 
     def test_admin_unauthorized_stats(self, client):
@@ -436,10 +447,7 @@ class TestE2EAdmin:
 
     def test_admin_wrong_password(self, client):
         """Wrong password returns 401"""
-        response = client.post(
-            "/admin/login",
-            json={"password": "wrong_password_123"}
-        )
+        response = client.post("/admin/login", json={"password": "wrong_password_123"})
         assert response.status_code == 401
 
     def test_admin_health(self, client):
@@ -461,25 +469,20 @@ class TestE2EAdmin:
     def test_admin_with_bearer_token(self, client):
         """Admin endpoints accept Bearer token header"""
         # Login to get token
-        login_resp = client.post(
-            "/admin/login",
-            json={"password": "test_admin_pw_123"}
-        )
+        login_resp = client.post("/admin/login", json={"password": "test_admin_pw_123"})
         assert login_resp.status_code == 200
         token = login_resp.cookies.get("session_token")
 
         # Use Bearer token header instead of cookie
         response = client.get(
-            "/admin/stats",
-            headers={"Authorization": f"Bearer {token}"}
+            "/admin/stats", headers={"Authorization": f"Bearer {token}"}
         )
         assert response.status_code == 200
 
     def test_admin_with_invalid_token(self, client):
         """Invalid Bearer token returns 401"""
         response = client.get(
-            "/admin/stats",
-            headers={"Authorization": "Bearer invalid_token_xyz"}
+            "/admin/stats", headers={"Authorization": "Bearer invalid_token_xyz"}
         )
         assert response.status_code == 401
 
@@ -495,6 +498,7 @@ class TestE2EHealthEndpoints:
     def client(self):
         try:
             from main import app
+
             return TestClient(app)
         except ImportError:
             pytest.skip("main module not available")

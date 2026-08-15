@@ -9,6 +9,7 @@ AI Privacy Gateway - 交互式启动向导
     python start.py --non-interactive  非交互模式（使用默认值）
     python start.py --port 9999       指定端口
 """
+
 import argparse
 import os
 import re
@@ -205,7 +206,9 @@ def find_process_on_port(port: int) -> str:
         try:
             result = subprocess.run(
                 ["netstat", "-ano"],
-                capture_output=True, text=True, timeout=5,
+                capture_output=True,
+                text=True,
+                timeout=5,
             )
             for line in result.stdout.splitlines():
                 if f":{port}" in line and "LISTENING" in line:
@@ -215,9 +218,15 @@ def find_process_on_port(port: int) -> str:
                         try:
                             proc = subprocess.run(
                                 ["tasklist", "/fi", f"PID eq {pid}", "/nh"],
-                                capture_output=True, text=True, timeout=5,
+                                capture_output=True,
+                                text=True,
+                                timeout=5,
                             )
-                            name = proc.stdout.strip().split()[0] if proc.stdout.strip() else pid
+                            name = (
+                                proc.stdout.strip().split()[0]
+                                if proc.stdout.strip()
+                                else pid
+                            )
                             return f"PID {pid} ({name})"
                         except subprocess.TimeoutExpired:
                             return f"PID {pid}"
@@ -336,7 +345,7 @@ def _serialize_env(config: dict) -> str:
         "",
         "# ── 数据库 ──",
         "DB_TYPE=sqlite",
-        'DB_PATH=./vault_data/privacy_vault.db',
+        "DB_PATH=./vault_data/privacy_vault.db",
         "",
         "# ── 脱敏引擎 ──",
         "MASK_ENGINE_TYPE=regex",
@@ -621,7 +630,9 @@ def start_gateway(config: dict) -> None:
     println(c("  [+] 网关服务已启动！", "green"))
     println()
     println(f"  API 地址:       {c('http://localhost:' + str(port), 'cyan', 'bold')}")
-    println(f"  管理后台:       {c('http://localhost:' + str(port) + '/admin', 'cyan', 'bold')}")
+    println(
+        f"  管理后台:       {c('http://localhost:' + str(port) + '/admin', 'cyan', 'bold')}"
+    )
     println(f"  目标 AI 服务:   {c(config['TARGET_LLM'], 'cyan')}")
     println()
     println(c("  将你的 AI 客户端 API 地址改为:", "bold"))
@@ -670,8 +681,13 @@ def main() -> None:
             # 显示已有密码，方便用户找回
             if config["ADMIN_PASSWORD"]:
                 println()
-                println(c("  管理员密码: ", "dim") + c(config["ADMIN_PASSWORD"], "yellow", "bold"))
-                println(c("  (从 .env 中读取，如已遗忘可删除 .env 后重新运行生成)", "dim"))
+                println(
+                    c("  管理员密码: ", "dim")
+                    + c(config["ADMIN_PASSWORD"], "yellow", "bold")
+                )
+                println(
+                    c("  (从 .env 中读取，如已遗忘可删除 .env 后重新运行生成)", "dim")
+                )
                 println()
         else:
             println(c("正在自动配置...", "dim"))
@@ -680,13 +696,21 @@ def main() -> None:
             # 显示简洁的使用说明
             println()
             println(c("  +------------------------------------------+", "cyan"))
-            println(c("  |  AI Privacy Gateway 配置完成              |", "cyan", "bold"))
+            println(
+                c("  |  AI Privacy Gateway 配置完成              |", "cyan", "bold")
+            )
             println(c("  +------------------------------------------+", "cyan"))
             println()
-            println(f"  API 地址:   {c('http://localhost:' + str(config['LISTEN_PORT']) + '/v1', 'cyan', 'bold')}")
-            println(f"  管理后台:   {c('http://localhost:' + str(config['LISTEN_PORT']) + '/admin', 'cyan')}")
+            println(
+                f"  API 地址:   {c('http://localhost:' + str(config['LISTEN_PORT']) + '/v1', 'cyan', 'bold')}"
+            )
+            println(
+                f"  管理后台:   {c('http://localhost:' + str(config['LISTEN_PORT']) + '/admin', 'cyan')}"
+            )
             if config["ADMIN_PASSWORD"]:
-                println(f"  管理员密码: {c(config['ADMIN_PASSWORD'], 'yellow', 'bold')}")
+                println(
+                    f"  管理员密码: {c(config['ADMIN_PASSWORD'], 'yellow', 'bold')}"
+                )
                 println(c("            请复制保存此密码！", "yellow"))
             println()
             println(c("  将 AI 客户端的 API 地址改为上方地址即可使用。", "dim"))
@@ -697,7 +721,12 @@ def main() -> None:
         if missing:
             println(c(f"安装依赖: {', '.join(missing)}...", "dim"))
             if not install_dependencies(missing, no_install=args.no_install):
-                println(c("依赖安装失败，请手动运行: pip install -r requirements.txt", "red"))
+                println(
+                    c(
+                        "依赖安装失败，请手动运行: pip install -r requirements.txt",
+                        "red",
+                    )
+                )
                 sys.exit(1)
 
         start_gateway(config)

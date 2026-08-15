@@ -1,6 +1,7 @@
 """
 Advanced database tests — encryption, audit integrity, custom regex rules, stateless mode.
 """
+
 import pytest
 import sqlite3
 import os
@@ -13,6 +14,7 @@ class TestDatabaseAudit:
     def test_verify_audit_integrity_empty(self):
         from database import Database
         import tempfile
+
         with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
         try:
@@ -25,6 +27,7 @@ class TestDatabaseAudit:
         """Tampering with an earlier record is detected by the hash chain."""
         from database import Database
         import tempfile
+
         with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
         try:
@@ -36,9 +39,7 @@ class TestDatabaseAudit:
             # Tamper with the FIRST record — this should be caught because
             # the second record's prev_hash chains back to the first.
             with db.get_conn() as conn:
-                conn.execute(
-                    "UPDATE audit_log SET action = 'tampered' WHERE id = 1"
-                )
+                conn.execute("UPDATE audit_log SET action = 'tampered' WHERE id = 1")
             assert db.verify_audit_integrity() is False
         finally:
             os.unlink(db_path)
@@ -46,6 +47,7 @@ class TestDatabaseAudit:
     def test_audit_log_single_entry(self):
         from database import Database
         import tempfile
+
         with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
         try:
@@ -62,6 +64,7 @@ class TestDatabaseCustomRegexRules:
     def test_add_and_get_custom_regex_rule(self):
         from database import Database
         import tempfile
+
         with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
         try:
@@ -79,6 +82,7 @@ class TestDatabaseCustomRegexRules:
     def test_add_duplicate_name_returns_minus_one(self):
         from database import Database
         import tempfile
+
         with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
         try:
@@ -92,6 +96,7 @@ class TestDatabaseCustomRegexRules:
     def test_delete_custom_regex_rule(self):
         from database import Database
         import tempfile
+
         with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
         try:
@@ -107,6 +112,7 @@ class TestDatabaseCustomRegexRules:
     def test_toggle_custom_regex_rule(self):
         from database import Database
         import tempfile
+
         with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
         try:
@@ -128,13 +134,16 @@ class TestDatabaseEncryption:
     def test_encrypted_save_and_retrieve(self, monkeypatch):
         from database import Database
         import tempfile
+
         monkeypatch.setenv("VAULT_ENCRYPT_KEY", "a" * 32)
         from config import Config
+
         old_key = Config.VAULT_ENCRYPT_KEY
         Config.VAULT_ENCRYPT_KEY = "a" * 32
         try:
             # Force reload vault_crypto module
             import vault_crypto
+
             vault_crypto._crypto_instance = None
 
             with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
@@ -147,10 +156,11 @@ class TestDatabaseEncryption:
 
                 # Verify value is encrypted in the database
                 import sqlite3
+
                 conn = sqlite3.connect(db_path)
                 row = conn.execute(
                     "SELECT real_value FROM vault_mappings WHERE placeholder = ?",
-                    ("[PII_TEST]",)
+                    ("[PII_TEST]",),
                 ).fetchone()
                 conn.close()
                 assert row is not None
@@ -160,6 +170,7 @@ class TestDatabaseEncryption:
         finally:
             Config.VAULT_ENCRYPT_KEY = old_key
             import vault_crypto
+
             vault_crypto._crypto_instance = None
 
     def test_encryption_off_plaintext_storage(self, monkeypatch):
@@ -170,12 +181,15 @@ class TestDatabaseEncryption:
         """
         from database import Database
         import tempfile
+
         # Explicitly opt into plaintext storage for this test.
         monkeypatch.setenv("ALLOW_PLAINTEXT_VAULT", "1")
         # Ensure vault crypto is disabled for this test
         import vault_crypto
+
         vault_crypto._crypto_instance = None
         import config as cfg_mod
+
         old_key = cfg_mod.Config.VAULT_ENCRYPT_KEY
         cfg_mod.Config.VAULT_ENCRYPT_KEY = ""
 
@@ -189,10 +203,11 @@ class TestDatabaseEncryption:
 
             # Verify value is stored as plaintext
             import sqlite3
+
             conn = sqlite3.connect(db_path)
             row = conn.execute(
                 "SELECT real_value FROM vault_mappings WHERE placeholder = ?",
-                ("[PII_X]",)
+                ("[PII_X]",),
             ).fetchone()
             conn.close()
             assert row[0] == "plain_value"
@@ -208,6 +223,7 @@ class TestDatabaseEdgeCases:
     def test_get_mapping_missing(self):
         from database import Database
         import tempfile
+
         with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
         try:
@@ -219,6 +235,7 @@ class TestDatabaseEdgeCases:
 
     def test_clear_session_twice(self):
         from database import db
+
         db.save_mappings("dup_clear_sess", {"[A]": "v1"}, "test")
         db.clear_session("dup_clear_sess")
         # Second clear should not raise
@@ -227,6 +244,7 @@ class TestDatabaseEdgeCases:
     def test_stats_organization_mapped_to_org(self):
         from database import Database
         import tempfile
+
         with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
         try:
@@ -245,6 +263,7 @@ class TestDatabaseEdgeCases:
     def test_update_stats_unknown_field_skipped(self):
         from database import Database
         import tempfile
+
         with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
         try:
@@ -261,6 +280,7 @@ class TestDatabaseEdgeCases:
     def test_update_stats_empty(self):
         from database import Database
         import tempfile
+
         with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
         try:
@@ -272,6 +292,7 @@ class TestDatabaseEdgeCases:
     def test_cleanup_expired_mappings_in_memory(self):
         from database import Database
         import tempfile
+
         with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
         try:
@@ -285,6 +306,7 @@ class TestDatabaseEdgeCases:
     def test_login_lockout_reached(self):
         from database import Database
         import tempfile
+
         with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
         try:

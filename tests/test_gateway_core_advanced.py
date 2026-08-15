@@ -1,6 +1,7 @@
 """
 Advanced GatewayCore tests — retry logic, error paths, streaming.
 """
+
 import pytest
 import json
 from unittest.mock import Mock, patch, AsyncMock, MagicMock
@@ -12,21 +13,25 @@ class TestGatewayCoreRetry:
     def test_is_retryable_timeout(self):
         from gateway_core import GatewayCore
         import httpx
+
         assert GatewayCore._is_retryable(httpx.TimeoutException("timed out")) is True
 
     def test_is_retryable_connect_error(self):
         from gateway_core import GatewayCore
         import httpx
+
         assert GatewayCore._is_retryable(httpx.ConnectError("refused")) is True
 
     def test_is_retryable_remote_protocol_error(self):
         from gateway_core import GatewayCore
         import httpx
+
         assert GatewayCore._is_retryable(httpx.RemoteProtocolError("reset")) is True
 
     def test_is_retryable_http_5xx(self):
         from gateway_core import GatewayCore
         import httpx
+
         mock_request = Mock(spec=httpx.Request)
         mock_response = Mock(spec=httpx.Response, status_code=503)
         err = httpx.HTTPStatusError("503", request=mock_request, response=mock_response)
@@ -35,6 +40,7 @@ class TestGatewayCoreRetry:
     def test_is_retryable_http_4xx_not_retryable(self):
         from gateway_core import GatewayCore
         import httpx
+
         mock_request = Mock(spec=httpx.Request)
         mock_response = Mock(spec=httpx.Response, status_code=401)
         err = httpx.HTTPStatusError("401", request=mock_request, response=mock_response)
@@ -42,6 +48,7 @@ class TestGatewayCoreRetry:
 
     def test_is_retryable_random_exception_not_retryable(self):
         from gateway_core import GatewayCore
+
         assert GatewayCore._is_retryable(ValueError("bad value")) is False
 
 
@@ -50,8 +57,9 @@ class TestGatewayCoreStreaming:
 
     @pytest.mark.asyncio
     async def test_proxy_stream_no_healthy_upstream(self):
-        with patch('routers.proxy.get_gateway_core') as mock_gw:
+        with patch("routers.proxy.get_gateway_core") as mock_gw:
             from gateway_core import GatewayCore
+
             gw = GatewayCore()
             # Make all nodes unhealthy
             for node in gw.load_balancer._nodes:
@@ -62,7 +70,7 @@ class TestGatewayCoreStreaming:
                 {"messages": [{"role": "user", "content": "hello"}]},
                 {"Authorization": "Bearer test"},
                 {},
-                None
+                None,
             ):
                 results.append(chunk)
 
@@ -73,11 +81,14 @@ class TestGatewayCoreStreaming:
 
     def test_gateway_core_init_with_upstream_urls(self, monkeypatch):
         """GatewayCore initializes load balancer with multiple upstream URLs"""
-        monkeypatch.setenv("UPSTREAM_LLM_URLS", "https://api.openai.com,https://api.anthropic.com")
+        monkeypatch.setenv(
+            "UPSTREAM_LLM_URLS", "https://api.openai.com,https://api.anthropic.com"
+        )
         monkeypatch.setenv("UPSTREAM_LB_STRATEGY", "random")
         import importlib
         import config as cfg_mod
         import gateway_core as gc_mod
+
         # Reload config first so the monkeypatched env vars are picked up
         importlib.reload(cfg_mod)
         importlib.reload(gc_mod)
@@ -94,6 +105,7 @@ class TestGatewayCoreUnmaskEdgeCases:
 
     def test_unmask_with_used_placeholders(self):
         from gateway_core import GatewayCore
+
         gw = GatewayCore()
         text = "Hello [PII_PHONE_A] and [PII_PHONE_B]"
         mappings = {
@@ -114,10 +126,13 @@ class TestGatewayCoreUnmaskEdgeCases:
     def test_unmask_with_none_used_placeholders(self):
         """When used_placeholders is None, all mappings are used"""
         from gateway_core import GatewayCore
+
         gw = GatewayCore()
         gw.mask_engine = Mock()
         gw.mask_engine.unmask.return_value = "Hello World"
-        result = gw.unmask_response("Hello [PII_X]", {"[PII_X]": "World"}, used_placeholders=None)
+        result = gw.unmask_response(
+            "Hello [PII_X]", {"[PII_X]": "World"}, used_placeholders=None
+        )
         assert result == "Hello World"
         gw.mask_engine.unmask.assert_called_once()
 

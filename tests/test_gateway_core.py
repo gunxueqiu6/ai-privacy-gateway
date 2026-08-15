@@ -1,6 +1,7 @@
 """
 GatewayCore 核心模块单元测试
 """
+
 import pytest
 from unittest.mock import Mock, patch, MagicMock
 
@@ -11,6 +12,7 @@ class TestGatewayCoreInit:
     def test_session_id_format(self):
         """会话 ID 格式正确"""
         from gateway_core import GatewayCore
+
         gw = GatewayCore()
         sid = gw.generate_session_id()
         assert sid.startswith("sess_")
@@ -19,6 +21,7 @@ class TestGatewayCoreInit:
     def test_session_id_unique(self):
         """会话 ID 唯一性"""
         from gateway_core import GatewayCore
+
         gw = GatewayCore()
         ids = [gw.generate_session_id() for _ in range(100)]
         assert len(set(ids)) == 100
@@ -30,13 +33,14 @@ class TestMaskRequest:
     @pytest.fixture
     def gateway(self):
         from gateway_core import GatewayCore
+
         gw = GatewayCore()
         # Mock the mask engine
         gw.mask_engine = Mock()
         gw.mask_engine.mask.return_value = (
             "Hello [PII_PHONE_0001]",
             {"[PII_PHONE_0001]": "13812345678"},
-            {"phone": 1}
+            {"phone": 1},
         )
         return gw
 
@@ -44,9 +48,7 @@ class TestMaskRequest:
         """单条消息脱敏"""
         body = {
             "model": "gpt-3.5",
-            "messages": [
-                {"role": "user", "content": "Hello 13812345678"}
-            ]
+            "messages": [{"role": "user", "content": "Hello 13812345678"}],
         }
         masked_body, mappings, stats, session_id, _ = gateway.mask_request(body)
 
@@ -58,6 +60,7 @@ class TestMaskRequest:
 
     def test_mask_multiple_messages(self, gateway):
         """多条消息脱敏"""
+
         def side_effect(text):
             if "138" in text:
                 return ("masked_a", {"[A]": "138"}, {"phone": 1})
@@ -68,7 +71,7 @@ class TestMaskRequest:
         body = {
             "messages": [
                 {"role": "user", "content": "call 138"},
-                {"role": "assistant", "content": "email test@x.com"}
+                {"role": "assistant", "content": "email test@x.com"},
             ]
         }
         masked_body, mappings, stats, _, _ = gateway.mask_request(body)
@@ -82,21 +85,13 @@ class TestMaskRequest:
 
     def test_mask_empty_content(self, gateway):
         """空内容消息不处理"""
-        body = {
-            "messages": [
-                {"role": "system", "content": ""}
-            ]
-        }
+        body = {"messages": [{"role": "system", "content": ""}]}
         masked_body, mappings, stats, _, _ = gateway.mask_request(body)
         assert mappings == {}
 
     def test_mask_no_content_field(self, gateway):
         """无 content 字段的消息"""
-        body = {
-            "messages": [
-                {"role": "user"}
-            ]
-        }
+        body = {"messages": [{"role": "user"}]}
         masked_body, mappings, stats, _, _ = gateway.mask_request(body)
         assert mappings == {}
 
@@ -107,6 +102,7 @@ class TestUnmaskResponse:
     @pytest.fixture
     def gateway(self):
         from gateway_core import GatewayCore
+
         gw = GatewayCore()
         gw.mask_engine = Mock()
         return gw
@@ -115,8 +111,7 @@ class TestUnmaskResponse:
         """基本还原"""
         gateway.mask_engine.unmask.return_value = "Hello 13812345678"
         result = gateway.unmask_response(
-            "Hello [PII_PHONE_0001]",
-            {"[PII_PHONE_0001]": "13812345678"}
+            "Hello [PII_PHONE_0001]", {"[PII_PHONE_0001]": "13812345678"}
         )
         assert result == "Hello 13812345678"
 
@@ -130,7 +125,7 @@ class TestUnmaskResponse:
         gateway.mask_engine.unmask.return_value = "张三 call 138"
         result = gateway.unmask_response(
             "[PER_0001] call [PHONE_0001]",
-            {"[PER_0001]": "张三", "[PHONE_0001]": "138"}
+            {"[PER_0001]": "张三", "[PHONE_0001]": "138"},
         )
         assert result == "张三 call 138"
 
@@ -141,6 +136,7 @@ class TestMaskRequestStats:
     @pytest.fixture
     def gateway(self):
         from gateway_core import GatewayCore
+
         gw = GatewayCore()
         gw.mask_engine = Mock()
         return gw
@@ -160,7 +156,7 @@ class TestMaskRequestStats:
         body = {
             "messages": [
                 {"role": "user", "content": "a"},
-                {"role": "user", "content": "b"}
+                {"role": "user", "content": "b"},
             ]
         }
         _, _, stats, _, _ = gateway.mask_request(body)
@@ -174,26 +170,33 @@ class TestProxyError:
     """代理错误处理测试"""
 
     def test_proxy_timeout_returns_504(self):
-        """连接失败返回 502"""
+        """连接失败返回 502（不依赖外部网络：指向本地关闭端口）"""
         import os
         import asyncio
         from gateway_core import GatewayCore
+        from config import config
 
-        # Point at a closed port to trigger connection error
-        os.environ["TARGET_LLM"] = "http://127.0.0.1:1"
+        # Point at a closed port to trigger connection error.
+        # NOTE: os.environ["TARGET_LLM"] alone does NOT work here — the
+        # config singleton is imported once and caches TARGET_LLM, so the
+        # gateway would still hit the real upstream (flaky on CI with
+        # working network). Patch the config object directly instead.
+        original_target = config.TARGET_LLM
+        config.TARGET_LLM = "http://127.0.0.1:1"
         os.environ["UPSTREAM_TIMEOUT"] = "0.1"
 
-        gw = GatewayCore()
+        try:
+            gw = GatewayCore()
 
-        async def run():
-            status, body, headers = await gw.proxy_request(
-                {"test": True},
-                {"Authorization": "Bearer x"},
-                {},
-                "test-session"
-            )
-            return status, body, headers
+            async def run():
+                status, body, headers = await gw.proxy_request(
+                    {"test": True}, {"Authorization": "Bearer x"}, {}, "test-session"
+                )
+                return status, body, headers
 
-        result = asyncio.run(run())
-        # 502 = connection refused / 504 = timeout
-        assert result[0] in [502, 504]
+            result = asyncio.run(run())
+            # 502 = connection refused / 504 = timeout
+            assert result[0] in [502, 504]
+        finally:
+            config.TARGET_LLM = original_target
+            os.environ.pop("UPSTREAM_TIMEOUT", None)

@@ -1,6 +1,7 @@
 """
 AI隐私网关 - FastAPI 入口 + 路由注册 + 管理后台
 """
+
 import asyncio
 import os
 import sys
@@ -47,7 +48,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # PyInstaller bundle: resolve paths relative to the extracted bundle or CWD
-if getattr(sys, 'frozen', False):
+if getattr(sys, "frozen", False):
     _app_dir = sys._MEIPASS
 else:
     _app_dir = os.path.dirname(os.path.abspath(__file__))
@@ -59,6 +60,7 @@ _start_time: float = time.time()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """启动/关闭时的生命周期管理。"""
+
     # --- 后台清理任务：每 24 小时清理过期映射 ---
     async def cleanup_loop():
         while True:
@@ -88,8 +90,10 @@ async def lifespan(app: FastAPI):
             await asyncio.sleep(86400)
             try:
                 result = db.cleanup_expired_data()
-                logger.info("数据保留清理: 删除了 %d 条过期审计记录",
-                            result.get("deleted_audit_count", 0))
+                logger.info(
+                    "数据保留清理: 删除了 %d 条过期审计记录",
+                    result.get("deleted_audit_count", 0),
+                )
             except Exception:
                 logger.exception("数据保留清理失败")
 
@@ -132,7 +136,9 @@ async def lifespan(app: FastAPI):
         await asyncio.sleep(0.5)
 
     if core.active_requests > 0:
-        logger.warning("关闭超时 (%ds)，强制终止 %d 个活跃请求", timeout, core.active_requests)
+        logger.warning(
+            "关闭超时 (%ds)，强制终止 %d 个活跃请求", timeout, core.active_requests
+        )
     else:
         logger.info("所有活跃请求已完成，安全关闭")
 
@@ -147,6 +153,7 @@ app = FastAPI(
 
 
 # ==================== 请求指标中间件 ====================
+
 
 @app.middleware("http")
 async def metrics_middleware(request: Request, call_next) -> Response:
@@ -175,7 +182,11 @@ async def metrics_middleware(request: Request, call_next) -> Response:
 
 # ==================== 挂载静态文件 ====================
 
-app.mount("/admin/static", StaticFiles(directory=os.path.join(_app_dir, "static")), name="admin_static")
+app.mount(
+    "/admin/static",
+    StaticFiles(directory=os.path.join(_app_dir, "static")),
+    name="admin_static",
+)
 
 # ==================== 速率限制 ====================
 
@@ -194,7 +205,9 @@ async def body_size_middleware(request: Request, call_next) -> Response:
             if int(content_length) > config.MAX_REQUEST_BODY_SIZE:
                 return JSONResponse(
                     status_code=413,
-                    content={"error": f"Request body too large, max {config.MAX_REQUEST_BODY_SIZE} bytes"}
+                    content={
+                        "error": f"Request body too large, max {config.MAX_REQUEST_BODY_SIZE} bytes"
+                    },
                 )
         except ValueError:
             pass
@@ -213,6 +226,7 @@ app.add_middleware(
 
 
 # ==================== 健康检查 ====================
+
 
 @app.get("/")
 async def root() -> dict:
@@ -237,6 +251,7 @@ async def _build_health_response() -> dict:
     # 检查 NER 引擎
     try:
         from mask_engine import HAS_NER  # noqa: F811
+
         if not HAS_NER:
             components["ner_engine"] = "unavailable"
     except Exception:
@@ -278,7 +293,9 @@ async def _check_upstream_connectivity() -> bool:
     Returns True if at least one responds with a <500 status."""
     try:
         if config.UPSTREAM_LLM_URLS:
-            upstream_urls = [u.strip() for u in config.UPSTREAM_LLM_URLS.split(",") if u.strip()]
+            upstream_urls = [
+                u.strip() for u in config.UPSTREAM_LLM_URLS.split(",") if u.strip()
+            ]
         else:
             upstream_urls = [config.TARGET_LLM]
 
@@ -309,6 +326,7 @@ async def healthz() -> dict:
 
 # ==================== Prometheus 指标 ====================
 
+
 @app.get("/metrics")
 async def metrics() -> Response:
     """Prometheus 指标抓取端点（无需认证）。"""
@@ -317,9 +335,10 @@ async def metrics() -> Response:
 
 # ==================== 管理面板 ====================
 
+
 def _env_exists() -> bool:
     """Check whether a non-empty .env file exists (first-run detection)."""
-    if getattr(sys, 'frozen', False):
+    if getattr(sys, "frozen", False):
         env_path = Path.cwd() / ".env"
     else:
         env_path = Path(__file__).resolve().parent / ".env"
@@ -344,10 +363,12 @@ async def admin_panel_slash():
 
 # ==================== 可见性仪表盘 ====================
 
+
 @app.get("/dashboard")
 async def dashboard():
     """可见性仪表盘 — 管理后台 + 用户自查看 + 团队视图。"""
     from fastapi.responses import FileResponse
+
     static_dir = os.path.join(_app_dir, "static")
     return FileResponse(os.path.join(static_dir, "dashboard.html"))
 

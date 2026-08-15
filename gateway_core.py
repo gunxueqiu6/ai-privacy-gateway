@@ -1,6 +1,7 @@
 """
 网关核心模块 - 上行脱敏 + 下行还原 + HTTP 代理转发
 """
+
 import asyncio
 import copy
 import hashlib
@@ -22,7 +23,6 @@ from audit import audit_bus
 from database import db
 from metrics import pii_detected_total, pii_masked_total, gateway_errors_total
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -35,7 +35,9 @@ class GatewayCore:
 
         # 初始化负载均衡器
         if config.UPSTREAM_LLM_URLS:
-            upstream_urls = [u.strip() for u in config.UPSTREAM_LLM_URLS.split(",") if u.strip()]
+            upstream_urls = [
+                u.strip() for u in config.UPSTREAM_LLM_URLS.split(",") if u.strip()
+            ]
         else:
             upstream_urls = [config.TARGET_LLM]
         self.load_balancer = LoadBalancer(upstream_urls, config.UPSTREAM_LB_STRATEGY)
@@ -43,26 +45,38 @@ class GatewayCore:
             try:
                 loop = asyncio.get_running_loop()
                 loop.create_task(
-                    self.load_balancer.start_health_check(config.UPSTREAM_HEALTH_CHECK_INTERVAL)
+                    self.load_balancer.start_health_check(
+                        config.UPSTREAM_HEALTH_CHECK_INTERVAL
+                    )
                 )
             except RuntimeError:
                 pass  # Health check will start on first request/reload_config
             logger.info(
                 "多上游 LLM 已启用: %d 个节点, 策略: %s, 健康检查间隔: %ds",
-                len(upstream_urls), config.UPSTREAM_LB_STRATEGY, config.UPSTREAM_HEALTH_CHECK_INTERVAL
+                len(upstream_urls),
+                config.UPSTREAM_LB_STRATEGY,
+                config.UPSTREAM_HEALTH_CHECK_INTERVAL,
             )
 
         # 无状态模式日志
         if config.STATELESS_MODE:
             logger.info("无状态模式已启用 — 映射数据不落盘，仅存内存")
-        logger.info("映射 TTL 配置: %d 秒 (%.1f 小时)", config.MAPPING_TTL, config.MAPPING_TTL / 3600)
+        logger.info(
+            "映射 TTL 配置: %d 秒 (%.1f 小时)",
+            config.MAPPING_TTL,
+            config.MAPPING_TTL / 3600,
+        )
 
         # 共享连接池客户端
         pool_limits = httpx.Limits(
             max_connections=int(os.environ.get("UPSTREAM_MAX_CONNECTIONS", "100")),
-            max_keepalive_connections=int(os.environ.get("UPSTREAM_MAX_KEEPALIVE", "20")),
+            max_keepalive_connections=int(
+                os.environ.get("UPSTREAM_MAX_KEEPALIVE", "20")
+            ),
         )
-        client_timeout = httpx.Timeout(float(os.environ.get("UPSTREAM_TIMEOUT", "120.0")))
+        client_timeout = httpx.Timeout(
+            float(os.environ.get("UPSTREAM_TIMEOUT", "120.0"))
+        )
         self._client = httpx.AsyncClient(timeout=client_timeout, limits=pool_limits)
 
         # 重试配置
@@ -102,7 +116,9 @@ class GatewayCore:
         return texts
 
     @staticmethod
-    def _rebuild_content(original_content: Union[str, list], masked_texts: list) -> Union[str, list]:
+    def _rebuild_content(
+        original_content: Union[str, list], masked_texts: list
+    ) -> Union[str, list]:
         """
         将脱敏后的文本重新构建为原始 content 格式。
         """
@@ -142,7 +158,7 @@ class GatewayCore:
         """
         if body:
             model = body.get("model", "")
-            if model and hasattr(config, 'UPSTREAM_MODEL_MAP'):
+            if model and hasattr(config, "UPSTREAM_MODEL_MAP"):
                 model_map = config.UPSTREAM_MODEL_MAP
                 if model in model_map:
                     logger.debug("模型 %s 映射到指定上游: %s", model, model_map[model])
@@ -152,7 +168,9 @@ class GatewayCore:
                     return model_map["*"]
         return self.load_balancer.get_upstream()
 
-    def mask_request(self, body: Dict[str, Any], audit_ctx: Optional[Dict[str, Any]] = None) -> Tuple[Dict[str, Any], Dict[str, str], Dict[str, int], str, Set[str]]:
+    def mask_request(
+        self, body: Dict[str, Any], audit_ctx: Optional[Dict[str, Any]] = None
+    ) -> Tuple[Dict[str, Any], Dict[str, str], Dict[str, int], str, Set[str]]:
         """
         上行脱敏处理。
         当 DRY_RUN_MODE 启用时，仅检测并统计 PII，不实际脱敏，不写入 Vault。
@@ -196,9 +214,15 @@ class GatewayCore:
 
         total_count = sum(total_stats.values())
         if dry_run:
-            logger.info("[Dry-Run] 会话 %s，检测到敏感信息 %d 条（未脱敏）", session_id, total_count)
+            logger.info(
+                "[Dry-Run] 会话 %s，检测到敏感信息 %d 条（未脱敏）",
+                session_id,
+                total_count,
+            )
         else:
-            logger.info("[网关拦截] 会话 %s，拦截敏感信息 %d 条", session_id, total_count)
+            logger.info(
+                "[网关拦截] 会话 %s，拦截敏感信息 %d 条", session_id, total_count
+            )
 
         # 更新 Prometheus PII 指标（detected 总是记录；masked 仅在非 dry-run 时记录）
         for entity_type, count in total_stats.items():
@@ -228,16 +252,18 @@ class GatewayCore:
             audit_detail["user_agent"] = audit_ctx.get("user_agent")
             audit_detail["key_hash"] = audit_ctx.get("key_hash")
         db.log_audit(session_id, "mask_request", audit_detail)
-        audit_bus.publish({
-            "event": "mask",
-            "session_id": session_id,
-            "entity_count": total_count,
-            "stats": total_stats,
-            "dry_run": dry_run,
-        })
+        audit_bus.publish(
+            {
+                "event": "mask",
+                "session_id": session_id,
+                "entity_count": total_count,
+                "stats": total_stats,
+                "dry_run": dry_run,
+            }
+        )
 
         # 提取实际出现在脱敏文本中的占位符
-        pii_pattern = re.compile(r'\[PII_\w+_[A-Z]+\]')
+        pii_pattern = re.compile(r"\[PII_\w+_[A-Z]+\]")
         used_placeholders: Set[str] = set()
         for msg in masked_messages:
             content = msg.get("content", "")
@@ -248,7 +274,13 @@ class GatewayCore:
 
         return masked_body, all_mappings, total_stats, session_id, used_placeholders
 
-    def unmask_response(self, text: str, mappings: Dict[str, str], session_id: Optional[str] = None, used_placeholders: Optional[Set[str]] = None) -> str:
+    def unmask_response(
+        self,
+        text: str,
+        mappings: Dict[str, str],
+        session_id: Optional[str] = None,
+        used_placeholders: Optional[Set[str]] = None,
+    ) -> str:
         """
         下行还原处理
         """
@@ -275,7 +307,11 @@ class GatewayCore:
         返回: (status_code, response_body, response_headers)
         """
         if self._shutdown_flag:
-            return 503, json.dumps({"error": "Server shutting down, retry later"}).encode(), {}
+            return (
+                503,
+                json.dumps({"error": "Server shutting down, retry later"}).encode(),
+                {},
+            )
 
         async with self._semaphore:
             self._active_requests += 1
@@ -286,8 +322,16 @@ class GatewayCore:
                 for attempt in range(self._max_retries + 1):
                     upstream_url = self._resolve_upstream(body)
                     if upstream_url is None:
-                        gateway_errors_total.labels(error_type="no_healthy_upstream").inc()
-                        return 502, json.dumps({"error": "No healthy upstream available"}).encode(), {}
+                        gateway_errors_total.labels(
+                            error_type="no_healthy_upstream"
+                        ).inc()
+                        return (
+                            502,
+                            json.dumps(
+                                {"error": "No healthy upstream available"}
+                            ).encode(),
+                            {},
+                        )
 
                     target_url = f"{upstream_url}/v1/chat/completions"
 
@@ -295,7 +339,9 @@ class GatewayCore:
                         delay = self._retry_delay * (2 ** (attempt - 1))
                         jitter = random.uniform(0, delay * 0.1)
                         await asyncio.sleep(delay + jitter)
-                        logger.info(f"[重试] 第 {attempt}/{self._max_retries} 次重试 {session_id}")
+                        logger.info(
+                            f"[重试] 第 {attempt}/{self._max_retries} 次重试 {session_id}"
+                        )
 
                     try:
                         response = await self._client.post(
@@ -303,8 +349,8 @@ class GatewayCore:
                             json=body,
                             headers={
                                 "Content-Type": "application/json",
-                                "Authorization": headers.get("authorization", "")
-                            }
+                                "Authorization": headers.get("authorization", ""),
+                            },
                         )
 
                         # 5xx 服务端错误也可重试
@@ -313,7 +359,7 @@ class GatewayCore:
                             last_error = httpx.HTTPStatusError(
                                 f"Upstream {response.status_code}",
                                 request=response.request,
-                                response=response
+                                response=response,
                             )
                             continue
 
@@ -324,7 +370,9 @@ class GatewayCore:
                             "latency_ms": latency_ms,
                             "attempts": attempt + 1,
                             "upstream_url": upstream_url,
-                            "model": body.get("model") if isinstance(body, dict) else None,
+                            "model": (
+                                body.get("model") if isinstance(body, dict) else None
+                            ),
                             "content_hash": hashlib.sha256(
                                 json.dumps(body, ensure_ascii=False).encode("utf-8")
                             ).hexdigest(),
@@ -334,14 +382,20 @@ class GatewayCore:
                             proxy_detail["client_ip"] = audit_ctx.get("client_ip")
                             proxy_detail["user_agent"] = audit_ctx.get("user_agent")
                         db.log_audit(session_id, "proxy_request", proxy_detail)
-                        audit_bus.publish({
-                            "event": "proxy",
-                            "session_id": session_id,
-                            "status_code": response.status_code,
-                            "latency_ms": latency_ms,
-                            "attempts": attempt + 1,
-                        })
-                        return response.status_code, response.content, dict(response.headers)
+                        audit_bus.publish(
+                            {
+                                "event": "proxy",
+                                "session_id": session_id,
+                                "status_code": response.status_code,
+                                "latency_ms": latency_ms,
+                                "attempts": attempt + 1,
+                            }
+                        )
+                        return (
+                            response.status_code,
+                            response.content,
+                            dict(response.headers),
+                        )
 
                     except httpx.TimeoutException as e:
                         self.load_balancer.mark_failure(upstream_url)
@@ -360,8 +414,14 @@ class GatewayCore:
                         logger.warning(f"[网关] 协议错误 (attempt {attempt + 1}): {e}")
 
                 # 所有重试耗尽
-                error_msg = "Gateway Timeout" if isinstance(last_error, httpx.TimeoutException) else "Upstream service unavailable"
-                status_code = 504 if isinstance(last_error, httpx.TimeoutException) else 502
+                error_msg = (
+                    "Gateway Timeout"
+                    if isinstance(last_error, httpx.TimeoutException)
+                    else "Upstream service unavailable"
+                )
+                status_code = (
+                    504 if isinstance(last_error, httpx.TimeoutException) else 502
+                )
                 logger.error(f"[网关错误] 重试耗尽: {last_error}")
                 error_detail = {
                     "error": str(last_error),
@@ -373,12 +433,14 @@ class GatewayCore:
                     error_detail["client_ip"] = audit_ctx.get("client_ip")
                     error_detail["user_agent"] = audit_ctx.get("user_agent")
                 db.log_audit(session_id, "proxy_error", error_detail)
-                audit_bus.publish({
-                    "event": "proxy_error",
-                    "session_id": session_id,
-                    "error": str(last_error),
-                    "attempts": self._max_retries + 1,
-                })
+                audit_bus.publish(
+                    {
+                        "event": "proxy_error",
+                        "session_id": session_id,
+                        "error": str(last_error),
+                        "attempts": self._max_retries + 1,
+                    }
+                )
                 return status_code, json.dumps({"error": error_msg}).encode(), {}
             finally:
                 self._active_requests -= 1
@@ -406,13 +468,19 @@ class GatewayCore:
                 upstream_url = self._resolve_upstream(body)
                 if upstream_url is None:
                     logger.error("[流式错误] 无健康上游可用")
-                    yield {"data": json.dumps({"error": "No healthy upstream available"})}
+                    yield {
+                        "data": json.dumps({"error": "No healthy upstream available"})
+                    }
                     return
 
                 target_url = f"{upstream_url}/v1/chat/completions"
-                content_hash = hashlib.sha256(
-                    json.dumps(body, ensure_ascii=False).encode("utf-8")
-                ).hexdigest() if isinstance(body, dict) else None
+                content_hash = (
+                    hashlib.sha256(
+                        json.dumps(body, ensure_ascii=False).encode("utf-8")
+                    ).hexdigest()
+                    if isinstance(body, dict)
+                    else None
+                )
 
                 start_detail = {
                     "upstream_url": upstream_url,
@@ -424,11 +492,13 @@ class GatewayCore:
                     start_detail["client_ip"] = audit_ctx.get("client_ip")
                     start_detail["user_agent"] = audit_ctx.get("user_agent")
                 db.log_audit(session_id, "proxy_stream_start", start_detail)
-                audit_bus.publish({
-                    "event": "proxy_stream_start",
-                    "session_id": session_id,
-                    "upstream_url": upstream_url,
-                })
+                audit_bus.publish(
+                    {
+                        "event": "proxy_stream_start",
+                        "session_id": session_id,
+                        "upstream_url": upstream_url,
+                    }
+                )
 
                 try:
                     async with self._client.stream(
@@ -437,18 +507,27 @@ class GatewayCore:
                         json=body,
                         headers={
                             "Content-Type": "application/json",
-                            "Authorization": headers.get("authorization", "")
-                        }
+                            "Authorization": headers.get("authorization", ""),
+                        },
                     ) as response:
 
                         if response.status_code >= 500:
                             self.load_balancer.mark_failure(upstream_url)
-                            err_detail = {"status_code": response.status_code, "upstream_url": upstream_url}
+                            err_detail = {
+                                "status_code": response.status_code,
+                                "upstream_url": upstream_url,
+                            }
                             if audit_ctx:
                                 err_detail["team_id"] = audit_ctx.get("team_id")
                             db.log_audit(session_id, "proxy_stream_error", err_detail)
                             error_body = await response.aread()
-                            yield {"data": error_body.decode() if isinstance(error_body, bytes) else error_body}
+                            yield {
+                                "data": (
+                                    error_body.decode()
+                                    if isinstance(error_body, bytes)
+                                    else error_body
+                                )
+                            }
                             return
 
                         self.load_balancer.mark_success(upstream_url)
@@ -463,7 +542,9 @@ class GatewayCore:
                                     yield {"data": "[DONE]"}
                                     break
 
-                                unmasked_data = self.unmask_response(data, mappings, used_placeholders=used_placeholders)
+                                unmasked_data = self.unmask_response(
+                                    data, mappings, used_placeholders=used_placeholders
+                                )
                                 yield {"data": unmasked_data}
                             else:
                                 yield {"data": line}
@@ -472,17 +553,23 @@ class GatewayCore:
                         complete_detail = {
                             "status_code": response.status_code,
                             "upstream_url": upstream_url,
-                            "model": body.get("model") if isinstance(body, dict) else None,
+                            "model": (
+                                body.get("model") if isinstance(body, dict) else None
+                            ),
                         }
                         if audit_ctx:
                             complete_detail["team_id"] = audit_ctx.get("team_id")
                             complete_detail["client_ip"] = audit_ctx.get("client_ip")
-                        db.log_audit(session_id, "proxy_stream_complete", complete_detail)
-                        audit_bus.publish({
-                            "event": "proxy_stream_complete",
-                            "session_id": session_id,
-                            "status_code": response.status_code,
-                        })
+                        db.log_audit(
+                            session_id, "proxy_stream_complete", complete_detail
+                        )
+                        audit_bus.publish(
+                            {
+                                "event": "proxy_stream_complete",
+                                "session_id": session_id,
+                                "status_code": response.status_code,
+                            }
+                        )
 
                 except httpx.TimeoutException:
                     self.load_balancer.mark_failure(upstream_url)
@@ -501,7 +588,9 @@ class GatewayCore:
                     if audit_ctx:
                         err_detail["team_id"] = audit_ctx.get("team_id")
                     db.log_audit(session_id, "proxy_stream_error", err_detail)
-                    yield {"data": json.dumps({"error": "Upstream service unavailable"})}
+                    yield {
+                        "data": json.dumps({"error": "Upstream service unavailable"})
+                    }
             finally:
                 self._active_requests -= 1
 
@@ -510,7 +599,7 @@ class GatewayCore:
         method: str,
         path: str,
         headers: Dict[str, str],
-        body: Optional[bytes] = None
+        body: Optional[bytes] = None,
     ) -> Tuple[int, Any, Dict[str, str]]:
         """
         通用代理转发（非 chat/completions 路由，含重试 + 负载均衡 + 并发限制 + 优雅关闭）
@@ -545,10 +634,7 @@ class GatewayCore:
 
                     try:
                         response = await self._client.request(
-                            method=method,
-                            url=target_url,
-                            headers=headers,
-                            content=body
+                            method=method, url=target_url, headers=headers, content=body
                         )
 
                         if response.status_code >= 500 and attempt < self._max_retries:
@@ -556,12 +642,16 @@ class GatewayCore:
                             last_error = httpx.HTTPStatusError(
                                 f"Upstream {response.status_code}",
                                 request=response.request,
-                                response=response
+                                response=response,
                             )
                             continue
 
                         self.load_balancer.mark_success(upstream_url)
-                        return response.status_code, response.content, dict(response.headers)
+                        return (
+                            response.status_code,
+                            response.content,
+                            dict(response.headers),
+                        )
 
                     except httpx.TimeoutException as e:
                         self.load_balancer.mark_failure(upstream_url)
@@ -570,17 +660,20 @@ class GatewayCore:
                     except httpx.ConnectError as e:
                         self.load_balancer.mark_failure(upstream_url)
                         last_error = e
-                        gateway_errors_total.labels(error_type="generic_connect_error").inc()
+                        gateway_errors_total.labels(
+                            error_type="generic_connect_error"
+                        ).inc()
                     except httpx.RemoteProtocolError as e:
                         self.load_balancer.mark_failure(upstream_url)
                         last_error = e
-                        gateway_errors_total.labels(error_type="generic_protocol_error").inc()
+                        gateway_errors_total.labels(
+                            error_type="generic_protocol_error"
+                        ).inc()
 
                 logger.error(f"[代理错误] 重试耗尽: {last_error}")
                 return 502, b'{"error": "Upstream service unavailable"}', {}
             finally:
                 self._active_requests -= 1
-
 
     # ---- Hot-Reload ----
 
@@ -590,7 +683,9 @@ class GatewayCore:
 
         # Rebuild upstream list
         if config.UPSTREAM_LLM_URLS:
-            upstream_urls = [u.strip() for u in config.UPSTREAM_LLM_URLS.split(",") if u.strip()]
+            upstream_urls = [
+                u.strip() for u in config.UPSTREAM_LLM_URLS.split(",") if u.strip()
+            ]
         else:
             upstream_urls = [config.TARGET_LLM]
 
@@ -601,15 +696,21 @@ class GatewayCore:
         self.load_balancer = LoadBalancer(upstream_urls, config.UPSTREAM_LB_STRATEGY)
         if len(upstream_urls) > 1:
             asyncio.get_event_loop().create_task(
-                self.load_balancer.start_health_check(config.UPSTREAM_HEALTH_CHECK_INTERVAL)
+                self.load_balancer.start_health_check(
+                    config.UPSTREAM_HEALTH_CHECK_INTERVAL
+                )
             )
 
         # Rebuild httpx client with new timeout
         pool_limits = httpx.Limits(
             max_connections=int(os.environ.get("UPSTREAM_MAX_CONNECTIONS", "100")),
-            max_keepalive_connections=int(os.environ.get("UPSTREAM_MAX_KEEPALIVE", "20")),
+            max_keepalive_connections=int(
+                os.environ.get("UPSTREAM_MAX_KEEPALIVE", "20")
+            ),
         )
-        client_timeout = httpx.Timeout(float(os.environ.get("UPSTREAM_TIMEOUT", "120.0")))
+        client_timeout = httpx.Timeout(
+            float(os.environ.get("UPSTREAM_TIMEOUT", "120.0"))
+        )
         self._client = httpx.AsyncClient(timeout=client_timeout, limits=pool_limits)
         self._max_retries = int(os.environ.get("UPSTREAM_MAX_RETRIES", "0"))
         self._retry_delay = float(os.environ.get("UPSTREAM_RETRY_DELAY", "1.0"))

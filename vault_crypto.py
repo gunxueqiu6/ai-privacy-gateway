@@ -87,7 +87,9 @@ def get_vault_crypto() -> Optional[VaultCrypto]:
     key_bytes = key_str.encode("utf-8")
     if len(key_bytes) != 32:
         key_bytes = hashlib.sha256(key_bytes).digest()
-        logger.info("VAULT_ENCRYPT_KEY is not 32 bytes — derived 32-byte key via SHA-256")
+        logger.info(
+            "VAULT_ENCRYPT_KEY is not 32 bytes — derived 32-byte key via SHA-256"
+        )
 
     _crypto_instance = VaultCrypto(key_bytes)
     logger.info("Vault encryption initialised (AES-256-GCM)")
