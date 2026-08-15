@@ -212,25 +212,25 @@ jobs:
       # The Docker image itself is published to GHCR — no need for the 72MB
       # tar in the GitHub Release.
       - name: Download Windows executable
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: windows-exe
           path: release-assets/windows-exe
 
       - name: Download Windows checksum
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: windows-checksum
           path: release-assets/windows-checksum
 
       - name: Download macOS executable
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: macos-exe
           path: release-assets/macos-exe
 
       - name: Download macOS checksum
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: macos-checksum
           path: release-assets/macos-checksum
