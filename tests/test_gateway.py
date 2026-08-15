@@ -440,7 +440,7 @@ class TestMaskEngineRegexFallback:
         mask_engine.HAS_NER = False
         try:
             engine = RegexMaskEngine()
-            text = "手机13812345678 邮箱 test@example.com 身份证110101199001011234 银行卡4111111111111111 车牌京A12345 IP192.168.1.1 网址 https://example.com 日期2024-01-15 金额¥1,234.56 邮编100081"
+            text = "手机13812345678 邮箱 test@example.com 身份证110101199001011234 银行卡4111111111111111 车牌京A12345 IP192.168.1.1 网址 https://example.com 日期2024-01-15 金额¥1,234.56 邮编100081"  # noqa: E501
             masked, mappings, stats = engine.mask(text)
             assert "13812345678" not in masked
             assert "test@example.com" not in masked

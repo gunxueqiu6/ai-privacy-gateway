@@ -226,7 +226,7 @@ class TestIntegrationChatCompletion:
             mock_core.proxy_request = AsyncMock(
                 return_value=(
                     200,
-                    b'{"id":"test-id","choices":[{"message":{"content":"\xe5\x9b\x9e\xe5\xa4\x8d\xe5\x86\x85\xe5\xae\xb9"}}]}',
+                    b'{"id":"test-id","choices":[{"message":{"content":"\xe5\x9b\x9e\xe5\xa4\x8d\xe5\x86\x85\xe5\xae\xb9"}}]}',  # noqa: E501
                     {"content-type": "application/json"},
                 )
             )

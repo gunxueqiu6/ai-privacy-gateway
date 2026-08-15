@@ -182,10 +182,10 @@ class NEREngine:
         patterns = {
             NEREntityType.PHONE: r"(?<!\d)(1[3-9]\d{9})(?!\d)",
             NEREntityType.EMAIL: r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}",
-            NEREntityType.IDCARD: r"(?<!\d)([1-9]\d{5}(18|19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[\dXx])(?!\d)",
+            NEREntityType.IDCARD: r"(?<!\d)([1-9]\d{5}(18|19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[\dXx])(?!\d)",  # noqa: E501
             NEREntityType.BANKCARD: r"(?<!\d)(\d{16}|\d{19})(?!\d)",
             NEREntityType.PLATE: r"[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z][A-Z0-9]{5}",
-            NEREntityType.IP: r"(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)",
+            NEREntityType.IP: r"(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)",  # noqa: E501
             NEREntityType.URL: r"https?://[^\s]+",
             NEREntityType.DATE: r"\d{4}[-/年](?:0?[1-9]|1[0-2])[-/月](?:0?[1-9]|[12]\d|3[01])日?",
             NEREntityType.AMOUNT: r"(?:¥|￥|\$)\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?",

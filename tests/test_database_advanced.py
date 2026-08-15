@@ -3,7 +3,6 @@ Advanced database tests — encryption, audit integrity, custom regex rules, sta
 """
 
 import pytest
-import sqlite3
 import os
 from unittest.mock import patch, MagicMock
 

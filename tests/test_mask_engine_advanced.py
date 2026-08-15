@@ -3,7 +3,6 @@ Advanced mask engine tests — custom regex rules, edge cases, Aho-Corasick.
 """
 
 import pytest
-import re
 
 
 class TestCustomRegexRules:
@@ -233,6 +232,7 @@ class TestMaskEngineAdvancedEdgeCases:
 
         engine = RegexMaskEngine()
         masked, _, _ = engine.mask("13812345678")
+
         import re
 
         placeholders = re.findall(r"\[PII_\w+_\w+\]", masked)

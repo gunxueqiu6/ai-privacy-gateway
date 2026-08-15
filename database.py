@@ -343,7 +343,7 @@ class Database:
             cursor = conn.cursor()
             for placeholder, real_value in encrypted.items():
                 cursor.execute(
-                    "INSERT INTO vault_mappings (session_id, placeholder, real_value, data_type, team_id) VALUES (?, ?, ?, ?, COALESCE(?, 'default'))",
+                    "INSERT INTO vault_mappings (session_id, placeholder, real_value, data_type, team_id) VALUES (?, ?, ?, ?, COALESCE(?, 'default'))",  # noqa: E501
                     (session_id, placeholder, real_value, data_type, team_id),
                 )
         logger.info(f"保存 {len(encrypted)} 条映射记录")
@@ -643,7 +643,7 @@ class Database:
                     if new_count >= 5:
                         locked_until = (now + timedelta(minutes=15)).isoformat()
                         cursor.execute(
-                            "UPDATE login_attempts SET attempt_count = ?, locked_until = ?, updated_at = ? WHERE ip_address = ?",
+                            "UPDATE login_attempts SET attempt_count = ?, locked_until = ?, updated_at = ? WHERE ip_address = ?",  # noqa: E501
                             (new_count, locked_until, now.isoformat(), ip_address),
                         )
                     else:
