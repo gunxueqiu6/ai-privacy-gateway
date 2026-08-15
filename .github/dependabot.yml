@@ -30,6 +30,19 @@ updates:
     assignees:
       - "gunxueqiu6"
 
+  # JS SDK dependencies
+  - package-ecosystem: "npm"
+    directory: "/sdk/js"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Shanghai"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "sdk"
+
   # GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"

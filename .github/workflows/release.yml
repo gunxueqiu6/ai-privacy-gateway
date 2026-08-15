@@ -112,7 +112,7 @@ jobs:
           pip install pyinstaller
 
       - name: Build Windows executable
-        run: pyinstaller --onefile --name PrivacyGateway --add-data "static;static" main.py
+        run: pyinstaller --onefile --name PrivacyGateway --add-data "static:static" --add-data "entity_catalog.json:." main.py
 
       - name: Generate Windows executable checksum
         run: certutil -hashfile dist/PrivacyGateway.exe SHA256 > PrivacyGateway.exe.sha256
@@ -145,7 +145,7 @@ jobs:
           pip install pyinstaller
 
       - name: Build macOS executable
-        run: pyinstaller --onefile --name PrivacyGateway --add-data "static:static" main.py
+        run: pyinstaller --onefile --name PrivacyGateway --add-data "static:static" --add-data "entity_catalog.json:." main.py
 
       - name: Generate macOS executable checksum
         run: shasum -a 256 dist/PrivacyGateway > PrivacyGateway.sha256

@@ -16,7 +16,7 @@
 set -euo pipefail
 
 # ── Configuration ──────────────────────────────────────────────────────────
-VERSION="2.0.0"
+VERSION="2.0.2"
 SHORT_VERSION="2.0"
 APP_NAME="AI Privacy Gateway"
 BUNDLE_ID="com.aiprivacygateway.app"

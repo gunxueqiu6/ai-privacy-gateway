@@ -16,6 +16,9 @@ a = Analysis(
         ('load_balancer.py', '.'),
         ('audit.py', '.'),
         ('vault_crypto.py', '.'),
+        ('metrics.py', '.'),
+        ('logging_config.py', '.'),
+        ('entity_catalog.json', '.'),
     ],
     hiddenimports=[
         'uvicorn',

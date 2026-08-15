@@ -7,6 +7,7 @@ import re
 import hashlib
 import json
 import os
+import sys
 import threading
 import logging
 from abc import ABC, abstractmethod
@@ -55,7 +56,15 @@ def _load_entity_catalog() -> Optional[Dict[str, Any]]:
 
     目录缺失或损坏时返回 None，引擎回退到内置 BUILTIN_RULES。
     """
-    path = os.environ.get("ENTITY_CATALOG_PATH", "./entity_catalog.json")
+    # PyInstaller frozen builds unpack data files into sys._MEIPASS, while the
+    # CWD stays at the launcher's directory — resolve relative to the bundle.
+    if getattr(sys, "frozen", False):
+        _bundle_dir: str = sys._MEIPASS  # type: ignore[attr-defined]
+    else:
+        _bundle_dir = os.path.dirname(os.path.abspath(__file__))
+    path = os.environ.get(
+        "ENTITY_CATALOG_PATH", os.path.join(_bundle_dir, "entity_catalog.json")
+    )
     if not os.path.exists(path):
         logger.warning("实体目录不存在: %s，使用内置回退规则", path)
         return None
