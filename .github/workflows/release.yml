@@ -237,8 +237,7 @@ jobs:
 
       - name: Extract release notes from CHANGELOG
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
-          python .github/scripts/release_notes.py "$VERSION" > release_body.md
+          python .github/scripts/release_notes.py "${{ github.ref_name }}" > release_body.md
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
