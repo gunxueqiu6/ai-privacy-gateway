@@ -81,23 +81,27 @@ class TestGatewayCoreStreaming:
 
     def test_gateway_core_init_with_upstream_urls(self, monkeypatch):
         """GatewayCore initializes load balancer with multiple upstream URLs"""
-        monkeypatch.setenv(
-            "UPSTREAM_LLM_URLS", "https://api.openai.com,https://api.anthropic.com"
-        )
-        monkeypatch.setenv("UPSTREAM_LB_STRATEGY", "random")
-        import importlib
+        # NOTE: do NOT use importlib.reload here — reloading the config module
+        # replaces the shared config singleton, so previously imported modules
+        # (gateway_core, routers, main) keep pointing at the OLD instance, and
+        # later tests that mutate config silently patch a different object
+        # (flaky failures depending on test collection order).
         import config as cfg_mod
         import gateway_core as gc_mod
 
-        # Reload config first so the monkeypatched env vars are picked up
-        importlib.reload(cfg_mod)
-        importlib.reload(gc_mod)
+        old_urls = cfg_mod.config.UPSTREAM_LLM_URLS
+        old_strategy = cfg_mod.config.UPSTREAM_LB_STRATEGY
+        cfg_mod.config.UPSTREAM_LLM_URLS = (
+            "https://api.openai.com,https://api.anthropic.com"
+        )
+        cfg_mod.config.UPSTREAM_LB_STRATEGY = "random"
         try:
             gw = gc_mod.GatewayCore()
             assert len(gw.load_balancer._nodes) == 2
             assert gw.load_balancer._strategy == "random"
         finally:
-            gc_mod.gateway_core = None
+            cfg_mod.config.UPSTREAM_LLM_URLS = old_urls
+            cfg_mod.config.UPSTREAM_LB_STRATEGY = old_strategy
 
 
 class TestGatewayCoreUnmaskEdgeCases:

@@ -7,6 +7,8 @@ import pytest
 import sys
 import json
 
+from tests.config_helpers import reload_config
+
 
 class TestConfigValidation:
     """Config validation edge cases"""
@@ -18,13 +20,11 @@ class TestConfigValidation:
             "ADMIN_PASSWORD_HASH",
             "$2b$12$LJ3m4ys3MvMWGvKkRnHoSu7WvA6BXBfAMrZTv5B.eqZJmJqoJzCGO",
         )
-        import importlib
+        import config as cfg_mod
 
         with pytest.raises(SystemExit) as excinfo:
-            # Need to avoid cached secrets from previous test
-            import config as cfg_mod
-
-            importlib.reload(cfg_mod)
+            # Refresh class attributes from the monkeypatched env vars
+            reload_config()
             cfg_mod.Config()
         assert excinfo.value.code == 1
 
@@ -35,12 +35,10 @@ class TestConfigValidation:
             "ADMIN_PASSWORD_HASH",
             "$2b$12$LJ3m4ys3MvMWGvKkRnHoSu7WvA6BXBfAMrZTv5B.eqZJmJqoJzCGO",
         )
-        import importlib
+        import config as cfg_mod
 
         with pytest.raises(SystemExit) as excinfo:
-            import config as cfg_mod
-
-            importlib.reload(cfg_mod)
+            reload_config()
             cfg_mod.Config()
         assert excinfo.value.code == 1
 
@@ -53,12 +51,10 @@ class TestConfigValidation:
             "ADMIN_PASSWORD_HASH",
             "$2b$12$LJ3m4ys3MvMWGvKkRnHoSu7WvA6BXBfAMrZTv5B.eqZJmJqoJzCGO",
         )
-        import importlib
+        import config as cfg_mod
 
         with pytest.raises(SystemExit) as excinfo:
-            import config as cfg_mod
-
-            importlib.reload(cfg_mod)
+            reload_config()
             cfg_mod.Config()
         assert excinfo.value.code == 1
 
@@ -70,12 +66,10 @@ class TestConfigValidation:
             "ADMIN_PASSWORD_HASH",
             "$2b$12$LJ3m4ys3MvMWGvKkRnHoSu7WvA6BXBfAMrZTv5B.eqZJmJqoJzCGO",
         )
-        import importlib
+        import config as cfg_mod
 
         with pytest.raises(SystemExit) as excinfo:
-            import config as cfg_mod
-
-            importlib.reload(cfg_mod)
+            reload_config()
             cfg_mod.Config()
         assert excinfo.value.code == 1
 
@@ -86,12 +80,10 @@ class TestConfigValidation:
             "ADMIN_PASSWORD_HASH",
             "$2b$12$LJ3m4ys3MvMWGvKkRnHoSu7WvA6BXBfAMrZTv5B.eqZJmJqoJzCGO",
         )
-        import importlib
+        import config as cfg_mod
 
         with pytest.raises(SystemExit) as excinfo:
-            import config as cfg_mod
-
-            importlib.reload(cfg_mod)
+            reload_config()
             cfg_mod.Config()
         assert excinfo.value.code == 1
 
@@ -102,12 +94,10 @@ class TestConfigValidation:
             "ADMIN_PASSWORD_HASH",
             "$2b$12$LJ3m4ys3MvMWGvKkRnHoSu7WvA6BXBfAMrZTv5B.eqZJmJqoJzCGO",
         )
-        import importlib
+        import config as cfg_mod
 
         with pytest.raises(SystemExit) as excinfo:
-            import config as cfg_mod
-
-            importlib.reload(cfg_mod)
+            reload_config()
             cfg_mod.Config()
         assert excinfo.value.code == 1
 
@@ -118,10 +108,9 @@ class TestConfigValidation:
             "ADMIN_PASSWORD_HASH",
             "$2b$12$LJ3m4ys3MvMWGvKkRnHoSu7WvA6BXBfAMrZTv5B.eqZJmJqoJzCGO",
         )
-        import importlib
         import config as cfg_mod
 
-        importlib.reload(cfg_mod)
+        reload_config()
         c = cfg_mod.Config()
         assert c.MAPPING_TTL == 0
 
@@ -132,10 +121,9 @@ class TestConfigValidation:
             "ADMIN_PASSWORD_HASH",
             "$2b$12$LJ3m4ys3MvMWGvKkRnHoSu7WvA6BXBfAMrZTv5B.eqZJmJqoJzCGO",
         )
-        import importlib
         import config as cfg_mod
 
-        importlib.reload(cfg_mod)
+        reload_config()
         c = cfg_mod.Config()
         assert c.UPSTREAM_API_KEY == ""
 
@@ -150,9 +138,8 @@ class TestConfigStateless:
             "ADMIN_PASSWORD_HASH",
             "$2b$12$LJ3m4ys3MvMWGvKkRnHoSu7WvA6BXBfAMrZTv5B.eqZJmJqoJzCGO",
         )
-        import importlib
         import config as cfg_mod
 
-        importlib.reload(cfg_mod)
+        reload_config()
         c = cfg_mod.Config()
         assert c.STATELESS_MODE is True

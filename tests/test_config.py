@@ -5,6 +5,8 @@ Config 模块单元测试
 import os
 import pytest
 
+from tests.config_helpers import reload_config
+
 
 class TestConfigDefaults:
     """默认配置测试"""
@@ -49,47 +51,47 @@ class TestConfigFromEnv:
     """环境变量覆盖测试"""
 
     def test_env_port_override(self, monkeypatch):
-        import importlib, config
+        import config
 
         monkeypatch.setenv("LISTEN_PORT", "8888")
-        importlib.reload(config)
+        reload_config()
         c = config.Config()
         assert c.LISTEN_PORT == 8888
 
     def test_env_target_llm_override(self, monkeypatch):
-        import importlib, config
+        import config
 
         monkeypatch.setenv("TARGET_LLM", "https://api.deepseek.com")
-        importlib.reload(config)
+        reload_config()
         c = config.Config()
         assert c.TARGET_LLM == "https://api.deepseek.com"
 
     def test_env_db_path_override(self, monkeypatch):
-        import importlib, config
+        import config
 
         monkeypatch.setenv(
             "DB_PATH", "/tmp/test.db"
         )  # nosec B108 — test-only temp path
-        importlib.reload(config)
+        reload_config()
         c = config.Config()
         assert c.DB_PATH == "/tmp/test.db"  # nosec B108
 
     def test_env_password_hash(self, monkeypatch):
         """环境变量提供已有哈希则直接使用"""
-        import importlib, config
+        import config
 
         monkeypatch.setenv(
             "ADMIN_PASSWORD_HASH",
             "$2b$12$LJ3m4ys3MvMWGvKkRnHoSu7WvA6BXBfAMrZTv5B.eqZJmJqoJzCGO",
         )
-        importlib.reload(config)
+        reload_config()
         c = config.Config()
         assert c.ADMIN_PASSWORD_HASH.startswith("$2b$12$")
 
     def test_env_jwt_secret(self, monkeypatch):
-        import importlib, config
+        import config
 
         monkeypatch.setenv("JWT_SECRET", "my-fixed-secret")
-        importlib.reload(config)
+        reload_config()
         c = config.Config()
         assert c.JWT_SECRET == "my-fixed-secret"

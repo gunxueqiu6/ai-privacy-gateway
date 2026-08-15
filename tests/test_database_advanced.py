@@ -190,8 +190,12 @@ class TestDatabaseEncryption:
         vault_crypto._crypto_instance = None
         import config as cfg_mod
 
-        old_key = cfg_mod.Config.VAULT_ENCRYPT_KEY
-        cfg_mod.Config.VAULT_ENCRYPT_KEY = ""
+        # NOTE: vault_crypto reads the key from the config INSTANCE
+        # (config.VAULT_ENCRYPT_KEY), not the class attribute — clearing the
+        # class attribute alone leaves the auto-generated/persisted key in
+        # place and encryption stays on (fails when vault_data exists).
+        old_key = cfg_mod.config.VAULT_ENCRYPT_KEY
+        cfg_mod.config.VAULT_ENCRYPT_KEY = ""
 
         with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
@@ -212,7 +216,7 @@ class TestDatabaseEncryption:
             conn.close()
             assert row[0] == "plain_value"
         finally:
-            cfg_mod.Config.VAULT_ENCRYPT_KEY = old_key
+            cfg_mod.config.VAULT_ENCRYPT_KEY = old_key
             vault_crypto._crypto_instance = None
             os.unlink(db_path)
 
