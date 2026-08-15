@@ -1,0 +1,5 @@
+# 开发/测试依赖（不进入生产镜像）
+pytest==8.4.2
+pytest-asyncio==1.2.0
+pytest-cov==7.1.0
+requests==2.32.4  # test_deepseek.py 连通性调试

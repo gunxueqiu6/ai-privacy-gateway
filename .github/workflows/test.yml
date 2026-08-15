@@ -19,7 +19,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt pytest-cov
+          pip install -r requirements.txt -r requirements-dev.txt
 
       - name: Run tests
         run: |
@@ -58,7 +58,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          pip install -r requirements.txt -r requirements-dev.txt
 
       - name: Run tests
         shell: pwsh
@@ -180,7 +180,9 @@ jobs:
 
       - name: Run pip-audit (dependency vulnerability scan)
         run: |
-          pip-audit
+          # Audit the project's declared dependencies, not the runner's
+          # pre-installed environment (which contains unrelated packages)
+          pip-audit -r requirements.txt
 
       - name: Run bandit (SAST)
         run: |

@@ -83,7 +83,7 @@ Custom regex file: `vault_data/patterns.json`
 
 ## Enable/Disable Entity Detection
 
-Modify the `enabled` field in `keywords.json`:
+Modify the `enabled` field in `entity_catalog.json`:
 
 ```json
 {

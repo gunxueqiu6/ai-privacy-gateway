@@ -88,7 +88,7 @@ canonicalURL: https://privacygw.pages.dev/docs/config
 
 ## 启用/禁用特定实体检测
 
-通过修改 `keywords.json` 中的 `enabled` 字段控制：
+通过修改 `entity_catalog.json` 中的 `enabled` 字段控制：
 
 ```json
 {

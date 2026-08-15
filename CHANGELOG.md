@@ -91,7 +91,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **NER entity recognition engine** — machine learning-based PII detection complementing regex engine
-- **AC automaton** — Rust PyO3 native module for fast multi-pattern matching across 1000+ patterns
+- **AC automaton** — high-performance multi-pattern matching (pure-Python implementation in mask_engine.py; the Rust PyO3 module was never completed)
 - **JavaScript/TypeScript SDK** — full-featured SDK with browser and Node.js support
 - **Chrome/Edge browser extension** — popup UI, per-site toggle, custom keyword management
 - **Flutter/Dart SDK** — cross-platform mobile SDK with platform-specific storage adapters

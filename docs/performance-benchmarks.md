@@ -227,9 +227,9 @@ Measured against a labeled corpus of 5,000 samples per entity type. False positi
 
 Top sources of false positives:
 
-1. **Postcode (6-digit)**: Any 6-digit number in text matches the postcode pattern. Mitigation: disable postcode detection if not needed (`"PII_POSTCODE": {"enabled": false}` in `keywords.json`).
+1. **Postcode (6-digit)**: Any 6-digit number in text matches the postcode pattern. Mitigation: disable postcode detection if not needed (`"PII_POSTCODE": {"enabled": false}` in `entity_catalog.json`).
 2. **ID Card (18-digit)**: Order numbers, tracking IDs, and timestamps formatted as 18 consecutive digits trigger matches. No checksum validation in lite tier.
-3. **Date**: Prose containing years and months (e.g., "2026年目标") triggers FPs. Date detection is disabled by default in `keywords.json`.
+3. **Date**: Prose containing years and months (e.g., "2026年目标") triggers FPs. Date detection is disabled by default in `entity_catalog.json`.
 4. **Amount**: Prices mentioned in examples or documentation ("售价$100") trigger FPs. Amount detection is disabled by default.
 
 ### 5.4 False Negative Analysis

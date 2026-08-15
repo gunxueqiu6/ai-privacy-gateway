@@ -36,7 +36,8 @@ from typing import Any, Dict, Optional, Set
 
 from fastapi import Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
-from jose import JWTError, jwt
+import jwt
+from jwt import InvalidTokenError
 
 # ── Fix: slowapi.Limiter internally uses starlette.config.Config which reads
 # .env files with the system default encoding (GBK on Chinese Windows),
@@ -148,7 +149,7 @@ def verify_jwt_token(token: str) -> bool:
     try:
         jwt.decode(token, config.JWT_SECRET, algorithms=["HS256"])
         return True
-    except JWTError:
+    except InvalidTokenError:
         return False
 
 

@@ -116,7 +116,7 @@ ai-privacy-gateway/
 ├── website-astro/          # Public-facing website (Astro)
 ├── installer/              # Installer scripts
 ├── scripts/                # Build and utility scripts
-├── rust_src/               # Rust native modules (PyO3)
+├── rust_src/               # (预留) Rust 加速模块 — 尚未实现，build 脚本暂不可用
 ├── requirements.txt        # Python dependencies
 ├── pytest.ini              # Pytest configuration
 ├── docker-compose.yml      # Docker Compose configuration
