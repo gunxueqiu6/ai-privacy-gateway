@@ -207,8 +207,33 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download all artifacts
+      # Download only the release attachments individually (bulk download of
+      # large artifacts can fail with "download failed after 5 retries").
+      # The Docker image itself is published to GHCR — no need for the 72MB
+      # tar in the GitHub Release.
+      - name: Download Windows executable
         uses: actions/download-artifact@v5
+        with:
+          name: windows-exe
+          path: release-assets/windows-exe
+
+      - name: Download Windows checksum
+        uses: actions/download-artifact@v5
+        with:
+          name: windows-checksum
+          path: release-assets/windows-checksum
+
+      - name: Download macOS executable
+        uses: actions/download-artifact@v5
+        with:
+          name: macos-exe
+          path: release-assets/macos-exe
+
+      - name: Download macOS checksum
+        uses: actions/download-artifact@v5
+        with:
+          name: macos-checksum
+          path: release-assets/macos-checksum
 
       - name: Extract release notes from CHANGELOG
         run: |
@@ -220,11 +245,9 @@ jobs:
         with:
           body_path: release_body.md
           files: |
-            lite-docker-image/lite_image.tar
-            lite-docker-checksum/lite_image.tar.sha256
-            windows-exe/PrivacyGateway.exe
-            windows-checksum/PrivacyGateway.exe.sha256
-            macos-exe/PrivacyGateway
-            macos-checksum/PrivacyGateway.sha256
+            release-assets/windows-exe/PrivacyGateway.exe
+            release-assets/windows-checksum/PrivacyGateway.exe.sha256
+            release-assets/macos-exe/PrivacyGateway
+            release-assets/macos-checksum/PrivacyGateway.sha256
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
