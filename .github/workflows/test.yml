@@ -23,13 +23,21 @@ jobs:
 
       - name: Run tests
         run: |
-          set -o pipefail
+          set +e
           pytest tests/ -v --tb=short --cov=. --cov-report=xml 2>&1 | tee pytest_output.txt
           EXIT_CODE=${PIPESTATUS[0]}
           if [ $EXIT_CODE -ne 0 ]; then
-            tail -80 pytest_output.txt | while IFS= read -r line; do echo "::error::$line"; done
+            echo "pytest exited with $EXIT_CODE"
+            tail -100 pytest_output.txt
             exit $EXIT_CODE
           fi
+
+      - name: Upload pytest output
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-output-lite
+          path: pytest_output.txt
 
       - name: Upload coverage
         if: success()
@@ -55,11 +63,18 @@ jobs:
       - name: Run tests
         shell: pwsh
         run: |
-          python -m pytest tests/ -v --tb=short 2>&1 | Tee-Object -Variable pytestOut
+          python -m pytest tests/ -v --tb=short 2>&1 | Tee-Object -FilePath pytest_output.txt
           if ($LASTEXITCODE -ne 0) {
-            ($pytestOut | Select-Object -Last 80) | ForEach-Object { Write-Output "::error::$_" }
+            Get-Content pytest_output.txt -Tail 100
             exit $LASTEXITCODE
           }
+
+      - name: Upload pytest output
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-output-windows
+          path: pytest_output.txt
 
   js-sdk:
     runs-on: ubuntu-latest
@@ -97,13 +112,20 @@ jobs:
 
       - name: Check code style (Black)
         run: |
-          set -o pipefail
+          set +e
           black --check --diff . 2>&1 | tee black_diff.txt
           EXIT_CODE=${PIPESTATUS[0]}
           if [ $EXIT_CODE -ne 0 ]; then
-            head -60 black_diff.txt | while IFS= read -r line; do echo "::error::$line"; done
+            head -80 black_diff.txt
             exit $EXIT_CODE
           fi
+
+      - name: Upload black diff
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: black-diff
+          path: black_diff.txt
 
       - name: Run flake8
         run: |
