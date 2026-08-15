@@ -92,7 +92,7 @@ privacy-gateway --provider openai --api-key sk-test-123
 Output shows:
 
 ```
-AI Privacy Gateway v2.0.0
+AI Privacy Gateway v2.0.2
 Proxy running on http://localhost:8080
 Provider: OpenAI (api.openai.com)
 Entities masked: email, phone, api_key, ip_address
@@ -473,7 +473,7 @@ Use this template to write a launch post-mortem for your blog or as a GitHub Dis
 # Launching AI Privacy Gateway on Product Hunt: What Happened
 
 **Date:** [Launch date]
-**Product:** AI Privacy Gateway v2.0.0
+**Product:** AI Privacy Gateway v2.0.2
 **Result:** [# votes, # comments, final rank]
 
 ---

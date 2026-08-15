@@ -1,6 +1,6 @@
 # AI Privacy Gateway — Knowledge Base (English)
 
-> Version: v2.1.0 | License: PolyForm Shield 1.0.0 | Repo: github.com/gunxueqiu6/ai-privacy-gateway
+> Version: v2.0.2 | License: PolyForm Shield 1.0.0 | Repo: github.com/gunxueqiu6/ai-privacy-gateway
 
 ---
 

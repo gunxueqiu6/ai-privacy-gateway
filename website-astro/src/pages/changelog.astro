@@ -10,6 +10,17 @@ const t = (zh: string, en: string) => lang === 'zh' ? zh : en;
 
 const releases = [
   {
+    version: '2.0.2',
+    date: '2026-08-02',
+    highlights: [
+      'Fixed Windows startup crash — slowapi .env encoding error (GBK vs UTF-8)',
+      'Fixed Windows console garbled text — UTF-8 output in all start scripts',
+      'start.bat: auto-detect system Python when .venv is absent',
+      'Python 3.14 compatibility — datetime.utcnow() → datetime.now(UTC)',
+      'Upstream health check accepts 403 as valid (Anthropic API)',
+    ],
+  },
+  {
     version: '2.0.1',
     date: '2026-07-27',
     highlights: [
@@ -84,11 +95,11 @@ const releases = [
 
 const title = t('更新日志 — AI Privacy Gateway', 'Changelog — AI Privacy Gateway');
 const desc = t(
-  'AI Privacy Gateway 版本更新历史 — v0.1.0 到 v2.0.0。了解最新功能、安全修复和性能改进。',
-  'AI Privacy Gateway release history — v0.1.0 through v2.0.0. New features, security fixes, and performance improvements.'
+  'AI Privacy Gateway 版本更新历史 — v0.1.0 到 v2.0.2。了解最新功能、安全修复和性能改进。',
+  'AI Privacy Gateway release history — v0.1.0 through v2.0.2. New features, security fixes, and performance improvements.'
 );
 const heroTitle = t('更新日志', 'Changelog');
-const heroSub = t('从原型到 v2.0.0 的演进之路', 'The journey from prototype to v2.0.0');
+const heroSub = t('从原型到 v2.0.2 的演进之路', 'The journey from prototype to v2.0.2');
 const fullLog = t('完整变更记录 (GitHub)', 'Full Changelog (GitHub)');
 const latestBadge = t('最新', 'Latest');
 ---

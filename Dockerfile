@@ -19,7 +19,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # 复制源码
 COPY config.py mask_engine.py ner_engine.py stream_buffer.py gateway_core.py database.py main.py ./
-COPY load_balancer.py audit.py vault_crypto.py ./
+COPY load_balancer.py audit.py vault_crypto.py metrics.py logging_config.py ./
+# 复制数据驱动配置（实体目录/关键词，缺失会静默降级）
+COPY entity_catalog.json keywords.json ./
 
 # 复制路由模块和静态文件
 COPY routers ./routers
