@@ -7,7 +7,7 @@ import logging
 import os
 import re
 from datetime import datetime, timedelta
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 
 from fastapi import APIRouter, HTTPException, Query, Request, Response
 from fastapi.responses import JSONResponse, StreamingResponse
@@ -48,7 +48,7 @@ async def admin_login(request: Request) -> JSONResponse:
 
     body, ok = await safe_json(request)
     if not ok:
-        return BAD_ENCODING_RESPONSE
+        return BAD_ENCODING_RESPONSE  # type: ignore[return-value]
     password = body.get("password", "")
 
     try:
@@ -133,7 +133,7 @@ async def add_keyword(request: Request):
 
     body, ok = await safe_json(request)
     if not ok:
-        return BAD_ENCODING_RESPONSE
+        return BAD_ENCODING_RESPONSE  # type: ignore[return-value]
     keyword = body.get("keyword", "").strip()
 
     if not keyword:
@@ -163,7 +163,7 @@ async def delete_keyword(request: Request):
 
     body, ok = await safe_json(request)
     if not ok:
-        return BAD_ENCODING_RESPONSE
+        return BAD_ENCODING_RESPONSE  # type: ignore[return-value]
     keyword = body.get("keyword", "").strip()
 
     if not keyword:
@@ -294,7 +294,7 @@ async def admin_add_regex_rule(request: Request):
 
     body, ok = await safe_json(request)
     if not ok:
-        return BAD_ENCODING_RESPONSE
+        return BAD_ENCODING_RESPONSE  # type: ignore[return-value]
 
     name = (body.get("name") or "").strip()
     pattern = (body.get("pattern") or "").strip()
@@ -434,7 +434,7 @@ async def vault_restore(request: Request):
 
     body, ok = await safe_json(request)
     if not ok:
-        return BAD_ENCODING_RESPONSE
+        return BAD_ENCODING_RESPONSE  # type: ignore[return-value]
     backup_path = (body.get("path") or "").strip()
     force = body.get("force", False)
 
@@ -464,7 +464,7 @@ async def toggle_dry_run(request: Request):
 
     body, ok = await safe_json(request)
     if not ok:
-        return BAD_ENCODING_RESPONSE
+        return BAD_ENCODING_RESPONSE  # type: ignore[return-value]
     enable = body.get("enable", not config.DRY_RUN_MODE)
     config.DRY_RUN_MODE = bool(enable)
 
@@ -613,7 +613,7 @@ async def import_rules(request: Request) -> dict:
 
     body, ok = await safe_json(request)
     if not ok:
-        return BAD_ENCODING_RESPONSE
+        return BAD_ENCODING_RESPONSE  # type: ignore[return-value]
 
     keywords = body.get("keywords", [])
     regex_rules = body.get("regex_rules", [])
@@ -621,7 +621,7 @@ async def import_rules(request: Request) -> dict:
     if not isinstance(keywords, list) or not isinstance(regex_rules, list):
         return JSONResponse(
             status_code=400,
-            content={"error": "无效的格式：keywords 和 regex_rules 应为数组"},
+            content={"error": "无效的格式：keywords 和 regex_rules 应为数组"},  # type: ignore[return-value]
         )
 
     engine = get_mask_engine()
@@ -694,7 +694,7 @@ async def admin_teams(request: Request) -> dict:
     result = []
     for t in teams:
         tid = t.get("team_id", "default")
-        by_type = {}
+        by_type: Dict[str, Any] = {}
         for key in [
             "phone_count",
             "email_count",
@@ -734,13 +734,13 @@ async def admin_team_stats(request: Request, team_id: str) -> dict:
         or len(team_id) > 128
         or not team_id.replace("-", "").replace("_", "").isalnum()
     ):
-        return JSONResponse(status_code=400, content={"error": "无效的 team_id"})
+        return JSONResponse(status_code=400, content={"error": "无效的 team_id"})  # type: ignore[return-value]
     today = db.get_stats_by_team_today(team_id)
     history = db.get_team_stats_range(team_id, days=7)
     sessions = db.get_user_sessions(team_id, limit=1, offset=0)
     keys = [k for k in db.list_api_keys(team_id) if k.get("is_active", True)]
 
-    today_result = {}
+    today_result: Dict[str, Any] = {}
     if today:
         today_result["total"] = today.get("total_count", 0) or 0
         today_result["types"] = {}
@@ -787,7 +787,7 @@ async def admin_team_sessions(
         or len(team_id) > 128
         or not team_id.replace("-", "").replace("_", "").isalnum()
     ):
-        return JSONResponse(status_code=400, content={"error": "无效的 team_id"})
+        return JSONResponse(status_code=400, content={"error": "无效的 team_id"})  # type: ignore[return-value]
     sessions = db.get_user_sessions(team_id, limit=limit, offset=offset)
     return {"team_id": team_id, "sessions": sessions}
 
@@ -799,7 +799,7 @@ async def admin_stats_today(request: Request) -> dict:
     await require_admin(request)
     teams = db.get_all_teams_stats_today()
     total_masked = sum(t.get("total_count", 0) or 0 for t in teams)
-    by_type = {}
+    by_type: Dict[str, Any] = {}
     for t in teams:
         for key in [
             "phone_count",

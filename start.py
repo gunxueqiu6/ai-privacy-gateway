@@ -11,6 +11,7 @@ AI Privacy Gateway - 交互式启动向导
 """
 
 import argparse
+from typing import Dict, Optional
 import os
 import re
 import secrets
@@ -53,7 +54,7 @@ REQUIREMENTS_PATH = PROJECT_DIR / "requirements.txt"
 MAIN_SCRIPT = PROJECT_DIR / "main.py"
 
 # ── 提供商配置 ──────────────────────────────────────────────
-PROVIDERS = {
+PROVIDERS: Dict[str, Dict[str, Optional[str]]] = {
     "1": {
         "name": "OpenAI",
         "url": "https://api.openai.com",
@@ -264,7 +265,7 @@ def pick_provider() -> tuple[str, str]:
             if choice == "3":
                 url = prompt("请输入目标 API 地址", default="https://api.openai.com")
                 return ("自定义", url)
-            return (p["name"], p["url"])
+            return (p["name"] or "", p["url"] or "")
         println(c(f"无效选项: {choice}，请输入 1/2/3", "yellow"))
 
 
@@ -683,7 +684,7 @@ def main() -> None:
                 println()
                 println(
                     c("  管理员密码: ", "dim")
-                    + c(config["ADMIN_PASSWORD"], "yellow", "bold")
+                    + c(str(config["ADMIN_PASSWORD"]), "yellow", "bold")
                 )
                 println(
                     c("  (从 .env 中读取，如已遗忘可删除 .env 后重新运行生成)", "dim")
@@ -709,7 +710,7 @@ def main() -> None:
             )
             if config["ADMIN_PASSWORD"]:
                 println(
-                    f"  管理员密码: {c(config['ADMIN_PASSWORD'], 'yellow', 'bold')}"
+                    f"  管理员密码: {c(str(config['ADMIN_PASSWORD']), 'yellow', 'bold')}"
                 )
                 println(c("            请复制保存此密码！", "yellow"))
             println()

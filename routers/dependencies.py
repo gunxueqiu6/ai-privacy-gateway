@@ -61,7 +61,7 @@ def _read_file_utf8(
     return file_values
 
 
-_starlette_config.Config._read_file = _read_file_utf8
+_starlette_config.Config._read_file = _read_file_utf8  # type: ignore[method-assign]
 
 from slowapi import Limiter
 

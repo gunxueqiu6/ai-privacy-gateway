@@ -256,6 +256,11 @@ class MaskEngineInterface(ABC):
         """
         pass
 
+    @abstractmethod
+    def get_entity_catalog(self) -> List[Dict[str, Any]]:
+        """返回数据驱动实体目录（key -> 实体元数据）。"""
+        raise NotImplementedError
+
 
 class RegexMaskEngine(MaskEngineInterface):
     """正则表达式脱敏引擎"""

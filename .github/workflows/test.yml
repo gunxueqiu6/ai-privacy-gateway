@@ -137,7 +137,8 @@ jobs:
 
       - name: Run mypy
         run: |
-          mypy . --ignore-missing-imports
+          # sdk/ contains icon-generation scripts; not part of the core gateway
+          mypy . --ignore-missing-imports --exclude sdk
 
   docker-build:
     runs-on: ubuntu-latest

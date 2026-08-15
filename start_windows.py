@@ -54,7 +54,7 @@ def start_server():
 
 
 # 活跃子进程列表
-_active_processes = []
+_active_processes: list = []
 
 
 def _monitor_process(proc):

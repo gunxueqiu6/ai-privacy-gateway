@@ -185,7 +185,7 @@ class Config:
             )
         except json.JSONDecodeError:
             logger.warning("UPSTREAM_MODEL_MAP 不是有效的 JSON，将使用空映射")
-            self.UPSTREAM_MODEL_MAP: Dict[str, str] = {}
+            self.UPSTREAM_MODEL_MAP = {}
 
         # Admin password
         if not self.ADMIN_PASSWORD_HASH and self.ADMIN_PASSWORD:

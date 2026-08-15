@@ -13,8 +13,8 @@ from pathlib import Path
 # ── UTF-8 mode: force stdout/stderr to use UTF-8 on Windows ──
 if sys.platform == "win32":
     try:
-        sys.stdout.reconfigure(encoding="utf-8")
-        sys.stderr.reconfigure(encoding="utf-8")
+        sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[union-attr]
+        sys.stderr.reconfigure(encoding="utf-8")  # type: ignore[union-attr]
     except Exception:
         pass
 
@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 
 # PyInstaller bundle: resolve paths relative to the extracted bundle or CWD
 if getattr(sys, "frozen", False):
-    _app_dir = sys._MEIPASS
+    _app_dir = getattr(sys, "_MEIPASS")  # type: ignore[attr-defined]
 else:
     _app_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -191,7 +191,7 @@ app.mount(
 # ==================== 速率限制 ====================
 
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
 
 # ==================== Body 大小限制中间件 ====================
 
@@ -415,4 +415,4 @@ if __name__ == "__main__":
         uv_kwargs["ssl_certfile"] = config.SSL_CERTFILE
         uv_kwargs["ssl_keyfile"] = config.SSL_KEYFILE
         logger.info("TLS 已启用: cert=%s", config.SSL_CERTFILE)
-    uvicorn.run(**uv_kwargs)
+    uvicorn.run(**uv_kwargs)  # type: ignore[arg-type]

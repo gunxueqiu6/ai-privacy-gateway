@@ -719,7 +719,7 @@ class Database:
             cursor = conn.cursor()
             cursor.execute(f"SELECT {sums} FROM stats WHERE date = ?", (today,))
             row = cursor.fetchone()
-            result = {"date": today}
+            result: Dict[str, Any] = {"date": today}
             for c in cols:
                 result[c] = row[c] if row and row[c] is not None else 0
             return result
@@ -774,7 +774,7 @@ class Database:
         key_prefix: str,
         team_id: str = "default",
         tier: str = "free",
-        label: str = None,
+        label: Optional[str] = None,
     ) -> None:
         try:
             with self.get_conn() as conn:
@@ -796,7 +796,7 @@ class Database:
         except Exception:
             logger.exception("更新API密钥使用时间失败")
 
-    def list_api_keys(self, team_id: str = None) -> list:
+    def list_api_keys(self, team_id: Optional[str] = None) -> list:
         try:
             with self.get_conn() as conn:
                 cursor = conn.cursor()
@@ -870,7 +870,7 @@ class Database:
             return 0
 
     def get_session_audit_log(
-        self, session_id: str, team_id: str = None, limit: int = 100
+        self, session_id: str, team_id: Optional[str] = None, limit: int = 100
     ) -> list:
         try:
             with self.get_conn() as conn:
