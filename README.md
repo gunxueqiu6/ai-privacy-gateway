@@ -3,7 +3,7 @@
 > Local, multi-jurisdiction AI data compliance gateway for ChatGPT, Claude, Cursor, DeepSeek, and any LLM API.
 > Install a compliance firewall for your AI data in 30 seconds. [PolyForm Shield | Free for Noncommercial Use]
 
-**v2.0.2** — A high-performance reverse proxy that automatically detects and masks sensitive data (Chinese ID cards, Unified Social Credit Codes, HK/Macau/Taiwan permits, phone numbers, bank cards, names, API keys, and 26 entity types) in AI API requests and responses before it leaves your machine. Data-driven entity catalog with compliance classification (personal_info / important_data / core_data), per-decision audit logs with Ed25519-signed evidence export, and offline license-key activation. New: AES-256-GCM vault encryption, multi-upstream load balancer, pub/sub audit bus, browser extension SDK, Windows/macOS installers.
+**v2.0.3** — A high-performance reverse proxy that automatically detects and masks sensitive data (Chinese ID cards, Unified Social Credit Codes, HK/Macau/Taiwan permits, phone numbers, bank cards, names, API keys, and 26 entity types) in AI API requests and responses before it leaves your machine. Data-driven entity catalog with compliance classification (personal_info / important_data / core_data), per-decision audit logs with Ed25519-signed evidence export, and offline license-key activation. New: AES-256-GCM vault encryption, multi-upstream load balancer, pub/sub audit bus, browser extension SDK, Windows/macOS installers.
 
 <p align="center">
   <a href="https://privacygw.pages.dev"><strong>Website</strong></a> ·

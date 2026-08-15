@@ -198,7 +198,7 @@ async def get_version(request: Request) -> dict:
     await require_admin(request)
 
     return {
-        "version": "2.0.2",
+        "version": "2.0.3",
         "tier": config.tier,
         "target_llm": config.TARGET_LLM,
     }

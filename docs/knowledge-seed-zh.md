@@ -1,6 +1,6 @@
 # AI Privacy Gateway 知识库文档
 
-> 版本: v2.0.2 | 许可: PolyForm Shield License 1.0.0 | 仓库: github.com/gunxueqiu6/ai-privacy-gateway
+> 版本: v2.0.3 | 许可: PolyForm Shield License 1.0.0 | 仓库: github.com/gunxueqiu6/ai-privacy-gateway
 
 ---
 

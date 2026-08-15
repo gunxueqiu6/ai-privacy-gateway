@@ -10,6 +10,17 @@ const t = (zh: string, en: string) => lang === 'zh' ? zh : en;
 
 const releases = [
   {
+    version: '2.0.3',
+    date: '2026-08-16',
+    highlights: [
+      'Fixed Docker deployment crash — missing metrics.py/logging_config.py/entity_catalog.json in image',
+      'Fixed CI test failures — pytest-asyncio 0.23.0 × pytest 8.2.0 incompatibility, config reload state pollution, network-dependent test',
+      'Security: python-jose (unmaintained) replaced with PyJWT; dependency audit clean',
+      'Fixed PyInstaller packaging — entity catalog now bundled; frozen path resolution',
+      'CI now fully green: tests, lint (black/flake8/mypy), docker, JS SDK, security scan',
+    ],
+  },
+  {
     version: '2.0.2',
     date: '2026-08-02',
     highlights: [
@@ -95,11 +106,11 @@ const releases = [
 
 const title = t('更新日志 — AI Privacy Gateway', 'Changelog — AI Privacy Gateway');
 const desc = t(
-  'AI Privacy Gateway 版本更新历史 — v0.1.0 到 v2.0.2。了解最新功能、安全修复和性能改进。',
-  'AI Privacy Gateway release history — v0.1.0 through v2.0.2. New features, security fixes, and performance improvements.'
+  'AI Privacy Gateway 版本更新历史 — v0.1.0 到 v2.0.3。了解最新功能、安全修复和性能改进。',
+  'AI Privacy Gateway release history — v0.1.0 through v2.0.3. New features, security fixes, and performance improvements.'
 );
 const heroTitle = t('更新日志', 'Changelog');
-const heroSub = t('从原型到 v2.0.2 的演进之路', 'The journey from prototype to v2.0.2');
+const heroSub = t('从原型到 v2.0.3 的演进之路', 'The journey from prototype to v2.0.3');
 const fullLog = t('完整变更记录 (GitHub)', 'Full Changelog (GitHub)');
 const latestBadge = t('最新', 'Latest');
 ---

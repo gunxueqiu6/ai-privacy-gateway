@@ -127,7 +127,7 @@ def print_welcome() -> None:
     """显示欢迎 Logo 和简介。"""
     logo = textwrap.dedent("""\
         +----------------------------------------------+
-        |       AI Privacy Gateway  v2.0.2              |
+        |       AI Privacy Gateway  v2.0.3              |
         |       你的 AI 数据隐私防火墙                    |
         +----------------------------------------------+
     """)

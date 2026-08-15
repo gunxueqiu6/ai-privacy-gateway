@@ -7,7 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.3] - 2026-08-16
+
+### Fixed
+
+- **Docker deployment crash** — image was missing metrics.py, logging_config.py and entity_catalog.json; containers exited with ModuleNotFoundError at startup (now verified healthy)
+- **CI test suite** — pytest-asyncio 0.23.0 was incompatible with pytest 8.2.0 (collection crash); dependency set upgraded and test dependencies split into requirements-dev.txt
+- **Flaky tests** — importlib.reload(config) created a duplicate config singleton (order-dependent failures); new tests/config_helpers.py reload_config() preserves the singleton; network-dependent timeout test now targets a local closed port
+- **Dependency vulnerabilities** — unmaintained python-jose replaced with PyJWT; cryptography/prometheus-client bumped; pip-audit -r requirements.txt reports zero known vulnerabilities
+- **PyInstaller packaging** — --add-data separator fixed (semicolon to colon); entity_catalog.json now bundled; entity catalog path resolves inside the frozen bundle (sys._MEIPASS)
+- **CI lint** — black pinned to 26.5.1; flake8 rules tuned and 10+ real issues fixed; 38 mypy type errors fixed
+- **bandit CI step** — invalid --level flag replaced with --severity-level medium
+- **Version consistency** — all docs/scripts/website aligned to v2.0.3
+
+### Security
+
+- python-jose (unmaintained, PYSEC-2024-232/233, PYSEC-2025-185) to PyJWT 2.13.0 (same HS256 algorithm, existing tokens remain valid)
+
+---
+
 ## [2.0.2] - 2026-08-02
+
 
 ### Fixed
 

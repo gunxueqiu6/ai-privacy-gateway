@@ -147,7 +147,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="AI隐私网关",
     description="边缘侧本地隐私网关 - 拦截AI请求自动脱敏",
-    version="2.0.2",
+    version="2.0.3",
     lifespan=lifespan,
 )
 
@@ -280,7 +280,7 @@ async def _build_health_response() -> dict:
     return {
         "status": status,
         "service": "AI Privacy Gateway",
-        "version": "2.0.2",
+        "version": "2.0.3",
         "tier": "lite",
         "uptime_seconds": uptime,
         "timestamp": datetime.now().isoformat(),
@@ -390,7 +390,7 @@ if __name__ == "__main__":
 
     banner = [
         "=" * 56,
-        "  AI Privacy Gateway  v2.0.2",
+        "  AI Privacy Gateway  v2.0.3",
         "  Your AI Data Privacy Firewall",
         "=" * 56,
         f"  API:          http://localhost:{config.LISTEN_PORT}/v1",
