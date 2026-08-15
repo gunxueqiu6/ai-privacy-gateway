@@ -163,8 +163,6 @@ jobs:
           path: dist/PrivacyGateway
 
   publish-js-sdk:
-    # Skip npm publishing when the repo has no NPM_TOKEN secret configured
-    if: ${{ secrets.NPM_TOKEN != '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -193,6 +191,8 @@ jobs:
           echo "Version check passed: $PKG_VERSION"
 
       - name: Publish to npm
+        # Skip when the repo has no NPM_TOKEN secret configured
+        if: ${{ secrets.NPM_TOKEN != '' }}
         run: npm publish
         working-directory: sdk/js
         env:
